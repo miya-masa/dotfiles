@@ -1,14 +1,11 @@
-ctrlp.vim
 neobundle.vim
 neocomplcache
 neosnippet-snippets
 neosnippet.vim
-unite-colorscheme
 unite.vim
-vim-colorschemes
 vim-fugitive
-vim-perl
+vim-hybrid
 vim-snippets
-vimfiler.vim
+vimfiler
 vimproc.vim
-vimshell
+vimshell.vim

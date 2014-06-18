@@ -255,6 +255,9 @@ nnoremap l <Right>zv
 "----------------------------------------
 " コマンドモード
 "----------------------------------------
+nnoremap ,tn <Esc>:tabNext<CR>
+nnoremap ,tp <Esc>:tabprevious<CR>
+nnoremap ,pt <Esc>:%! perltidy -se<CR>
 
 "----------------------------------------
 " Vimスクリプト
@@ -342,6 +345,89 @@ endif
 "----------------------------------------
 " 各種プラグイン設定
 "----------------------------------------
+" NeoBundleの設定
+if has('vim_starting')
+   set nocompatible               " Be iMproved
+
+   " Required:
+   set runtimepath+=~/.vim/bundle/neobundle.vim/
+ endif
+
+ " Required:
+ call neobundle#begin(expand('~/.vim/bundle/'))
+
+ " Let NeoBundle manage NeoBundle
+ " Required:
+ NeoBundleFetch 'Shougo/neobundle.vim'
+
+ " My Bundles here:
+ " Refer to |:NeoBundle-examples|.
+ " Note: You don't set neobundle setting in .gvimrc!
+ "###################################
+ NeoBundle 'Shougo/unite.vim'
+ "###################################
+ "hybridカラースキーマ
+ NeoBundle 'w0ng/vim-hybrid'
+ "###################################
+ "hybridカラースキーマ
+ NeoBundle 'Shougo/vimfiler'
+ "###################################
+ NeoBundle 'Shougo/neocomplcache'
+ let g:neocomplcache_enable_at_startup = 1
+ "###################################
+ NeoBundle 'tpope/vim-fugitive'
+ "###################################
+ NeoBundle 'Shougo/vimshell.vim'
+ "###################################
+ NeoBundle 'Shougo/neosnippet.vim'
+ NeoBundle 'Shougo/neosnippet-snippets'
+ NeoBundle 'honza/vim-snippets'
+" Plugin key-mappings.
+imap <C-p>     <Plug>(neosnippet_expand_or_jump)
+smap <C-p>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-p>     <Plug>(neosnippet_expand_target)
+
+" SuperTab like snippets behavior.
+imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+\ "\<Plug>(neosnippet_expand_or_jump)"
+\: pumvisible() ? "\<C-n>" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+\ "\<Plug>(neosnippet_expand_or_jump)"
+\: "\<TAB>"
+
+" For snippet_complete marker.
+if has('conceal')
+  set conceallevel=2 concealcursor=i
+endif
+" Enable snipMate compatibility feature.
+let g:neosnippet#enable_snipmate_compatibility = 1
+
+" Tell Neosnippet about the other snippets
+let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+ "###################################
+" NeoBundle procの設定
+let vimproc_updcmd = has('win64') ?
+      \ 'tools\\update-dll-mingw 64' : 'tools\\update-dll-mingw 32'
+execute "NeoBundle 'Shougo/vimproc.vim'," . string({
+      \ 'build' : {
+      \     'windows' : vimproc_updcmd,
+      \     'cygwin' : 'make -f make_cygwin.mak',
+      \     'mac' : 'make -f make_mac.mak',
+      \     'unix' : 'make -f make_unix.mak',
+      \    },
+      \ })
+ "###################################
+
+
+ call neobundle#end()
+
+ " Required:
+ filetype plugin indent on
+
+ " If there are uninstalled bundles found on startup,
+ " this will conveniently prompt you to install them.
+ NeoBundleCheck
+
 
 "----------------------------------------
 " 一時設定
