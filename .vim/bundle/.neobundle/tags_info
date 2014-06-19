@@ -1,11 +1,10 @@
 neobundle.vim
-neocomplcache
+neocomplcache.vim
+neomru.vim
+neosnippet
 neosnippet-snippets
-neosnippet.vim
 unite.vim
 vim-fugitive
 vim-hybrid
 vim-snippets
-vimfiler
-vimproc.vim
-vimshell.vim
+vimfiler.vim
