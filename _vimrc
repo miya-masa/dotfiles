@@ -5,6 +5,7 @@
 "        Version: 7.40
 "=============================================================================
 set nocompatible
+set encoding=utf8
 scriptencoding utf8
 " scriptencodingと、このファイルのエンコーディングが一致するよう注意！
 " scriptencodingは、vimの内部エンコーディングと同じものを推奨します。
