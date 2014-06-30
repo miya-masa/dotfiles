@@ -65,7 +65,7 @@ if version >= 703
   " アンドゥの保存場所(7.3)
   " set undodir=.
 endif
- set noswapfile
+set noswapfile
 " viminfoを作成しない
 " set viminfo=
 " クリップボードを共有
@@ -139,9 +139,12 @@ endif
 " 括弧の対応表示時間
 set showmatch matchtime=1
 " タブを設定
-" set ts=4 sw=4 sts=4
+" set ts=2 sw=2 sts=2
+set tabstop=2
 " 自動的にインデントする
 set autoindent
+set shiftwidth=2
+set expandtab
 " Cインデントの設定
 set cinoptions+=:0
 " タイトルを表示
@@ -163,7 +166,7 @@ if &t_Co > 2 || has('gui_running')
 endif
 " 色テーマ設定
 " gvimの色テーマは.gvimrcで指定する
-" colorscheme mycolor
+" colorscheme hybrid
 
 """"""""""""""""""""""""""""""
 " ステータスラインに文字コード等表示
@@ -222,7 +225,7 @@ command! -nargs=? -complete=file Diff if '<args>'=='' | browse vertical diffspli
 " パッチコマンド
 set patchexpr=MyPatch()
 function! MyPatch()
-   call system($VIM."\\'.'patch -o " . v:fname_out . " " . v:fname_in . " < " . v:fname_diff)
+  call system($VIM."\\'.'patch -o " . v:fname_out . " " . v:fname_in . " < " . v:fname_diff)
 endfunction
 
 "----------------------------------------
@@ -244,9 +247,15 @@ nnoremap j gj
 nnoremap k gk
 nnoremap l <Right>zv
 
+nnoremap ,tn <Esc>:tabNext<CR>
+nnoremap ,tp <Esc>:tabprevious<CR>
+nnoremap ,ub <Esc>:Unite bookmark<CR>
+
 "----------------------------------------
 " 挿入モード
 "----------------------------------------
+map ,pt <Esc>:%! perltidy -se<CR>
+map ,ptv <Esc>:'<,'>! perltidy -se<CR>
 
 "----------------------------------------
 " ビジュアルモード
@@ -343,63 +352,73 @@ endif
 "----------------------------------------
 " 各種プラグイン設定
 "----------------------------------------
- if has('vim_starting')
-   set nocompatible               " Be iMproved
+if has('vim_starting')
+  set nocompatible               " Be iMproved
 
-   " Required:
-   set runtimepath+=~/.vim/bundle/neobundle.vim/
- endif
+  " Required:
+  set runtimepath+=~/.vim/bundle/neobundle.vim/
+endif
 
- " Required:
- call neobundle#begin(expand('~/.vim/bundle/'))
+" Required:
+call neobundle#begin(expand('~/.vim/bundle/'))
 
- " Let NeoBundle manage NeoBundle
- " Required:
- NeoBundleFetch 'Shougo/neobundle.vim'
- NeoBundle 'w0ng/vim-hybrid'
- NeoBundle 'Shougo/unite.vim/' ,'ca33d284657654595647562ecfb9642f2f4f13cf'
- NeoBundle 'Shougo/neomru.vim'
- NeoBundle 'Shougo/vimfiler.vim'
- let g:vimfiler_as_default_explorer = 1
- NeoBundle 'Shougo/neocomplcache.vim'
- let g:neocomplcache_enable_at_startup = 1
- NeoBundle 'Shougo/neosnippet'
- NeoBundle 'Shougo/neosnippet-snippets'
- " Plugin key-mappings.
- imap <C-k>     <Plug>(neosnippet_expand_or_jump)
- smap <C-k>     <Plug>(neosnippet_expand_or_jump)
- xmap <C-k>     <Plug>(neosnippet_expand_target)
+" Let NeoBundle manage NeoBundle
+" Required:
+NeoBundleFetch 'Shougo/neobundle.vim'
+NeoBundle 'w0ng/vim-hybrid'
+NeoBundle 'Shougo/unite.vim/' 
+NeoBundle 'Shougo/neomru.vim'
+NeoBundle 'Shougo/vimfiler.vim'
+let g:vimfiler_as_default_explorer = 1
+NeoBundle 'Shougo/neocomplcache.vim'
+let g:neocomplcache_enable_at_startup = 1
+NeoBundle 'Shougo/neosnippet'
+NeoBundle 'honza/vim-snippets'
+NeoBundle 'Shougo/neosnippet-snippets'
+" Plugin key-mappings.
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
 
- " SuperTab like snippets behavior.
- imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-			 \ "\<Plug>(neosnippet_expand_or_jump)"
-			 \: pumvisible() ? "\<C-n>" : "\<TAB>"
- smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-			 \ "\<Plug>(neosnippet_expand_or_jump)"
-			 \: "\<TAB>"
+" SuperTab like snippets behavior.
+imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+      \ "\<Plug>(neosnippet_expand_or_jump)"
+      \: pumvisible() ? "\<C-n>" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+      \ "\<Plug>(neosnippet_expand_or_jump)"
+      \: "\<TAB>"
 
- " For snippet_complete marker.
- if has('conceal')
-	 set conceallevel=2 concealcursor=i
- endif
- " Tell Neosnippet about the other snippets
- let g:neosnippet#snippets_directory='~/.vim/bundle/honza/vim-snippets/snippets'
- NeoBundle 'honza/vim-snippets'
- NeoBundle 'tpope/vim-fugitive'
+" For snippet_complete marker.
+if has('conceal')
+  set conceallevel=2 concealcursor=i
+endif
+" Enable snipMate compatibility feature.
+let g:neosnippet#enable_snipmate_compatibility = 1
+" Tell Neosnippet about the other snippets
+let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'vim-perl/vim-perl'
+NeoBundle 'PProvost/vim-ps1'
+augroup filetypedetect
+  autocmd! BufNewFile,BufRead *.t setf perl
+  autocmd! BufNewFile,BufRead *.psgi setf perl
+  autocmd! BufNewFile,BufRead *.tt setf tt2html
+  autocmd! BufNewFile,BufRead *.tmpl setf tt2html
+augroup END
 
 
- " My Bundles here:
- " Refer to |:NeoBundle-examples|.
- " Note: You don't set neobundle setting in .gvimrc!
+" My Bundles here:
+" Refer to |:NeoBundle-examples|.
+" Note: You don't set neobundle setting in .gvimrc!
 
- call neobundle#end()
+call neobundle#end()
 
- " Required:
- filetype plugin indent on
+" Required:
+filetype plugin indent on
 
- " If there are uninstalled bundles found on startup,
- " this will conveniently prompt you to install them.
- NeoBundleCheck
+" If there are uninstalled bundles found on startup,
+" this will conveniently prompt you to install them.
+NeoBundleCheck
 "----------------------------------------
 " 一時設定
 "----------------------------------------
