@@ -1,11 +1,10 @@
 "=============================================================================
 "    Description: .vimrcサンプル設定
 "         Author: anonymous
-"  Last Modified: 0000-00-00 00:00
-"        Version: 7.40
+"  Last Modified: 0000-00-00 07:03
+"        Version: 0.00
 "=============================================================================
 set nocompatible
-set encoding=utf8
 scriptencoding utf8
 " scriptencodingと、このファイルのエンコーディングが一致するよう注意！
 " scriptencodingは、vimの内部エンコーディングと同じものを推奨します。
@@ -17,7 +16,7 @@ scriptencoding utf8
 " Let $HOGE=$USERPROFILE.'/ほげ'
 
 "----------------------------------------
-" ユーザーランタイムパス設aa定
+" ユーザーランタイムパス設定
 "----------------------------------------
 " Windows, unixでのruntimepathの違いを吸収するためのもの。
 " $MY_VIMRUNTIMEはユーザーランタイムディレクトリを示す。
@@ -66,7 +65,7 @@ if version >= 703
   " アンドゥの保存場所(7.3)
   " set undodir=.
 endif
- set noswapfile
+set noswapfile
 " viminfoを作成しない
 " set viminfo=
 " クリップボードを共有
@@ -140,9 +139,12 @@ endif
 " 括弧の対応表示時間
 set showmatch matchtime=1
 " タブを設定
-" set ts=4 sw=4 sts=4
+" set ts=2 sw=2 sts=2
+set tabstop=2
 " 自動的にインデントする
 set autoindent
+set shiftwidth=2
+set expandtab
 " Cインデントの設定
 set cinoptions+=:0
 " タイトルを表示
@@ -164,7 +166,7 @@ if &t_Co > 2 || has('gui_running')
 endif
 " 色テーマ設定
 " gvimの色テーマは.gvimrcで指定する
-" colorscheme mylight
+" colorscheme hybrid
 
 """"""""""""""""""""""""""""""
 " ステータスラインに文字コード等表示
@@ -223,12 +225,9 @@ command! -nargs=? -complete=file Diff if '<args>'=='' | browse vertical diffspli
 " パッチコマンド
 set patchexpr=MyPatch()
 function! MyPatch()
-   call system($VIM."\\'.'patch -o " . v:fname_out . " " . v:fname_in . " < " . v:fname_diff)
+  call system($VIM."\\'.'patch -o " . v:fname_out . " " . v:fname_in . " < " . v:fname_diff)
 endfunction
 
-set tabstop=2
-set shiftwidth=2
-set expandtab
 "----------------------------------------
 " ノーマルモード
 "----------------------------------------
@@ -247,20 +246,21 @@ nnoremap h <Left>zv
 nnoremap j gj
 nnoremap k gk
 nnoremap l <Right>zv
-nnoremap ,pt <Esc>:%! perltidy -se<CR>
-nnoremap ,uh <Esc>:Unite history/yank<CR>
-nnoremap ,ub <Esc>:Unite bookmark<CR>
-nnoremap ,tp <Esc>:tabprevious<CR>
+
 nnoremap ,tn <Esc>:tabNext<CR>
+nnoremap ,tp <Esc>:tabprevious<CR>
+nnoremap ,ub <Esc>:Unite bookmark<CR>
 
 "----------------------------------------
 " 挿入モード
 "----------------------------------------
+map ,pt <Esc>:%! perltidy -se<CR>
+map ,ptv <Esc>:'<,'>! perltidy -se<CR>
 
 "----------------------------------------
 " ビジュアルモード
 "----------------------------------------
-vnoremap ,pt <Esc>:'<,'>! perltidy -se<CR>
+
 "----------------------------------------
 " コマンドモード
 "----------------------------------------
@@ -333,6 +333,7 @@ if has('syntax')
     autocmd!
     autocmd ColorScheme       * call ZenkakuSpace()
     autocmd VimEnter,WinEnter * match ZenkakuSpace /　/
+    autocmd VimEnter,WinEnter * match ZenkakuSpace '\%u3000'
   augroup END
   call ZenkakuSpace()
 endif
@@ -352,111 +353,28 @@ endif
 " 各種プラグイン設定
 "----------------------------------------
 if has('vim_starting')
-   set nocompatible               " Be iMproved
+  set nocompatible               " Be iMproved
 
-   " Required:
-   set runtimepath+=~/.vim/bundle/neobundle.vim/
- endif
+  " Required:
+  set runtimepath+=~/.vim/bundle/neobundle.vim/
+endif
 
- " Required:
- call neobundle#begin(expand('~/.vim/bundle/'))
+" Required:
+call neobundle#begin(expand('~/.vim/bundle/'))
 
- " Let NeoBundle manage NeoBundle
- " Required:
- NeoBundleFetch 'Shougo/neobundle.vim'
-
- " My Bundles here:
- NeoBundle 'Shougo/neocomplcache'
-"Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
-" Disable AutoComplPop.
-let g:acp_enableAtStartup = 0
-" Use neocomplcache.
+" Let NeoBundle manage NeoBundle
+" Required:
+NeoBundleFetch 'Shougo/neobundle.vim'
+NeoBundle 'w0ng/vim-hybrid'
+NeoBundle 'Shougo/unite.vim/' 
+NeoBundle 'Shougo/neomru.vim'
+NeoBundle 'Shougo/vimfiler.vim'
+let g:vimfiler_as_default_explorer = 1
+NeoBundle 'Shougo/neocomplcache.vim'
 let g:neocomplcache_enable_at_startup = 1
-" Use smartcase.
-let g:neocomplcache_enable_smart_case = 1
-" Set minimum syntax keyword length.
-let g:neocomplcache_min_syntax_length = 3
-let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
-
-" Enable heavy features.
-" Use camel case completion.
-"let g:neocomplcache_enable_camel_case_completion = 1
-" Use underbar completion.
-"let g:neocomplcache_enable_underbar_completion = 1
-
-" Define dictionary.
-let g:neocomplcache_dictionary_filetype_lists = {
-    \ 'default' : '',
-    \ 'vimshell' : $HOME.'/.vimshell_hist',
-    \ 'scheme' : $HOME.'/.gosh_completions'
-        \ }
-
-" Define keyword.
-if !exists('g:neocomplcache_keyword_patterns')
-    let g:neocomplcache_keyword_patterns = {}
-endif
-let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
-
-" Plugin key-mappings.
-inoremap <expr><C-g>     neocomplcache#undo_completion()
-inoremap <expr><C-l>     neocomplcache#complete_common_string()
-
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-  return neocomplcache#smart_close_popup() . "\<CR>"
-  " For no inserting <CR> key.
-  "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
-endfunction
-" <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><C-y>  neocomplcache#close_popup()
-inoremap <expr><C-e>  neocomplcache#cancel_popup()
-" Close popup by <Space>.
-"inoremap <expr><Space> pumvisible() ? neocomplcache#close_popup() : "\<Space>"
-
-" For cursor moving in insert mode(Not recommended)
-"inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
-"inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
-"inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
-"inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
-" Or set this.
-"let g:neocomplcache_enable_cursor_hold_i = 1
-" Or set this.
-"let g:neocomplcache_enable_insert_char_pre = 1
-
-" AutoComplPop like behavior.
-"let g:neocomplcache_enable_auto_select = 1
-
-" Shell like behavior(not recommended).
-"set completeopt+=longest
-"let g:neocomplcache_enable_auto_select = 1
-"let g:neocomplcache_disable_auto_complete = 1
-"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
-
-" Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-" Enable heavy omni completion.
-if !exists('g:neocomplcache_omni_patterns')
-  let g:neocomplcache_omni_patterns = {}
-endif
-let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplcache_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-let g:neocomplcache_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-
-" For perlomni.vim setting.
-" https://github.com/c9s/perlomni.vim
-let g:neocomplcache_omni_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
- NeoBundle 'Shougo/neosnippet.vim'
+NeoBundle 'Shougo/neosnippet'
+NeoBundle 'honza/vim-snippets'
+NeoBundle 'Shougo/neosnippet-snippets'
 " Plugin key-mappings.
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 smap <C-k>     <Plug>(neosnippet_expand_or_jump)
@@ -464,49 +382,43 @@ xmap <C-k>     <Plug>(neosnippet_expand_target)
 
 " SuperTab like snippets behavior.
 imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-\ "\<Plug>(neosnippet_expand_or_jump)"
-\: pumvisible() ? "\<C-n>" : "\<TAB>"
+      \ "\<Plug>(neosnippet_expand_or_jump)"
+      \: pumvisible() ? "\<C-n>" : "\<TAB>"
 smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-\ "\<Plug>(neosnippet_expand_or_jump)"
-\: "\<TAB>"
+      \ "\<Plug>(neosnippet_expand_or_jump)"
+      \: "\<TAB>"
+
 " For snippet_complete marker.
 if has('conceal')
   set conceallevel=2 concealcursor=i
 endif
+" Enable snipMate compatibility feature.
 let g:neosnippet#enable_snipmate_compatibility = 1
-let g:neosnippet#snippets_directory='~/.vim/**/snip**'
+" Tell Neosnippet about the other snippets
+let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'vim-perl/vim-perl'
+NeoBundle 'PProvost/vim-ps1'
+augroup filetypedetect
+  autocmd! BufNewFile,BufRead *.t setf perl
+  autocmd! BufNewFile,BufRead *.psgi setf perl
+  autocmd! BufNewFile,BufRead *.tt setf tt2html
+  autocmd! BufNewFile,BufRead *.tmpl setf tt2html
+augroup END
 
- NeoBundle 'Shougo/neosnippet-snippets'
- NeoBundle 'kien/ctrlp.vim'
- NeoBundle 'tpope/vim-fugitive'
- NeoBundle 'vim-perl/vim-perl'
- NeoBundle 'flazz/vim-colorschemes'
- NeoBundle 'ujihisa/unite-colorscheme'
- NeoBundle 'Shougo/unite.vim'
- let g:unite_source_history_yank_enable = 1
- NeoBundle 'Shougo/vimproc.vim',{
-      \ 'build' : {
-      \     'windows' : 'make -f make_mingw32.mak',
-      \     'cygwin' : 'make -f make_cygwin.mak',
-      \     'mac' : 'make -f make_mac.mak',
-      \     'unix' : 'make -f make_unix.mak',
-      \    },
-      \ }
- NeoBundle 'honza/vim-snippets'
- NeoBundle 'Shougo/vimfiler.vim'
- let g:vimfiler_as_default_explorer = 1
- " You can specify revision/branch/tag.
- NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
 
- call neobundle#end()
+" My Bundles here:
+" Refer to |:NeoBundle-examples|.
+" Note: You don't set neobundle setting in .gvimrc!
 
- " Required:
- filetype plugin indent on
+call neobundle#end()
 
- " If there are uninstalled bundles found on startup,
- " this will conveniently prompt you to install them.
- NeoBundleCheck
+" Required:
+filetype plugin indent on
 
+" If there are uninstalled bundles found on startup,
+" this will conveniently prompt you to install them.
+NeoBundleCheck
 "----------------------------------------
 " 一時設定
 "----------------------------------------
