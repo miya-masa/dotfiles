@@ -378,10 +378,14 @@ NeoBundle 'Shougo/neocomplcache.vim'
 let g:neocomplcache_enable_at_startup = 1
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'honza/vim-snippets'
+NeoBundle 'godlygeek/tabular'
 NeoBundle 'plasticboy/vim-markdown'
 NeoBundle 'kannokanno/previm'
 NeoBundle 'tyru/open-browser.vim'
-au BufRead,BufNewFile *.md set filetype=markdown
+augroup PrevimSettings
+    autocmd!
+    autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+augroup END
 NeoBundle 'Shougo/neosnippet-snippets'
 " Plugin key-mappings.
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
