@@ -250,6 +250,10 @@ nnoremap l <Right>zv
 nnoremap ,tn <Esc>:tabNext<CR>
 nnoremap ,tp <Esc>:tabprevious<CR>
 nnoremap ,ub <Esc>:Unite bookmark<CR>
+nnoremap ,dltnmo <Esc>:! powershell.exe c://bin/ftp_pull.ps1 t-nmoadm %:p<CR>
+nnoremap ,dlnmo <Esc>:! powershell.exe c://bin/ftp_pull.ps1 nmoadm %:p<CR>
+nnoremap ,uptnmo <Esc>:! powershell.exe c://bin/ftp_push.ps1 t-nmoadm %:p<CR>
+nnoremap ,upnmo <Esc>:! powershell.exe c://bin/ftp_push.ps1 nmoadm %:p<CR>
 
 "----------------------------------------
 " 挿入モード
@@ -374,6 +378,10 @@ NeoBundle 'Shougo/neocomplcache.vim'
 let g:neocomplcache_enable_at_startup = 1
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'honza/vim-snippets'
+NeoBundle 'plasticboy/vim-markdown'
+NeoBundle 'kannokanno/previm'
+NeoBundle 'tyru/open-browser.vim'
+au BufRead,BufNewFile *.md set filetype=markdown
 NeoBundle 'Shougo/neosnippet-snippets'
 " Plugin key-mappings.
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
