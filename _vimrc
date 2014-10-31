@@ -369,6 +369,13 @@ call neobundle#begin(expand('~/.vim/bundle/'))
 " Let NeoBundle manage NeoBundle
 " Required:
 NeoBundleFetch 'Shougo/neobundle.vim'
+NeoBundle 'plasticboy/vim-markdown'
+NeoBundle 'kannokanno/previm'
+augroup PrevimSettings
+    autocmd!
+    autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+augroup END
+NeoBundle 'tyru/open-browser.vim'
 NeoBundle 'w0ng/vim-hybrid'
 NeoBundle 'Shougo/unite.vim/' 
 NeoBundle 'Shougo/neomru.vim'
@@ -378,9 +385,6 @@ NeoBundle 'Shougo/neocomplcache.vim'
 let g:neocomplcache_enable_at_startup = 1
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'honza/vim-snippets'
-NeoBundle 'godlygeek/tabular'
-NeoBundle 'plasticboy/vim-markdown'
-NeoBundle 'kannokanno/previm'
 " js formatter
 NeoBundle 'maksimr/vim-jsbeautify'
 autocmd FileType javascript noremap <C-f> :call JsBeautify()<cr>
@@ -389,11 +393,6 @@ autocmd FileType html noremap <C-f> :call HtmlBeautify()<cr>
 " for css or scss
 autocmd FileType css noremap <C-f> :call CSSBeautify()<cr>
 
-NeoBundle 'tyru/open-browser.vim'
-augroup PrevimSettings
-    autocmd!
-    autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-  augroup END
 NeoBundle 'Shougo/neosnippet-snippets'
 " Plugin key-mappings.
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
@@ -415,17 +414,17 @@ endif
 " Enable snipMate compatibility feature.
 let g:neosnippet#enable_snipmate_compatibility = 1
 " Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory = '~/.vim/bundle/vim-snippets/snippets'
+let g:neosnippet#snippets_directory = '~/.vim/bundle/vim-snippets/snippets,~/.vim/bundle/vim-snippets/UltiSnips/'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'vim-perl/vim-perl'
-NeoBundle 'thinca/vim-qfreplace'
-NeoBundle 'PProvost/vim-ps1'
 augroup filetypedetect
   autocmd! BufNewFile,BufRead *.t setf perl
   autocmd! BufNewFile,BufRead *.psgi setf perl
   autocmd! BufNewFile,BufRead *.tt setf tt2html
   autocmd! BufNewFile,BufRead *.tmpl setf tt2html
 augroup END
+NeoBundle 'thinca/vim-qfreplace'
+NeoBundle 'PProvost/vim-ps1'
 
 
 " My Bundles here:
