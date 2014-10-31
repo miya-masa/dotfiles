@@ -381,11 +381,19 @@ NeoBundle 'honza/vim-snippets'
 NeoBundle 'godlygeek/tabular'
 NeoBundle 'plasticboy/vim-markdown'
 NeoBundle 'kannokanno/previm'
+" js formatter
+NeoBundle 'maksimr/vim-jsbeautify'
+autocmd FileType javascript noremap <C-f> :call JsBeautify()<cr>
+" for html
+autocmd FileType html noremap <C-f> :call HtmlBeautify()<cr>
+" for css or scss
+autocmd FileType css noremap <C-f> :call CSSBeautify()<cr>
+
 NeoBundle 'tyru/open-browser.vim'
 augroup PrevimSettings
     autocmd!
     autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-augroup END
+  augroup END
 NeoBundle 'Shougo/neosnippet-snippets'
 " Plugin key-mappings.
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
@@ -407,9 +415,10 @@ endif
 " Enable snipMate compatibility feature.
 let g:neosnippet#enable_snipmate_compatibility = 1
 " Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+let g:neosnippet#snippets_directory = '~/.vim/bundle/vim-snippets/snippets'
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'vim-perl/vim-perl'
+NeoBundle 'thinca/vim-qfreplace'
 NeoBundle 'PProvost/vim-ps1'
 augroup filetypedetect
   autocmd! BufNewFile,BufRead *.t setf perl
