@@ -1,4 +1,4 @@
-cd C:\Users\%USERNAME%
+cd %HOMEPATH%
 
 mklink .\_vimrc .\dotFiles\_vimrc 
 mklink .\_gvimrc .\dotFiles\_gvimrc 

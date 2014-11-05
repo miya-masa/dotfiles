@@ -247,19 +247,9 @@ nnoremap j gj
 nnoremap k gk
 nnoremap l <Right>zv
 
-nnoremap ,tn <Esc>:tabNext<CR>
-nnoremap ,tp <Esc>:tabprevious<CR>
-nnoremap ,ub <Esc>:Unite bookmark<CR>
-nnoremap ,dltnmo <Esc>:! powershell.exe c://bin/ftp_pull.ps1 t-nmoadm %:p<CR>
-nnoremap ,dlnmo <Esc>:! powershell.exe c://bin/ftp_pull.ps1 nmoadm %:p<CR>
-nnoremap ,uptnmo <Esc>:! powershell.exe c://bin/ftp_push.ps1 t-nmoadm %:p<CR>
-nnoremap ,upnmo <Esc>:! powershell.exe c://bin/ftp_push.ps1 nmoadm %:p<CR>
-
 "----------------------------------------
 " 挿入モード
 "----------------------------------------
-map ,pt <Esc>:%! perltidy -se<CR>
-map ,ptv <Esc>:'<,'>! perltidy -se<CR>
 
 "----------------------------------------
 " ビジュアルモード
@@ -373,60 +363,43 @@ NeoBundle 'w0ng/vim-hybrid'
 NeoBundle 'Shougo/unite.vim/' 
 NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'Shougo/vimfiler.vim'
+"vimデフォルトのエクスプローラをvimfilerで置き換える
 let g:vimfiler_as_default_explorer = 1
-NeoBundle 'Shougo/neocomplcache.vim'
-let g:neocomplcache_enable_at_startup = 1
-NeoBundle 'Shougo/neosnippet'
-NeoBundle 'honza/vim-snippets'
-NeoBundle 'godlygeek/tabular'
+"セーフモードを無効にした状態で起動する
+let g:vimfiler_safe_mode_by_default = 0
+"現在開いているバッファのディレクトリを開く
+nnoremap <silent> <Leader>fe :<C-u>VimFilerBufferDir -quit<CR>
+"現在開いているバッファをIDE風に開く
+nnoremap <silent> <Leader>fi :<C-u>VimFilerBufferDir -split -simple -winwidth=40 -no-quit<CR>
+
+"デフォルトのキーマッピングを変更
+augroup vimrc
+  autocmd FileType vimfiler call s:vimfiler_my_settings()
+augroup END
+function! s:vimfiler_my_settings()
+  nmap <buffer> q <Plug>(vimfiler_exit)
+  nmap <buffer> Q <Plug>(vimfiler_hide)
+endfunction
+"VimでMarkdownの設定
 NeoBundle 'plasticboy/vim-markdown'
 NeoBundle 'kannokanno/previm'
-" js formatter
-NeoBundle 'maksimr/vim-jsbeautify'
-autocmd FileType javascript noremap <C-f> :call JsBeautify()<cr>
-" for html
-autocmd FileType html noremap <C-f> :call HtmlBeautify()<cr>
-" for css or scss
-autocmd FileType css noremap <C-f> :call CSSBeautify()<cr>
-
 NeoBundle 'tyru/open-browser.vim'
 augroup PrevimSettings
     autocmd!
     autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-  augroup END
-NeoBundle 'Shougo/neosnippet-snippets'
-" Plugin key-mappings.
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-k>     <Plug>(neosnippet_expand_target)
-
-" SuperTab like snippets behavior.
-imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-      \ "\<Plug>(neosnippet_expand_or_jump)"
-      \: pumvisible() ? "\<C-n>" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-      \ "\<Plug>(neosnippet_expand_or_jump)"
-      \: "\<TAB>"
-
-" For snippet_complete marker.
-if has('conceal')
-  set conceallevel=2 concealcursor=i
-endif
-" Enable snipMate compatibility feature.
-let g:neosnippet#enable_snipmate_compatibility = 1
-" Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory = '~/.vim/bundle/vim-snippets/snippets'
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'vim-perl/vim-perl'
-NeoBundle 'thinca/vim-qfreplace'
-NeoBundle 'PProvost/vim-ps1'
-augroup filetypedetect
-  autocmd! BufNewFile,BufRead *.t setf perl
-  autocmd! BufNewFile,BufRead *.psgi setf perl
-  autocmd! BufNewFile,BufRead *.tt setf tt2html
-  autocmd! BufNewFile,BufRead *.tmpl setf tt2html
 augroup END
+"ここまでVimでMarkdownの設定
+NeoBundle 'Shougo/vimproc.vim', {
+\ 'build' : {
+\     'windows' : 'tools\\update-dll-mingw',
+\     'cygwin' : 'make -f make_cygwin.mak',
+\     'mac' : 'make -f make_mac.mak',
+\     'linux' : 'make',
+\     'unix' : 'gmake',
+\    },
+\ }
 
+NeoBundle 'tpope/vim-fugitive'
 
 " My Bundles here:
 " Refer to |:NeoBundle-examples|.
