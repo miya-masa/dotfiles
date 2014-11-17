@@ -248,7 +248,7 @@ nnoremap k gk
 nnoremap l <Right>zv
 nnoremap <Leader>tn :tabNext<CR>
 nnoremap <Leader>tp :tabprevious<CR>
-nnoremap <Leader>te :tabprevious<CR>
+nnoremap <Leader>te :tabnew<CR>
 " 個別に指定したい設定を読み込む
 if filereadable($HOME."./_vimrc_local")
     source ~/_vimrc_local
@@ -394,7 +394,8 @@ let g:vimfiler_safe_mode_by_default = 0
 "現在開いているバッファのディレクトリを開く
 nnoremap <silent> <Leader>fe :<C-u>VimFilerBufferDir -quit<CR>
 "現在開いているバッファをIDE風に開く
-nnoremap <silent> <Leader>fi :<C-u>VimFilerBufferDir -split -simple -winwidth=40 -no-quit<CR>
+nnoremap <silent> <Leader>fi :<C-u>VimFilerBufferDir -split -winwidth=40 -no-quit<CR>
+nnoremap <silent> <Leader>ft :<C-u>VimFilerTab -winwidth=40 -no-quit<CR>
 
 "デフォルトのキーマッピングを変更
 augroup vimrc
