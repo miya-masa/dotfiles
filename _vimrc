@@ -251,7 +251,7 @@ nnoremap <Leader>tp :tabprevious<CR>
 nnoremap <Leader>te :tabprevious<CR>
 " 個別に指定したい設定を読み込む
 if filereadable($HOME."./_vimrc_local")
-    source ~./_vimrc_local
+    source ~/_vimrc_local
 endif
 
 "----------------------------------------
@@ -424,6 +424,7 @@ NeoBundle 'Shougo/vimproc.vim', {
       \ }
 
 NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'thinca/vim-qfreplace'
 
 " start  neocomplcache.vim
 NeoBundle 'Shougo/neocomplcache.vim'
