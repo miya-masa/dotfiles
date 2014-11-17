@@ -1,4 +1,3 @@
-
 @echo off
 
 rem
@@ -17,6 +16,10 @@ del .\_vimrc
 mklink .\_vimrc .\dotfiles\_vimrc 
 del .\_gvimrc
 mklink .\_gvimrc .\dotfiles\_gvimrc 
+del .\.bash_profile
+mklink .\_bash_profile .\dotfiles\.bash_profile
+del .\.editorconfig
+mklink .\.editorconfig .\dotfiles\.editorconfig
 rd .\.vim
 mklink /D .\.vim .\dotfiles\.vim 
 pushd %0\..
