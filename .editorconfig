@@ -1,0 +1,14 @@
+root = true
+
+[**.js]
+jslint-happy = true
+
+[**.css]
+indent_style = space
+indent_size = 4
+
+[**.html]
+indent_style = space
+indent_size = 4
+max_char = 78
+brace_style = expand

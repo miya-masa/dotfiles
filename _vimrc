@@ -247,6 +247,8 @@ nnoremap j gj
 nnoremap k gk
 nnoremap l <Right>zv
 nnoremap <Leader>tn :tabNext<CR>
+nnoremap <Leader>tp :tabprevious<CR>
+nnoremap <Leader>te :tabprevious<CR>
 
 
 "----------------------------------------
