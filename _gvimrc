@@ -36,7 +36,7 @@ endif
 " set cmdheight=2
 
 " カラー設定:
- colorscheme jellybeans
+ colorscheme mopkai
 
 " フォント設定
 " フォントは英語名で指定すると問題が起きにくくなります
