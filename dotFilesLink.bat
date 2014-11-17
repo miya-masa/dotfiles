@@ -1,6 +1,28 @@
-cd %HOMEPATH%
+@echo off
 
-mklink .\_vimrc .\dotFiles\_vimrc 
-mklink .\_gvimrc .\dotFiles\_gvimrc 
-mklink /D .\.vim .\dotFiles\.vim 
+rem
+rem このバッチの説明
+rem
+
+rem 設定事項
+set HOGE="変数の値"
+
+rem このバッチが存在するフォルダをカレントに
+pushd %0\..
+cls
+
+cd C:\Users\%USERNAME%
+del .\_vimrc
+mklink .\_vimrc .\dotfiles\_vimrc 
+del .\_gvimrc
+mklink .\_gvimrc .\dotfiles\_gvimrc 
+del .\.bash_profile
+mklink .\_bash_profile .\dotfiles\.bash_profile
+del .\.editorconfig
+mklink .\.editorconfig .\dotfiles\.editorconfig
+rd .\.vim
+mklink /D .\.vim .\dotfiles\.vim 
+pushd %0\..
+
 pause
+exit
