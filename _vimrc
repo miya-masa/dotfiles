@@ -248,9 +248,6 @@ nnoremap h <Left>zv
 nnoremap j gj
 nnoremap k gk
 nnoremap l <Right>zv
-nnoremap <Leader>tn :tabNext<CR>
-nnoremap <Leader>tp :tabprevious<CR>
-nnoremap <Leader>te :tabnew<CR>
 " 個別に指定したい設定を読み込む
 if filereadable($HOME."./_vimrc_local")
     source ~/_vimrc_local
