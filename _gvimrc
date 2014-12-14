@@ -11,6 +11,7 @@ scriptencoding utf8
 " エラー時の音とビジュアルベルの抑制
 set noerrorbells
 set novisualbell
+set cmdheight=1
 set visualbell t_vb=
 
 if has('multi_byte_ime') || has('xim')

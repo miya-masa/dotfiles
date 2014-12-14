@@ -66,6 +66,7 @@ if version >= 703
   " set undodir=.
 endif
 set noswapfile
+set noundofile
 " viminfoを作成しない
 " set viminfo=
 " クリップボードを共有
