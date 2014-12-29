@@ -11,6 +11,7 @@ rem このバッチが存在するフォルダをカレントに
 pushd %0\..
 cls
 
+ curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh | sh
 cd C:\Users\%USERNAME%
 del .\_vimrc
 mklink .\_vimrc .\dotfiles\_vimrc 

@@ -407,6 +407,10 @@ function! s:vimfiler_my_settings()
 endfunction
 "VimでMarkdownの設定
 NeoBundle 'plasticboy/vim-markdown'
+NeoBundle 'Rykka/clickable.vim'       " sphinx の依存プラグイン
+NeoBundle 'Rykka/riv.vim'
+NeoBundle 'Rykka/InstantRst'
+let g:riv_web_browser = '"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
 NeoBundle 'kannokanno/previm'
 NeoBundle 'tyru/open-browser.vim'
 augroup PrevimSettings
