@@ -407,6 +407,10 @@ function! s:vimfiler_my_settings()
 endfunction
 "VimでMarkdownの設定
 NeoBundle 'plasticboy/vim-markdown'
+NeoBundle 'Rykka/clickable.vim'       " sphinx の依存プラグイン
+NeoBundle 'Rykka/riv.vim'
+NeoBundle 'Rykka/InstantRst'
+let g:riv_web_browser = '"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
 NeoBundle 'kannokanno/previm'
 NeoBundle 'tyru/open-browser.vim'
 augroup PrevimSettings
@@ -540,10 +544,11 @@ if has('conceal')
   set conceallevel=2 concealcursor=i
 endif
 NeoBundle 'honza/vim-snippets'
+NeoBundle 'ryuzee/neosnippet_chef_recipe_snippet'
 " Enable snipMate compatibility feature.
 let g:neosnippet#enable_snipmate_compatibility = 1
 " Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+let g:neosnippet#snippets_directory='~/.vim/bundle/neosnippet_chef_recipe_snippet/autoload/neosnippet/snippets,~/.vim/bundle/vim-snippets/snippets'
 " end sunippets
 " start jsBeautifier
 NeoBundle 'maksimr/vim-jsbeautify'
