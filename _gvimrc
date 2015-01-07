@@ -37,7 +37,7 @@ endif
 " set cmdheight=2
 
 " カラー設定:
- colorscheme mopkai
+colorscheme jellybeans
 
 " フォント設定
 " フォントは英語名で指定すると問題が起きにくくなります
@@ -48,8 +48,8 @@ elseif has('unix')
 elseif has('mac')
   " set guifont=Osaka-Mono:h14
 elseif has('win32') || has('win64')
-   set guifont=MigMix_2M:h10
-   set guifontwide=MigMix_2M:h10
+   set guifont=MigMix_2M:h11
+   set guifontwide=MigMix_2M:h11
 endif
 
 " 印刷用フォント

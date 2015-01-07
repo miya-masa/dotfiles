@@ -571,4 +571,4 @@ NeoBundleCheck
 "----------------------------------------
 " 一時設定
 "----------------------------------------
-colorscheme mopkai
+colorscheme jellybeans
