@@ -21,8 +21,6 @@ del .\.bash_profile
 mklink .\_bash_profile .\dotfiles\.bash_profile
 del .\.editorconfig
 mklink .\.editorconfig .\dotfiles\.editorconfig
-rd .\.vim
-mklink /D .\.vim .\dotfiles\.vim 
 pushd %0\..
 
 pause

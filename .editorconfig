@@ -1,7 +1,7 @@
 root = true
 
 [**.js]
-jslint-happy = true
+jslint-happy=true
 
 [**.css]
 indent_style = space
