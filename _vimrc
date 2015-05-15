@@ -566,8 +566,10 @@ autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
 call neobundle#end()
 NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'chriskempson/vim-tomorrow-theme'
-NeoBundle 'wookiehangover/jshint.vim'
 NeoBundle 'mopp/mopkai.vim'
+NeoBundle 'scrooloose/syntastic'
+NeoBundle 'bkad/CamelCaseMotion'
+
 " Required:
 filetype plugin indent on
 
