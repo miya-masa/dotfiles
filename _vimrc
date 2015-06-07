@@ -552,7 +552,7 @@ let g:neosnippet#snippets_directory='~/.vim/bundle/neosnippet_chef_recipe_snippe
 " end sunippets
 " start jsBeautifier
 NeoBundle 'maksimr/vim-jsbeautify'
-NeoBundle 'einars/js-beautify'
+" NeoBundle 'einars/js-beautify'
 autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr>
 " for html
 autocmd FileType html noremap <buffer> <c-f> :call HtmlBeautify()<cr>
@@ -567,6 +567,9 @@ call neobundle#end()
 NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'chriskempson/vim-tomorrow-theme'
 NeoBundle 'mopp/mopkai.vim'
+NeoBundle 'scrooloose/syntastic'
+NeoBundle 'bkad/CamelCaseMotion'
+
 " Required:
 filetype plugin indent on
 
@@ -576,4 +579,4 @@ NeoBundleCheck
 "----------------------------------------
 " 一時設定
 "----------------------------------------
- colorscheme jellybeans
+colorscheme jellybeans
