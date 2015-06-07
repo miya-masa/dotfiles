@@ -37,11 +37,7 @@ endif
 " set cmdheight=2
 
 " カラー設定:
-<<<<<<< HEAD
- colorscheme jellybeans
-=======
 colorscheme jellybeans
->>>>>>> ea63062b9127871e59ccd27977e67d23f8457cde
 
 " フォント設定
 " フォントは英語名で指定すると問題が起きにくくなります
