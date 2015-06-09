@@ -569,6 +569,7 @@ NeoBundle 'chriskempson/vim-tomorrow-theme'
 NeoBundle 'mopp/mopkai.vim'
 NeoBundle 'scrooloose/syntastic'
 NeoBundle 'bkad/CamelCaseMotion'
+NeoBundle 'Shougo/unite-outline'
 
 " Required:
 filetype plugin indent on
