@@ -563,13 +563,15 @@ autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
 " Refer to |:NeoBundle-examples|.
 " Note: You don't set neobundle setting in .gvimrc!
 
-call neobundle#end()
 NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'chriskempson/vim-tomorrow-theme'
 NeoBundle 'mopp/mopkai.vim'
 NeoBundle 'scrooloose/syntastic'
 NeoBundle 'bkad/CamelCaseMotion'
 NeoBundle 'Shougo/unite-outline'
+NeoBundle 'editorconfig/editorconfig-vim'
+
+call neobundle#end()
 
 " Required:
 filetype plugin indent on
