@@ -174,9 +174,9 @@ endif
 " iconvが使用可能の場合、カーソル上の文字コードをエンコードに応じた表示にするFencB()を使用
 """"""""""""""""""""""""""""""
 if has('iconv')
-  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=[0x%{FencB()}]\ (%v,%l)/%L%8P\ 
+  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=[0x%{FencB()}]\ (%v,%l)/%L%8P\
 else
-  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=\ (%v,%l)/%L%8P\ 
+  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=\ (%v,%l)/%L%8P\
 endif
 
 " FencB() : カーソル上の文字コードをエンコードに応じた表示にする
@@ -382,9 +382,9 @@ augroup END
 " Let NeoBundle manage NeoBundle
 NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'w0ng/vim-hybrid'
-NeoBundle 'Shougo/unite.vim/' 
+NeoBundle 'Shougo/unite.vim/'
 let g:unite_source_history_yank_enable = 1
-NeoBundle 'Shougo/vimshell.vim/' 
+NeoBundle 'Shougo/vimshell.vim/'
 NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'Shougo/vimfiler.vim'
 "vimデフォルトのエクスプローラをvimfilerで置き換える
