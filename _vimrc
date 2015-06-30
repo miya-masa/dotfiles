@@ -233,7 +233,7 @@ endfunction
 " ノーマルモード
 "----------------------------------------
 " leaderの設定
-" :let mapleader=" "
+:let mapleader=","
 " ヘルプ検索
 nnoremap <F1> K
 " 現在開いているvimスクリプトファイルを実行
@@ -249,6 +249,15 @@ nnoremap h <Left>zv
 nnoremap j gj
 nnoremap k gk
 nnoremap l <Right>zv
+nnoremap <Leader>l <C-w>l
+nnoremap <Leader>h <C-w>h
+nnoremap <Leader>k <C-w>k
+nnoremap <Leader>j <C-w>j
+nnoremap <Leader>sl <C-w><S-l>
+nnoremap <Leader>sh <C-w><S-h>
+nnoremap <Leader>sk <C-w><S-k>
+nnoremap <Leader>sj <C-w><S-j>
+
 " 個別に指定したい設定を読み込む
 if filereadable($HOME."./_vimrc_local")
     source ~/_vimrc_local
