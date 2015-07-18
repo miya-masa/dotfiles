@@ -174,9 +174,9 @@ endif
 " iconvが使用可能の場合、カーソル上の文字コードをエンコードに応じた表示にするFencB()を使用
 """"""""""""""""""""""""""""""
 if has('iconv')
-  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=[0x%{FencB()}]\ (%v,%l)/%L%8P\ 
+  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=[0x%{FencB()}]\ (%v,%l)/%L%8P\
 else
-  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=\ (%v,%l)/%L%8P\ 
+  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=\ (%v,%l)/%L%8P\
 endif
 
 " FencB() : カーソル上の文字コードをエンコードに応じた表示にする
@@ -233,7 +233,7 @@ endfunction
 " ノーマルモード
 "----------------------------------------
 " leaderの設定
-" :let mapleader=" "
+:let mapleader=","
 " ヘルプ検索
 nnoremap <F1> K
 " 現在開いているvimスクリプトファイルを実行
@@ -249,6 +249,15 @@ nnoremap h <Left>zv
 nnoremap j gj
 nnoremap k gk
 nnoremap l <Right>zv
+nnoremap <Leader>l <C-w>l
+nnoremap <Leader>h <C-w>h
+nnoremap <Leader>k <C-w>k
+nnoremap <Leader>j <C-w>j
+nnoremap <Leader>sl <C-w><S-l>
+nnoremap <Leader>sh <C-w><S-h>
+nnoremap <Leader>sk <C-w><S-k>
+nnoremap <Leader>sj <C-w><S-j>
+
 " 個別に指定したい設定を読み込む
 if filereadable($HOME."./_vimrc_local")
     source ~/_vimrc_local
@@ -382,9 +391,9 @@ augroup END
 " Let NeoBundle manage NeoBundle
 NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'w0ng/vim-hybrid'
-NeoBundle 'Shougo/unite.vim/' 
+NeoBundle 'Shougo/unite.vim/'
 let g:unite_source_history_yank_enable = 1
-NeoBundle 'Shougo/vimshell.vim/' 
+NeoBundle 'Shougo/vimshell.vim/'
 NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'Shougo/vimfiler.vim'
 "vimデフォルトのエクスプローラをvimfilerで置き換える

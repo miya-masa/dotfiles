@@ -1,2 +1,5 @@
 alias gulp='exe --encoding=utf-8 gulp'
+alias grunt='exe --encoding=utf-8 grunt'
+alias git='exe --encoding=utf-8 git'
+alias mvn='exe --encoding=utf-8 mvn'
 alias ls='exe --encoding=utf-8 ls'
