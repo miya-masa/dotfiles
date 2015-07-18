@@ -1,28 +1,30 @@
 @echo off
 
 rem
-rem ‚±‚Ìƒoƒbƒ`‚Ìà–¾
+rem ã“ã®ãƒãƒƒãƒã®èª¬æ˜
 rem
 
-rem İ’è–€
-set HOGE="•Ï”‚Ì’l"
+rem è¨­å®šäº‹é …
+set HOGE="å¤‰æ•°ã®å€¤"
 
-rem ‚±‚Ìƒoƒbƒ`‚ª‘¶İ‚·‚éƒtƒHƒ‹ƒ_‚ğƒJƒŒƒ“ƒg‚É
+rem ã“ã®ãƒãƒƒãƒãŒå­˜åœ¨ã™ã‚‹ãƒ•ã‚©ãƒ«ãƒ€ã‚’ã‚«ãƒ¬ãƒ³ãƒˆã«
 pushd %0\..
 cls
 
  curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh | sh
 cd C:\Users\%USERNAME%
 del .\_vimrc
-mklink .\_vimrc .\dotfiles\_vimrc 
+mklink .\_vimrc .\dotfiles\_vimrc
 del .\_gvimrc
-mklink .\_gvimrc .\dotfiles\_gvimrc 
+mklink .\_gvimrc .\dotfiles\_gvimrc
 del .\.bash_profile
 mklink .\_bash_profile .\dotfiles\.bash_profile
 del .\.editorconfig
 mklink .\.editorconfig .\dotfiles\.editorconfig
-del .\.editorconfig
+del .\.jshintrc
 mklink .\.jshintrc .\dotfiles\.jshintrc
+del .\.vimshrc
+mklink .\.vimshrc .\dotfiles\.vimshrc
 pushd %0\..
 
 pause

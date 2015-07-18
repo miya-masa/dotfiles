@@ -1,0 +1,2 @@
+alias gulp='exe --encoding=utf-8 gulp'
+alias ls='exe --encoding=utf-8 ls'
