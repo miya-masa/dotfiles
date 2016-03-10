@@ -1,12 +1,13 @@
 # dotfiles
 
-1. kaoriya-vim‚ğƒ_ƒEƒ“ƒ[ƒh/”CˆÓ‚ÌêŠ‚É‰ğ“€
-2. msys-git‚ğƒCƒ“ƒXƒg[ƒ‹
-3. git-bash‚ğŠJ‚«ˆÈ‰º‚ÌƒRƒ}ƒ“ƒh‚ğÀs
-```
-curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh > install.sh
-sh /install.sh
-```
-4. _vimrc‚¨‚æ‚Ñ_gvimrc‚ğƒz[ƒ€ƒfƒBƒŒƒNƒgƒŠ‚É”z’u
-5. vimXX/switches/catalog/utf-8.vim‚ğvimXX/switches/enbaled‚ÉƒRƒs[
-6. vimXX/plugins/vimproc/lib/vimproc_win64.dll‚ğ$HOME/.vim/bundle/vimproc.vim/lib/‚ÉƒRƒs[
+1. kaoriya-vimã‚’ãƒ€ã‚¦ãƒ³ãƒ­ãƒ¼ãƒ‰/ä»»æ„ã®å ´æ‰€ã«è§£å‡
+2. msys-gitã‚’ã‚¤ãƒ³ã‚¹ãƒˆãƒ¼ãƒ«
+3. git-bashã‚’é–‹ãä»¥ä¸‹ã®ã‚³ãƒãƒ³ãƒ‰ã‚’å®Ÿè¡Œ
+
+  ```
+  curl https://raw.githubusercontent.com/Shougo/neobundle.vim/master/bin/install.sh > install.sh
+  sh /install.sh
+  ```
+4. _vimrcãŠã‚ˆã³_gvimrcã‚’ãƒ›ãƒ¼ãƒ ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã«é…ç½®
+5. vimXX/switches/catalog/utf-8.vimã‚’vimXX/switches/enbaledã«ã‚³ãƒ”ãƒ¼
+6. vimXX/plugins/vimproc/lib/vimproc_win64.dllã‚’$HOME/.vim/bundle/vimproc.vim/lib/ã«ã‚³ãƒ”ãƒ¼
