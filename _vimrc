@@ -278,6 +278,10 @@ endif
 "----------------------------------------
 " Vimスクリプト
 "----------------------------------------
+
+"hbsはhtmlとして扱う
+autocmd BufNewFile,BufRead *.{hbs} set filetype=html
+
 """"""""""""""""""""""""""""""
 " ファイルを開いたら前回のカーソル位置へ移動
 " $VIMRUNTIME/vimrc_example.vim
@@ -515,7 +519,7 @@ inoremap <expr><C-e>  neocomplcache#cancel_popup()
 
 " Enable omni completion.
 autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType html,markdown,hbs setlocal omnifunc=htmlcomplete#CompleteTags
 autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
@@ -564,7 +568,7 @@ NeoBundle 'maksimr/vim-jsbeautify'
 " NeoBundle 'einars/js-beautify'
 autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr>
 " for html
-autocmd FileType html noremap <buffer> <c-f> :call HtmlBeautify()<cr>
+autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
 " for css or scss
 autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
 " end jsBeautifier
@@ -578,7 +582,6 @@ NeoBundle 'mopp/mopkai.vim'
 NeoBundle 'scrooloose/syntastic'
 NeoBundle 'bkad/CamelCaseMotion'
 NeoBundle 'Shougo/unite-outline'
-NeoBundle 'editorconfig/editorconfig-vim'
 
 call neobundle#end()
 
