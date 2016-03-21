@@ -582,6 +582,11 @@ NeoBundle 'mopp/mopkai.vim'
 NeoBundle 'scrooloose/syntastic'
 NeoBundle 'bkad/CamelCaseMotion'
 NeoBundle 'Shougo/unite-outline'
+NeoBundle 'millermedeiros/vim-esformatter'
+
+" will run esformatter after pressing <leader> followed by the 'e' and 's' keys
+nnoremap <silent> <leader>es :Esformatter<CR>
+vnoremap <silent> <leader>es :EsformatterVisual<CR>
 
 call neobundle#end()
 
