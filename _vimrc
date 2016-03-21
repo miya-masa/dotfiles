@@ -566,7 +566,7 @@ let g:neosnippet#snippets_directory='~/.vim/bundle/neosnippet_chef_recipe_snippe
 " start jsBeautifier
 NeoBundle 'maksimr/vim-jsbeautify'
 " NeoBundle 'einars/js-beautify'
-autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr>
+""autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr> => esformatterに変更
 " for html
 autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
 " for css or scss
@@ -585,8 +585,8 @@ NeoBundle 'Shougo/unite-outline'
 NeoBundle 'millermedeiros/vim-esformatter'
 
 " will run esformatter after pressing <leader> followed by the 'e' and 's' keys
-nnoremap <silent> <leader>es :Esformatter<CR>
-vnoremap <silent> <leader>es :EsformatterVisual<CR>
+autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
+autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
 
 call neobundle#end()
 
