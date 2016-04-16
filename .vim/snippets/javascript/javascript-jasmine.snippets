@@ -1,6 +1,6 @@
 # After Each
 snippet aft
-	afterEach(function() { 
+	afterEach(() => { 
 		${1} 
 	}
 
@@ -10,13 +10,13 @@ snippet any
 
 #	Before Each
 snippet bef
-	beforeEach(function() {
+	beforeEach(() => {
 		${1}
 	});
 
 # Describe
 snippet des
-	describe("${1:description}", function() {
+	describe('${1:description}', () => {
 		${2}
 	});${3}	
 
@@ -102,35 +102,35 @@ snippet ex
 
 # It
 snippet it
-	it("${1:description}", function() {
+	it('${1:description}', () => {
 		${2}
 	});${3}
 
 # Runs
 snippet ru
-	runs(function() {
+	runs(() => {
 		${1}
 	});${2}
 
 # Spy on and call fake
 snippet scf
-	spyOn(${1:object}, "${2:method}").andCallFake(${3:function});${4}
+	spyOn(${1:object}, '${2:method}').andCallFake(${3:function});${4}
 
 # Spy on and call through
 snippet sct
-	spyOn(${1:object}, "${2:method}").andCallThrough();${3}
+	spyOn(${1:object}, '${2:method}').andCallThrough();${3}
 
 # Spy on and return
 snippet sr
-	spyOn(${1:object}, "${2:method}").andReturn(${3:arguments});${4}
+	spyOn(${1:object}, '${2:method}').andReturn(${3:arguments});${4}
 
 # Spy on and throw
 snippet st
-	spyOn(${1:object}, "${2:method}").andThrow(${3:exception});${4}
+	spyOn(${1:object}, '${2:method}').andThrow(${3:exception});${4}
 
 # Spy on
 snippet s
-	spyOn(${1:object}, "${2:method}");${3}
+	spyOn(${1:object}, '${2:method}');${3}
 
 # Waits
 snippet wa
