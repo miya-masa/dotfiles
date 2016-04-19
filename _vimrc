@@ -585,6 +585,7 @@ NeoBundle 'bkad/CamelCaseMotion'
 NeoBundle 'Shougo/unite-outline'
 NeoBundle 'millermedeiros/vim-esformatter'
 NeoBundle 'mxw/vim-jsx'
+NeoBundle 'simeji/winresizer'
 
 " will run esformatter after pressing <leader> followed by the 'e' and 's' keys
 autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
