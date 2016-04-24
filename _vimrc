@@ -385,13 +385,6 @@ NeoBundle 'Shougo/vimproc.vim', {
       \     'unix' : 'gmake',
       \    },
       \ }
-NeoBundle 'plasticboy/vim-markdown'
-NeoBundle 'kannokanno/previm'
-NeoBundle 'tyru/open-browser.vim'
-augroup PrevimSettings
-  autocmd!
-  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-augroup END
 " Let NeoBundle manage NeoBundle
 NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'w0ng/vim-hybrid'
@@ -558,10 +551,11 @@ if has('conceal')
 endif
 NeoBundle 'honza/vim-snippets'
 NeoBundle 'ryuzee/neosnippet_chef_recipe_snippet'
+NeoBundle 'vim-scripts/Jasmine-snippets-for-snipMate'
 " Enable snipMate compatibility feature.
 let g:neosnippet#enable_snipmate_compatibility = 1
 " Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory='~/.vim/bundle/neosnippet_chef_recipe_snippet/autoload/neosnippet/snippets,~/.vim/bundle/vim-snippets/snippets'
+let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets,~/.vim/snippets'
 " end sunippets
 " start jsBeautifier
 NeoBundle 'maksimr/vim-jsbeautify'
@@ -579,14 +573,27 @@ autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
 NeoBundle 'nanotech/jellybeans.vim'
 NeoBundle 'chriskempson/vim-tomorrow-theme'
 NeoBundle 'mopp/mopkai.vim'
-NeoBundle 'scrooloose/syntastic'
 NeoBundle 'bkad/CamelCaseMotion'
 NeoBundle 'Shougo/unite-outline'
 NeoBundle 'millermedeiros/vim-esformatter'
+NeoBundle 'mxw/vim-jsx'
 
 " will run esformatter after pressing <leader> followed by the 'e' and 's' keys
 autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
 autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
+
+NeoBundle 'scrooloose/syntastic'
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_javascript_checkers = ["eslint"]
+
+NeoBundle 'simeji/winresizer'
 
 call neobundle#end()
 
