@@ -11,4 +11,5 @@
 4. _vimrcおよび_gvimrcをホームディレクトリに配置
 5. vimXX/switches/catalog/utf-8.vimをvimXX/switches/enbaledにコピー
 6. vimXX/plugins/vimproc/lib/vimproc_win64.dllを$HOME/.vim/bundle/vimproc.vim/lib/にコピー
-7. npm install -g esformatter => (esformatterのlcdがバグってるのでスペース一個入れる)
+7. npm install -g esformatter eslint eslint-config-standard eslint-plugin-promise eslint-plugin-standard
+> => (esformatterのlcdがバグってるのでスペース一個入れる)
