@@ -1,0 +1,17 @@
+" ---設定系---
+" インクリメンタル検索
+set incsearch
+set hlsearch
+
+" 検索時の大文字小文字無視
+set ignorecase
+set smartcase
+
+" クリップボード共有
+set clipboard=unnamed 
+
+" insertモードを抜けた時にIME解除
+set imd
+
+" [F8] _vrapperrcのリロード
+nnoremap <F8> :source ~/_vrapperrc<CR>:noh<CR>
