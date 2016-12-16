@@ -594,6 +594,10 @@ let g:syntastic_check_on_wq = 0
 let g:syntastic_javascript_checkers = ["eslint"]
 
 NeoBundle 'simeji/winresizer'
+NeoBundle 'mattn/emmet-vim'
+NeoBundle 'taichouchou2/surround.vim'
+NeoBundle 'taichouchou2/html5.vim'
+
 
 call neobundle#end()
 
