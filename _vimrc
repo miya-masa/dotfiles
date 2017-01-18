@@ -1,9 +1,3 @@
-"=============================================================================
-"    Description: .vimrcサンプル設定
-"         Author: anonymous
-"  Last Modified: 0000-00-00 07:03
-"        Version: 0.00
-"=============================================================================
 set nocompatible
 scriptencoding utf8
 " scriptencodingと、このファイルのエンコーディングが一致するよう注意！
@@ -595,6 +589,7 @@ let g:syntastic_javascript_checkers = ["eslint"]
 
 NeoBundle 'simeji/winresizer'
 NeoBundle 'mattn/emmet-vim'
+let g:user_emmet_leader_key='<C-t>'
 NeoBundle 'taichouchou2/surround.vim'
 NeoBundle 'taichouchou2/html5.vim'
 
