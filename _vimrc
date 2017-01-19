@@ -360,249 +360,293 @@ endif
 "----------------------------------------
 " 各種プラグイン設定
 "----------------------------------------
-if has('vim_starting')
-  set nocompatible               " Be iMproved
 
-  " Required:
-  set runtimepath+=~/.vim/bundle/neobundle.vim/
+"dein Scripts-----------------------------
+if &compatible
+  set nocompatible               " Be iMproved
 endif
 
 " Required:
-call neobundle#begin(expand('~/.vim/bundle/'))
-NeoBundleFetch 'Shougo/neobundle.vim'
-NeoBundle 'Shougo/vimproc.vim', {
-      \ 'build' : {
-      \     'windows' : 'tools\\update-dll-mingw',
-      \     'cygwin' : 'make -f make_cygwin.mak',
-      \     'mac' : 'make -f make_mac.mak',
-      \     'linux' : 'make',
-      \     'unix' : 'gmake',
-      \    },
-      \ }
-" Let NeoBundle manage NeoBundle
-NeoBundle 'nanotech/jellybeans.vim'
-NeoBundle 'w0ng/vim-hybrid'
-NeoBundle 'Shougo/unite.vim/'
-let g:unite_source_history_yank_enable = 1
-NeoBundle 'Shougo/vimshell.vim/'
-NeoBundle 'Shougo/neomru.vim'
-NeoBundle 'Shougo/vimfiler.vim'
-"vimデフォルトのエクスプローラをvimfilerで置き換える
-let g:vimfiler_as_default_explorer = 1
-"セーフモードを無効にした状態で起動する
-let g:vimfiler_safe_mode_by_default = 0
+set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
 
-"現在開いているバッファのディレクトリを開く
-nnoremap <silent> <Leader>fe :<C-u>VimFilerBufferDir -quit<CR>
-"現在開いているバッファをIDE風に開く
-nnoremap <silent> <Leader>fi :<C-u>VimFilerBufferDir -simple -split -winwidth=40 -no-quit<CR>
-nnoremap <silent> <Leader>ft :<C-u>VimFilerTab -simple -winwidth=40 -no-quit<CR>
+" Required:
+if dein#load_state('~/.cache/dein')
+  call dein#begin('~/.cache/dein')
 
-"デフォルトのキーマッピングを変更
-autocmd FileType vimfiler call s:vimfiler_my_settings()
-function! s:vimfiler_my_settings()
-  nmap <buffer> q <Plug>(vimfiler_exit)
-  nmap <buffer> Q <Plug>(vimfiler_hide)
-  nmap <buffer> <Leader> <Nop>
-endfunction
-"VimでMarkdownの設定
-NeoBundle 'plasticboy/vim-markdown'
-NeoBundle 'Rykka/clickable.vim'       " sphinx の依存プラグイン
-NeoBundle 'Rykka/riv.vim'
-NeoBundle 'Rykka/InstantRst'
-let g:riv_web_browser = '"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
-NeoBundle 'kannokanno/previm'
-NeoBundle 'tyru/open-browser.vim'
-augroup PrevimSettings
-  autocmd!
-  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-augroup END
-"ここまでVimでMarkdownの設定
-NeoBundle 'Shougo/vimproc.vim', {
-      \ 'build' : {
-      \     'windows' : 'tools\\update-dll-mingw',
-      \     'cygwin' : 'make -f make_cygwin.mak',
-      \     'mac' : 'make -f make_mac.mak',
-      \     'linux' : 'make',
-      \     'unix' : 'gmake',
-      \    },
-      \ }
+  " Let dein manage dein
+  " Required:
+  call dein#add('~/.cache/dein/repos/github.com/Shougo/dein.vim')
 
-NeoBundle 'tpope/vim-fugitive'
-NeoBundle 'thinca/vim-qfreplace'
+  " Add or remove your plugins here:
+  call dein#add('Shougo/neosnippet.vim')
+  call dein#add('Shougo/neosnippet-snippets')
+  call dein#add('nanotech/jellybeans.vim')
+  colorscheme jellybeans
+  call dein#add('tpope/vim-fugitive')
 
-" start  neocomplcache.vim
-NeoBundle 'Shougo/neocomplcache.vim'
-" Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
-" Disable AutoComplPop.
-let g:acp_enableAtStartup = 0
-" Use neocomplcache.
-let g:neocomplcache_enable_at_startup = 1
-" Use smartcase.
-let g:neocomplcache_enable_smart_case = 1
-" Set minimum syntax keyword length.
-let g:neocomplcache_min_syntax_length = 3
-let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
+  " You can specify revision/branch/tag.
+  call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
 
-" Enable heavy features.
-" Use camel case completion.
-"let g:neocomplcache_enable_camel_case_completion = 1
-" Use underbar completion.
-"let g:neocomplcache_enable_underbar_completion = 1
-
-" Define dictionary.
-let g:neocomplcache_dictionary_filetype_lists = {
-      \ 'default' : '',
-      \ 'vimshell' : $HOME.'/.vimshell_hist',
-      \ 'scheme' : $HOME.'/.gosh_completions'
-      \ }
-
-" Define keyword.
-if !exists('g:neocomplcache_keyword_patterns')
-  let g:neocomplcache_keyword_patterns = {}
+  " Required:
+  call dein#end()
+  call dein#save_state()
 endif
-let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
-
-" Plugin key-mappings.
-inoremap <expr><C-g>     neocomplcache#undo_completion()
-inoremap <expr><C-l>     neocomplcache#complete_common_string()
-
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-  return neocomplcache#smart_close_popup() . "\<CR>"
-  " For no inserting <CR> key.
-  "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
-endfunction
-" <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><C-y>  neocomplcache#close_popup()
-inoremap <expr><C-e>  neocomplcache#cancel_popup()
-" Close popup by <Space>.
-"inoremap <expr><Space> pumvisible() ? neocomplcache#close_popup() : "\<Space>"
-
-" For cursor moving in insert mode(Not recommended)
-"inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
-"inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
-"inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
-"inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
-" Or set this.
-"let g:neocomplcache_enable_cursor_hold_i = 1
-" Or set this.
-"let g:neocomplcache_enable_insert_char_pre = 1
-
-" AutoComplPop like behavior.
-"let g:neocomplcache_enable_auto_select = 1
-
-" Shell like behavior(not recommended).
-"set completeopt+=longest
-"let g:neocomplcache_enable_auto_select = 1
-"let g:neocomplcache_disable_auto_complete = 1
-"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
-
-" Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown,hbs setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-" Enable heavy omni completion.
-if !exists('g:neocomplcache_force_omni_patterns')
-  let g:neocomplcache_force_omni_patterns = {}
-endif
-let g:neocomplcache_force_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-
-" For perlomni.vim setting.
-" https://github.com/c9s/perlomni.vim
-let g:neocomplcache_force_omni_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
-" end neocomplcache.vim
-" start sunippets
-NeoBundle 'Shougo/neosnippet'
-NeoBundle 'Shougo/neosnippet-snippets'
-" Plugin key-mappings.
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-k>     <Plug>(neosnippet_expand_target)
-
-" SuperTab like snippets behavior.
-imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-      \ "\<Plug>(neosnippet_expand_or_jump)"
-      \: pumvisible() ? "\<C-n>" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-      \ "\<Plug>(neosnippet_expand_or_jump)"
-      \: "\<TAB>"
-
-" For snippet_complete marker.
-if has('conceal')
-  set conceallevel=2 concealcursor=i
-endif
-NeoBundle 'honza/vim-snippets'
-NeoBundle 'ryuzee/neosnippet_chef_recipe_snippet'
-NeoBundle 'vim-scripts/Jasmine-snippets-for-snipMate'
-" Enable snipMate compatibility feature.
-let g:neosnippet#enable_snipmate_compatibility = 1
-" Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets,~/.vim/snippets'
-" end sunippets
-" start jsBeautifier
-NeoBundle 'maksimr/vim-jsbeautify'
-" NeoBundle 'einars/js-beautify'
-""autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr> => esformatterに変更
-" for html
-autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
-" for css or scss
-autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
-" end jsBeautifier
-" My Bundles here:
-" Refer to |:NeoBundle-examples|.
-" Note: You don't set neobundle setting in .gvimrc!
-
-NeoBundle 'nanotech/jellybeans.vim'
-NeoBundle 'chriskempson/vim-tomorrow-theme'
-NeoBundle 'mopp/mopkai.vim'
-NeoBundle 'bkad/CamelCaseMotion'
-NeoBundle 'Shougo/unite-outline'
-NeoBundle 'millermedeiros/vim-esformatter'
-NeoBundle 'mxw/vim-jsx'
-
-" will run esformatter after pressing <leader> followed by the 'e' and 's' keys
-autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
-autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
-
-NeoBundle 'scrooloose/syntastic'
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
-let g:syntastic_check_on_wq = 0
-let g:syntastic_javascript_checkers = ["eslint"]
-
-NeoBundle 'simeji/winresizer'
-NeoBundle 'mattn/emmet-vim'
-let g:user_emmet_leader_key='<C-t>'
-NeoBundle 'taichouchou2/surround.vim'
-NeoBundle 'taichouchou2/html5.vim'
-
-
-call neobundle#end()
 
 " Required:
 filetype plugin indent on
+syntax enable
 
-" If there are uninstalled bundles found on startup,
-" this will conveniently prompt you to install them.
-NeoBundleCheck
-"----------------------------------------
-" 一時設定
-"----------------------------------------
-colorscheme jellybeans
+" If you want to install not installed plugins on startup.
+if dein#check_install()
+  call dein#install()
+endif
+
+"End dein Scripts-------------------------
+
+
+"
+"if has('vim_starting')
+"  set nocompatible               " Be iMproved
+"
+"  " Required:
+"  set runtimepath+=~/.vim/bundle/neobundle.vim/
+"endif
+"
+"" Required:
+"call neobundle#begin(expand('~/.vim/bundle/'))
+"NeoBundleFetch 'Shougo/neobundle.vim'
+"NeoBundle 'Shougo/vimproc.vim', {
+"      \ 'build' : {
+"      \     'windows' : 'tools\\update-dll-mingw',
+"      \     'cygwin' : 'make -f make_cygwin.mak',
+"      \     'mac' : 'make -f make_mac.mak',
+"      \     'linux' : 'make',
+"      \     'unix' : 'gmake',
+"      \    },
+"      \ }
+"" Let NeoBundle manage NeoBundle
+"NeoBundle 'nanotech/jellybeans.vim'
+"NeoBundle 'w0ng/vim-hybrid'
+"NeoBundle 'Shougo/unite.vim/'
+"let g:unite_source_history_yank_enable = 1
+"NeoBundle 'Shougo/vimshell.vim/'
+"NeoBundle 'Shougo/neomru.vim'
+"NeoBundle 'Shougo/vimfiler.vim'
+""vimデフォルトのエクスプローラをvimfilerで置き換える
+"let g:vimfiler_as_default_explorer = 1
+""セーフモードを無効にした状態で起動する
+"let g:vimfiler_safe_mode_by_default = 0
+"
+""現在開いているバッファのディレクトリを開く
+"nnoremap <silent> <Leader>fe :<C-u>VimFilerBufferDir -quit<CR>
+""現在開いているバッファをIDE風に開く
+"nnoremap <silent> <Leader>fi :<C-u>VimFilerBufferDir -simple -split -winwidth=40 -no-quit<CR>
+"nnoremap <silent> <Leader>ft :<C-u>VimFilerTab -simple -winwidth=40 -no-quit<CR>
+"
+""デフォルトのキーマッピングを変更
+"autocmd FileType vimfiler call s:vimfiler_my_settings()
+"function! s:vimfiler_my_settings()
+"  nmap <buffer> q <Plug>(vimfiler_exit)
+"  nmap <buffer> Q <Plug>(vimfiler_hide)
+"  nmap <buffer> <Leader> <Nop>
+"endfunction
+""VimでMarkdownの設定
+"NeoBundle 'plasticboy/vim-markdown'
+"NeoBundle 'Rykka/clickable.vim'       " sphinx の依存プラグイン
+"NeoBundle 'Rykka/riv.vim'
+"NeoBundle 'Rykka/InstantRst'
+"let g:riv_web_browser = '"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
+"NeoBundle 'kannokanno/previm'
+"NeoBundle 'tyru/open-browser.vim'
+"augroup PrevimSettings
+"  autocmd!
+"  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+"augroup END
+""ここまでVimでMarkdownの設定
+"NeoBundle 'Shougo/vimproc.vim', {
+"      \ 'build' : {
+"      \     'windows' : 'tools\\update-dll-mingw',
+"      \     'cygwin' : 'make -f make_cygwin.mak',
+"      \     'mac' : 'make -f make_mac.mak',
+"      \     'linux' : 'make',
+"      \     'unix' : 'gmake',
+"      \    },
+"      \ }
+"
+"NeoBundle 'tpope/vim-fugitive'
+"NeoBundle 'thinca/vim-qfreplace'
+"
+"" start  neocomplcache.vim
+"NeoBundle 'Shougo/neocomplcache.vim'
+"" Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
+"" Disable AutoComplPop.
+"let g:acp_enableAtStartup = 0
+"" Use neocomplcache.
+"let g:neocomplcache_enable_at_startup = 1
+"" Use smartcase.
+"let g:neocomplcache_enable_smart_case = 1
+"" Set minimum syntax keyword length.
+"let g:neocomplcache_min_syntax_length = 3
+"let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
+"
+"" Enable heavy features.
+"" Use camel case completion.
+""let g:neocomplcache_enable_camel_case_completion = 1
+"" Use underbar completion.
+""let g:neocomplcache_enable_underbar_completion = 1
+"
+"" Define dictionary.
+"let g:neocomplcache_dictionary_filetype_lists = {
+"      \ 'default' : '',
+"      \ 'vimshell' : $HOME.'/.vimshell_hist',
+"      \ 'scheme' : $HOME.'/.gosh_completions'
+"      \ }
+"
+"" Define keyword.
+"if !exists('g:neocomplcache_keyword_patterns')
+"  let g:neocomplcache_keyword_patterns = {}
+"endif
+"let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
+"
+"" Plugin key-mappings.
+"inoremap <expr><C-g>     neocomplcache#undo_completion()
+"inoremap <expr><C-l>     neocomplcache#complete_common_string()
+"
+"" Recommended key-mappings.
+"" <CR>: close popup and save indent.
+"inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+"function! s:my_cr_function()
+"  return neocomplcache#smart_close_popup() . "\<CR>"
+"  " For no inserting <CR> key.
+"  "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
+"endfunction
+"" <TAB>: completion.
+"inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+"" <C-h>, <BS>: close popup and delete backword char.
+"inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
+"inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
+"inoremap <expr><C-y>  neocomplcache#close_popup()
+"inoremap <expr><C-e>  neocomplcache#cancel_popup()
+"" Close popup by <Space>.
+""inoremap <expr><Space> pumvisible() ? neocomplcache#close_popup() : "\<Space>"
+"
+"" For cursor moving in insert mode(Not recommended)
+""inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
+""inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
+""inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
+""inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
+"" Or set this.
+""let g:neocomplcache_enable_cursor_hold_i = 1
+"" Or set this.
+""let g:neocomplcache_enable_insert_char_pre = 1
+"
+"" AutoComplPop like behavior.
+""let g:neocomplcache_enable_auto_select = 1
+"
+"" Shell like behavior(not recommended).
+""set completeopt+=longest
+""let g:neocomplcache_enable_auto_select = 1
+""let g:neocomplcache_disable_auto_complete = 1
+""inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
+"
+"" Enable omni completion.
+"autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+"autocmd FileType html,markdown,hbs setlocal omnifunc=htmlcomplete#CompleteTags
+"autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+"autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+"autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+"
+"" Enable heavy omni completion.
+"if !exists('g:neocomplcache_force_omni_patterns')
+"  let g:neocomplcache_force_omni_patterns = {}
+"endif
+"let g:neocomplcache_force_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+"let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+"let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+"
+"" For perlomni.vim setting.
+"" https://github.com/c9s/perlomni.vim
+"let g:neocomplcache_force_omni_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+"" end neocomplcache.vim
+"" start sunippets
+"NeoBundle 'Shougo/neosnippet'
+"NeoBundle 'Shougo/neosnippet-snippets'
+"" Plugin key-mappings.
+"imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+"smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+"xmap <C-k>     <Plug>(neosnippet_expand_target)
+"
+"" SuperTab like snippets behavior.
+"imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+"      \ "\<Plug>(neosnippet_expand_or_jump)"
+"      \: pumvisible() ? "\<C-n>" : "\<TAB>"
+"smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+"      \ "\<Plug>(neosnippet_expand_or_jump)"
+"      \: "\<TAB>"
+"
+"" For snippet_complete marker.
+"if has('conceal')
+"  set conceallevel=2 concealcursor=i
+"endif
+"NeoBundle 'honza/vim-snippets'
+"NeoBundle 'ryuzee/neosnippet_chef_recipe_snippet'
+"NeoBundle 'vim-scripts/Jasmine-snippets-for-snipMate'
+"" Enable snipMate compatibility feature.
+"let g:neosnippet#enable_snipmate_compatibility = 1
+"" Tell Neosnippet about the other snippets
+"let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets,~/.vim/snippets'
+"" end sunippets
+"" start jsBeautifier
+"NeoBundle 'maksimr/vim-jsbeautify'
+"" NeoBundle 'einars/js-beautify'
+"""autocmd FileType javascript noremap <buffer>  <c-f> :call JsBeautify()<cr> => esformatterに変更
+"" for html
+"autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
+"" for css or scss
+"autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
+"" end jsBeautifier
+"" My Bundles here:
+"" Refer to |:NeoBundle-examples|.
+"" Note: You don't set neobundle setting in .gvimrc!
+"
+"NeoBundle 'nanotech/jellybeans.vim'
+"NeoBundle 'chriskempson/vim-tomorrow-theme'
+"NeoBundle 'mopp/mopkai.vim'
+"NeoBundle 'bkad/CamelCaseMotion'
+"NeoBundle 'Shougo/unite-outline'
+"NeoBundle 'millermedeiros/vim-esformatter'
+"NeoBundle 'mxw/vim-jsx'
+"
+"" will run esformatter after pressing <leader> followed by the 'e' and 's' keys
+"autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
+"autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
+"
+"NeoBundle 'scrooloose/syntastic'
+"set statusline+=%#warningmsg#
+"set statusline+=%{SyntasticStatuslineFlag()}
+"set statusline+=%*
+"
+"let g:syntastic_always_populate_loc_list = 1
+"let g:syntastic_auto_loc_list = 1
+"let g:syntastic_check_on_open = 1
+"let g:syntastic_check_on_wq = 0
+"let g:syntastic_javascript_checkers = ["eslint"]
+"
+"NeoBundle 'simeji/winresizer'
+"NeoBundle 'mattn/emmet-vim'
+"let g:user_emmet_leader_key='<C-t>'
+"NeoBundle 'taichouchou2/surround.vim'
+"NeoBundle 'taichouchou2/html5.vim'
+"
+"
+"call neobundle#end()
+"
+"" Required:
+"filetype plugin indent on
+"
+"" If there are uninstalled bundles found on startup,
+"" this will conveniently prompt you to install them.
+"NeoBundleCheck
+""----------------------------------------
+"" 一時設定
+""----------------------------------------
