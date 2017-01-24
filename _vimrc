@@ -400,10 +400,13 @@ if dein#load_state('~/.cache/dein')
 
   call dein#add('Shougo/vimfiler.vim')
   " start vimfiler settings
+  "セーフモードを無効にした状態で起動する
+  call vimfiler#custom#profile('default', 'context', {
+        \ 'safe' : 0,
+        \ 'edit_action' : 'choose',
+        \ })
   "vimデフォルトのエクスプローラをvimfilerで置き換える
   let g:vimfiler_as_default_explorer = 1
-  "セーフモードを無効にした状態で起動する
-  let g:vimfiler_safe_mode_by_default = 0
   
   "現在開いているバッファのディレクトリを開く
   nnoremap <silent> <Leader>fe :<C-u>VimFilerBufferDir -quit<CR>
