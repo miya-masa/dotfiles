@@ -331,6 +331,12 @@ if dein#load_state('~/.vim/bundles/')
   call dein#add('tpope/vim-fugitive')
   call dein#add('thinca/vim-qfreplace')
 
+  call dein#add('Shougo/neosnippet')
+  call dein#add('Shougo/neosnippet-snippets')
+  call dein#add('honza/vim-snippets')
+  call dein#add('ryuzee/neosnippet_chef_recipe_snippet')
+  call dein#add('vim-scripts/Jasmine-snippets-for-snipMate')
+
   " start  neocomplcache.vim
   call dein#add('Shougo/neocomplcache.vim')
   call dein#add('chriskempson/vim-tomorrow-theme')
@@ -475,8 +481,6 @@ let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\
 let g:neocomplcache_force_omni_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
 " end neocomplcache.vim
 " start sunippets
-call dein#add('Shougo/neosnippet')
-call dein#add('Shougo/neosnippet-snippets')
 " Plugin key-mappings.
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 smap <C-k>     <Plug>(neosnippet_expand_or_jump)
@@ -494,9 +498,6 @@ smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
 if has('conceal')
   set conceallevel=2 concealcursor=i
 endif
-call dein#add('honza/vim-snippets')
-call dein#add('ryuzee/neosnippet_chef_recipe_snippet')
-call dein#add('vim-scripts/Jasmine-snippets-for-snipMate')
 " Enable snipMate compatibility feature.
 let g:neosnippet#enable_snipmate_compatibility = 1
 " Tell Neosnippet about the other snippets
