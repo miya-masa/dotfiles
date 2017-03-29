@@ -1,74 +1,21 @@
 set nocompatible
 scriptencoding utf8
-" scriptencodingと、このファイルのエンコーディングが一致するよう注意！
-" scriptencodingは、vimの内部エンコーディングと同じものを推奨します。
-" 改行コードは set fileformat=unix に設定するとunixでも使えます。
-
-" Windowsで内部エンコーディングを cp932以外にしていて、
-" 環境変数に日本語を含む値を設定したい場合は Let を使用します。
-" Letは vimrc(オールインワンパッケージの場合)と encode.vim で定義されます。
-" Let $HOGE=$USERPROFILE.'/ほげ'
-
-"----------------------------------------
-" ユーザーランタイムパス設定
-"----------------------------------------
-" Windows, unixでのruntimepathの違いを吸収するためのもの。
-" $MY_VIMRUNTIMEはユーザーランタイムディレクトリを示す。
-" :echo $MY_VIMRUNTIMEで実際のパスを確認できます。
-if isdirectory($HOME . '/.vim')
-  let $MY_VIMRUNTIME = $HOME.'/.vim'
-elseif isdirectory($HOME . '\vimfiles')
-  let $MY_VIMRUNTIME = $HOME.'\vimfiles'
-elseif isdirectory($VIM . '\vimfiles')
-  let $MY_VIMRUNTIME = $VIM.'\vimfiles'
-endif
-
-" ランタイムパスを通す必要のあるプラグインを使用する場合、
-" $MY_VIMRUNTIMEを使用すると Windows/Linuxで切り分ける必要が無くなります。
-" 例) vimfiles/qfixapp (Linuxでは~/.vim/qfixapp)にランタイムパスを通す場合
-" set runtimepath+=$MY_VIMRUNTIME/qfixapp
-
-"----------------------------------------
-" 内部エンコーディング指定
-"----------------------------------------
-" 内部エンコーディングのUTF-8化と文字コードの自動認識設定をencode.vimで行う。
-" オールインワンパッケージの場合 vimrcで設定されます。
-" エンコーディング指定や文字コードの自動認識設定が適切に設定されている場合、
-" 次行の encode.vim読込部分はコメントアウトして下さい。
-" silent! source $MY_VIMRUNTIME/pluginjp/encode.vim
-" scriptencodingと異なる内部エンコーディングに変更する場合、
-" 変更後にもscriptencodingを指定しておくと問題が起きにくくなります。
-" scriptencoding cp932
-
-"----------------------------------------
-" システム設定
-"----------------------------------------
-" mswin.vimを読み込む
-" source $VIMRUNTIME/mswin.vim
-" behave mswin
-
 " ファイルの上書きの前にバックアップを作る/作らない
 " set writebackupを指定してもオプション 'backup' がオンでない限り、
 " バックアップは上書きに成功した後に削除される。
 set nowritebackup
 " バックアップ/スワップファイルを作成する/しない
 set nobackup
-if version >= 703
-  " 再読込、vim終了後も継続するアンドゥ(7.3)
-  " set undofile
-  " アンドゥの保存場所(7.3)
-  " set undodir=.
-endif
 set noswapfile
 set noundofile
 " viminfoを作成しない
-" set viminfo=
+set viminfo=
 " クリップボードを共有
 set clipboard+=unnamed
 " 8進数を無効にする。<C-a>,<C-x>に影響する
 set nrformats-=octal
 " キーコードやマッピングされたキー列が完了するのを待つ時間(ミリ秒)
-set timeout timeoutlen=3000 ttimeoutlen=100
+set timeout timeoutlen=3000 ttimeoutlen=500
 " 編集結果非保存のバッファから、新しいバッファを開くときに警告を出さない
 set hidden
 " ヒストリの保存数
@@ -127,10 +74,6 @@ set visualbell t_vb=
 set shellslash
 " 行番号表示
 set number
-if version >= 703
-  " 相対行番号表示(7.3)
-  " set relativenumber
-endif
 " 括弧の対応表示時間
 set showmatch matchtime=1
 " タブを設定
@@ -252,11 +195,6 @@ nnoremap <Leader>sh <C-w><S-h>
 nnoremap <Leader>sk <C-w><S-k>
 nnoremap <Leader>sj <C-w><S-j>
 
-" 個別に指定したい設定を読み込む
-if filereadable($HOME."./_vimrc_local")
-    source ~/_vimrc_local
-endif
-
 "----------------------------------------
 " 挿入モード
 "----------------------------------------
@@ -273,12 +211,8 @@ endif
 " Vimスクリプト
 "----------------------------------------
 
-"hbsはhtmlとして扱う
-autocmd BufNewFile,BufRead *.{hbs} set filetype=html
-
 """"""""""""""""""""""""""""""
 " ファイルを開いたら前回のカーソル位置へ移動
-" $VIMRUNTIME/vimrc_example.vim
 """"""""""""""""""""""""""""""
 augroup vimrcEx
   autocmd!
@@ -346,17 +280,6 @@ if has('syntax')
   call ZenkakuSpace()
 endif
 
-""""""""""""""""""""""""""""""
-" grep,tagsのためカレントディレクトリをファイルと同じディレクトリに移動する
-""""""""""""""""""""""""""""""
-" if exists('+autochdir')
-"   "autochdirがある場合カレントディレクトリを移動
-"   set autochdir
-" else
-"   "autochdirが存在しないが、カレントディレクトリを移動したい場合
-"   au BufEnter * execute ":silent! lcd " . escape(expand("%:p:h"), ' ')
-" endif
-
 "----------------------------------------
 " 各種プラグイン設定
 "----------------------------------------
@@ -379,50 +302,22 @@ if dein#load_state('~/.vim/bundles/')
 
   " Add or remove your plugins here:
   call dein#add('Shougo/vimproc.vim', {
-      \ 'build' : {
-      \     'windows' : 'tools\\update-dll-mingw',
-      \     'cygwin' : 'make -f make_cygwin.mak',
-      \     'mac' : 'make -f make_mac.mak',
-      \     'linux' : 'make',
-      \     'unix' : 'gmake',
-      \    },
-      \ })
+        \ 'build' : {
+        \     'windows' : 'tools\\update-dll-mingw',
+        \     'cygwin' : 'make -f make_cygwin.mak',
+        \     'mac' : 'make -f make_mac.mak',
+        \     'linux' : 'make',
+        \     'unix' : 'gmake',
+        \    },
+        \ })
 
   call dein#add('Shougo/neosnippet.vim')
   call dein#add('Shougo/neosnippet-snippets')
   call dein#add('nanotech/jellybeans.vim')
-  colorscheme mopkai
   call dein#add('tpope/vim-fugitive')
-
-  " You can specify revision/branch/tag.
-  call dein#add('Shougo/vimshell', { 'rev': '3787e5' })
-
+  call dein#add('Shougo/vimshell')
   call dein#add('Shougo/unite.vim')
-
   call dein#add('Shougo/vimfiler.vim')
-  " start vimfiler settings
-  "セーフモードを無効にした状態で起動する
-  call vimfiler#custom#profile('default', 'context', {
-        \ 'safe' : 0,
-        \ 'edit_action' : 'tabopen',
-        \ })
-  "vimデフォルトのエクスプローラをvimfilerで置き換える
-  let g:vimfiler_as_default_explorer = 1
-  
-  "現在開いているバッファのディレクトリを開く
-  nnoremap <silent> <Leader>fe :<C-u>VimFilerBufferDir -quit<CR>
-  "現在開いているバッファをIDE風に開く
-  nnoremap <silent> <Leader>fi :<C-u>VimFilerBufferDir -simple -split -winwidth=40 -no-quit<CR>
-  nnoremap <silent> <Leader>ft :<C-u>VimFilerTab -simple -winwidth=40 -no-quit<CR>
-  
-  "デフォルトのキーマッピングを変更
-  autocmd FileType vimfiler call s:vimfiler_my_settings()
-  function! s:vimfiler_my_settings()
-    nmap <buffer> q <Plug>(vimfiler_exit)
-    nmap <buffer> Q <Plug>(vimfiler_hide)
-    nmap <buffer> <Leader> <Nop>
-  endfunction
-  " end vimfiler settings
 
   "VimでMarkdownの設定
   call dein#add('plasticboy/vim-markdown')
@@ -430,178 +325,31 @@ if dein#load_state('~/.vim/bundles/')
   call dein#add('Rykka/clickable.vim')
   call dein#add('Rykka/riv.vim')
   call dein#add('Rykka/InstantRst')
-  let g:riv_web_browser = '"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
   call dein#add('kannokanno/previm')
   call dein#add('tyru/open-browser.vim')
-  augroup PrevimSettings
-    autocmd!
-    autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-  augroup END
-  "ここまでVimでMarkdownの設定
 
   call dein#add('tpope/vim-fugitive')
   call dein#add('thinca/vim-qfreplace')
 
   " start  neocomplcache.vim
   call dein#add('Shougo/neocomplcache.vim')
-  " Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
-  " Disable AutoComplPop.
-  let g:acp_enableAtStartup = 0
-  " Use neocomplcache.
-  let g:neocomplcache_enable_at_startup = 1
-  " Use smartcase.
-  let g:neocomplcache_enable_smart_case = 1
-  " Set minimum syntax keyword length.
-  let g:neocomplcache_min_syntax_length = 3
-  let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
-  
-  " Enable heavy features.
-  " Use camel case completion.
-  "let g:neocomplcache_enable_camel_case_completion = 1
-  " Use underbar completion.
-  "let g:neocomplcache_enable_underbar_completion = 1
-  
-  " Define dictionary.
-  let g:neocomplcache_dictionary_filetype_lists = {
-        \ 'default' : '',
-        \ 'vimshell' : $HOME.'/.vimshell_hist',
-        \ 'scheme' : $HOME.'/.gosh_completions'
-        \ }
-  
-  " Define keyword.
-  if !exists('g:neocomplcache_keyword_patterns')
-    let g:neocomplcache_keyword_patterns = {}
-  endif
-  let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
-  
-  " Plugin key-mappings.
-  inoremap <expr><C-g>     neocomplcache#undo_completion()
-  inoremap <expr><C-l>     neocomplcache#complete_common_string()
-  
-  " Recommended key-mappings.
-  " <CR>: close popup and save indent.
-  inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-  function! s:my_cr_function()
-    return neocomplcache#smart_close_popup() . "\<CR>"
-    " For no inserting <CR> key.
-    "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
-  endfunction
-  " <TAB>: completion.
-  inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-  " <C-h>, <BS>: close popup and delete backword char.
-  inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-  inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-  inoremap <expr><C-y>  neocomplcache#close_popup()
-  inoremap <expr><C-e>  neocomplcache#cancel_popup()
-  " Close popup by <Space>.
-  "inoremap <expr><Space> pumvisible() ? neocomplcache#close_popup() : "\<Space>"
-  
-  " For cursor moving in insert mode(Not recommended)
-  "inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
-  "inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
-  "inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
-  "inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
-  " Or set this.
-  "let g:neocomplcache_enable_cursor_hold_i = 1
-  " Or set this.
-  "let g:neocomplcache_enable_insert_char_pre = 1
-  
-  " AutoComplPop like behavior.
-  "let g:neocomplcache_enable_auto_select = 1
-  
-  " Shell like behavior(not recommended).
-  "set completeopt+=longest
-  "let g:neocomplcache_enable_auto_select = 1
-  "let g:neocomplcache_disable_auto_complete = 1
-  "inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
-  
-  " Enable omni completion.
-  autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-  autocmd FileType html,markdown,hbs setlocal omnifunc=htmlcomplete#CompleteTags
-  autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-  autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-  autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-  
-  " Enable heavy omni completion.
-  if !exists('g:neocomplcache_force_omni_patterns')
-    let g:neocomplcache_force_omni_patterns = {}
-  endif
-  let g:neocomplcache_force_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-  let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-  let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-  
-  " For perlomni.vim setting.
-  " https://github.com/c9s/perlomni.vim
-  let g:neocomplcache_force_omni_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
-  " end neocomplcache.vim
-  " start sunippets
-  call dein#add('Shougo/neosnippet')
-  call dein#add('Shougo/neosnippet-snippets')
-  " Plugin key-mappings.
-  imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-  smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-  xmap <C-k>     <Plug>(neosnippet_expand_target)
-  
-  " SuperTab like snippets behavior.
-  imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-        \ "\<Plug>(neosnippet_expand_or_jump)"
-        \: pumvisible() ? "\<C-n>" : "\<TAB>"
-  smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-        \ "\<Plug>(neosnippet_expand_or_jump)"
-        \: "\<TAB>"
-  
-  " For snippet_complete marker.
-  if has('conceal')
-    set conceallevel=2 concealcursor=i
-  endif
-  call dein#add('honza/vim-snippets')
-  call dein#add('ryuzee/neosnippet_chef_recipe_snippet')
-  call dein#add('vim-scripts/Jasmine-snippets-for-snipMate')
-  " Enable snipMate compatibility feature.
-  let g:neosnippet#enable_snipmate_compatibility = 1
-  " Tell Neosnippet about the other snippets
-  let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets,~/.vim/snippets'
-  " end sunippets
-  " for html
-  autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
-  " for css or scss
-  autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
-  " My Bundles here:
-  
   call dein#add('chriskempson/vim-tomorrow-theme')
   call dein#add('mopp/mopkai.vim')
   call dein#add('bkad/CamelCaseMotion')
   call dein#add('Shougo/unite-outline')
   call dein#add('miya-masa/vim-esformatter')
   call dein#add('mxw/vim-jsx')
-  
-  " will run esformatter after pressing <leader> followed by the 'e' and 's' keys
-  autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
-  autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
-  
   call dein#add('scrooloose/syntastic')
-  set statusline+=%#warningmsg#
-  set statusline+=%{SyntasticStatuslineFlag()}
-  set statusline+=%*
-  
-  let g:syntastic_always_populate_loc_list = 1
-  let g:syntastic_auto_loc_list = 1
-  let g:syntastic_check_on_open = 1
-  let g:syntastic_check_on_wq = 0
-  let g:syntastic_javascript_checkers = ["eslint"]
-  
   call dein#add('simeji/winresizer')
   call dein#add('mattn/emmet-vim')
-  let g:user_emmet_leader_key='<C-t>'
   call dein#add('taichouchou2/html5.vim')
-  
-    " Required:
-    call dein#end()
+
+  " Required:
+  call dein#end()
   call dein#save_state()
 endif
 
 " Required:
-filetype plugin indent on
 syntax enable
 
 " If you want to install not installed plugins on startup.
@@ -610,3 +358,169 @@ if dein#check_install()
 endif
 
 "End dein Scripts-------------------------
+let g:riv_web_browser = '"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
+augroup PrevimSettings
+  autocmd!
+  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+augroup END
+"ここまでVimでMarkdownの設定
+" start vimfiler settings
+"デフォルトのキーマッピングを変更
+autocmd FileType vimfiler call s:vimfiler_my_settings()
+function! s:vimfiler_my_settings()
+  nmap <buffer> q <Plug>(vimfiler_exit)
+  nmap <buffer> Q <Plug>(vimfiler_hide)
+endfunction
+" end vimfiler settings
+"セーフモードを無効にした状態で起動する
+call vimfiler#custom#profile('default', 'context', {
+      \ 'safe' : 0,
+      \ })
+"vimデフォルトのエクスプローラをvimfilerで置き換える
+let g:vimfiler_as_default_explorer = 1
+"現在開いているバッファのディレクトリを開く
+nnoremap <silent> <Leader>fe :VimFilerBufferDir -quit<CR>
+"現在開いているバッファをIDE風に開く
+nnoremap <silent> <Leader>fi :VimFilerBufferDir -simple -split -winwidth=40 -no-quit<CR>
+nnoremap <silent> <Leader>ft :VimFilerTab -simple -winwidth=40 -no-quit<CR>
+
+" Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
+" Disable AutoComplPop.
+let g:acp_enableAtStartup = 0
+" Use neocomplcache.
+let g:neocomplcache_enable_at_startup = 1
+" Use smartcase.
+let g:neocomplcache_enable_smart_case = 1
+" Set minimum syntax keyword length.
+let g:neocomplcache_min_syntax_length = 3
+let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
+
+" Enable heavy features.
+" Use camel case completion.
+"let g:neocomplcache_enable_camel_case_completion = 1
+" Use underbar completion.
+"let g:neocomplcache_enable_underbar_completion = 1
+
+" Define dictionary.
+let g:neocomplcache_dictionary_filetype_lists = {
+      \ 'default' : '',
+      \ 'vimshell' : $HOME.'/.vimshell_hist',
+      \ 'scheme' : $HOME.'/.gosh_completions'
+      \ }
+
+" Define keyword.
+if !exists('g:neocomplcache_keyword_patterns')
+  let g:neocomplcache_keyword_patterns = {}
+endif
+let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
+
+" Plugin key-mappings.
+inoremap <expr><C-g>     neocomplcache#undo_completion()
+inoremap <expr><C-l>     neocomplcache#complete_common_string()
+
+" Recommended key-mappings.
+" <CR>: close popup and save indent.
+inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+function! s:my_cr_function()
+  return neocomplcache#smart_close_popup() . "\<CR>"
+  " For no inserting <CR> key.
+  "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
+endfunction
+" <TAB>: completion.
+inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+" <C-h>, <BS>: close popup and delete backword char.
+inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
+inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
+inoremap <expr><C-y>  neocomplcache#close_popup()
+inoremap <expr><C-e>  neocomplcache#cancel_popup()
+" Close popup by <Space>.
+"inoremap <expr><Space> pumvisible() ? neocomplcache#close_popup() : "\<Space>"
+
+" For cursor moving in insert mode(Not recommended)
+"inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
+"inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
+"inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
+"inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
+" Or set this.
+"let g:neocomplcache_enable_cursor_hold_i = 1
+" Or set this.
+"let g:neocomplcache_enable_insert_char_pre = 1
+
+" AutoComplPop like behavior.
+"let g:neocomplcache_enable_auto_select = 1
+
+" Shell like behavior(not recommended).
+"set completeopt+=longest
+"let g:neocomplcache_enable_auto_select = 1
+"let g:neocomplcache_disable_auto_complete = 1
+"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
+
+" Enable omni completion.
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown,hbs setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+" Enable heavy omni completion.
+if !exists('g:neocomplcache_force_omni_patterns')
+  let g:neocomplcache_force_omni_patterns = {}
+endif
+let g:neocomplcache_force_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+
+" For perlomni.vim setting.
+" https://github.com/c9s/perlomni.vim
+let g:neocomplcache_force_omni_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+" end neocomplcache.vim
+" start sunippets
+call dein#add('Shougo/neosnippet')
+call dein#add('Shougo/neosnippet-snippets')
+" Plugin key-mappings.
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+smap <C-k>     <Plug>(neosnippet_expand_or_jump)
+xmap <C-k>     <Plug>(neosnippet_expand_target)
+
+" SuperTab like snippets behavior.
+imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+      \ "\<Plug>(neosnippet_expand_or_jump)"
+      \: pumvisible() ? "\<C-n>" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
+      \ "\<Plug>(neosnippet_expand_or_jump)"
+      \: "\<TAB>"
+
+" For snippet_complete marker.
+if has('conceal')
+  set conceallevel=2 concealcursor=i
+endif
+call dein#add('honza/vim-snippets')
+call dein#add('ryuzee/neosnippet_chef_recipe_snippet')
+call dein#add('vim-scripts/Jasmine-snippets-for-snipMate')
+" Enable snipMate compatibility feature.
+let g:neosnippet#enable_snipmate_compatibility = 1
+" Tell Neosnippet about the other snippets
+let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets,~/.vim/snippets'
+" end sunippets
+" for html
+autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
+" for css or scss
+autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
+" My Bundles here:
+
+
+" will run esformatter after pressing <leader> followed by the 'e' and 's' keys
+autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
+autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
+
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_javascript_checkers = ["eslint"]
+
+let g:user_emmet_leader_key='<C-t>'
