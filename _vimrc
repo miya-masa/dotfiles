@@ -367,15 +367,17 @@ if &compatible
 endif
 
 " Required:
-set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
+set runtimepath+=~/.vim/bundles/repos/github.com/Shougo/dein.vim
 
 " Required:
-if dein#load_state('~/.cache/dein')
-  call dein#begin('~/.cache/dein')
+if dein#load_state('~/.vim/bundles/')
+  call dein#begin('~/.vim/bundles/')
 
   " Let dein manage dein
   " Required:
-  call dein#add('~/.cache/dein/repos/github.com/Shougo/dein.vim')
+  call dein#add('~/.vim/bundles/repos/github.com/Shougo/dein.vim')
+
+  " Add or remove your plugins here:
   call dein#add('Shougo/vimproc.vim', {
       \ 'build' : {
       \     'windows' : 'tools\\update-dll-mingw',
@@ -386,11 +388,10 @@ if dein#load_state('~/.cache/dein')
       \    },
       \ })
 
-  " Add or remove your plugins here:
   call dein#add('Shougo/neosnippet.vim')
   call dein#add('Shougo/neosnippet-snippets')
   call dein#add('nanotech/jellybeans.vim')
-  colorscheme jellybeans
+  colorscheme mopkai
   call dein#add('tpope/vim-fugitive')
 
   " You can specify revision/branch/tag.
@@ -403,7 +404,7 @@ if dein#load_state('~/.cache/dein')
   "セーフモードを無効にした状態で起動する
   call vimfiler#custom#profile('default', 'context', {
         \ 'safe' : 0,
-        \ 'edit_action' : 'choose',
+        \ 'edit_action' : 'tabopen',
         \ })
   "vimデフォルトのエクスプローラをvimfilerで置き換える
   let g:vimfiler_as_default_explorer = 1
