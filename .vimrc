@@ -303,6 +303,8 @@ if dein#load_state('~/.vim/bundles/')
   call dein#add('honza/vim-snippets')
   call dein#add('ryuzee/neosnippet_chef_recipe_snippet')
   call dein#add('vim-scripts/Jasmine-snippets-for-snipMate')
+
+  " Unite 
   call dein#add('Shougo/unite-outline')
   call dein#add('Shougo/unite.vim')
   call dein#add('Shougo/vimfiler.vim')
@@ -310,28 +312,35 @@ if dein#load_state('~/.vim/bundles/')
   call dein#add('Shougo/vimshell')
   call dein#add('thinca/vim-qfreplace')
   call dein#add('tpope/vim-fugitive')
+
+  " colorscheme
   call dein#add('chriskempson/vim-tomorrow-theme')
   call dein#add('mopp/mopkai.vim')
-  call dein#add('bkad/CamelCaseMotion')
-  call dein#add('miya-masa/vim-esformatter')
-  call dein#add('mxw/vim-jsx')
+  call dein#add('fatih/molokai')
+  " syntax
   call dein#add('vim-syntastic/syntastic')
-  call dein#add('simeji/winresizer')
+
   " Html5 snipetts
   call dein#add('mattn/emmet-vim')
   " Html5 omnicomplete
   call dein#add('alpaca-tc/html5.vim')
+  " JS
+  call dein#add('mxw/vim-jsx')
+  call dein#add('miya-masa/vim-esformatter')
+
+  " go
   call dein#add('fatih/vim-go')
-  let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
-  let g:go_metalinter_autosave = 1
-  let g:go_def_mode = 'godef'
-  let g:go_auto_sameids = 1
-  call dein#add('fatih/molokai')
   call dein#add('AndrewRadev/splitjoin.vim')
   call dein#add('ctrlpvim/ctrlp.vim')
+  call dein#add('sebdah/vim-delve')
 
+  " apiblueprint
   call dein#add('kylef/apiblueprint.vim')
+
+  " other
   call dein#add('majutsushi/tagbar')
+  call dein#add('bkad/CamelCaseMotion')
+  call dein#add('simeji/winresizer')
 
   " Required:
   call dein#end()
@@ -506,12 +515,19 @@ let g:go_fmt_command = "goimports"
 let g:go_autodetect_gopath = 1
 let g:go_list_type = "quickfix"
 
+" highlight
 let g:go_highlight_types = 1
 let g:go_highlight_fields = 1
 let g:go_highlight_functions = 1
 let g:go_highlight_methods = 1
 let g:go_highlight_extra_types = 1
 let g:go_highlight_generate_tags = 1
+
+" lint
+let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
+let g:go_metalinter_autosave = 1
+let g:go_def_mode = 'godef'
+let g:go_auto_sameids = 1
 
 " Open :GoDeclsDir with ctrl-g
 nmap <C-g> :GoDeclsDir<cr>
