@@ -1,21 +1,9 @@
-# .bash_profile
-alias ls='ls --show-control-chars'
+export GOPATH="$HOME/go:$HOME/repos:$HOME/GoglandProjects"
+export PATH="$HOME/go/bin:$HOME/repos/bin:$PATH"
+export XDG_CONFIG_HOME=$HOME/.config
 
-# Get the aliases and functions
 if [ -f ~/.bashrc ]; then
-	. ~/.bashrc
+    . ~/.bashrc
 fi
 
-# User specific environment and startup programs
 
-PATH=$PATH:$HOME/.local/bin:$HOME/bin
-
-export PATH
-export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
-
-if [ -e /usr/share/terminfo/x/xterm-256color ]; then
-  export TERM='xterm-256color'
-else
-  export TERM='xterm-color'
-fi
