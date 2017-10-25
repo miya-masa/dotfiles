@@ -308,7 +308,7 @@ if dein#load_state('~/.vim/bundles/')
   call dein#add('Shougo/unite-outline')
   call dein#add('Shougo/unite.vim')
   call dein#add('Shougo/vimfiler.vim')
-  call dein#add('Shougo/vimproc.vim', {'build' : 'make'})
+  call dein#add('Shougo/vimproc', {'build' : 'make'})
   call dein#add('Shougo/vimshell')
   call dein#add('thinca/vim-qfreplace')
   call dein#add('tpope/vim-fugitive')
@@ -327,6 +327,9 @@ if dein#load_state('~/.vim/bundles/')
   " JS
   call dein#add('mxw/vim-jsx')
   call dein#add('miya-masa/vim-esformatter')
+  " JSON
+  call dein#add('elzr/vim-json')
+
 
   " go
   call dein#add('fatih/vim-go')
@@ -337,10 +340,14 @@ if dein#load_state('~/.vim/bundles/')
   " apiblueprint
   call dein#add('kylef/apiblueprint.vim')
 
+  " Docker
+  call dein#add('ekalinin/Dockerfile.vim')
+
   " other
   call dein#add('majutsushi/tagbar')
   call dein#add('bkad/CamelCaseMotion')
   call dein#add('simeji/winresizer')
+  call dein#add('kannokanno/previm')
 
   " Required:
   call dein#end()
@@ -491,6 +498,13 @@ autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
 
 let g:user_emmet_leader_key='<C-t>'
 
+" Enable snipMate compatibility feature.
+let g:neosnippet#enable_snipmate_compatibility = 1
+
+" Tell Neosnippet about the other snippets
+let g:neosnippet#snippets_directory='~/.vim/bundles/repos/github.com/ekalinin/Dockerfile.vim/snippets'
+
+
 " #######################
 " start syntastic
 " #######################
@@ -528,6 +542,11 @@ let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
 let g:go_metalinter_autosave = 1
 let g:go_def_mode = 'godef'
 let g:go_auto_sameids = 1
+
+let g:go_term_mode = 1
+
+" Guru Scope
+let g:go_guru_scope = ["git.aptpod.co.jp/intdash/intdash-api"]
 
 " Open :GoDeclsDir with ctrl-g
 nmap <C-g> :GoDeclsDir<cr>
@@ -574,3 +593,20 @@ function! s:build_go_files()
     call go#cmd#Build(0)
   endif
 endfunction
+
+
+" #######################
+" start previm
+" #######################
+let g:previm_open_cmd = 'open -a Google\ Chrome'
+
+augroup PrevimSettings
+    autocmd!
+    autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+augroup END
+
+
+" #######################
+" start json
+" #######################
+let g:vim_json_syntax_conceal = 0

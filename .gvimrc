@@ -108,4 +108,3 @@ amenu <silent> 10.341 &File.更新時保存(&S)<Tab>:update  :if expand('%') == 
 amenu <silent> 10.400 &File.現バッファ差分表示(&D)<Tab>:DiffOrig  :DiffOrig<CR>
 amenu <silent> 10.401 &File.裏バッファと差分表示(&D)<Tab>:Diff\ #  :Diff #<CR>
 amenu <silent> 10.402 &File.差分表示(&D)<Tab>:Diff  :browse vertical diffsplit<CR>
-molokai

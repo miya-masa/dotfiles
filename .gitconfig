@@ -1,7 +1,6 @@
 [user]
-  name = miya-masa
-  email = miyauchi0623@gmail.com
-#[http]
-#  proxy = 
-#[httpx]
-#  proxy = 
+	email = miyauchi@aptpod.co.jp
+	name = miyauchi
+[ghq]
+  root = ~/repos/src
+  root = ~/go/src
