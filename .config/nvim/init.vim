@@ -330,7 +330,6 @@ if dein#load_state('/Users/miyauchi-masayuki/.nvim')
   " Unite 
   call dein#add('Shougo/unite-outline')
   call dein#add('Shougo/denite.nvim')
-  call dein#add('Shougo/vimproc', {'build' : 'make'})
   call dein#add('thinca/vim-qfreplace')
   call dein#add('tpope/vim-fugitive')
   call dein#add('Shougo/deol.nvim')
