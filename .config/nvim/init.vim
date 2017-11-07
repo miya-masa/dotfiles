@@ -200,13 +200,14 @@ nnoremap <C-m> :cp<CR>
 nnoremap <leader>a :cclose<CR>
 
 " vimshell 
-nnoremap <leader>vt :VimShellTab<CR>
-nnoremap <leader>vc :VimShellCurrentDir<CR>
-nnoremap <leader>vp :VimShellPop<CR>
+tnoremap <silent> <ESC> <C-\><C-n>
+nnoremap <leader>vt :tabnew<CR>:terminal<CR>
 
-" unite
-nnoremap <leader>ub :Unite bookmark -default-action=cd<CR>
-nnoremap <leader>ug :Unite file_rec/git<CR>
+" denite
+nnoremap <leader>db :Denite buffer<CR>
+nnoremap <leader>dg :Denite grep<CR>
+nnoremap <leader>df :Denite file_rec<CR>
+nnoremap <leader>dl :Denite line<CR>
 
 "----------------------------------------
 " 挿入モード
@@ -298,22 +299,29 @@ endif
 "----------------------------------------
 
 "dein Scripts-----------------------------
-" Required:
-set runtimepath+=~/.vim/bundles/repos/github.com/Shougo/dein.vim
+if &compatible
+  set nocompatible               " Be iMproved
+endif
 
 " Required:
-if dein#load_state('~/.vim/bundles/')
-  call dein#begin('~/.vim/bundles/')
+set runtimepath+=/Users/miyauchi-masayuki/.nvim/repos/github.com/Shougo/dein.vim
 
-  " Let dein manage dein
+" Required:
+if dein#load_state('/Users/miyauchi-masayuki/.nvim')
+  call dein#begin('/Users/miyauchi-masayuki/.nvim')
   " Required:
   call dein#add('~/.vim/bundles/repos/github.com/Shougo/dein.vim')
 
   " Add or remove your plugins here:
-  call dein#add('Shougo/neocomplete.vim')
+  call dein#add('Shougo/deoplete.nvim')
+  if !has('nvim')
+    call dein#add('roxma/nvim-yarp')
+    call dein#add('roxma/vim-hug-neovim-rpc')
+  endif
   " snippet
   call dein#add('Shougo/neosnippet')
   call dein#add('Shougo/neosnippet-snippets')
+
   call dein#add('SirVer/ultisnips')
   call dein#add('honza/vim-snippets')
   call dein#add('ryuzee/neosnippet_chef_recipe_snippet')
@@ -321,12 +329,15 @@ if dein#load_state('~/.vim/bundles/')
 
   " Unite 
   call dein#add('Shougo/unite-outline')
-  call dein#add('Shougo/unite.vim')
-  call dein#add('Shougo/vimfiler.vim')
+  call dein#add('Shougo/denite.nvim')
   call dein#add('Shougo/vimproc', {'build' : 'make'})
-  call dein#add('Shougo/vimshell')
   call dein#add('thinca/vim-qfreplace')
   call dein#add('tpope/vim-fugitive')
+  call dein#add('Shougo/deol.nvim')
+
+  " nerdtree
+  call dein#add('scrooloose/nerdtree')
+  call dein#add('Xuyuanp/nerdtree-git-plugin')
 
   " colorscheme
   call dein#add('chriskempson/vim-tomorrow-theme')
@@ -352,6 +363,7 @@ if dein#load_state('~/.vim/bundles/')
   call dein#add('fatih/vim-go')
   call dein#add('AndrewRadev/splitjoin.vim')
   call dein#add('ctrlpvim/ctrlp.vim')
+  let g:loaded_vimshell = 1
   call dein#add('sebdah/vim-delve')
 
   " apiblueprint
@@ -383,99 +395,10 @@ endif
 "End dein Scripts-------------------------
 
 " #######################
-" start vimfiler settings
+" start nerdtree
 " #######################
-"デフォルトのキーマッピングを変更
-autocmd FileType vimfiler call s:vimfiler_my_settings()
-function! s:vimfiler_my_settings()
-  nmap <buffer> q <Plug>(vimfiler_exit)
-  nmap <buffer> Q <Plug>(vimfiler_hide)
-endfunction
-"セーフモードを無効にした状態で起動する
-call vimfiler#custom#profile('default', 'context', {
-      \ 'safe' : 0,
-      \ })
-"vimデフォルトのエクスプローラをvimfilerで置き換える
-let g:vimfiler_as_default_explorer = 1
-"現在開いているバッファのディレクトリを開く
-nnoremap <silent> <Leader>fe :VimFilerBufferDir -quit<CR>
-"現在開いているバッファをIDE風に開く
-nnoremap <silent> <Leader>fi :VimFilerBufferDir -simple -split -winwidth=40 -no-quit<CR>
-nnoremap <silent> <Leader>ft :VimFilerTab -simple -winwidth=40 -no-quit<CR>
-
-" #######################
-" start neocomplete
-" #######################
-"Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
-" Disable AutoComplPop.
-let g:acp_enableAtStartup = 0
-" Use neocomplete.
-let g:neocomplete#enable_at_startup = 1
-" Use smartcase.
-let g:neocomplete#enable_smart_case = 1
-" Set minimum syntax keyword length.
-let g:neocomplete#sources#syntax#min_keyword_length = 3
-
-" Define dictionary.
-let g:neocomplete#sources#dictionary#dictionaries = {
-    \ 'default' : '',
-    \ 'vimshell' : $HOME.'/.vimshell_hist',
-    \ 'scheme' : $HOME.'/.gosh_completions'
-        \ }
-
-" Define keyword.
-if !exists('g:neocomplete#keyword_patterns')
-    let g:neocomplete#keyword_patterns = {}
-endif
-let g:neocomplete#keyword_patterns['default'] = '\h\w*'
-
-" Plugin key-mappings.
-inoremap <expr><C-g>     neocomplete#undo_completion()
-inoremap <expr><C-l>     neocomplete#complete_common_string()
-
-" Recommended key-mappings.
-" <CR>: close popup and save indent.
-inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-function! s:my_cr_function()
-  return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
-  " For no inserting <CR> key.
-  "return pumvisible() ? "\<C-y>" : "\<CR>"
-endfunction
-" <TAB>: completion.
-inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-" <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-" Close popup by <Space>.
-"inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
-
-" AutoComplPop like behavior.
-"let g:neocomplete#enable_auto_select = 1
-
-" Shell like behavior(not recommended).
-"set completeopt+=longest
-"let g:neocomplete#enable_auto_select = 1
-"let g:neocomplete#disable_auto_complete = 1
-"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
-
-" Enable omni completion.
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html setlocal omnifunc=htmlcomplete#CompleteTags
-autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-
-" Enable heavy omni completion.
-if !exists('g:neocomplete#sources#omni#input_patterns')
-  let g:neocomplete#sources#omni#input_patterns = {}
-endif
-"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-
-" For perlomni.vim setting.
-" https://github.com/c9s/perlomni.vim
-let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+noremap <leader>fi :NERDTreeToggle<CR>
+nnoremap <leader>ft :tabnew<CR>:NERDTreeToggle<CR>
 
 " #######################
 " start neosnippet
@@ -501,6 +424,18 @@ if has('conceal')
   set conceallevel=2 concealcursor=niv
 endif
 
+" Enable snipMate compatibility feature.
+" let g:neosnippet#enable_snipmate_compatibility = 1
+
+" Tell Neosnippet about the other snippets
+let g:neosnippet#snippets_directory='~/.vim/bundles/repos/github.com/ekalinin/Dockerfile.vim/snippets'
+
+" #######################
+" start ultisnips
+" #######################
+
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
+
 " #######################
 " start web
 " #######################
@@ -515,12 +450,6 @@ autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
 autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
 
 let g:user_emmet_leader_key='<C-t>'
-
-" Enable snipMate compatibility feature.
-let g:neosnippet#enable_snipmate_compatibility = 1
-
-" Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory='~/.vim/bundles/repos/github.com/ekalinin/Dockerfile.vim/snippets'
 
 
 " #######################
@@ -628,3 +557,151 @@ augroup END
 " start json
 " #######################
 let g:vim_json_syntax_conceal = 0
+
+
+" #######################
+" start deoplete
+" #######################
+" Use deoplete.
+let g:deoplete#enable_at_startup = 1
+
+
+" #######################
+" start color
+" #######################
+let g:rehash256 = 1
+let g:molokai_original = 1
+colorscheme molokai
+
+
+" #######################
+" start denite  
+" #######################
+	" Change file_rec command.
+	call denite#custom#var('file_rec', 'command',
+	\ ['ag', '--follow', '--nocolor', '--nogroup', '-g', ''])
+"	" For ripgrep
+"	" Note: It is slower than ag
+"	call denite#custom#var('file_rec', 'command',
+"	\ ['rg', '--files', '--glob', '!.git', ''])
+"	" For Pt(the platinum searcher)
+"	" NOTE: It also supports windows.
+"	call denite#custom#var('file_rec', 'command',
+"	\ ['pt', '--follow', '--nocolor', '--nogroup',
+"	\  (has('win32') ? '-g:' : '-g='), ''])
+"	"For python script scantree.py (works if python 3.5+ in path)
+"	"Read bellow on this file to learn more about scantree.py
+"	call denite#custom#var('file_rec', 'command', ['scantree.py'])
+
+	" Change mappings.
+	call denite#custom#map(
+	      \ 'insert',
+	      \ '<C-j>',
+	      \ '<denite:move_to_next_line>',
+	      \ 'noremap'
+	      \)
+	call denite#custom#map(
+	      \ 'insert',
+	      \ '<C-k>',
+	      \ '<denite:move_to_previous_line>',
+	      \ 'noremap'
+	      \)
+
+	" Change matchers.
+	call denite#custom#source(
+	\ 'file_mru', 'matchers', ['matcher_fuzzy', 'matcher_project_files'])
+	call denite#custom#source(
+	\ 'file_rec', 'matchers', ['matcher_cpsm'])
+
+	" Change sorters.
+	call denite#custom#source(
+	\ 'file_rec', 'sorters', ['sorter_sublime'])
+
+	" Add custom menus
+"	let s:menus = {}
+"
+"	let s:menus.zsh = {
+"		\ 'description': 'Edit your import zsh configuration'
+"		\ }
+"	let s:menus.zsh.file_candidates = [
+"		\ ['zshrc', '~/.config/zsh/.zshrc'],
+"		\ ['zshenv', '~/.zshenv'],
+"		\ ]
+"
+"	let s:menus.my_commands = {
+"		\ 'description': 'Example commands'
+"		\ }
+"	let s:menus.my_commands.command_candidates = [
+"		\ ['Split the window', 'vnew'],
+"		\ ['Open zsh menu', 'Denite menu:zsh'],
+"		\ ]
+
+"	call denite#custom#var('menu', 'menus', s:menus)
+
+	" Ag command on grep source
+	call denite#custom#var('grep', 'command', ['ag'])
+	call denite#custom#var('grep', 'default_opts',
+			\ ['-i', '--vimgrep'])
+	call denite#custom#var('grep', 'recursive_opts', [])
+	call denite#custom#var('grep', 'pattern_opt', [])
+	call denite#custom#var('grep', 'separator', ['--'])
+	call denite#custom#var('grep', 'final_opts', [])
+
+"	" Ack command on grep source
+"	call denite#custom#var('grep', 'command', ['ack'])
+"	call denite#custom#var('grep', 'default_opts',
+"			\ ['--ackrc', $HOME.'/.ackrc', '-H',
+"			\  '--nopager', '--nocolor', '--nogroup', '--column'])
+"	call denite#custom#var('grep', 'recursive_opts', [])
+"	call denite#custom#var('grep', 'pattern_opt', ['--match'])
+"	call denite#custom#var('grep', 'separator', ['--'])
+"	call denite#custom#var('grep', 'final_opts', [])
+
+"	" Ripgrep command on grep source
+"	call denite#custom#var('grep', 'command', ['rg'])
+"	call denite#custom#var('grep', 'default_opts',
+"			\ ['--vimgrep', '--no-heading'])
+"	call denite#custom#var('grep', 'recursive_opts', [])
+"	call denite#custom#var('grep', 'pattern_opt', ['--regexp'])
+"	call denite#custom#var('grep', 'separator', ['--'])
+"	call denite#custom#var('grep', 'final_opts', [])
+
+	" Pt command on grep source
+"	call denite#custom#var('grep', 'command', ['pt'])
+"	call denite#custom#var('grep', 'default_opts',
+"			\ ['--nogroup', '--nocolor', '--smart-case'])
+"	call denite#custom#var('grep', 'recursive_opts', [])
+"	call denite#custom#var('grep', 'pattern_opt', [])
+"	call denite#custom#var('grep', 'separator', ['--'])
+"	call denite#custom#var('grep', 'final_opts', [])
+"
+"	" jvgrep command on grep source
+"	call denite#custom#var('grep', 'command', ['jvgrep'])
+"	call denite#custom#var('grep', 'default_opts', [])
+"	call denite#custom#var('grep', 'recursive_opts', ['-R'])
+"	call denite#custom#var('grep', 'pattern_opt', [])
+"	call denite#custom#var('grep', 'separator', [])
+"	call denite#custom#var('grep', 'final_opts', [])
+
+	" Define alias
+	call denite#custom#alias('source', 'file_rec/git', 'file_rec')
+	call denite#custom#var('file_rec/git', 'command',
+	      \ ['git', 'ls-files', '-co', '--exclude-standard'])
+
+	call denite#custom#alias('source', 'file_rec/py', 'file_rec')
+	call denite#custom#var('file_rec/py', 'command',['scantree.py'])
+
+	" Change default prompt
+	call denite#custom#option('default', 'prompt', '>')
+
+	" Change ignore_globs
+	call denite#custom#filter('matcher_ignore_globs', 'ignore_globs',
+	      \ [ '.git/', '.ropeproject/', '__pycache__/',
+	      \   'venv/', 'images/', '*.min.*', 'img/', 'fonts/'])
+
+	" Custom action
+"	call denite#custom#action('file', 'test',
+"	      \ {context -> execute('let g:foo = 1')})
+"	call denite#custom#action('file', 'test2',
+"	      \ {context -> denite#do_action(
+"	      \  context, 'open', context['targets'])})
