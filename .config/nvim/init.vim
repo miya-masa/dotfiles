@@ -101,9 +101,6 @@ set listchars=tab:^\ ,trail:~
 if &t_Co > 2 || has('gui_running')
   syntax on
 endif
-" 色テーマ設定
-" gvimの色テーマは.gvimrcで指定する
-" colorscheme hybrid
 
 """"""""""""""""""""""""""""""
 " ステータスラインに文字コード等表示
@@ -128,41 +125,6 @@ endfunction
 
 function! s:Byte2hex(bytes)
   return join(map(copy(a:bytes), 'printf("%02X", v:val)'), '')
-endfunction
-
-"----------------------------------------
-" diff/patch
-"----------------------------------------
-" diffの設定
-if has('win32') || has('win64')
-  set diffexpr=MyDiff()
-  function! MyDiff()
-    " 7.3.443 以降の変更に対応
-    silent! let saved_sxq=&shellxquote
-    silent! set shellxquote=
-    let opt = '-a --binary '
-    if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
-    if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
-    let arg1 = v:fname_in
-    if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
-    let arg2 = v:fname_new
-    if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
-    let arg3 = v:fname_out
-    if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
-    let cmd = '!diff ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
-    silent execute cmd
-    silent! let &shellxquote = saved_sxq
-  endfunction
-endif
-
-" 現バッファの差分表示(変更箇所の表示)
-command! DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis | wincmd p | diffthis
-" ファイルまたはバッファ番号を指定して差分表示。#なら裏バッファと比較
-command! -nargs=? -complete=file Diff if '<args>'=='' | browse vertical diffsplit|else| vertical diffsplit <args>|endif
-" パッチコマンド
-set patchexpr=MyPatch()
-function! MyPatch()
-  call system($VIM."\\'.'patch -o " . v:fname_out . " " . v:fname_in . " < " . v:fname_diff)
 endfunction
 
 "----------------------------------------
@@ -234,34 +196,13 @@ augroup vimrcEx
 augroup END
 
 """"""""""""""""""""""""""""""
-" 挿入モード時、ステータスラインのカラー変更
+" 全角スペースを表示
 """"""""""""""""""""""""""""""
-let g:hi_insert = 'highlight StatusLine guifg=darkblue guibg=darkyellow gui=none ctermfg=blue ctermbg=yellow cterm=none'
-
-if has('syntax')
-  augroup InsertHook
-    autocmd!
-    autocmd InsertEnter * call s:StatusLine('Enter')
-    autocmd InsertLeave * call s:StatusLine('Leave')
-  augroup END
-endif
-" if has('unix') && !has('gui_running')
-"   " ESCですぐに反映されない対策
-"   inoremap <silent> <ESC> <ESC>
-" endif
-
-let s:slhlcmd = ''
-function! s:StatusLine(mode)
-  if a:mode == 'Enter'
-    silent! let s:slhlcmd = 'highlight ' . s:GetHighlight('StatusLine')
-    silent exec g:hi_insert
-  else
-    highlight clear StatusLine
-    silent exec s:slhlcmd
-    redraw
-  endif
-endfunction
-
+" コメント以外で全角スペースを指定しているので、scriptencodingと、
+" このファイルのエンコードが一致するよう注意！
+" 強調表示されない場合、ここでscriptencodingを指定するとうまくいく事があります。
+" scriptencoding cp932
+"
 function! s:GetHighlight(hi)
   redir => hl
   exec 'highlight '.a:hi
@@ -270,14 +211,6 @@ function! s:GetHighlight(hi)
   let hl = substitute(hl, 'xxx', '', '')
   return hl
 endfunction
-
-""""""""""""""""""""""""""""""
-" 全角スペースを表示
-""""""""""""""""""""""""""""""
-" コメント以外で全角スペースを指定しているので、scriptencodingと、
-" このファイルのエンコードが一致するよう注意！
-" 強調表示されない場合、ここでscriptencodingを指定するとうまくいく事があります。
-" scriptencoding cp932
 function! ZenkakuSpace()
   silent! let hi = s:GetHighlight('ZenkakuSpace')
   if hi =~ 'E411' || hi =~ 'cleared$'
@@ -362,8 +295,7 @@ if dein#load_state('/Users/miyauchi-masayuki/.nvim')
   call dein#add('fatih/vim-go')
   call dein#add('AndrewRadev/splitjoin.vim')
   call dein#add('ctrlpvim/ctrlp.vim')
-  let g:loaded_vimshell = 1
-  call dein#add('sebdah/vim-delve')
+  call dein#add('jodosha/vim-godebug')
 
   " apiblueprint
   call dein#add('kylef/apiblueprint.vim')
@@ -398,6 +330,8 @@ endif
 " #######################
 noremap <leader>fi :NERDTreeToggle<CR>
 nnoremap <leader>ft :tabnew<CR>:NERDTreeToggle<CR>
+let NERDTreeShowHidden=1
+let NERDTreeShowBookmarks=1
 
 " #######################
 " start neosnippet
@@ -485,11 +419,10 @@ let g:go_highlight_generate_tags = 1
 
 " lint
 let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
+let g:go_metalinter_autosave_enabled = ['vet', 'golint']
 let g:go_metalinter_autosave = 1
 let g:go_def_mode = 'godef'
-let g:go_auto_sameids = 1
-
-let g:go_term_mode = 1
+let g:go_term_mode = 'vsplit'
 
 " Guru Scope
 let g:go_guru_scope = ["git.aptpod.co.jp/intdash/intdash-api/api/..." ,"git.aptpod.co.jp/intdash/intdash-api/api/...","git.aptpod.co.jp/intdash/intdash-api/cmd/...","git.aptpod.co.jp/intdash/intdash-api/pubsub/...","git.aptpod.co.jp/intdash/intdash-api/rdb/...","git.aptpod.co.jp/intdash/intdash-api/tsdb/...","git.aptpod.co.jp/intdash/intdash-api/ws/..."]
@@ -520,7 +453,9 @@ augroup go
   " :GoDef but opens in a vertical split
   autocmd FileType go nmap <Leader>v <Plug>(go-def-vertical)
   " :GoDef but opens in a horizontal split
-  autocmd FileType go nmap <Leader>s <Plug>(go-def-split)
+  autocmd FileType go nmap <Leader>ss <Plug>(go-def-split)
+  " :GoTestFunc
+  autocmd FileType go nmap <Leader>ff <Plug>(go-test-func)
 
   " :GoAlternate  commands :A, :AV, :AS and :AT
   autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
@@ -539,6 +474,7 @@ function! s:build_go_files()
     call go#cmd#Build(0)
   endif
 endfunction
+
 
 
 " #######################
@@ -704,3 +640,9 @@ colorscheme molokai
 "	call denite#custom#action('file', 'test2',
 "	      \ {context -> denite#do_action(
 "	      \  context, 'open', context['targets'])})
+"
+"
+" #######################
+" start camel motion  
+" #######################
+call camelcasemotion#CreateMotionMappings('<leader>')
