@@ -14,7 +14,7 @@ set clipboard+=unnamed
 " 8進数を無効にする。<C-a>,<C-x>に影響する
 set nrformats-=octal
 " キーコードやマッピングされたキー列が完了するのを待つ時間(ミリ秒)
-set timeout timeoutlen=3000 ttimeoutlen=500
+set timeout timeoutlen=3000 ttimeoutlen=50
 " 編集結果非保存のバッファから、新しいバッファを開くときに警告を出さない
 set hidden
 " ヒストリの保存数
