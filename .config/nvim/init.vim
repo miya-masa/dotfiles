@@ -252,13 +252,7 @@ if dein#load_state('/Users/miyauchi-masayuki/.nvim')
     call dein#add('roxma/vim-hug-neovim-rpc')
   endif
   " snippet
-  call dein#add('Shougo/neosnippet')
-  call dein#add('Shougo/neosnippet-snippets')
-
   call dein#add('SirVer/ultisnips')
-  call dein#add('honza/vim-snippets')
-  call dein#add('ryuzee/neosnippet_chef_recipe_snippet')
-  call dein#add('vim-scripts/Jasmine-snippets-for-snipMate')
 
   " Unite 
   call dein#add('Shougo/unite-outline')
@@ -296,12 +290,16 @@ if dein#load_state('/Users/miyauchi-masayuki/.nvim')
   call dein#add('AndrewRadev/splitjoin.vim')
   call dein#add('ctrlpvim/ctrlp.vim')
   call dein#add('jodosha/vim-godebug')
+  call dein#add('zchee/deoplete-go', {'build': 'make'})
 
   " apiblueprint
   call dein#add('kylef/apiblueprint.vim')
 
   " Docker
   call dein#add('ekalinin/Dockerfile.vim')
+
+  " Slack
+  call dein#add('yaasita/edit-slack.vim')
 
   " other
   call dein#add('majutsushi/tagbar')
@@ -332,36 +330,6 @@ noremap <leader>fi :NERDTreeToggle<CR>
 nnoremap <leader>ft :tabnew<CR>:NERDTreeToggle<CR>
 let NERDTreeShowHidden=1
 let NERDTreeShowBookmarks=1
-
-" #######################
-" start neosnippet
-" #######################
-" Plugin key-mappings.
-" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-smap <C-k>     <Plug>(neosnippet_expand_or_jump)
-xmap <C-k>     <Plug>(neosnippet_expand_target)
-
-" SuperTab like snippets behavior.
-" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
-imap <C-k>     <Plug>(neosnippet_expand_or_jump)
-"imap <expr><TAB>
-" \ pumvisible() ? "\<C-n>" :
-" \ neosnippet#expandable_or_jumpable() ?
-" \    "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-\ "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-
-" For conceal markers.
-if has('conceal')
-  set conceallevel=2 concealcursor=niv
-endif
-
-" Enable snipMate compatibility feature.
-" let g:neosnippet#enable_snipmate_compatibility = 1
-
-" Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory='~/.vim/bundles/repos/github.com/ekalinin/Dockerfile.vim/snippets'
 
 " #######################
 " start ultisnips
@@ -418,8 +386,7 @@ let g:go_highlight_extra_types = 1
 let g:go_highlight_generate_tags = 1
 
 " lint
-let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
-let g:go_metalinter_autosave_enabled = ['vet', 'golint']
+let g:go_metalinter_autosave_enabled = ['vet', 'golint', 'errcheck']
 let g:go_metalinter_autosave = 1
 let g:go_def_mode = 'godef'
 let g:go_term_mode = 'vsplit'
@@ -646,3 +613,19 @@ colorscheme molokai
 " start camel motion  
 " #######################
 call camelcasemotion#CreateMotionMappings('<leader>')
+
+
+" #######################
+" start Slack vim
+" #######################
+"
+if filereadable(expand('~/.vimrc.slack'))
+source ~/.vimrc.slack
+endif
+
+" #######################
+" start deoplete go
+" #######################
+
+let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
