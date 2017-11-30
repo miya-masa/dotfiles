@@ -97,36 +97,6 @@ set display=lastline
 set list
 set listchars=tab:^\ ,trail:~
 
-" ハイライトを有効にする
-if &t_Co > 2 || has('gui_running')
-  syntax on
-endif
-
-""""""""""""""""""""""""""""""
-" ステータスラインに文字コード等表示
-" iconvが使用可能の場合、カーソル上の文字コードをエンコードに応じた表示にするFencB()を使用
-""""""""""""""""""""""""""""""
-if has('iconv')
-  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=[0x%{FencB()}]\ (%v,%l)/%L%8P\
-else
-  set statusline=%<%f\ %m\ %r%h%w%{'['.(&fenc!=''?&fenc:&enc).']['.&ff.']'}%=\ (%v,%l)/%L%8P\
-endif
-
-" FencB() : カーソル上の文字コードをエンコードに応じた表示にする
-function! FencB()
-  let c = matchstr(getline('.'), '.', col('.') - 1)
-  let c = iconv(c, &enc, &fenc)
-  return s:Byte2hex(s:Str2byte(c))
-endfunction
-
-function! s:Str2byte(str)
-  return map(range(len(a:str)), 'char2nr(a:str[v:val])')
-endfunction
-
-function! s:Byte2hex(bytes)
-  return join(map(copy(a:bytes), 'printf("%02X", v:val)'), '')
-endfunction
-
 "----------------------------------------
 " ノーマルモード
 "----------------------------------------
@@ -161,7 +131,7 @@ nnoremap <C-n> :cn<CR>
 nnoremap <C-m> :cp<CR>
 nnoremap <leader>a :cclose<CR>
 
-" vimshell 
+" vimshell
 tnoremap <silent> <ESC> <C-\><C-n>
 nnoremap <leader>vt :tabnew<CR>:terminal<CR>
 
@@ -170,30 +140,6 @@ nnoremap <leader>db :Denite buffer<CR>
 nnoremap <leader>dg :Denite grep<CR>
 nnoremap <leader>df :Denite file_rec<CR>
 nnoremap <leader>dl :Denite line<CR>
-
-"----------------------------------------
-" 挿入モード
-"----------------------------------------
-
-"----------------------------------------
-" ビジュアルモード
-"----------------------------------------
-
-"----------------------------------------
-" コマンドモード
-"----------------------------------------
-
-"----------------------------------------
-" Vimスクリプト
-"----------------------------------------
-
-""""""""""""""""""""""""""""""
-" ファイルを開いたら前回のカーソル位置へ移動
-""""""""""""""""""""""""""""""
-augroup vimrcEx
-  autocmd!
-  autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line('$') | exe "normal! g`\"" | endif
-augroup END
 
 """"""""""""""""""""""""""""""
 " 全角スペースを表示
@@ -243,7 +189,7 @@ set runtimepath+=/Users/miyauchi-masayuki/.nvim/repos/github.com/Shougo/dein.vim
 if dein#load_state('/Users/miyauchi-masayuki/.nvim')
   call dein#begin('/Users/miyauchi-masayuki/.nvim')
   " Required:
-  call dein#add('~/.vim/bundles/repos/github.com/Shougo/dein.vim')
+  call dein#add('~/.nvim/repos/github.com/Shougo/dein.vim')
 
   " Add or remove your plugins here:
   call dein#add('Shougo/deoplete.nvim')
@@ -254,7 +200,7 @@ if dein#load_state('/Users/miyauchi-masayuki/.nvim')
   " snippet
   call dein#add('SirVer/ultisnips')
 
-  " Unite 
+  " Unite
   call dein#add('Shougo/unite-outline')
   call dein#add('Shougo/denite.nvim')
   call dein#add('thinca/vim-qfreplace')
@@ -268,7 +214,13 @@ if dein#load_state('/Users/miyauchi-masayuki/.nvim')
   " colorscheme
   call dein#add('chriskempson/vim-tomorrow-theme')
   call dein#add('mopp/mopkai.vim')
-  call dein#add('fatih/molokai')
+  call dein#add('tomasr/molokai')
+  call dein#add('w0ng/vim-hybrid')
+  call dein#add('jacoborus/tender.vim')
+  call dein#add('vim-airline/vim-airline')
+  call dein#add('altercation/vim-colors-solarized')
+  call dein#add('nanotech/jellybeans.vim')
+
   " syntax
   call dein#add('vim-syntastic/syntastic')
 
@@ -450,8 +402,8 @@ endfunction
 let g:previm_open_cmd = 'open -a Google\ Chrome'
 
 augroup PrevimSettings
-    autocmd!
-    autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+  autocmd!
+  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
 augroup END
 
 
@@ -471,17 +423,44 @@ let g:deoplete#enable_at_startup = 1
 " #######################
 " start color
 " #######################
+" ### molokai
 let g:rehash256 = 1
 let g:molokai_original = 1
 colorscheme molokai
 
+" ### hybrid
+" set background=dark
+" colorscheme hybrid
+"
+" ### jellybeans
+" set background=dark
+" colorscheme hybrid
+
+" ### tender
+" Theme
+" syntax enable
+" " 256色¬
+" set t_Co=256
+" " 背景色¬
+" set background=dark
+" colorscheme tender
+" let g:airline_theme = 'tender'
+
+" ### solarized
+" set background=dark
+" colorscheme solarized
+
+" ### jellybeans
+" colorscheme jellybeans
+
+
 
 " #######################
-" start denite  
+" start denite
 " #######################
-	" Change file_rec command.
-	call denite#custom#var('file_rec', 'command',
-	\ ['ag', '--follow', '--nocolor', '--nogroup', '-g', ''])
+" Change file_rec command.
+call denite#custom#var('file_rec', 'command',
+      \ ['ag', '--follow', '--nocolor', '--nogroup', '-g', ''])
 "	" For ripgrep
 "	" Note: It is slower than ag
 "	call denite#custom#var('file_rec', 'command',
@@ -495,31 +474,31 @@ colorscheme molokai
 "	"Read bellow on this file to learn more about scantree.py
 "	call denite#custom#var('file_rec', 'command', ['scantree.py'])
 
-	" Change mappings.
-	call denite#custom#map(
-	      \ 'insert',
-	      \ '<C-j>',
-	      \ '<denite:move_to_next_line>',
-	      \ 'noremap'
-	      \)
-	call denite#custom#map(
-	      \ 'insert',
-	      \ '<C-k>',
-	      \ '<denite:move_to_previous_line>',
-	      \ 'noremap'
-	      \)
+" Change mappings.
+call denite#custom#map(
+      \ 'insert',
+      \ '<C-j>',
+      \ '<denite:move_to_next_line>',
+      \ 'noremap'
+      \)
+call denite#custom#map(
+      \ 'insert',
+      \ '<C-k>',
+      \ '<denite:move_to_previous_line>',
+      \ 'noremap'
+      \)
 
-	" Change matchers.
-	call denite#custom#source(
-	\ 'file_mru', 'matchers', ['matcher_fuzzy', 'matcher_project_files'])
-	call denite#custom#source(
-	\ 'file_rec', 'matchers', ['matcher_cpsm'])
+" Change matchers.
+call denite#custom#source(
+      \ 'file_mru', 'matchers', ['matcher_fuzzy', 'matcher_project_files'])
+call denite#custom#source(
+      \ 'file_rec', 'matchers', ['matcher_cpsm'])
 
-	" Change sorters.
-	call denite#custom#source(
-	\ 'file_rec', 'sorters', ['sorter_sublime'])
+" Change sorters.
+call denite#custom#source(
+      \ 'file_rec', 'sorters', ['sorter_sublime'])
 
-	" Add custom menus
+" Add custom menus
 "	let s:menus = {}
 "
 "	let s:menus.zsh = {
@@ -540,14 +519,14 @@ colorscheme molokai
 
 "	call denite#custom#var('menu', 'menus', s:menus)
 
-	" Ag command on grep source
-	call denite#custom#var('grep', 'command', ['ag'])
-	call denite#custom#var('grep', 'default_opts',
-			\ ['-i', '--vimgrep'])
-	call denite#custom#var('grep', 'recursive_opts', [])
-	call denite#custom#var('grep', 'pattern_opt', [])
-	call denite#custom#var('grep', 'separator', ['--'])
-	call denite#custom#var('grep', 'final_opts', [])
+" Ag command on grep source
+call denite#custom#var('grep', 'command', ['ag'])
+call denite#custom#var('grep', 'default_opts',
+      \ ['-i', '--vimgrep'])
+call denite#custom#var('grep', 'recursive_opts', [])
+call denite#custom#var('grep', 'pattern_opt', [])
+call denite#custom#var('grep', 'separator', ['--'])
+call denite#custom#var('grep', 'final_opts', [])
 
 "	" Ack command on grep source
 "	call denite#custom#var('grep', 'command', ['ack'])
@@ -568,7 +547,7 @@ colorscheme molokai
 "	call denite#custom#var('grep', 'separator', ['--'])
 "	call denite#custom#var('grep', 'final_opts', [])
 
-	" Pt command on grep source
+" Pt command on grep source
 "	call denite#custom#var('grep', 'command', ['pt'])
 "	call denite#custom#var('grep', 'default_opts',
 "			\ ['--nogroup', '--nocolor', '--smart-case'])
@@ -585,23 +564,23 @@ colorscheme molokai
 "	call denite#custom#var('grep', 'separator', [])
 "	call denite#custom#var('grep', 'final_opts', [])
 
-	" Define alias
-	call denite#custom#alias('source', 'file_rec/git', 'file_rec')
-	call denite#custom#var('file_rec/git', 'command',
-	      \ ['git', 'ls-files', '-co', '--exclude-standard'])
+" Define alias
+call denite#custom#alias('source', 'file_rec/git', 'file_rec')
+call denite#custom#var('file_rec/git', 'command',
+      \ ['git', 'ls-files', '-co', '--exclude-standard'])
 
-	call denite#custom#alias('source', 'file_rec/py', 'file_rec')
-	call denite#custom#var('file_rec/py', 'command',['scantree.py'])
+call denite#custom#alias('source', 'file_rec/py', 'file_rec')
+call denite#custom#var('file_rec/py', 'command',['scantree.py'])
 
-	" Change default prompt
-	call denite#custom#option('default', 'prompt', '>')
+" Change default prompt
+call denite#custom#option('default', 'prompt', '>')
 
-	" Change ignore_globs
-	call denite#custom#filter('matcher_ignore_globs', 'ignore_globs',
-	      \ [ '.git/', '.ropeproject/', '__pycache__/',
-	      \   'venv/', 'images/', '*.min.*', 'img/', 'fonts/'])
+" Change ignore_globs
+call denite#custom#filter('matcher_ignore_globs', 'ignore_globs',
+      \ [ '.git/', '.ropeproject/', '__pycache__/',
+      \   'venv/', 'images/', '*.min.*', 'img/', 'fonts/'])
 
-	" Custom action
+" Custom action
 "	call denite#custom#action('file', 'test',
 "	      \ {context -> execute('let g:foo = 1')})
 "	call denite#custom#action('file', 'test2',
@@ -610,7 +589,7 @@ colorscheme molokai
 "
 "
 " #######################
-" start camel motion  
+" start camel motion
 " #######################
 call camelcasemotion#CreateMotionMappings('<leader>')
 
@@ -620,8 +599,10 @@ call camelcasemotion#CreateMotionMappings('<leader>')
 " #######################
 "
 if filereadable(expand('~/.vimrc.slack'))
-source ~/.vimrc.slack
+  source ~/.vimrc.slack
 endif
+command! SlackPG :tabe slack://pg
+command! SlackCH :tabe slack://ch
 
 " #######################
 " start deoplete go
