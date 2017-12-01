@@ -18,7 +18,7 @@ set timeout timeoutlen=3000 ttimeoutlen=50
 " 編集結果非保存のバッファから、新しいバッファを開くときに警告を出さない
 set hidden
 " ヒストリの保存数
-set history=50
+set history=500
 " 日本語の行の連結時には空白を入力しない
 set formatoptions+=mM
 " Visual blockモードでフリーカーソルを有効にする
@@ -259,6 +259,12 @@ if dein#load_state('/Users/miyauchi-masayuki/.nvim')
   call dein#add('simeji/winresizer')
   call dein#add('kannokanno/previm')
   call dein#add('vim-scripts/DrawIt')
+
+  call dein#add('tomtom/tcomment_vim')
+  call dein#add('tpope/vim-surround')
+  call dein#add('maxbrunsfeld/vim-yankstack')
+  call dein#add('bronson/vim-trailing-whitespace')
+  call dein#add('airblade/vim-gitgutter')
 
   " Required:
   call dein#end()
@@ -610,3 +616,9 @@ command! SlackCH :tabe slack://ch
 
 let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+
+" #######################
+" start yankstack
+" #######################
+nmap <leader>p <Plug>yankstack_substitute_older_paste
+nmap <leader>P <Plug>yankstack_substitute_newer_paste
