@@ -1,4 +1,3 @@
-set nocompatible
 scriptencoding utf8
 " ファイルの上書きの前にバックアップを作る/作らない
 " set writebackupを指定してもオプション 'backup' がオンでない限り、
@@ -171,8 +170,6 @@ endfunction
 "----------------------------------------
 " leaderの設定
 :let mapleader=","
-" ヘルプ検索
-nnoremap <F1> K
 " 現在開いているvimスクリプトファイルを実行
 nnoremap <F8> :source %<CR>
 " 強制全保存終了を無効化
@@ -182,18 +179,34 @@ nnoremap ZZ <Nop>
 " h l は行末、行頭を超えることが可能に設定(whichwrap)
 nnoremap <Down> gj
 nnoremap <Up>   gk
-nnoremap h <Left>zv
 nnoremap j gj
 nnoremap k gk
+nnoremap h <Left>zv
 nnoremap l <Right>zv
-nnoremap <Leader>l <C-w>l
-nnoremap <Leader>h <C-w>h
-nnoremap <Leader>k <C-w>k
-nnoremap <Leader>j <C-w>j
-nnoremap <Leader>sl <C-w><S-l>
-nnoremap <Leader>sh <C-w><S-h>
-nnoremap <Leader>sk <C-w><S-k>
-nnoremap <Leader>sj <C-w><S-j>
+nnoremap Y y$
+nnoremap H ^
+nnoremap L $
+vnoremap H ^
+vnoremap L g_
+nnoremap <C-j> <C-W>j
+nnoremap <C-k> <C-W>k
+nnoremap <C-h> <C-W>h
+nnoremap <C-l> <C-W>l
+nnoremap <leader><space> :nohlsearch<CR>
+
+" Some useful quickfix shortcuts for quickfix
+nnoremap <C-n> :cn<CR>
+nnoremap <C-m> :cp<CR>
+nnoremap <leader>a :cclose<CR>
+
+" vimshell 
+nnoremap <leader>vt :VimShellTab<CR>
+nnoremap <leader>vc :VimShellCurrentDir<CR>
+nnoremap <leader>vp :VimShellPop<CR>
+
+" unite
+nnoremap <leader>ub :Unite bookmark -default-action=cd<CR>
+nnoremap <leader>ug :Unite file_rec/git<CR>
 
 "----------------------------------------
 " 挿入モード
@@ -285,10 +298,6 @@ endif
 "----------------------------------------
 
 "dein Scripts-----------------------------
-if &compatible
-  set nocompatible               " Be iMproved
-endif
-
 " Required:
 set runtimepath+=~/.vim/bundles/repos/github.com/Shougo/dein.vim
 
@@ -301,54 +310,62 @@ if dein#load_state('~/.vim/bundles/')
   call dein#add('~/.vim/bundles/repos/github.com/Shougo/dein.vim')
 
   " Add or remove your plugins here:
-  call dein#add('Shougo/vimproc.vim', {
-        \ 'build' : {
-        \     'windows' : 'tools\\update-dll-mingw',
-        \     'cygwin' : 'make -f make_cygwin.mak',
-        \     'mac' : 'make -f make_mac.mak',
-        \     'linux' : 'make',
-        \     'unix' : 'gmake',
-        \    },
-        \ })
-
-  call dein#add('Shougo/neosnippet.vim')
-  call dein#add('Shougo/neosnippet-snippets')
-  call dein#add('nanotech/jellybeans.vim')
-  call dein#add('tpope/vim-fugitive')
-  call dein#add('Shougo/vimshell')
-  call dein#add('Shougo/unite.vim')
-  call dein#add('Shougo/vimfiler.vim')
-
-  "VimでMarkdownの設定
-  call dein#add('plasticboy/vim-markdown')
-  " sphinx の依存プラグイン
-  call dein#add('Rykka/clickable.vim')
-  call dein#add('Rykka/riv.vim')
-  call dein#add('Rykka/InstantRst')
-  call dein#add('kannokanno/previm')
-  call dein#add('tyru/open-browser.vim')
-
-  call dein#add('tpope/vim-fugitive')
-  call dein#add('thinca/vim-qfreplace')
-
+  call dein#add('Shougo/neocomplete.vim')
+  " snippet
   call dein#add('Shougo/neosnippet')
   call dein#add('Shougo/neosnippet-snippets')
+  call dein#add('SirVer/ultisnips')
   call dein#add('honza/vim-snippets')
   call dein#add('ryuzee/neosnippet_chef_recipe_snippet')
   call dein#add('vim-scripts/Jasmine-snippets-for-snipMate')
 
-  " start  neocomplcache.vim
-  call dein#add('Shougo/neocomplcache.vim')
+  " Unite 
+  call dein#add('Shougo/unite-outline')
+  call dein#add('Shougo/unite.vim')
+  call dein#add('Shougo/vimfiler.vim')
+  call dein#add('Shougo/vimproc', {'build' : 'make'})
+  call dein#add('Shougo/vimshell')
+  call dein#add('thinca/vim-qfreplace')
+  call dein#add('tpope/vim-fugitive')
+
+  " colorscheme
   call dein#add('chriskempson/vim-tomorrow-theme')
   call dein#add('mopp/mopkai.vim')
-  call dein#add('bkad/CamelCaseMotion')
-  call dein#add('Shougo/unite-outline')
-  call dein#add('miya-masa/vim-esformatter')
-  call dein#add('mxw/vim-jsx')
-  call dein#add('scrooloose/syntastic')
-  call dein#add('simeji/winresizer')
+  call dein#add('fatih/molokai')
+  " syntax
+  call dein#add('vim-syntastic/syntastic')
+
+  " Html5 snipetts
   call dein#add('mattn/emmet-vim')
-  call dein#add('taichouchou2/html5.vim')
+  " Html5 omnicomplete
+  call dein#add('alpaca-tc/html5.vim')
+  call dein#add('othree/html5.vim')
+
+  " JS
+  call dein#add('mxw/vim-jsx')
+  call dein#add('miya-masa/vim-esformatter')
+  " JSON
+  call dein#add('elzr/vim-json')
+
+
+  " go
+  call dein#add('fatih/vim-go')
+  call dein#add('AndrewRadev/splitjoin.vim')
+  call dein#add('ctrlpvim/ctrlp.vim')
+  call dein#add('sebdah/vim-delve')
+
+  " apiblueprint
+  call dein#add('kylef/apiblueprint.vim')
+
+  " Docker
+  call dein#add('ekalinin/Dockerfile.vim')
+
+  " other
+  call dein#add('majutsushi/tagbar')
+  call dein#add('bkad/CamelCaseMotion')
+  call dein#add('simeji/winresizer')
+  call dein#add('kannokanno/previm')
+  call dein#add('vim-scripts/DrawIt')
 
   " Required:
   call dein#end()
@@ -364,20 +381,16 @@ if dein#check_install()
 endif
 
 "End dein Scripts-------------------------
-let g:riv_web_browser = '"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"'
-augroup PrevimSettings
-  autocmd!
-  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-augroup END
-"ここまでVimでMarkdownの設定
+
+" #######################
 " start vimfiler settings
+" #######################
 "デフォルトのキーマッピングを変更
 autocmd FileType vimfiler call s:vimfiler_my_settings()
 function! s:vimfiler_my_settings()
   nmap <buffer> q <Plug>(vimfiler_exit)
   nmap <buffer> Q <Plug>(vimfiler_hide)
 endfunction
-" end vimfiler settings
 "セーフモードを無効にした状態で起動する
 call vimfiler#custom#profile('default', 'context', {
       \ 'safe' : 0,
@@ -390,129 +403,129 @@ nnoremap <silent> <Leader>fe :VimFilerBufferDir -quit<CR>
 nnoremap <silent> <Leader>fi :VimFilerBufferDir -simple -split -winwidth=40 -no-quit<CR>
 nnoremap <silent> <Leader>ft :VimFilerTab -simple -winwidth=40 -no-quit<CR>
 
-" Note: This option must set it in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
+" #######################
+" start neocomplete
+" #######################
+"Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
 " Disable AutoComplPop.
 let g:acp_enableAtStartup = 0
-" Use neocomplcache.
-let g:neocomplcache_enable_at_startup = 1
+" Use neocomplete.
+let g:neocomplete#enable_at_startup = 1
 " Use smartcase.
-let g:neocomplcache_enable_smart_case = 1
+let g:neocomplete#enable_smart_case = 1
 " Set minimum syntax keyword length.
-let g:neocomplcache_min_syntax_length = 3
-let g:neocomplcache_lock_buffer_name_pattern = '\*ku\*'
-
-" Enable heavy features.
-" Use camel case completion.
-"let g:neocomplcache_enable_camel_case_completion = 1
-" Use underbar completion.
-"let g:neocomplcache_enable_underbar_completion = 1
+let g:neocomplete#sources#syntax#min_keyword_length = 3
 
 " Define dictionary.
-let g:neocomplcache_dictionary_filetype_lists = {
-      \ 'default' : '',
-      \ 'vimshell' : $HOME.'/.vimshell_hist',
-      \ 'scheme' : $HOME.'/.gosh_completions'
-      \ }
+let g:neocomplete#sources#dictionary#dictionaries = {
+    \ 'default' : '',
+    \ 'vimshell' : $HOME.'/.vimshell_hist',
+    \ 'scheme' : $HOME.'/.gosh_completions'
+        \ }
 
 " Define keyword.
-if !exists('g:neocomplcache_keyword_patterns')
-  let g:neocomplcache_keyword_patterns = {}
+if !exists('g:neocomplete#keyword_patterns')
+    let g:neocomplete#keyword_patterns = {}
 endif
-let g:neocomplcache_keyword_patterns['default'] = '\h\w*'
+let g:neocomplete#keyword_patterns['default'] = '\h\w*'
 
 " Plugin key-mappings.
-inoremap <expr><C-g>     neocomplcache#undo_completion()
-inoremap <expr><C-l>     neocomplcache#complete_common_string()
+inoremap <expr><C-g>     neocomplete#undo_completion()
+inoremap <expr><C-l>     neocomplete#complete_common_string()
 
 " Recommended key-mappings.
 " <CR>: close popup and save indent.
 inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
 function! s:my_cr_function()
-  return neocomplcache#smart_close_popup() . "\<CR>"
+  return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
   " For no inserting <CR> key.
-  "return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
+  "return pumvisible() ? "\<C-y>" : "\<CR>"
 endfunction
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " <C-h>, <BS>: close popup and delete backword char.
-inoremap <expr><C-h> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-inoremap <expr><C-y>  neocomplcache#close_popup()
-inoremap <expr><C-e>  neocomplcache#cancel_popup()
+inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
 " Close popup by <Space>.
-"inoremap <expr><Space> pumvisible() ? neocomplcache#close_popup() : "\<Space>"
-
-" For cursor moving in insert mode(Not recommended)
-"inoremap <expr><Left>  neocomplcache#close_popup() . "\<Left>"
-"inoremap <expr><Right> neocomplcache#close_popup() . "\<Right>"
-"inoremap <expr><Up>    neocomplcache#close_popup() . "\<Up>"
-"inoremap <expr><Down>  neocomplcache#close_popup() . "\<Down>"
-" Or set this.
-"let g:neocomplcache_enable_cursor_hold_i = 1
-" Or set this.
-"let g:neocomplcache_enable_insert_char_pre = 1
+"inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
 
 " AutoComplPop like behavior.
-"let g:neocomplcache_enable_auto_select = 1
+"let g:neocomplete#enable_auto_select = 1
 
 " Shell like behavior(not recommended).
 "set completeopt+=longest
-"let g:neocomplcache_enable_auto_select = 1
-"let g:neocomplcache_disable_auto_complete = 1
+"let g:neocomplete#enable_auto_select = 1
+"let g:neocomplete#disable_auto_complete = 1
 "inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
 
 " Enable omni completion.
 autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType html,markdown,hbs setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType html setlocal omnifunc=htmlcomplete#CompleteTags
 autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 " Enable heavy omni completion.
-if !exists('g:neocomplcache_force_omni_patterns')
-  let g:neocomplcache_force_omni_patterns = {}
+if !exists('g:neocomplete#sources#omni#input_patterns')
+  let g:neocomplete#sources#omni#input_patterns = {}
 endif
-let g:neocomplcache_force_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplcache_force_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-let g:neocomplcache_force_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
 
 " For perlomni.vim setting.
 " https://github.com/c9s/perlomni.vim
-let g:neocomplcache_force_omni_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
-" end neocomplcache.vim
-" start sunippets
+let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
+
+" #######################
+" start neosnippet
+" #######################
 " Plugin key-mappings.
+" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
 imap <C-k>     <Plug>(neosnippet_expand_or_jump)
 smap <C-k>     <Plug>(neosnippet_expand_or_jump)
 xmap <C-k>     <Plug>(neosnippet_expand_target)
 
 " SuperTab like snippets behavior.
-imap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-      \ "\<Plug>(neosnippet_expand_or_jump)"
-      \: pumvisible() ? "\<C-n>" : "\<TAB>"
+" Note: It must be "imap" and "smap".  It uses <Plug> mappings.
+imap <C-k>     <Plug>(neosnippet_expand_or_jump)
+"imap <expr><TAB>
+" \ pumvisible() ? "\<C-n>" :
+" \ neosnippet#expandable_or_jumpable() ?
+" \    "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 smap <expr><TAB> neosnippet#expandable_or_jumpable() ?
-      \ "\<Plug>(neosnippet_expand_or_jump)"
-      \: "\<TAB>"
+\ "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 
-" For snippet_complete marker.
+" For conceal markers.
 if has('conceal')
-  set conceallevel=2 concealcursor=i
+  set conceallevel=2 concealcursor=niv
 endif
-" Enable snipMate compatibility feature.
-let g:neosnippet#enable_snipmate_compatibility = 1
-" Tell Neosnippet about the other snippets
-let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets,~/.vim/snippets'
-" end sunippets
+
+" #######################
+" start web
+" #######################
 " for html
 autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
 " for css or scss
 autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
 " My Bundles here:
 
-
 " will run esformatter after pressing <leader> followed by the 'e' and 's' keys
 autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
 autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
+
+let g:user_emmet_leader_key='<C-t>'
+
+" Enable snipMate compatibility feature.
+let g:neosnippet#enable_snipmate_compatibility = 1
+
+" Tell Neosnippet about the other snippets
+let g:neosnippet#snippets_directory='~/.vim/bundles/repos/github.com/ekalinin/Dockerfile.vim/snippets'
+
+
+" #######################
+" start syntastic
+" #######################
 
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
@@ -524,4 +537,92 @@ let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
 let g:syntastic_javascript_checkers = ["eslint"]
 
-let g:user_emmet_leader_key='<C-t>'
+
+" #######################
+" start go
+" #######################
+
+" vim-go
+let g:go_fmt_command = "goimports"
+let g:go_autodetect_gopath = 1
+let g:go_list_type = "quickfix"
+
+" highlight
+let g:go_highlight_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_extra_types = 1
+let g:go_highlight_generate_tags = 1
+
+" lint
+let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
+let g:go_metalinter_autosave = 1
+let g:go_def_mode = 'godef'
+let g:go_auto_sameids = 1
+
+let g:go_term_mode = 1
+
+" Guru Scope
+let g:go_guru_scope = ["git.aptpod.co.jp/intdash/intdash-api/api/..." ,"git.aptpod.co.jp/intdash/intdash-api/api/...","git.aptpod.co.jp/intdash/intdash-api/cmd/...","git.aptpod.co.jp/intdash/intdash-api/pubsub/...","git.aptpod.co.jp/intdash/intdash-api/rdb/...","git.aptpod.co.jp/intdash/intdash-api/tsdb/...","git.aptpod.co.jp/intdash/intdash-api/ws/..."]
+
+" Open :GoDeclsDir with ctrl-g
+nmap <C-g> :GoDeclsDir<cr>
+imap <C-g> <esc>:<C-u>GoDeclsDir<cr>
+
+
+augroup go
+  autocmd!
+  " Show by default 4 spaces for a tab
+  autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+  " :GoBuild and :GoTestCompile
+  autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+  " :GoTest
+  autocmd FileType go nmap <leader>t  <Plug>(go-test)
+  " :GoRun
+  autocmd FileType go nmap <leader>r  <Plug>(go-run)
+  " :GoDoc
+  autocmd FileType go nmap <Leader>d <Plug>(go-doc)
+  " :GoCoverageToggle
+  autocmd FileType go nmap <Leader>c <Plug>(go-coverage-toggle)
+  " :GoInfo
+  autocmd FileType go nmap <Leader>i <Plug>(go-info)
+  " :GoMetaLinter
+  autocmd FileType go nmap <Leader>l <Plug>(go-metalinter)
+  " :GoDef but opens in a vertical split
+  autocmd FileType go nmap <Leader>v <Plug>(go-def-vertical)
+  " :GoDef but opens in a horizontal split
+  autocmd FileType go nmap <Leader>s <Plug>(go-def-split)
+
+  " :GoAlternate  commands :A, :AV, :AS and :AT
+  autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+  autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+  autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+  autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+augroup END
+
+" build_go_files is a custom function that builds or compiles the test file.
+" It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
+endfunction
+
+
+" #######################
+" start previm
+" #######################
+let g:previm_open_cmd = 'open -a Google\ Chrome'
+
+augroup PrevimSettings
+    autocmd!
+    autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+augroup END
+
+
+" #######################
+" start json

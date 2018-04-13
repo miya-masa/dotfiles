@@ -31,7 +31,9 @@ endif
 " set cmdheight=2
 
 " カラー設定:
-colorscheme mopkai
+let g:rehash256 = 1
+let g:molokai_original = 1
+colorscheme molokai
 
 " フォント設定
 " フォントは英語名で指定すると問題が起きにくくなります
@@ -40,7 +42,7 @@ if has('xfontset')
 elseif has('unix')
 
 elseif has('mac')
-  " set guifont=Osaka-Mono:h14
+   set guifont=Osaka-Mono:h14
 elseif has('win32') || has('win64')
    set guifont=MigMix_2M:h11
    set guifontwide=MigMix_2M:h11
@@ -106,4 +108,3 @@ amenu <silent> 10.341 &File.更新時保存(&S)<Tab>:update  :if expand('%') == 
 amenu <silent> 10.400 &File.現バッファ差分表示(&D)<Tab>:DiffOrig  :DiffOrig<CR>
 amenu <silent> 10.401 &File.裏バッファと差分表示(&D)<Tab>:Diff\ #  :Diff #<CR>
 amenu <silent> 10.402 &File.差分表示(&D)<Tab>:Diff  :browse vertical diffsplit<CR>
-
