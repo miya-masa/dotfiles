@@ -3,9 +3,12 @@ repo = 'Shougo/deoplete.nvim'
 
 [[plugins]]
 repo = 'SirVer/ultisnips'
-hook_add = '''
-let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
+hook_source = '''
+" let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
 '''
+
+[[plugins]]
+repo = 'honza/vim-snippets'
 
 [[plugins]]
 repo = 'Shougo/unite-outline'
@@ -164,6 +167,9 @@ hook_add = '''
 '''
 
 [[plugins]]
+repo = 'whatyouhide/vim-gotham'
+
+[[plugins]]
 repo = 'tpope/vim-fugitive'
 
 [[plugins]]
@@ -180,65 +186,24 @@ repo = 'mopp/mopkai.vim'
 
 [[plugins]]
 repo = 'tomasr/molokai'
-hook_add = '''
-let g:rehash256 = 1
-let g:molokai_original = 1
-colorscheme molokai
-
-
-'''
 
 [[plugins]]
 repo = 'w0ng/vim-hybrid'
-hook_add = '''
-" set background=dark
-" colorscheme hybrid
-'''
 
 [[plugins]]
 repo = 'jacoborus/tender.vim'
-hook_add = '''
-    " ### tender
-    " Theme
-    " syntax enable
-    " " 256色¬
-    " set t_Co=256
-    " " 背景色¬
-    " set background=dark
-    " colorscheme tender
-    " let g:airline_theme = 'tender'
-'''
 
 [[plugins]]
 repo = 'vim-airline/vim-airline'
 
 [[plugins]]
 repo = 'altercation/vim-colors-solarized'
-hook_add = '''
-  " set background=dark
-  " colorscheme solarized
-'''
 
 [[plugins]]
 repo = 'nanotech/jellybeans.vim'
-hook_add = '''
-  " colorscheme jellybeans
-  " set background=dark
-'''
 
 [[plugins]]
-repo = 'vim-syntastic/syntastic'
-hook_add = '''
-    set statusline+=%#warningmsg#
-    set statusline+=%{SyntasticStatuslineFlag()}
-    set statusline+=%*
-
-    let g:syntastic_always_populate_loc_list = 1
-    let g:syntastic_auto_loc_list = 1
-    let g:syntastic_check_on_open = 1
-    let g:syntastic_check_on_wq = 0
-    let g:syntastic_javascript_checkers = ["eslint"]
-'''
+repo = 'w0rp/ale'
 
 [[plugins]]
 repo = 'mattn/emmet-vim'
@@ -258,6 +223,8 @@ repo = 'mxw/vim-jsx'
 [[plugins]]
 repo = 'miya-masa/vim-esformatter'
 hook_add = '''
+  augroup Vim-Esformatter
+    autocmd!
     " for html
     autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
     " for css or scss
@@ -267,6 +234,7 @@ hook_add = '''
     " will run esformatter after pressing <leader> followed by the 'e' and 's' keys
     autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
     autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
+  augroup END
 '''
 
 [[plugins]]
@@ -293,7 +261,7 @@ hook_add = '''
 
     " lint
     let g:go_metalinter_autosave_enabled = ['vet','errcheck', 'golint']
-    let g:go_metalinter_autosave = 1
+    let g:go_metalinter_autosave = 0
     let g:go_def_mode = 'godef'
     let g:go_term_mode = 'vsplit'
 
@@ -304,37 +272,37 @@ hook_add = '''
     nmap <C-g> :GoDeclsDir<cr>
     imap <C-g> <esc>:<C-u>GoDeclsDir<cr>
 
-
     augroup go
       autocmd!
       " Show by default 4 spaces for a tab
       autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
       " :GoBuild and :GoTestCompile
-      autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+      autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
       " :GoTest
-      autocmd FileType go nmap <leader>t  <Plug>(go-test)
+      autocmd FileType go nmap <leader>gt  <Plug>(go-test)
       " :GoRun
-      autocmd FileType go nmap <leader>r  <Plug>(go-run)
+      autocmd FileType go nmap <leader>gr  <Plug>(go-run)
       " :GoDoc
-      autocmd FileType go nmap <Leader>d <Plug>(go-doc)
+      autocmd FileType go nmap <Leader>gd <Plug>(go-doc)
       " :GoCoverageToggle
-      autocmd FileType go nmap <Leader>c <Plug>(go-coverage-toggle)
+      autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
       " :GoInfo
-      autocmd FileType go nmap <Leader>i <Plug>(go-info)
+      autocmd FileType go nmap <Leader>gi <Plug>(go-info)
       " :GoMetaLinter
-      autocmd FileType go nmap <Leader>l <Plug>(go-metalinter)
+      autocmd FileType go nmap <Leader>gl <Plug>(go-metalinter)
       " :GoDef but opens in a vertical split
-      autocmd FileType go nmap <Leader>v <Plug>(go-def-vertical)
+      autocmd FileType go nmap <Leader>gv <Plug>(go-def-vertical)
       " :GoDef but opens in a horizontal split
-      autocmd FileType go nmap <Leader>ss <Plug>(go-def-split)
+      autocmd FileType go nmap <Leader>gs <Plug>(go-def-split)
       " :GoTestFunc
-      autocmd FileType go nmap <Leader>ff <Plug>(go-test-func)
+      autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
       " :GoAlternate  commands :A, :AV, :AS and :AT
       autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
       autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
       autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
       autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+      autocmd Filetype go command! GoRunArgs :!go run % <args>
     augroup END
 
 
@@ -434,7 +402,10 @@ repo = 'Yggdroot/indentLine'
 [[plugins]]
 repo = 'aklt/plantuml-syntax'
 hook_add = '''
-au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
+  augroup PlantUML
+    autocmd!
+    au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
+  augroup END
 '''
 
 [[plugins]]
@@ -445,3 +416,132 @@ if   = '''!has('nvim')'''
 repo = 'roxma/vim-hug-neovim-rpc'
 if   = '''!has('nvim')'''
 
+[[plugins]]
+repo = 'vim-scripts/SQLUtilities'
+depends = ['Align']
+hook_add= '''
+    let g:sqlutil_align_comma = 1
+'''
+
+[[plugins]]
+repo = 'vim-scripts/Align'
+
+[[plugins]]
+ repo = 'cespare/vim-toml'
+
+
+[[plugins]]
+repo = 'pangloss/vim-javascript'
+
+[[plugins]]
+repo = 'othree/yajs.vim'
+
+[[plugins]]
+repo = 'othree/es.next.syntax.vim'
+
+[[plugins]]
+repo = 'othree/javascript-libraries-syntax.vim'
+hook_add= '''
+  augroup JavascriptLibrariesSyntax
+    autocmd!
+    autocmd BufReadPre *.js let b:javascript_lib_use_underscore = 1
+    autocmd BufReadPre *.js let b:javascript_lib_use_react = 1
+  augroup END
+'''
+
+[[plugins]]
+repo = 'maxmellon/vim-jsx-pretty'
+
+[[plugins]]
+repo = 'ternjs/tern_for_vim'
+
+[[plugins]]
+repo = 'carlitux/deoplete-ternjs'
+hook_post_update = '''
+  let cmd = 'npm install -g term'
+  let g:dein#plugin.build = cmd
+'''
+
+hook_add = '''
+    " Set bin if you have many instalations
+    " let g:deoplete#sources#ternjs#tern_bin = '/path/to/tern_bin'
+    let g:deoplete#sources#ternjs#timeout = 1
+
+    " Whether to include the types of the completions in the result data. Default: 0
+    " let g:deoplete#sources#ternjs#types = 1
+
+    " Whether to include the distance (in scopes for variables, in prototypes for 
+    " properties) between the completions and the origin position in the result 
+    " data. Default: 0
+    " let g:deoplete#sources#ternjs#depths = 1
+
+    " Whether to include documentation strings (if found) in the result data.
+    " Default: 0
+    " let g:deoplete#sources#ternjs#docs = 1
+
+    " When on, only completions that match the current word at the given point will
+    " be returned. Turn this off to get all results, so that you can filter on the 
+    " client side. Default: 1
+    "let g:deoplete#sources#ternjs#filter = 0
+
+    " Whether to use a case-insensitive compare between the current word and 
+    " potential completions. Default 0
+    " let g:deoplete#sources#ternjs#case_insensitive = 1
+
+    " When completing a property and no completions are found, Tern will use some 
+    " heuristics to try and return some properties anyway. Set this to 0 to 
+    " turn that off. Default: 1
+    " let g:deoplete#sources#ternjs#guess = 0
+
+    " Determines whether the result set will be sorted. Default: 1
+    " let g:deoplete#sources#ternjs#sort = 0
+
+    " When disabled, only the text before the given position is considered part of 
+    " the word. When enabled (the default), the whole variable name that the cursor
+    " is on will be included. Default: 1
+    " let g:deoplete#sources#ternjs#expand_word_forward = 0
+
+    " Whether to ignore the properties of Object.prototype unless they have been 
+    " spelled out by at least two characters. Default: 1
+    " let g:deoplete#sources#ternjs#omit_object_prototype = 0
+
+    " Whether to include JavaScript keywords when completing something that is not 
+    " a property. Default: 0
+    " let g:deoplete#sources#ternjs#include_keywords = 1
+
+    " If completions should be returned when inside a literal. Default: 1
+    " let g:deoplete#sources#ternjs#in_literal = 0
+
+
+    "Add extra filetypes
+    "let g:deoplete#sources#ternjs#filetypes = [
+    "                \ 'jsx',
+    "                \ 'javascript.jsx',
+    "                \ 'vue',
+    "                \ '...'
+    "                \ ]
+'''
+
+[[plugins]]
+repo = 'Shougo/neopairs.vim'
+
+[[plugins]]
+repo = 'Shougo/context_filetype.vim'
+
+[[plugins]]
+repo = 'Shougo/echodoc.vim'
+
+[[plugins]]
+repo = 'c9s/perlomni.vim'
+
+[[plugins]]
+repo = 'zchee/deoplete-zsh'
+
+[[plugins]]
+repo = 'skielbasa/vim-material-monokai'
+
+[[plugins]]
+repo = 'felipesousa/rupza'
+
+[[plugins]]
+repo = 'jdkanani/vim-material-theme'
