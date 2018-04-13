@@ -1,10 +1,12 @@
 #!/bin/sh
 
 cd $(dirname $0)
-for dotfile in .?*
+
+mkdir -p ~/.config/nvim
+mkdir -p ~/.vim/snippets/javascript
+
+for dotfile in `find  -type d -name '.git' -prune -o -type f -and -print`
 do
-    if [ $dotfile != '..' ] && [ $dotfile != '.git' ]
-    then
-        ln -Fis "$PWD/$dotfile" $HOME
-    fi
+  rm -f "$HOME/$dotfile"
+  ln -s "$PWD/$dotfile" "$HOME/$dotfile"
 done
