@@ -205,47 +205,7 @@ if has('vim_starting') && dein#check_install()
 endif
 
 " ###### color scheme
-"
-"
-" set background=dark
-" colorscheme gotham
-
-" set background=dark
-" colorscheme solarized
-"
-" ### tender
-" Theme
 syntax enable
-"" " 256色¬
-set t_Co=256
-"" " 背景色¬
 set background=dark
-" colorscheme tender
-" let g:airline_theme = 'tender'
-"
-" ##### hybrid
-" syntax enable
-" set background=dark
-" colorscheme hybrid
-"
-"
-"  let g:rehash256 = 1
-"  let g:molokai_original = 1
-"  colorscheme molokai
-"
-" ##### material-monokai
-" set background=dark
-" set termguicolors
-" colorscheme material-monokai
-" let g:airline_theme='materialmonokai'
-
-" ##### rupza
-" colorscheme rupza
-"
-" ##### vim -material
-" syntax enable
-" set background=dark
-" colorscheme material-theme
-"
-" ##### vim -material
-colorscheme gruvbox
+colorscheme hybrid_material
+let g:airline_theme = "hybrid"

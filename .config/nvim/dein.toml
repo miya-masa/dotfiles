@@ -549,3 +549,9 @@ repo = 'jdkanani/vim-material-theme'
 [[plugins]]
 repo = 'morhetz/gruvbox'
 
+[[plugins]]
+repo = 'kristijanhusak/vim-hybrid-material'
+
+[[plugins]]
+repo = 'vim-airline/vim-airline-themes'
+

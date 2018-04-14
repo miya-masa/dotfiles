@@ -12,6 +12,7 @@ zplug "mollifier/anyframe"
 zplug "mollifier/cd-gitroot"
 zplug "b4b4r07/enhancd", use:enhancd.sh
 zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
+# zplug "carloscuesta/materialshell", use:materialshell, from:github, as:theme
 
 if ! zplug check --verbose; then
   printf "Install? [y/N]: "
