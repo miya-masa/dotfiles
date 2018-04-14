@@ -4,7 +4,6 @@
 * zplug*
 * neovim
 * Silver Searcher
-* fzf
 * jq
 * Universal Ctags
   ```

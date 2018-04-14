@@ -266,7 +266,7 @@ hook_add = '''
     let g:go_term_mode = 'vsplit'
 
     " Guru Scope
-    let g:go_guru_scope = ["github.com/..."]
+    let g:go_guru_scope = ["git.aptpod.co.jp/...","-git.aptpod.co.jp/.../vendor/..."]
 
     " Open :GoDeclsDir with ctrl-g
     nmap <C-g> :GoDeclsDir<cr>
@@ -545,3 +545,7 @@ repo = 'felipesousa/rupza'
 
 [[plugins]]
 repo = 'jdkanani/vim-material-theme'
+
+[[plugins]]
+repo = 'morhetz/gruvbox'
+

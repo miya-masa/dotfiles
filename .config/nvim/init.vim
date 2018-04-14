@@ -229,9 +229,9 @@ set background=dark
 " colorscheme hybrid
 "
 "
- let g:rehash256 = 1
- let g:molokai_original = 1
- colorscheme molokai
+"  let g:rehash256 = 1
+"  let g:molokai_original = 1
+"  colorscheme molokai
 "
 " ##### material-monokai
 " set background=dark
@@ -246,3 +246,6 @@ set background=dark
 " syntax enable
 " set background=dark
 " colorscheme material-theme
+"
+" ##### vim -material
+colorscheme gruvbox
