@@ -118,7 +118,6 @@ nnoremap l <Right>zv
 nnoremap Y y$
 nnoremap H ^
 nnoremap L $
-vnoremap H ^
 vnoremap L g_
 nnoremap <C-j> <C-W>j
 nnoremap <C-k> <C-W>k

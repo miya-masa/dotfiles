@@ -266,7 +266,7 @@ hook_add = '''
     let g:go_term_mode = 'vsplit'
 
     " Guru Scope
-    let g:go_guru_scope = ["git.aptpod.co.jp/...","-git.aptpod.co.jp/.../vendor/..."]
+    let g:go_guru_scope = []
 
     " Open :GoDeclsDir with ctrl-g
     nmap <C-g> :GoDeclsDir<cr>
