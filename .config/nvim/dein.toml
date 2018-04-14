@@ -266,8 +266,7 @@ hook_add = '''
     let g:go_term_mode = 'vsplit'
 
     " Guru Scope
-    let g:go_guru_scope = []
-
+    " let g:go_guru_scope = []
     " Open :GoDeclsDir with ctrl-g
     nmap <C-g> :GoDeclsDir<cr>
     imap <C-g> <esc>:<C-u>GoDeclsDir<cr>
@@ -276,6 +275,11 @@ hook_add = '''
       autocmd!
       " Show by default 4 spaces for a tab
       autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+      autocmd BufRead $GOPATH/src/*.go
+          \  let s:tmp = matchlist(expand('%:p'),
+              \  $GOPATH.'/src/\([^/]\+/[^/]\+/[^/]\+/\)')
+          \| if len(s:tmp) > 1 |  exe 'silent :GoGuruScope ' . s:tmp[1] . '... -' . s:tmp[1] . 'vendor/...' | endif
+          \| unlet s:tmp
       " :GoBuild and :GoTestCompile
       autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
       " :GoTest
@@ -304,6 +308,8 @@ hook_add = '''
       autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
       autocmd Filetype go command! GoRunArgs :!go run % <args>
     augroup END
+
+
 
 
     " build_go_files is a custom function that builds or compiles the test file.
