@@ -1,3 +1,8 @@
+# Check if zplug is installed
+if [[ ! -d ~/.zplug ]]; then
+  git clone https://github.com/zplug/zplug ~/.zplug
+  source ~/.zplug/init.zsh && zplug update --self
+fi
 source ~/.zplug/init.zsh
 
 zplug 'zplug/zplug', hook-build:'zplug --self-manage'
@@ -12,7 +17,12 @@ zplug "mollifier/anyframe"
 zplug "mollifier/cd-gitroot"
 zplug "b4b4r07/enhancd", use:enhancd.sh
 zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
-# zplug "carloscuesta/materialshell", use:materialshell, from:github, as:theme
+# Support oh-my-zsh plugins and the like
+zplug "plugins/git",   from:oh-my-zsh
+
+if [[ -e "$HOME/.local_zshrc" ]]; then
+  source "$HOME/.local_zshrc" 
+fi
 
 if ! zplug check --verbose; then
   printf "Install? [y/N]: "
@@ -81,6 +91,11 @@ fi
 alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
+
+# move directories
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
