@@ -20,10 +20,6 @@ zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
 # Support oh-my-zsh plugins and the like
 zplug "plugins/git",   from:oh-my-zsh
 
-if [[ -e "$HOME/.local_zshrc" ]]; then
-  source "$HOME/.local_zshrc" 
-fi
-
 if ! zplug check --verbose; then
   printf "Install? [y/N]: "
   if read -q; then
@@ -101,7 +97,11 @@ alias ....='cd ../../..'
 #   sleep 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
+## options
+set -o AUTO_CD
+set -o AUTO_CD
 
-export GOPATH="$HOME/go"
-export PATH="$GOPATH/bin:$PATH"
-export XDG_CONFIG_HOME=$HOME/.config
+if [[ -e "$HOME/.local_zshrc" ]]; then
+  source "$HOME/.local_zshrc" 
+fi
+
