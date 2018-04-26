@@ -4,7 +4,7 @@ repo = 'Shougo/deoplete.nvim'
 [[plugins]]
 repo = 'SirVer/ultisnips'
 hook_source = '''
-" let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
 '''
 
 [[plugins]]
@@ -16,10 +16,12 @@ repo = 'Shougo/unite-outline'
 [[plugins]]
 repo = 'Shougo/denite.nvim'
 hook_add = '''
-    nnoremap <leader>db :Denite buffer<CR>
-    nnoremap <leader>dg :Denite grep<CR>
-    nnoremap <leader>df :Denite file_rec<CR>
+    nnoremap <Leader>db :Denite buffer<CR>
+    nnoremap <Leader>dg :Denite grep<CR>
+    nnoremap <Leader>df :Denite file_rec<CR>
     nnoremap <leader>dl :Denite line<CR>
+    nnoremap <leader>do :Denite outline<CR>
+
     " Change file_rec command.
     call denite#custom#var('file_rec', 'command',
           \ ['ag', '--follow', '--nocolor', '--nogroup', '-g', ''])
@@ -267,19 +269,17 @@ hook_add = '''
 
     " Guru Scope
     " let g:go_guru_scope = []
-    " Open :GoDeclsDir with ctrl-g
-    nmap <C-g> :GoDeclsDir<cr>
-    imap <C-g> <esc>:<C-u>GoDeclsDir<cr>
 
     augroup go
       autocmd!
       " Show by default 4 spaces for a tab
       autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
       autocmd BufRead $GOPATH/src/*.go
-          \  let s:tmp = matchlist(expand('%:p'),
-              \  $GOPATH.'/src/\([^/]\+/[^/]\+/[^/]\+/\)')
-          \| if len(s:tmp) > 1 |  exe 'silent :GoGuruScope ' . s:tmp[1] . '... -' . s:tmp[1] . 'vendor/...' | endif
-          \| unlet s:tmp
+         \  let s:tmp = matchlist(expand('%:p'),
+             \  $GOPATH.'/src/\([^/]\+/[^/]\+/[^/]\+/\)')
+         \| if len(s:tmp) > 1 |  exe 'silent :GoGuruScope ' . s:tmp[1] . '... -' . s:tmp[1] . 'vendor/...' | endif
+         \| unlet s:tmp
+
       " :GoBuild and :GoTestCompile
       autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
       " :GoTest
@@ -287,7 +287,7 @@ hook_add = '''
       " :GoRun
       autocmd FileType go nmap <leader>gr  <Plug>(go-run)
       " :GoDoc
-      autocmd FileType go nmap <Leader>gd <Plug>(go-doc)
+      autocmd FileType go nmap <Leader>gdoc <Plug>(go-doc)
       " :GoCoverageToggle
       autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
       " :GoInfo
@@ -301,6 +301,10 @@ hook_add = '''
       " :GoTestFunc
       autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
+      " Open :GoDeclsDir with ctrl-g
+      autocmd FileType go nmap <C-g> :Denite decls<cr>
+      autocmd FileType go imap <C-g> <esc>:Denite decls<cr>
+
       " :GoAlternate  commands :A, :AV, :AS and :AT
       autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
       autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
@@ -308,10 +312,6 @@ hook_add = '''
       autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
       autocmd Filetype go command! GoRunArgs :!go run % <args>
     augroup END
-
-
-
-
     " build_go_files is a custom function that builds or compiles the test file.
     " It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file
     function! s:build_go_files()
@@ -326,9 +326,6 @@ hook_add = '''
 
 [[plugins]]
 repo = 'AndrewRadev/splitjoin.vim'
-
-[[plugins]]
-repo = 'ctrlpvim/ctrlp.vim'
 
 [[plugins]]
 repo = 'jodosha/vim-godebug'
@@ -364,9 +361,6 @@ hook_add = '''
 '''
 
 [[plugins]]
-repo = 'majutsushi/tagbar'
-
-[[plugins]]
 repo = 'bkad/CamelCaseMotion'
 hook_add = '''
     call camelcasemotion#CreateMotionMappings('<leader>')
@@ -400,10 +394,10 @@ repo = 'tpope/vim-surround'
 repo = 'bronson/vim-trailing-whitespace'
 
 [[plugins]]
-repo = 'majutsushi/tagbar'
+repo = 'Yggdroot/indentLine'
 
 [[plugins]]
-repo = 'Yggdroot/indentLine'
+repo = 'vim-jp/vimdoc-ja'
 
 [[plugins]]
 repo = 'aklt/plantuml-syntax'
