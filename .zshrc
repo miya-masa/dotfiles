@@ -92,6 +92,7 @@ alias l='ls -CF'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
+alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -101,6 +102,11 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 set -o AUTO_CD
 
 if [[ -e "$HOME/.local_zshrc" ]]; then
-  source "$HOME/.local_zshrc" 
+  source "$HOME/.local_zshrc"
 fi
 
+if [[ -e "$HOME/.pecorc" ]]; then
+  source "$HOME/.pecorc"
+fi
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

@@ -1,4 +1,5 @@
 scriptencoding utf8
+set helplang=ja,en
 " ファイルの上書きの前にバックアップを作る/作らない
 " set writebackupを指定してもオプション 'backup' がオンでない限り、
 " バックアップは上書きに成功した後に削除される。
@@ -208,3 +209,9 @@ syntax enable
 set background=dark
 colorscheme hybrid_material
 let g:airline_theme = "hybrid"
+
+" syntax enable
+" set background=dark
+" set termguicolors
+" colorscheme material-monokai
+" let g:airline_theme='materialmonokai'
