@@ -562,7 +562,7 @@ repo = 'vim-airline/vim-airline-themes'
 repo = 'junegunn/fzf.vim'
 
 [[plugins]]
-repo = '/usr/local/opt/fzf'
+repo = '~/.fzf'
 
 [[plugins]]
 repo = 'ryanoasis/vim-devicons'

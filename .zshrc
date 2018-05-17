@@ -105,8 +105,4 @@ if [[ -e "$HOME/.local_zshrc" ]]; then
   source "$HOME/.local_zshrc"
 fi
 
-if [[ -e "$HOME/.pecorc" ]]; then
-  source "$HOME/.pecorc"
-fi
-
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
