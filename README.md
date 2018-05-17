@@ -5,6 +5,10 @@
 * neovim
 * Silver Searcher
 * jq
+* nerd-fonts 
+  ```
+   https://github.com/ryanoasis/nerd-fonts#font-installation
+```
 * Universal Ctags
   ```
   sudo apt-get install autoconf automake libtool autoconf-doc libtool-doc```

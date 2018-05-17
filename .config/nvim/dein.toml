@@ -197,6 +197,9 @@ repo = 'jacoborus/tender.vim'
 
 [[plugins]]
 repo = 'vim-airline/vim-airline'
+hook_add = '''
+  let g:airline_powerline_fonts = 1
+'''
 
 [[plugins]]
 repo = 'altercation/vim-colors-solarized'
@@ -560,3 +563,7 @@ repo = 'junegunn/fzf.vim'
 
 [[plugins]]
 repo = '/usr/local/opt/fzf'
+
+[[plugins]]
+repo = 'ryanoasis/vim-devicons'
+
