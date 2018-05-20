@@ -16,11 +16,10 @@ repo = 'Shougo/unite-outline'
 [[plugins]]
 repo = 'Shougo/denite.nvim'
 hook_add = '''
-    nnoremap <Leader>db :Denite buffer<CR>
-    nnoremap <Leader>dg :Denite grep<CR>
-    nnoremap <Leader>df :Denite file_rec<CR>
-    nnoremap <leader>dl :Denite line<CR>
-    nnoremap <leader>do :Denite outline<CR>
+    nnoremap <Leader>db :Buffer<CR>
+    nnoremap <Leader>dg :Ag<CR>
+    nnoremap <Leader>df :Files<CR>
+    nnoremap <leader>dl :Line<CR>
 
     " Change file_rec command.
     call denite#custom#var('file_rec', 'command',
@@ -383,7 +382,6 @@ hook_add = '''
   augroup END
 '''
 
-
 [[plugins]]
 repo = 'vim-scripts/DrawIt'
 
@@ -567,3 +565,5 @@ repo = '~/.fzf'
 [[plugins]]
 repo = 'ryanoasis/vim-devicons'
 
+[[plugins]]
+repo = 'majutsushi/tagbar'
