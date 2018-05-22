@@ -19,6 +19,7 @@ zplug "b4b4r07/enhancd", use:enhancd.sh
 zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
 # Support oh-my-zsh plugins and the like
 zplug "plugins/git",   from:oh-my-zsh
+zplug "jocelynmallon/zshmarks"
 
 if ! zplug check --verbose; then
   printf "Install? [y/N]: "
@@ -93,6 +94,7 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
+alias b='jump '
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
