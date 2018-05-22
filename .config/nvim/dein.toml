@@ -571,3 +571,12 @@ repo = 'ryanoasis/vim-devicons'
 
 [[plugins]]
 repo = 'majutsushi/tagbar'
+
+[[plugins]]
+repo = 'dhruvasagar/vim-table-mode'
+
+[[plugins]]
+repo = 'thinca/vim-quickrun'
+
+[[plugins]]
+repo = 'diepm/vim-rest-console'
