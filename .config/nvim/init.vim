@@ -11,7 +11,7 @@ set noundofile
 " viminfoを作成しない
 set viminfo=
 " クリップボードを共有
-set clipboard+=unnamed
+set clipboard+=unnamedplus
 " 8進数を無効にする。<C-a>,<C-x>に影響する
 set nrformats-=octal
 " キーコードやマッピングされたキー列が完了するのを待つ時間(ミリ秒)

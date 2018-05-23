@@ -5,7 +5,7 @@
 * neovim
 * Silver Searcher
 * jq
-* nerd-fonts 
+* nerd-fonts
   ```
    https://github.com/ryanoasis/nerd-fonts#font-installation
 ```
