@@ -520,13 +520,7 @@ hook_add = '''
 '''
 
 [[plugins]]
-repo = 'Shougo/neopairs.vim'
-
-[[plugins]]
-repo = 'Shougo/context_filetype.vim'
-
-[[plugins]]
-repo = 'Shougo/echodoc.vim'
+repo = 'jiangmiao/auto-pairs'
 
 [[plugins]]
 repo = 'c9s/perlomni.vim'
@@ -598,3 +592,6 @@ hook_add = '''
 
 [[plugins]]
 repo = 'osyo-manga/vim-over'
+
+[[plugins]]
+repo = 'flazz/vim-colorschemes'

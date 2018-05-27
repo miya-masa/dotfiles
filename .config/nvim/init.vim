@@ -88,7 +88,7 @@ set cinoptions+=:0
 " タイトルを表示
 set title
 " コマンドラインの高さ (gvimはgvimrcで指定)
-" set cmdheight=2
+set cmdheight=2
 set laststatus=2
 " コマンドをステータス行に表示
 set showcmd
@@ -213,5 +213,5 @@ let g:airline_theme = "hybrid"
 " syntax enable
 " set background=dark
 " set termguicolors
-" colorscheme material-monokai
+" colorscheme material-
 " let g:airline_theme='materialmonokai'
