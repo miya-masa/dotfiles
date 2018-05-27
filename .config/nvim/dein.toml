@@ -11,16 +11,8 @@ let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
 repo = 'honza/vim-snippets'
 
 [[plugins]]
-repo = 'Shougo/unite-outline'
-
-[[plugins]]
 repo = 'Shougo/denite.nvim'
 hook_add = '''
-    nnoremap <Leader>db :Buffer<CR>
-    nnoremap <Leader>dg :Ag<CR>
-    nnoremap <Leader>df :Files<CR>
-    nnoremap <leader>dl :Line<CR>
-
     " Change file_rec command.
     call denite#custom#var('file_rec', 'command',
           \ ['ag', '--follow', '--nocolor', '--nogroup', '-g', ''])
@@ -562,6 +554,12 @@ repo = 'vim-airline/vim-airline-themes'
 
 [[plugins]]
 repo = 'junegunn/fzf.vim'
+hook_add = '''
+    nnoremap <Leader><C-B> :Buffer<CR>
+    nnoremap <Leader><C-A> :Ag<CR>
+    nnoremap <Leader><C-F> :Files<CR>
+    nnoremap <leader><C-L> :Line<CR>
+'''
 
 [[plugins]]
 repo = '~/.fzf'
