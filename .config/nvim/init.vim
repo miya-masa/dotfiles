@@ -194,137 +194,6 @@ Plug 'SirVer/ultisnips'
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
 
 Plug 'honza/vim-snippets'
-Plug 'Shougo/denite.nvim'
-" Change file_rec command.
-call denite#custom#var('file_rec', 'command',
-      \ ['ag', '--follow', '--nocolor', '--nogroup', '-g', ''])
-"	" For ripgrep
-"	" Note: It is slower than ag
-"	call denite#custom#var('file_rec', 'command',
-"	\ ['rg', '--files', '--glob', '!.git', ''])
-"	" For Pt(the platinum searcher)
-"	" NOTE: It also supports windows.
-"	call denite#custom#var('file_rec', 'command',
-"	\ ['pt', '--follow', '--nocolor', '--nogroup',
-"	\  (has('win32') ? '-g:' : '-g='), ''])
-"	"For python script scantree.py (works if python 3.5+ in path)
-"	"Read bellow on this file to learn more about scantree.py
-"	call denite#custom#var('file_rec', 'command', ['scantree.py'])
-
-" Change mappings.
-call denite#custom#map(
-      \ 'insert',
-      \ '<C-j>',
-      \ '<denite:move_to_next_line>',
-      \ 'noremap'
-      \)
-call denite#custom#map(
-      \ 'insert',
-      \ '<C-k>',
-      \ '<denite:move_to_previous_line>',
-      \ 'noremap'
-      \)
-
-" Change matchers.
-call denite#custom#source(
-      \ 'file_mru', 'matchers', ['matcher_fuzzy', 'matcher_project_files'])
-call denite#custom#source(
-      \ 'file_rec', 'matchers', ['matcher_cpsm'])
-
-" Change sorters.
-call denite#custom#source(
-      \ 'file_rec', 'sorters', ['sorter_sublime'])
-
-" Add custom menus
-"	let s:menus = {}
-"
-"	let s:menus.zsh = {
-"		\ 'description': 'Edit your import zsh configuration'
-"		\ }
-"	let s:menus.zsh.file_candidates = [
-"		\ ['zshrc', '~/.config/zsh/.zshrc'],
-"		\ ['zshenv', '~/.zshenv'],
-"		\ ]
-"
-"	let s:menus.my_commands = {
-"		\ 'description': 'Example commands'
-"		\ }
-"	let s:menus.my_commands.command_candidates = [
-"		\ ['Split the window', 'vnew'],
-"		\ ['Open zsh menu', 'Denite menu:zsh'],
-"		\ ]
-
-"	call denite#custom#var('menu', 'menus', s:menus)
-
-" Ag command on grep source
-call denite#custom#var('grep', 'command', ['ag'])
-call denite#custom#var('grep', 'default_opts',
-      \ ['-i', '--vimgrep'])
-call denite#custom#var('grep', 'recursive_opts', [])
-call denite#custom#var('grep', 'pattern_opt', [])
-call denite#custom#var('grep', 'separator', ['--'])
-call denite#custom#var('grep', 'final_opts', [])
-
-"	" Ack command on grep source
-"	call denite#custom#var('grep', 'command', ['ack'])
-"	call denite#custom#var('grep', 'default_opts',
-"			\ ['--ackrc', $HOME.'/.ackrc', '-H',
-"			\  '--nopager', '--nocolor', '--nogroup', '--column'])
-"	call denite#custom#var('grep', 'recursive_opts', [])
-"	call denite#custom#var('grep', 'pattern_opt', ['--match'])
-"	call denite#custom#var('grep', 'separator', ['--'])
-"	call denite#custom#var('grep', 'final_opts', [])
-
-"	" Ripgrep command on grep source
-"	call denite#custom#var('grep', 'command', ['rg'])
-"	call denite#custom#var('grep', 'default_opts',
-"			\ ['--vimgrep', '--no-heading'])
-"	call denite#custom#var('grep', 'recursive_opts', [])
-"	call denite#custom#var('grep', 'pattern_opt', ['--regexp'])
-"	call denite#custom#var('grep', 'separator', ['--'])
-"	call denite#custom#var('grep', 'final_opts', [])
-
-" Pt command on grep source
-"	call denite#custom#var('grep', 'command', ['pt'])
-"	call denite#custom#var('grep', 'default_opts',
-"			\ ['--nogroup', '--nocolor', '--smart-case'])
-"	call denite#custom#var('grep', 'recursive_opts', [])
-"	call denite#custom#var('grep', 'pattern_opt', [])
-"	call denite#custom#var('grep', 'separator', ['--'])
-"	call denite#custom#var('grep', 'final_opts', [])
-"
-"	" jvgrep command on grep source
-"	call denite#custom#var('grep', 'command', ['jvgrep'])
-"	call denite#custom#var('grep', 'default_opts', [])
-"	call denite#custom#var('grep', 'recursive_opts', ['-R'])
-"	call denite#custom#var('grep', 'pattern_opt', [])
-"	call denite#custom#var('grep', 'separator', [])
-"	call denite#custom#var('grep', 'final_opts', [])
-
-" Define alias
-call denite#custom#alias('source', 'file_rec/git', 'file_rec')
-call denite#custom#var('file_rec/git', 'command',
-      \ ['git', 'ls-files', '-co', '--exclude-standard'])
-
-call denite#custom#alias('source', 'file_rec/py', 'file_rec')
-call denite#custom#var('file_rec/py', 'command',['scantree.py'])
-
-" Change default prompt
-call denite#custom#option('default', 'prompt', '>')
-
-" Change ignore_globs
-call denite#custom#filter('matcher_ignore_globs', 'ignore_globs',
-      \ [ '.git/', '.ropeproject/', '__pycache__/',
-      \   'venv/', 'images/', '*.min.*', 'img/', 'fonts/'])
-
-" Custom action
-"	call denite#custom#action('file', 'test',
-"	      \ {context -> execute('let g:foo = 1')})
-"	call denite#custom#action('file', 'test2',
-"	      \ {context -> denite#do_action(
-"	      \  context, 'open', context['targets'])})
-"
-
 Plug 'thinca/vim-qfreplace'
 Plug 'Shougo/deol.nvim'
 Plug 'scrooloose/nerdtree'
@@ -422,8 +291,8 @@ augroup go
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
   " Open :GoDeclsDir with ctrl-g
-  autocmd FileType go nmap <C-g> :Denite decls<cr>
-  autocmd FileType go imap <C-g> <esc>:Denite decls<cr>
+  autocmd FileType go nmap <C-g> :GoDecls<cr>
+  autocmd FileType go imap <C-g> <esc>:GoDeclsDir<cr>
 
   " :GoAlternate  commands :A, :AV, :AS and :AT
   autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
@@ -446,8 +315,6 @@ endfunction
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jodosha/vim-godebug'
 Plug 'zchee/deoplete-go'
-let cmd = 'make'
-let g:dein#plugin.build = cmd
 let g:deoplete#enable_at_startup = 1
 let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
@@ -465,7 +332,6 @@ command! SlackDM :tabe slack://dm
 command! SlackME :tabe slack://dm/miyauchi.m
 
 Plug 'bkad/CamelCaseMotion'
-call camelcasemotion#CreateMotionMappings('<leader>')
 
 Plug 'simeji/winresizer'
 Plug 'kannokanno/previm'
@@ -493,8 +359,7 @@ if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
 
-Plug 'vim-scripts/SQLUtilities'
-depends = ['Align']
+Plug 'vim-scripts/SQLUtilities', {'on' : 'Align'}
 let g:sqlutil_align_comma=1
 
 Plug 'vim-scripts/Align'
@@ -515,7 +380,6 @@ Plug 'maxmellon/vim-jsx-pretty'
 Plug 'ternjs/tern_for_vim'
 Plug 'carlitux/deoplete-ternjs'
 let cmd = 'npm install -g term'
-let g:dein#plugin.build = cmd
 
 " Set bin if you have many instalations
 " let g:deoplete#sources#ternjs#tern_bin = '/path/to/tern_bin'
@@ -615,6 +479,7 @@ Plug 'osyo-manga/vim-over'
 Plug 'flazz/vim-colorschemes'
 
 call plug#end()
+call camelcasemotion#CreateMotionMappings('<leader>')
 
 " ###### color scheme
 syntax enable
