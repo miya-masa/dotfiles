@@ -175,15 +175,15 @@ endif
 " 各種プラグイン設定
 "----------------------------------------
 
-"dein Scripts-----------------------------
-
-" dein settings {{{
-if &compatible
-  set nocompatible               " Be iMproved
+let s:plug_path = '~/.vim/autoload/plug.vim'
+if has('nvim')
+  let s:plug_path = '~/.local/share/nvim/site/autoload/plug.vim'
+else 
+  let s:plug_path = '~/.vim/autoload/plug.vim'
 endif
-if empty(glob('~/.vim/autoload/plug.vim'))
-  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
-        \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+if !filereadable(glob(s:plug_path))
+  call system('curl -fLo ' . s:plug_path . ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim')
   autocmd VimEnter * PlugInstall --sync | source ~/.config/nvim/init.vim
 endif
 
@@ -213,11 +213,13 @@ Plug 'w0ng/vim-hybrid'
 Plug 'jacoborus/tender.vim'
 Plug 'vim-airline/vim-airline'
 let g:airline_powerline_fonts = 1
+
 Plug 'altercation/vim-colors-solarized'
 Plug 'nanotech/jellybeans.vim'
 Plug 'w0rp/ale'
 Plug 'mattn/emmet-vim'
 let g:user_emmet_leader_key='<C-t>'
+
 Plug 'alpaca-tc/html5.vim'
 Plug 'othree/html5.vim'
 Plug 'mxw/vim-jsx'
