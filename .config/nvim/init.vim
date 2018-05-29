@@ -293,8 +293,8 @@ augroup go
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
   " Open :GoDeclsDir with ctrl-g
-  autocmd FileType go nmap <C-g> :GoDecls<cr>
-  autocmd FileType go imap <C-g> <esc>:GoDeclsDir<cr>
+  autocmd FileType go imap <C-g> <esc>:GoDecls<cr>
+  autocmd FileType go nmap <C-g> :GoDeclsDir<cr>
 
   " :GoAlternate  commands :A, :AV, :AS and :AT
   autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
