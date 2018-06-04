@@ -124,7 +124,7 @@ nnoremap <C-j> <C-W>j
 nnoremap <C-k> <C-W>k
 nnoremap <C-h> <C-W>h
 nnoremap <C-l> <C-W>l
-nnoremap <leader><space> :nohlsearch<CR>
+nnoremap <C-[><C-[> :nohlsearch<CR>
 
 " Some useful quickfix shortcuts for quickfix
 nnoremap <C-n> :cn<CR>
@@ -136,8 +136,6 @@ tnoremap <silent> <leader><C-[> <C-\><C-n>
 nnoremap <leader>vt :tabnew<CR>:terminal<CR>
 nnoremap <leader>st :split<CR>:terminal<CR>
 map <C-[> <ESC>
-
-" denite
 
 """"""""""""""""""""""""""""""
 " 全角スペースを表示
@@ -178,7 +176,7 @@ endif
 let s:plug_path = '~/.vim/autoload/plug.vim'
 if has('nvim')
   let s:plug_path = '~/.local/share/nvim/site/autoload/plug.vim'
-else 
+else
   let s:plug_path = '~/.vim/autoload/plug.vim'
 endif
 
@@ -390,8 +388,8 @@ let g:deoplete#sources#ternjs#timeout = 1
 " Whether to include the types of the completions in the result data. Default: 0
 " let g:deoplete#sources#ternjs#types = 1
 
-" Whether to include the distance (in scopes for variables, in prototypes for 
-" properties) between the completions and the origin position in the result 
+" Whether to include the distance (in scopes for variables, in prototypes for
+" properties) between the completions and the origin position in the result
 " data. Default: 0
 " let g:deoplete#sources#ternjs#depths = 1
 
@@ -400,32 +398,32 @@ let g:deoplete#sources#ternjs#timeout = 1
 " let g:deoplete#sources#ternjs#docs = 1
 
 " When on, only completions that match the current word at the given point will
-" be returned. Turn this off to get all results, so that you can filter on the 
+" be returned. Turn this off to get all results, so that you can filter on the
 " client side. Default: 1
 "let g:deoplete#sources#ternjs#filter = 0
 
-" Whether to use a case-insensitive compare between the current word and 
+" Whether to use a case-insensitive compare between the current word and
 " potential completions. Default 0
 " let g:deoplete#sources#ternjs#case_insensitive = 1
 
-" When completing a property and no completions are found, Tern will use some 
-" heuristics to try and return some properties anyway. Set this to 0 to 
+" When completing a property and no completions are found, Tern will use some
+" heuristics to try and return some properties anyway. Set this to 0 to
 " turn that off. Default: 1
 " let g:deoplete#sources#ternjs#guess = 0
 
 " Determines whether the result set will be sorted. Default: 1
 " let g:deoplete#sources#ternjs#sort = 0
 
-" When disabled, only the text before the given position is considered part of 
+" When disabled, only the text before the given position is considered part of
 " the word. When enabled (the default), the whole variable name that the cursor
 " is on will be included. Default: 1
 " let g:deoplete#sources#ternjs#expand_word_forward = 0
 
-" Whether to ignore the properties of Object.prototype unless they have been 
+" Whether to ignore the properties of Object.prototype unless they have been
 " spelled out by at least two characters. Default: 1
 " let g:deoplete#sources#ternjs#omit_object_prototype = 0
 
-" Whether to include JavaScript keywords when completing something that is not 
+" Whether to include JavaScript keywords when completing something that is not
 " a property. Default: 0
 " let g:deoplete#sources#ternjs#include_keywords = 1
 
@@ -479,6 +477,8 @@ let g:vrc_auto_format_response_patterns = {
 
 Plug 'osyo-manga/vim-over'
 Plug 'flazz/vim-colorschemes'
+Plug 'VincentCordobes/vim-translate'
+
 
 call plug#end()
 call camelcasemotion#CreateMotionMappings('<leader>')
@@ -486,8 +486,8 @@ call camelcasemotion#CreateMotionMappings('<leader>')
 " ###### color scheme
 syntax enable
 set background=dark
-colorscheme hybrid_material
-let g:airline_theme = "hybrid"
+colorscheme gruvbox
+let g:airline_theme = "gruvbox"
 
 " syntax enable
 " set background=dark
