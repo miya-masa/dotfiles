@@ -478,6 +478,7 @@ let g:vrc_auto_format_response_patterns = {
 Plug 'osyo-manga/vim-over'
 Plug 'flazz/vim-colorschemes'
 Plug 'VincentCordobes/vim-translate'
+Plug 'fenetikm/falcon'
 
 
 call plug#end()
@@ -487,7 +488,7 @@ call camelcasemotion#CreateMotionMappings('<leader>')
 syntax enable
 set background=dark
 colorscheme gruvbox
-let g:airline_theme = "gruvbox"
+let g:airline_theme = 'gruvbox'
 
 " syntax enable
 " set background=dark
