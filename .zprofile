@@ -6,4 +6,4 @@ autoload -Uz compinit colors
 compinit
 colors
 
-[ -f ~/.local_zprofile ] && source ~/.local_zprofile
+[ -f ~/.zprofile.local ] && source ~/.zprofile.local

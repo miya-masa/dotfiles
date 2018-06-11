@@ -103,8 +103,8 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 ## options
 set -o AUTO_CD
 
-if [[ -e "$HOME/.local_zshrc" ]]; then
-  source "$HOME/.local_zshrc"
+if [[ -e "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

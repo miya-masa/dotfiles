@@ -346,7 +346,9 @@ Plug 'vim-scripts/DrawIt'
 Plug 'tomtom/tcomment_vim'
 Plug 'tpope/vim-surround'
 Plug 'bronson/vim-trailing-whitespace'
-Plug 'Yggdroot/indentLine'
+Plug 'nathanaelkane/vim-indent-guides'
+let g:indent_guides_enable_on_vim_startup = 1
+
 Plug 'vim-jp/vimdoc-ja'
 Plug 'aklt/plantuml-syntax'
 augroup PlantUML
