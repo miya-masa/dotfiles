@@ -19,6 +19,8 @@ zplug "b4b4r07/enhancd", use:enhancd.sh
 zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
 # Support oh-my-zsh plugins and the like
 zplug "plugins/git",   from:oh-my-zsh
+zplug "plugins/docker-compose",   from:oh-my-zsh
+zplug "plugins/docker",   from:oh-my-zsh
 zplug "jocelynmallon/zshmarks"
 
 if ! zplug check --verbose; then
