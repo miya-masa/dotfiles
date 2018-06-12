@@ -1,7 +1,7 @@
 # dotfiles
 
 ## Software
-* zplug*
+* zplug
 * neovim
 * Silver Searcher
 * jq
