@@ -188,6 +188,8 @@ endif
 call plug#begin('~/.vim/plugged')
 
 Plug 'Shougo/deoplete.nvim'
+let g:deoplete#enable_at_startup = 1
+
 Plug 'SirVer/ultisnips'
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
 
@@ -315,7 +317,6 @@ endfunction
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jodosha/vim-godebug'
 Plug 'zchee/deoplete-go'
-let g:deoplete#enable_at_startup = 1
 let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
 let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 
@@ -361,11 +362,11 @@ if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
 
-Plug 'vim-scripts/SQLUtilities', {'on' : 'Align'}
-let g:sqlutil_align_comma=1
-
 Plug 'vim-scripts/Align'
 let g:Align_xstrlen=3
+
+Plug 'vim-scripts/SQLUtilities', {'on' : 'Align'}
+let g:sqlutil_align_comma=1
 
 Plug 'cespare/vim-toml'
 Plug 'pangloss/vim-javascript'
@@ -497,3 +498,18 @@ let g:airline_theme = 'gruvbox'
 " set termguicolors
 " colorscheme material-
 " let g:airline_theme='materialmonokai'
+"
+"
+" # deoplete
+" Use smartcase.
+call deoplete#custom#option('smart_case', v:true)
+inoremap <expr><C-h> deoplete#smart_close_popup()."\<C-h>"
+inoremap <expr><BS>  deoplete#smart_close_popup()."\<C-h>"
+
+" conv hex deg bin
+command! -nargs=1 ToH echo printf("%0x", <args>)
+command! -nargs=1 ToD echo printf("%0d", <args>)
+command! -nargs=1 ToB echo printf("%0b", <args>)
+command! -nargs=1 ToHReg let @a=printf("%0x", <args>)
+command! -nargs=1 ToDReg let @a=printf("%0d", <args>)
+command! -nargs=1 ToBReg let @a=printf("%0b", <args>)
