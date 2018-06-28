@@ -120,10 +120,6 @@ nnoremap Y y$
 nnoremap H ^
 nnoremap L $
 vnoremap L g_
-nnoremap <C-j> <C-W>j
-nnoremap <C-k> <C-W>k
-nnoremap <C-h> <C-W>h
-nnoremap <C-l> <C-W>l
 nnoremap <C-[><C-[> :nohlsearch<CR>
 
 " Some useful quickfix shortcuts for quickfix
@@ -188,7 +184,6 @@ endif
 call plug#begin('~/.vim/plugged')
 
 Plug 'Shougo/deoplete.nvim'
-let g:deoplete#enable_at_startup = 1
 
 Plug 'SirVer/ultisnips'
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
@@ -317,8 +312,6 @@ endfunction
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jodosha/vim-godebug'
 Plug 'zchee/deoplete-go'
-let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
-let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
 
 Plug 'kylef/apiblueprint.vim'
 Plug 'ekalinin/Dockerfile.vim'
@@ -502,6 +495,11 @@ let g:airline_theme = 'gruvbox'
 "
 " # deoplete
 " Use smartcase.
+"
+"
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+let g:deoplete#sources#go#sort_class = ['package', 'var', 'func', 'type', 'const']
 call deoplete#custom#option('smart_case', v:true)
 inoremap <expr><C-h> deoplete#smart_close_popup()."\<C-h>"
 inoremap <expr><BS>  deoplete#smart_close_popup()."\<C-h>"
@@ -510,6 +508,6 @@ inoremap <expr><BS>  deoplete#smart_close_popup()."\<C-h>"
 command! -nargs=1 ToH echo printf("%0x", <args>)
 command! -nargs=1 ToD echo printf("%0d", <args>)
 command! -nargs=1 ToB echo printf("%0b", <args>)
-command! -nargs=1 ToHReg let @a=printf("%0x", <args>)
-command! -nargs=1 ToDReg let @a=printf("%0d", <args>)
-command! -nargs=1 ToBReg let @a=printf("%0b", <args>)
+command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
+command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
+command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
