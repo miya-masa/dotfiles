@@ -1,7 +1,7 @@
 # dotfiles
 
 ## Software
-* zplug*
+* zplug
 * neovim
 * Silver Searcher
 * jq
@@ -13,7 +13,7 @@
   ```
   sudo apt-get install autoconf automake libtool autoconf-doc libtool-doc```
   ```
-
+* https://github.com/soimort/translate-shell
 
 ## nvim settings(Mac or Ubuntu)
 1. Clone this repository
@@ -21,3 +21,8 @@
 1. ```nvim```
 1. UpdateRemotePlugin
 1. GoInstallBinary(for golang)
+
+
+## other recommended
+
+* https://github.com/mhinz/neovim-remote

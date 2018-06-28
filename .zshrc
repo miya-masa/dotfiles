@@ -19,6 +19,8 @@ zplug "b4b4r07/enhancd", use:enhancd.sh
 zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
 # Support oh-my-zsh plugins and the like
 zplug "plugins/git",   from:oh-my-zsh
+zplug "plugins/docker-compose",   from:oh-my-zsh
+zplug "plugins/docker",   from:oh-my-zsh
 zplug "jocelynmallon/zshmarks"
 
 if ! zplug check --verbose; then
@@ -103,8 +105,8 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 ## options
 set -o AUTO_CD
 
-if [[ -e "$HOME/.local_zshrc" ]]; then
-  source "$HOME/.local_zshrc"
+if [[ -e "$HOME/.zshrc.local" ]]; then
+  source "$HOME/.zshrc.local"
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
