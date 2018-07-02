@@ -120,7 +120,7 @@ nnoremap Y y$
 nnoremap H ^
 nnoremap L $
 vnoremap L g_
-nnoremap <C-[><C-[> :nohlsearch<CR>
+nnoremap <C-j><C-j> :nohlsearch<CR>
 
 " Some useful quickfix shortcuts for quickfix
 nnoremap <C-n> :cn<CR>
@@ -128,10 +128,13 @@ nnoremap <C-m> :cp<CR>
 nnoremap <leader>a :cclose<CR>
 
 " vimshell
-tnoremap <silent> <leader><C-[> <C-\><C-n>
+tnoremap <silent> <leader><C-j> <C-\><C-n>
 nnoremap <leader>vt :tabnew<CR>:terminal<CR>
 nnoremap <leader>st :split<CR>:terminal<CR>
-map <C-[> <ESC>
+
+" escape
+imap <c-j> <ESC>
+vmap <c-j> <ESC>
 
 """"""""""""""""""""""""""""""
 " 全角スペースを表示
