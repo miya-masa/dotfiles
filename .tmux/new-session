@@ -1,3 +1,4 @@
+rename-window dev
 splitw -d
 resize-pane -D 21
 
