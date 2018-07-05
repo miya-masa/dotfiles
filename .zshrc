@@ -122,3 +122,5 @@ if [[ -e "$HOME/.zshrc.local" ]]; then
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+[ -f ~/.tmux/.new-session ] && tmux new-session \; source-file ~/.tmux/new-session

@@ -135,6 +135,7 @@ nnoremap <leader>st :split<CR>:terminal<CR>
 " escape
 imap <c-j> <ESC>
 vmap <c-j> <ESC>
+nmap <c-j> <ESC>
 
 """"""""""""""""""""""""""""""
 " 全角スペースを表示
@@ -191,12 +192,10 @@ let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
 
 Plug 'honza/vim-snippets'
 Plug 'thinca/vim-qfreplace'
+
 Plug 'Shougo/deol.nvim'
-Plug 'scrooloose/nerdtree'
-noremap <leader>fi :NERDTreeToggle<CR>
-nnoremap <leader>ft :tabnew<CR>:NERDTreeToggle<CR>
-let g:NERDTreeShowHidden=1
-let g:NERDTreeShowBookmarks=1
+Plug 'justinmk/vim-dirvish'
+Plug 'kristijanhusak/vim-dirvish-git'
 
 Plug 'whatyouhide/vim-gotham'
 Plug 'tpope/vim-fugitive'
@@ -411,12 +410,12 @@ let g:vrc_auto_format_response_patterns = {
       \ 'json': 'jq "."',
       \ 'xml': 'tidy -xml -i -'
       \}
+let g:vrc_trigger = '<Leader><C-j>'
 
 Plug 'osyo-manga/vim-over'
 Plug 'flazz/vim-colorschemes'
 Plug 'VincentCordobes/vim-translate'
 Plug 'fenetikm/falcon'
-
 
 call plug#end()
 call camelcasemotion#CreateMotionMappings('<leader>')

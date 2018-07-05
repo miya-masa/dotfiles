@@ -1,6 +1,7 @@
 all: git tmux zsh nvim fzf
 
 tmux:
+	ln -fsn ${PWD}/.tmux/new-session ${HOME}/.tmux/new-session/.tmux.conf
 	ln -fs ${PWD}/.tmux.conf ${HOME}/.tmux.conf
 
 zsh:
