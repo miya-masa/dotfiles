@@ -313,7 +313,6 @@ Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jodosha/vim-godebug'
 Plug 'Valloric/YouCompleteMe'
 
-
 Plug 'kylef/apiblueprint.vim'
 Plug 'ekalinin/Dockerfile.vim'
 
@@ -387,6 +386,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 nnoremap <Leader><C-B> :Buffer<CR>
 nnoremap <Leader><C-A> :Ag<CR>
+nnoremap <Leader><C-G> :GFiles<CR>
 nnoremap <Leader><C-F> :Files<CR>
 nnoremap <leader><C-L> :Line<CR>
 
