@@ -15,6 +15,8 @@
   ```
 * https://github.com/soimort/translate-shell
 * tmux
+* tmux-git
+* https://github.com/thewtex/tmux-mem-cpu-load
 
 ## nvim settings(Mac or Ubuntu)
 1. Clone this repository
