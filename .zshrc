@@ -1,3 +1,15 @@
+export LANG=ja_JP.UTF-8
+export LC_TIME=C
+export LC_MESSAGES=C
+export PAGER=less
+
+###
+### history
+###
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+
 # Check if zplug is installed
 if [[ ! -d ~/.zplug ]]; then
   git clone https://github.com/zplug/zplug ~/.zplug
@@ -110,3 +122,5 @@ if [[ -e "$HOME/.zshrc.local" ]]; then
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+[ -f ~/.tmux/.new-session ] && tmux new-session \; source-file ~/.tmux/new-session

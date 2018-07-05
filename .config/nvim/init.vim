@@ -120,7 +120,7 @@ nnoremap Y y$
 nnoremap H ^
 nnoremap L $
 vnoremap L g_
-nnoremap <C-[><C-[> :nohlsearch<CR>
+nnoremap <C-j><C-j> :nohlsearch<CR>
 
 " Some useful quickfix shortcuts for quickfix
 nnoremap <C-n> :cn<CR>
@@ -128,10 +128,14 @@ nnoremap <C-m> :cp<CR>
 nnoremap <leader>a :cclose<CR>
 
 " vimshell
-tnoremap <silent> <leader><C-[> <C-\><C-n>
+tnoremap <silent> <leader><C-j> <C-\><C-n>
 nnoremap <leader>vt :tabnew<CR>:terminal<CR>
 nnoremap <leader>st :split<CR>:terminal<CR>
-map <C-[> <ESC>
+
+" escape
+imap <c-j> <ESC>
+vmap <c-j> <ESC>
+nmap <c-j> <ESC>
 
 """"""""""""""""""""""""""""""
 " 全角スペースを表示
@@ -183,19 +187,15 @@ endif
 
 call plug#begin('~/.vim/plugged')
 
-Plug 'Shougo/deoplete.nvim'
-
 Plug 'SirVer/ultisnips'
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
 
 Plug 'honza/vim-snippets'
 Plug 'thinca/vim-qfreplace'
+
 Plug 'Shougo/deol.nvim'
-Plug 'scrooloose/nerdtree'
-noremap <leader>fi :NERDTreeToggle<CR>
-nnoremap <leader>ft :tabnew<CR>:NERDTreeToggle<CR>
-let g:NERDTreeShowHidden=1
-let g:NERDTreeShowBookmarks=1
+Plug 'justinmk/vim-dirvish'
+Plug 'kristijanhusak/vim-dirvish-git'
 
 Plug 'whatyouhide/vim-gotham'
 Plug 'tpope/vim-fugitive'
@@ -311,7 +311,8 @@ endfunction
 
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jodosha/vim-godebug'
-Plug 'zchee/deoplete-go'
+Plug 'Valloric/YouCompleteMe'
+
 
 Plug 'kylef/apiblueprint.vim'
 Plug 'ekalinin/Dockerfile.vim'
@@ -374,70 +375,9 @@ augroup END
 
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'ternjs/tern_for_vim'
-Plug 'carlitux/deoplete-ternjs'
-let cmd = 'npm install -g term'
-
-" Set bin if you have many instalations
-" let g:deoplete#sources#ternjs#tern_bin = '/path/to/tern_bin'
-let g:deoplete#sources#ternjs#timeout = 1
-
-" Whether to include the types of the completions in the result data. Default: 0
-" let g:deoplete#sources#ternjs#types = 1
-
-" Whether to include the distance (in scopes for variables, in prototypes for
-" properties) between the completions and the origin position in the result
-" data. Default: 0
-" let g:deoplete#sources#ternjs#depths = 1
-
-" Whether to include documentation strings (if found) in the result data.
-" Default: 0
-" let g:deoplete#sources#ternjs#docs = 1
-
-" When on, only completions that match the current word at the given point will
-" be returned. Turn this off to get all results, so that you can filter on the
-" client side. Default: 1
-"let g:deoplete#sources#ternjs#filter = 0
-
-" Whether to use a case-insensitive compare between the current word and
-" potential completions. Default 0
-" let g:deoplete#sources#ternjs#case_insensitive = 1
-
-" When completing a property and no completions are found, Tern will use some
-" heuristics to try and return some properties anyway. Set this to 0 to
-" turn that off. Default: 1
-" let g:deoplete#sources#ternjs#guess = 0
-
-" Determines whether the result set will be sorted. Default: 1
-" let g:deoplete#sources#ternjs#sort = 0
-
-" When disabled, only the text before the given position is considered part of
-" the word. When enabled (the default), the whole variable name that the cursor
-" is on will be included. Default: 1
-" let g:deoplete#sources#ternjs#expand_word_forward = 0
-
-" Whether to ignore the properties of Object.prototype unless they have been
-" spelled out by at least two characters. Default: 1
-" let g:deoplete#sources#ternjs#omit_object_prototype = 0
-
-" Whether to include JavaScript keywords when completing something that is not
-" a property. Default: 0
-" let g:deoplete#sources#ternjs#include_keywords = 1
-
-" If completions should be returned when inside a literal. Default: 1
-" let g:deoplete#sources#ternjs#in_literal = 0
-
-
-"Add extra filetypes
-"let g:deoplete#sources#ternjs#filetypes = [
-"                \ 'jsx',
-"                \ 'javascript.jsx',
-"                \ 'vue',
-"                \ '...'
-"                \ ]
 
 Plug 'jiangmiao/auto-pairs'
 Plug 'c9s/perlomni.vim'
-Plug 'zchee/deoplete-zsh'
 Plug 'skielbasa/vim-material-monokai'
 Plug 'felipesousa/rupza'
 Plug 'jdkanani/vim-material-theme'
@@ -470,12 +410,12 @@ let g:vrc_auto_format_response_patterns = {
       \ 'json': 'jq "."',
       \ 'xml': 'tidy -xml -i -'
       \}
+let g:vrc_trigger = '<Leader><C-j>'
 
 Plug 'osyo-manga/vim-over'
 Plug 'flazz/vim-colorschemes'
 Plug 'VincentCordobes/vim-translate'
 Plug 'fenetikm/falcon'
-
 
 call plug#end()
 call camelcasemotion#CreateMotionMappings('<leader>')
@@ -493,16 +433,6 @@ let g:airline_theme = 'gruvbox'
 " let g:airline_theme='materialmonokai'
 "
 "
-" # deoplete
-" Use smartcase.
-"
-"
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
-let g:deoplete#sources#go#sort_class = ['package', 'var', 'func', 'type', 'const']
-call deoplete#custom#option('smart_case', v:true)
-inoremap <expr><C-h> deoplete#smart_close_popup()."\<C-h>"
-inoremap <expr><BS>  deoplete#smart_close_popup()."\<C-h>"
 
 " conv hex deg bin
 command! -nargs=1 ToH echo printf("%0x", <args>)
@@ -511,3 +441,7 @@ command! -nargs=1 ToB echo printf("%0b", <args>)
 command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
 command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
 command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
+
+
+inoremap <c-x><c-k> <c-x><c-k>
+let g:UltiSnipsExpandTrigger="<C-l>"

@@ -1,0 +1,5 @@
+new-window -n ops
+new-window -n tool
+new-window -n sand
+
+select-pane -t 0

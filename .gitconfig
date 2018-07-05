@@ -1,1 +1,36 @@
-[user]
+[color]
+	ui = auto
+
+[grep]
+	lineNumber = true
+
+[diff]
+	renames = true
+
+[alias]
+	rpo = remote prune origin
+
+	st = status
+	ss = status -s
+
+	ba = branch -a
+	bm = branch --merged
+	br = branch -r
+
+	co = checkout
+	cb = checkout -b
+
+	di = diff
+	dm = diff master
+	dw = diff --word-diff
+	dc = diff --cached
+	d1 = diff HEAD~
+	d2 = diff HEAD~~
+	d3 = diff HEAD~~~
+
+	ls = log --stat
+	lp = log -p
+
+	hist = log --graph --format='%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset)'
+
+	mergeable = !git format-patch --stdout $(git rev-parse --abbrev-ref HEAD)..$(git rev-parse --abbrev-ref @{-1}) | git apply --check && echo ok
