@@ -17,5 +17,5 @@ git:
 	ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
 
 fzf:
-	${PWD}/.init_fzf.zsh
+	${PWD}/init_fzf.sh
 	ln -fs ${PWD}/.fzfadd.zsh ${HOME}/.fzfadd.zsh

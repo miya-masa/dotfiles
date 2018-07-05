@@ -11,13 +11,22 @@
 ```
 * Universal Ctags
   ```
+# linux
   sudo apt-get install autoconf automake libtool autoconf-doc libtool-doc```
   ```
 * https://github.com/soimort/translate-shell
 * tmux
+```
+# linux
+sudo apt-get install aptitude
+sudo aptitude install tmux
+```
 * tmux-git
 * https://github.com/thewtex/tmux-mem-cpu-load
-* lhttps://github.com/tmux-plugins/tpm
+* https://github.com/tmux-plugins/tpm
+```
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
 ## nvim settings(Mac or Ubuntu)
 1. Clone this repository
 1. make all
