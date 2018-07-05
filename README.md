@@ -17,7 +17,7 @@
 * tmux
 * tmux-git
 * https://github.com/thewtex/tmux-mem-cpu-load
-
+* lhttps://github.com/tmux-plugins/tpm
 ## nvim settings(Mac or Ubuntu)
 1. Clone this repository
 1. make all
