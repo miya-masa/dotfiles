@@ -123,4 +123,6 @@ fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-[ -f ~/.tmux/.new-session ] && tmux new-session \; source-file ~/.tmux/new-session
+if [ $SHLVL = 1 ]; then
+    [ -f ~/.tmux/new-session ] && alias tmuxopen="tmux -2 attach || tmux -2 new-session \; source-file ~/.tmux/new-session"
+fi
