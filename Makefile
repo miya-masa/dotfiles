@@ -1,7 +1,8 @@
 all: git tmux zsh nvim fzf
 
 tmux:
-	ln -fsn ${PWD}/.tmux/new-session ${HOME}/.tmux/new-session/.tmux.conf
+	mkdir -p ${HOME}/.tmux
+	ln -fsn ${PWD}/.tmux/new-session ${HOME}/.tmux/new-session
 	ln -fs ${PWD}/.tmux.conf ${HOME}/.tmux.conf
 
 zsh:
@@ -9,6 +10,7 @@ zsh:
 	ln -fs ${PWD}/.zprofile ${HOME}/.zprofile
 
 nvim:
+	mkdir -p ${HOME}/.config
 	ln -fsn ${PWD}/.config ${HOME}/.config
 
 git:
