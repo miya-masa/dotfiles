@@ -338,7 +338,11 @@ set listchars=tab:^\ ,trail:~
 " Key map {{{
 :let mapleader=","
   " Map {{{
-  map <c-j> <ESC>
+  map <C-j> <ESC>
+  imap <C-j> <ESC>
+  nmap <C-j> <ESC>
+  vmap <C-j> <ESC>
+  tmap <C-j> <ESC>
   " }}}
   " Normal Mode {{{
   nnoremap <F8> :source %<CR>
