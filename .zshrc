@@ -59,10 +59,6 @@ esac
 # See bash(1) for more options
 HISTCONTROL=ignoreboth
 
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
-
 # If set, the pattern "**" used in a pathname expansion context will
 # match all files and zero or more directories and subdirectories.
 
@@ -117,12 +113,9 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 ## options
 set -o AUTO_CD
 
-if [[ -e "$HOME/.zshrc.local" ]]; then
-  source "$HOME/.zshrc.local"
-fi
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+[ -f "$HOME/.fzf.zsh" ] && source "$HOME/.fzf.zsh"
 
 if [ $SHLVL = 1 ]; then
-    [ -f ~/.tmux/new-session ] && alias tmuxopen="tmux -2 attach || tmux -2 new-session \; source-file ~/.tmux/new-session"
+    [ -f "$HOME/.tmux/new-session" ] && alias tmuxopen="tmux -2 attach || tmux -2 new-session \; source-file $HOME/.tmux/new-session"
 fi
