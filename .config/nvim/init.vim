@@ -10,9 +10,8 @@
 "  / / / / / / /__| |/ / / / / / / /
 " /_/_/ /_/_/\__(_)___/_/_/ /_/ /_/
 "
-
 " Plugins {{{
-" Enable plugin {{{
+" Enable plugin {{{2
 filetype plugin indent on
 let s:plug_path = '~/.vim/autoload/plug.vim'
 if has('nvim')
@@ -108,7 +107,6 @@ Plug 'vim-airline/vim-airline-themes'
 " }}}
 call plug#end()
 " }}}
-
 " Plugin Configuration {{{
   " Plugin UltiSnips {{{
     let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
@@ -304,7 +302,6 @@ if has('mouse')
 endif
 au FileType vim setlocal foldmethod=marker
 " }}}
-
 " Search {{{
 set ignorecase
 set smartcase
@@ -313,7 +310,6 @@ set incsearch
 set hlsearch
 set iskeyword=a-z,A-Z,48-57,_,.,-,>
 " }}}
-
 " Display {{{
 set noerrorbells
 set novisualbell
@@ -334,7 +330,6 @@ set display=lastline
 set list
 set listchars=tab:^\ ,trail:~
 " }}}
-
 " Key map {{{
 :let mapleader=","
   " Map {{{
@@ -374,14 +369,12 @@ set listchars=tab:^\ ,trail:~
   tnoremap <silent> <leader><C-j> <C-\><C-n>
   " }}}
 " }}}
-
 " Colorscheme {{{
   syntax enable
   set background=dark
   colorscheme gruvbox
   let g:airline_theme = 'gruvbox'
 " }}}
-
 " Util Command {{{
 " Conv hex deg bin {{{
   command! -nargs=1 ToH echo printf("%0x", <args>)
