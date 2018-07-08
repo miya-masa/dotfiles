@@ -121,8 +121,11 @@ alias b='jump '
 set -o AUTO_CD
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
-[ -f "$HOME/.fzf.zsh" ] && source "$HOME/.fzf.zsh"
+# DO NOT EDIT HERE
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# DO NOT EDIT END
 
 if [ $SHLVL = 1 ]; then
     [ -f "$HOME/.tmux/new-session" ] && alias tmuxopen="tmux -2 new-session \; source-file $HOME/.tmux/new-session"
 fi
+
