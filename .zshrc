@@ -117,5 +117,5 @@ set -o AUTO_CD
 [ -f "$HOME/.fzf.zsh" ] && source "$HOME/.fzf.zsh"
 
 if [ $SHLVL = 1 ]; then
-    [ -f "$HOME/.tmux/new-session" ] && alias tmuxopen="tmux -2 attach || tmux -2 new-session \; source-file $HOME/.tmux/new-session"
+    [ -f "$HOME/.tmux/new-session" ] && alias tmuxopen="tmux -2 new-session \; source-file $HOME/.tmux/new-session"
 fi
