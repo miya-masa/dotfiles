@@ -349,8 +349,6 @@ set listchars=tab:^\ ,trail:~
   nnoremap h <Left>zv
   nnoremap l <Right>zv
   nnoremap Y y$
-  nnoremap H ^
-  nnoremap L $
   nnoremap <C-j><C-j> :nohlsearch<CR>
   nnoremap <C-n> :cn<CR>
   nnoremap <C-m> :cp<CR>
