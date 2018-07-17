@@ -97,6 +97,7 @@ Plug 'diepm/vim-rest-console'
 Plug 'osyo-manga/vim-over'
 Plug 'VincentCordobes/vim-translate'
 Plug 'junegunn/vim-easy-align'
+Plug 'christoomey/vim-tmux-navigator'
 
 " Plugin Display {{{
 Plug 'flazz/vim-colorschemes'
@@ -332,13 +333,6 @@ set listchars=tab:^\ ,trail:~
 " }}}
 " Key map {{{
 :let mapleader=","
-  " Map {{{
-  map <C-j> <ESC>
-  imap <C-j> <ESC>
-  nmap <C-j> <ESC>
-  vmap <C-j> <ESC>
-  tmap <C-j> <ESC>
-  " }}}
   " Normal Mode {{{
   nnoremap <F8> :source %<CR>
   nnoremap ZZ <Nop>
@@ -349,7 +343,6 @@ set listchars=tab:^\ ,trail:~
   nnoremap h <Left>zv
   nnoremap l <Right>zv
   nnoremap Y y$
-  nnoremap <C-j><C-j> :nohlsearch<CR>
   nnoremap <C-n> :cn<CR>
   nnoremap <C-m> :cp<CR>
   nnoremap <leader>a :cclose<CR>
@@ -359,12 +352,10 @@ set listchars=tab:^\ ,trail:~
   nnoremap <Leader><C-G> :GFiles<CR>
   nnoremap <Leader><C-F> :Files<CR>
   nnoremap <leader><C-L> :Line<CR>
-  " }}}
-  " Visual Mode {{{
-  vnoremap L g_
+  nnoremap <Leader><CR> :nohlsearch<CR>
   " }}}
   " Termninal Mode {{{
-  tnoremap <silent> <leader><C-j> <C-\><C-n>
+  tnoremap <silent> <leader><C-[> <C-\><C-n>
   " }}}
 " }}}
 " Colorscheme {{{
