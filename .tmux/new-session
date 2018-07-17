@@ -4,14 +4,12 @@ resize-pane -D 22
 
 new-window -n ops
 splitw -d
-resize-pane -D 22
+splitw -d
+splitw -h -d
+resize-pane -U 10
 
 new-window -n tool
-splitw -d
-resize-pane -D 22
 
 new-window -n sand
-splitw -d
-resize-pane -D 22
 
 select-window -t 1
