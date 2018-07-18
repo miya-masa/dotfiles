@@ -10,7 +10,6 @@
 "  / / / / / / /__| |/ / / / / / / /
 " /_/_/ /_/_/\__(_)___/_/_/ /_/ /_/
 "
-" Plugins {{{
 " Enable plugin {{{2
 filetype plugin indent on
 let s:plug_path = '~/.vim/autoload/plug.vim'
@@ -271,6 +270,13 @@ call plug#end()
   " vim-airline {{{
     let g:airline_powerline_fonts = 1
   " }}}
+  " tmux-navigator {{{
+    let g:tmux_navigator_no_mappings = 1
+    nnoremap <silent> <C-w>h :TmuxNavigateLeft<cr>
+    nnoremap <silent> <C-w>j :TmuxNavigateDown<cr>
+    nnoremap <silent> <C-w>k :TmuxNavigateUp<cr>
+    nnoremap <silent> <C-w>h :TmuxNavigateRight<cr>
+  " }}}
   " PluginName {{{
   " }}}
 " }}}
@@ -344,7 +350,7 @@ set listchars=tab:^\ ,trail:~
   nnoremap l <Right>zv
   nnoremap Y y$
   nnoremap <C-n> :cn<CR>
-  nnoremap <C-m> :cp<CR>
+  nnoremap <C-p> :cp<CR>
   nnoremap <leader>a :cclose<CR>
   nnoremap <leader>st :split<CR>:terminal<CR>
   nnoremap <Leader><C-B> :Buffer<CR>
