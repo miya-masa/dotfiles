@@ -10,7 +10,7 @@
 "  / / / / / / /__| |/ / / / / / / /
 " /_/_/ /_/_/\__(_)___/_/_/ /_/ /_/
 "
-" Enable plugin {{{2
+" Enable plugin {{{
 filetype plugin indent on
 let s:plug_path = '~/.vim/autoload/plug.vim'
 if has('nvim')
@@ -23,19 +23,6 @@ if !filereadable(glob(s:plug_path))
   call system('curl -fLo ' . s:plug_path . ' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim')
   autocmd VimEnter * PlugInstall --sync | source ~/.config/nvim/init.vim
 endif
-" }}}
-" Define function {{{
-  " YouCompleteMe {{{
-    function! BuildYCM(info)
-      " info is a dictionary with 3 fields
-      " - name:   name of the plugin
-      " - status: 'installed', 'updated', or 'unchanged'
-      " - force:  set on PlugInstall! or PlugUpdate!
-      if a:info.status == 'installed' || a:info.force
-        !./install.py
-      endif
-    endfunction
-  " }}}
 " }}}
 " VimPlug Start {{{
 call plug#begin('~/.vim/plugged')
@@ -61,7 +48,14 @@ Plug 'elzr/vim-json'
 Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jodosha/vim-godebug'
-Plug 'Valloric/YouCompleteMe', { 'do': function('BuildYCM') }
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'kylef/apiblueprint.vim'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'yaasita/edit-slack.vim'
@@ -279,9 +273,14 @@ call plug#end()
     nnoremap <silent> <C-w>k :TmuxNavigateUp<cr>
     nnoremap <silent> <C-w>h :TmuxNavigateRight<cr>
   " }}}
+  " deoplete & deoplete-go {{{
+  let g:deoplete#enable_at_startup = 1
+  let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+  let g:deoplete#sources#go#package_dot = 1
+  let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+  " }}}
   " PluginName {{{
   " }}}
-" }}}
 " }}}
 " Basic Settings  {{{
 scriptencoding utf8
