@@ -93,6 +93,7 @@ Plug 'osyo-manga/vim-over'
 Plug 'VincentCordobes/vim-translate'
 Plug 'junegunn/vim-easy-align'
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'Konfekt/FastFold'
 
 " Plugin Display {{{
 Plug 'flazz/vim-colorschemes'
@@ -278,6 +279,8 @@ call plug#end()
   let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
   let g:deoplete#sources#go#package_dot = 1
   let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+  " }}}
+  " FastFold {{{
   " }}}
   " PluginName {{{
   " }}}
