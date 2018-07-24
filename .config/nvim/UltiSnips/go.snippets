@@ -1,0 +1,78 @@
+extends go
+
+snippet iferr "if error"
+if err != nil {
+	return ${0:${VISUAL}}
+}
+endsnippet
+
+snippet test "test"
+
+func Test${1:FuncName}(t *testing.T) {
+	// setup
+	${0:${VISUAL}}
+	// execute
+	// verification
+}
+endsnippet
+
+snippet assert "assert snippet"
+t.Errorf("index:%+v name %+v \ninput %+v \nwant %+v \nbut  %+v",i ,c.name,${1:c.in}, ${2:c.exp}, ${3:act})
+${0:${VISUAL}}
+endsnippet
+
+snippet casetest "casetest snip"
+func Test$1(t *testing.T) {
+	type in struct {
+	}
+	type exp struct {
+		err	error
+	}
+	cases := []struct {
+		name  string
+		in in
+
+		exp exp
+	}{
+		{
+			name : "success",
+		},
+		{
+			name : "failure",
+		},
+	}
+
+	for i, c := range cases {
+		t.Run(c.name, func(t *testing.T){
+		// setup
+		${0:${VISUAL}}
+		// execute
+		// verification
+		})
+	}
+}
+endsnippet
+
+snippet mockgen "generate mock"
+//go:generate mockgen -destination ./${1:package}mocks/${2:filename}.go -package $1mocks -source ./$2.go -imports .=${3:selfpackage}
+${0:${VISUAL}}
+endsnippet
+
+snippet gomock "gomock"
+ctrl := gomock.NewController(t)
+defer ctrl.Finish()
+mock${1:varname} := ${2:packagename}.NewMock${3:ifname}(ctrl)
+${0:${VISUAL}}
+endsnippet
+
+
+snippet pr "print debug"
+//DEBUG: print debug
+fmt.Printf("####################################${1:tag} %v\n",${0:${VISUAL}})
+endsnippet
+
+snippet deepeq "deep equal"
+if !reflect.DeepEqual($1,$2) {
+	${0:${VISUAL}}
+}
+endsnippet

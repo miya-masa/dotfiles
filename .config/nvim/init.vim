@@ -106,7 +106,7 @@ call plug#end()
 " }}}
 " Plugin Configuration {{{
   " Plugin UltiSnips {{{
-    let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/"]
+    let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/", "~/.config/nvim/UltiSnips_local/"]
     let g:UltiSnipsExpandTrigger="<C-l>"
   " }}}
   " VimRestConsole {{{
@@ -144,8 +144,8 @@ call plug#end()
     let g:go_highlight_generate_tags = 1
 
     " lint
-    let g:go_metalinter_autosave_enabled = ['vet','errcheck', 'golint']
-    let g:go_metalinter_autosave = 0
+    let g:go_metalinter_enabled = ['vet', 'golint', 'staticcheck']
+    let g:go_metalinter_deadline = "30s"
     let g:go_def_mode = 'godef'
     let g:go_term_mode = 'vsplit'
 
@@ -278,7 +278,11 @@ call plug#end()
   " }}}
   " FastFold {{{
   " }}}
-  " PluginName {{{
+  " ALE {{{
+    let g:ale_linters = {
+    \   'go': ['gometalinter'],
+    \}
+    let g:ale_go_gometalinter_options = '--enable=staticcheck --enable=golint --enable=vet'
   " }}}
 " }}}
 " Basic Settings  {{{
