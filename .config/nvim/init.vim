@@ -268,11 +268,7 @@ call plug#end()
     let g:airline_powerline_fonts = 1
   " }}}
   " tmux-navigator {{{
-    let g:tmux_navigator_no_mappings = 1
-    nnoremap <silent> <C-w>h :TmuxNavigateLeft<cr>
-    nnoremap <silent> <C-w>j :TmuxNavigateDown<cr>
-    nnoremap <silent> <C-w>k :TmuxNavigateUp<cr>
-    nnoremap <silent> <C-w>h :TmuxNavigateRight<cr>
+  nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
   " }}}
   " deoplete & deoplete-go {{{
   let g:deoplete#enable_at_startup = 1

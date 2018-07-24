@@ -11,7 +11,7 @@ zsh:
 
 nvim:
 	mkdir -p ${HOME}/.config
-	ln -fsn ${PWD}/.config ${HOME}/.config
+	ln -fs ${PWD}/.config/nvim ${HOME}/.config/nvim
 
 git:
 	ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
