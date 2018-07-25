@@ -268,7 +268,7 @@ call plug#end()
     let g:airline_powerline_fonts = 1
   " }}}
   " tmux-navigator {{{
-  nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
+    nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
   " }}}
   " deoplete & deoplete-go {{{
   let g:deoplete#enable_at_startup = 1
@@ -277,6 +277,11 @@ call plug#end()
   let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
   " }}}
   " FastFold {{{
+    let g:go_fold = 1
+  " }}}
+  " IndentGuide {{{
+    let g:indent_guides_start_level = 2
+    let g:indent_guides_guide_size = 1
   " }}}
   " ALE {{{
     let g:ale_linters = {
