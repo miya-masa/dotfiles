@@ -68,7 +68,9 @@ endsnippet
 
 snippet pr "print debug"
 //DEBUG: print debug
-fmt.Printf("####################################${1:tag} %v\n",${0:${VISUAL}})
+fmt.Printf("####################################${1:tag} %v\n", ${2:val})
+${0:${VISUAL}}
+
 endsnippet
 
 snippet deepeq "deep equal"
