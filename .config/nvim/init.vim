@@ -288,8 +288,6 @@ call plug#end()
     \   'go': ['gometalinter'],
     \}
     let g:ale_go_gometalinter_options = '--fast --enable=staticcheck --enable=golint --enable=vet'
-    let g:ale_set_loclist = 0
-    let g:ale_set_quickfix = 1
   " }}}
 " }}}
 " Basic Settings  {{{
