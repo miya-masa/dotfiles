@@ -94,6 +94,7 @@ Plug 'VincentCordobes/vim-translate'
 Plug 'junegunn/vim-easy-align'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'Konfekt/FastFold'
+" Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
 Plug 'flazz/vim-colorschemes'
@@ -288,6 +289,19 @@ call plug#end()
     \   'go': ['gometalinter'],
     \}
     let g:ale_go_gometalinter_options = '--fast --enable=staticcheck --enable=golint --enable=vet'
+  " }}}
+  " tmuxline {{{
+  let g:tmuxline_powerline_separators = 0
+  let g:tmuxline_preset = {
+  \'a'    : '#S',
+  \'b'    : '#(tmux-mem-cpu-load --colors)',
+  \'c'    : ['#(whoami)'],
+  \'win'  : ['#I', '#W'],
+  \'cwin' : ['#I', '#W', '#F'],
+  \'x'    : 'Online: #{online_status}',
+  \'y'    : 'Batt: #{battery_icon} #{battery_percentage}',
+  \'z'    : ['%R', '%a', '%Y'],
+  \'options' : {'status-justify' : 'left'}}
   " }}}
 " }}}
 " Basic Settings  {{{

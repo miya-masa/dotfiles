@@ -3,6 +3,7 @@ all: git tmux zsh nvim fzf
 tmux:
 	mkdir -p ${HOME}/.tmux
 	ln -fsn ${PWD}/.tmux/new-session ${HOME}/.tmux/new-session
+	ln -fsn ${PWD}/.tmux/tmuxline.conf ${HOME}/.tmux/tmuxline.conf
 	ln -fs ${PWD}/.tmux.conf ${HOME}/.tmux.conf
 
 zsh:
