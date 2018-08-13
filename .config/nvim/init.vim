@@ -325,7 +325,7 @@ set formatoptions+=mM
 set virtualedit=block
 set whichwrap=b,s,[,],<,>
 set backspace=indent,eol,start
-set ambiwidth=double
+" set ambiwidth=double
 set wildmenu
 if has('mouse')
   set mouse=a
