@@ -194,6 +194,9 @@ call plug#end()
       autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
       autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
       autocmd Filetype go command! GoRunArgs :!go run % <args>
+
+      " GoKeyword
+      autocmd FileType go set iskeyword=a-z,A-Z,48-57,&,*
     augroup END
     " build_go_files is a custom function that builds or compiles the test file.
     " It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file
