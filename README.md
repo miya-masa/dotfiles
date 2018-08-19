@@ -28,8 +28,6 @@
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
   ```
 
-* autojump https://github.com/wting/autojump
-
 ## nvim settings(Mac or Ubuntu)
 
 1. Clone this repository
