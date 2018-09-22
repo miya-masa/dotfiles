@@ -48,6 +48,7 @@ Plug 'elzr/vim-json'
 Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jodosha/vim-godebug'
+" Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
 if has('nvim')
   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 else
@@ -94,6 +95,9 @@ Plug 'VincentCordobes/vim-translate'
 Plug 'junegunn/vim-easy-align'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'Konfekt/FastFold'
+Plug 'itchyny/calendar.vim'
+Plug 'xolox/vim-notes'
+Plug 'xolox/vim-misc'
 " Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
@@ -107,7 +111,7 @@ call plug#end()
 " }}}
 " Plugin Configuration {{{
   " Plugin UltiSnips {{{
-    let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips/", "~/.config/nvim/UltiSnips_local/"]
+    let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
     let g:UltiSnipsExpandTrigger="<C-l>"
   " }}}
   " VimRestConsole {{{
@@ -145,7 +149,7 @@ call plug#end()
     let g:go_highlight_generate_tags = 1
 
     " lint
-    let g:go_metalinter_enabled = ['vet', 'golint', 'staticcheck']
+    " let g:go_metalinter_enabled = ['vet', 'golint', 'staticcheck']
     let g:go_metalinter_deadline = "30s"
     let g:go_def_mode = 'godef'
     let g:go_term_mode = 'vsplit'
@@ -288,10 +292,16 @@ call plug#end()
     let g:indent_guides_guide_size = 1
   " }}}
   " ALE {{{
-    let g:ale_linters = {
-    \   'go': ['gometalinter'],
-    \}
-    let g:ale_go_gometalinter_options = '--fast --enable=staticcheck --enable=golint --enable=vet'
+    " let g:ale_linters = {
+    " \   'go': ['gometalinter'],
+    " \}
+    " let g:ale_go_gometalinter_options = '--fast'
+  " }}}
+  " calendar.vim {{{
+    let g:calendar_google_calendar = 1
+  " }}}
+  " fix-whitespace {{{
+    let g:extra_whitespace_ignored_filetypes = ['calendar']
   " }}}
   " tmuxline {{{
   let g:tmuxline_powerline_separators = 0
@@ -306,6 +316,12 @@ call plug#end()
   \'z'    : ['%R', '%a', '%Y'],
   \'options' : {'status-justify' : 'left'}}
   " }}}
+  " vim-notes {{{
+    let g:notes_directories = ['~/work/Notes']
+    let g:notes_suffix = '.md'
+  " }}}
+  " YCM {{{
+  " }}}
 " }}}
 " Basic Settings  {{{
 scriptencoding utf8
@@ -315,6 +331,10 @@ set nowritebackup
 set nobackup
 set noswapfile
 set noundofile
+set noerrorbells
+set novisualbell
+set t_vb=
+set tm=500
 " disable viminfo
 set viminfo=
 " share clipboard
@@ -328,6 +348,14 @@ set formatoptions+=mM
 set virtualedit=block
 set whichwrap=b,s,[,],<,>
 set backspace=indent,eol,start
+set so=7
+set ruler
+set hid
+set lazyredraw
+" Use Unix as the standard file type
+set ffs=unix,dos,mac
+" Add a bit extra margin to the left
+set foldcolumn=1
 " set ambiwidth=double
 set wildmenu
 if has('mouse')
@@ -344,14 +372,13 @@ set hlsearch
 set iskeyword=a-z,A-Z,48-57,_,.,-,>
 " }}}
 " Display {{{
-set noerrorbells
-set novisualbell
-set visualbell t_vb=
 set shellslash
 set number
 set showmatch matchtime=1
 set ts=2 sw=2 sts=2
 set autoindent
+set smartindent
+set wrap
 set shiftwidth=2
 set expandtab
 set cinoptions+=:0
@@ -363,8 +390,40 @@ set display=lastline
 set list
 set listchars=tab:^\ ,trail:~
 " }}}
+" Spell Check {{{
+set spelllang=en,cjk
+
+fun! s:SpellConf()
+  redir! => syntax
+  silent syntax
+  redir END
+
+  set spell
+
+  if syntax =~? '/<comment\>'
+    syntax spell default
+    syntax match SpellMaybeCode /\<\h\l*[_A-Z]\h\{-}\>/ contains=@NoSpell transparent containedin=Comment contained
+  else
+    syntax spell toplevel
+    syntax match SpellMaybeCode /\<\h\l*[_A-Z]\h\{-}\>/ contains=@NoSpell transparent
+  endif
+
+  syntax cluster Spell add=SpellNotAscii,SpellMaybeCode
+endfunc
+
+augroup spell_check
+  autocmd!
+  autocmd BufReadPost,BufNewFile,Syntax * call s:SpellConf()
+augroup END
+" }}}
 " Key map {{{
 :let mapleader=","
+  " Opens a new tab with the current buffer's path
+  " Super useful when editing files in the same directory
+  map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
+
+  " Switch CWD to the directory of the open buffer
+  map <leader>cd :cd %:p:h<cr>:pwd<cr>
   " Normal Mode {{{
   nnoremap <F8> :source %<CR>
   nnoremap ZZ <Nop>
@@ -385,9 +444,13 @@ set listchars=tab:^\ ,trail:~
   nnoremap <Leader><C-F> :Files<CR>
   nnoremap <leader><C-L> :Line<CR>
   nnoremap <Leader><CR> :nohlsearch<CR>
+  nnoremap <Space><CR> V:!sh<CR>
   " }}}
   " Termninal Mode {{{
   tnoremap <silent> <leader><C-[> <C-\><C-n>
+  " }}}
+  " Visual Mode {{{
+  vnoremap <Space><CR> :!sh<CR>
   " }}}
 " }}}
 " Colorscheme {{{

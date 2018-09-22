@@ -1,5 +1,25 @@
 extends go
 
+snippet strp "convert pointer"
+strp := func(s string) *string { return &s }
+endsnippet
+
+snippet boolp "convert pointer"
+boolp := func(b bool) *bool { return &b }
+endsnippet
+
+snippet intp "convert pointer"
+intp := func(i int) *int { return &i }
+endsnippet
+
+snippet int64p "convert pointer"
+int64p := func(i64 int64) *int64 { return &i64 }
+endsnippet
+
+snippet uintp "convert pointer"
+uintp := func(i uint) *uint { return &i }
+endsnippet
+
 snippet iferr "if error"
 if err != nil {
 	return ${0:${VISUAL}}
@@ -37,9 +57,6 @@ func Test$1(t *testing.T) {
 		{
 			name : "success",
 		},
-		{
-			name : "failure",
-		},
 	}
 
 	for i, c := range cases {
@@ -54,7 +71,7 @@ func Test$1(t *testing.T) {
 endsnippet
 
 snippet mockgen "generate mock"
-//go:generate mockgen -destination ./${1:package}mocks/${2:filename}.go -package $1mocks -source ./$2.go -imports .=${3:selfpackage}
+//go:generate mockgen -destination ./${1:package}mocks/${2:filename}.go -package $1mocks -source ./$2.go
 ${0:${VISUAL}}
 endsnippet
 
@@ -68,12 +85,12 @@ endsnippet
 
 snippet pr "print debug"
 //DEBUG: print debug
-fmt.Printf("####################################${1:tag} %v\n", ${2:val})
+fmt.Printf("####################################${1:tag} %+v\n", ${2:val})
 ${0:${VISUAL}}
 
 endsnippet
 
-snippet deepeq "deep equal"
+snippet deq "deep equal"
 if !reflect.DeepEqual($1,$2) {
 	${0:${VISUAL}}
 }
