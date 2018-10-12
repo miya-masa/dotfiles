@@ -73,7 +73,6 @@ Plug 'nathanaelkane/vim-indent-guides'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'aklt/plantuml-syntax'
 Plug 'vim-scripts/Align'
-Plug 'vim-scripts/SQLUtilities', {'on' : 'Align'}
 Plug 'cespare/vim-toml'
 Plug 'pangloss/vim-javascript'
 Plug 'othree/yajs.vim'
@@ -90,7 +89,6 @@ Plug 'majutsushi/tagbar'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'thinca/vim-quickrun'
 Plug 'diepm/vim-rest-console'
-Plug 'osyo-manga/vim-over'
 Plug 'VincentCordobes/vim-translate'
 Plug 'junegunn/vim-easy-align'
 Plug 'christoomey/vim-tmux-navigator'
@@ -98,6 +96,7 @@ Plug 'Konfekt/FastFold'
 Plug 'itchyny/calendar.vim'
 Plug 'xolox/vim-notes'
 Plug 'xolox/vim-misc'
+Plug 'tpope/vim-repeat'
 " Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
@@ -322,6 +321,13 @@ call plug#end()
   " }}}
   " YCM {{{
   " }}}
+  " dirvish {{{
+  "
+    augroup dirvish
+      autocmd!
+      autocmd FileType dirvish command! -nargs=1 NF :e %<args>
+    augroup END
+  " }}}
 " }}}
 " Basic Settings  {{{
 scriptencoding utf8
@@ -357,6 +363,7 @@ set ffs=unix,dos,mac
 " Add a bit extra margin to the left
 set foldcolumn=1
 " set ambiwidth=double
+set inccommand=split
 set wildmenu
 if has('mouse')
   set mouse=a
