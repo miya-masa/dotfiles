@@ -72,7 +72,6 @@ Plug 'bronson/vim-trailing-whitespace'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'aklt/plantuml-syntax'
-Plug 'vim-scripts/Align'
 Plug 'cespare/vim-toml'
 Plug 'pangloss/vim-javascript'
 Plug 'othree/yajs.vim'
@@ -428,9 +427,19 @@ augroup END
   " Opens a new tab with the current buffer's path
   " Super useful when editing files in the same directory
   map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
+  " Close the current buffer
+  map <leader>bd :Bclose<cr>:tabclose<cr>gT
+  " Close all the buffers
+  map <leader>ba :bufdo bd<cr>
 
   " Switch CWD to the directory of the open buffer
   map <leader>cd :cd %:p:h<cr>:pwd<cr>
+  " Useful mappings for managing tabs
+  map <leader>tn :tabnew<cr>
+  map <leader>to :tabonly<cr>
+  map <leader>tc :tabclose<cr>
+  map <leader>tm :tabmove 
+  map <leader>t<leader> :tabnext 
   " Normal Mode {{{
   nnoremap <F8> :source %<CR>
   nnoremap ZZ <Nop>
