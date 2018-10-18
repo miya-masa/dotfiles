@@ -427,8 +427,6 @@ augroup END
   " Opens a new tab with the current buffer's path
   " Super useful when editing files in the same directory
   map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
-  " Close the current buffer
-  map <leader>bd :Bclose<cr>:tabclose<cr>gT
   " Close all the buffers
   map <leader>ba :bufdo bd<cr>
 
@@ -467,6 +465,7 @@ augroup END
   " }}}
   " Visual Mode {{{
   vnoremap <Space><CR> :!sh<CR>
+  vnoremap <Leader>gt :TranslateVisual<CR>
   " }}}
 " }}}
 " Colorscheme {{{
