@@ -96,6 +96,9 @@ Plug 'itchyny/calendar.vim'
 Plug 'xolox/vim-notes'
 Plug 'xolox/vim-misc'
 Plug 'tpope/vim-repeat'
+Plug 'Shougo/vinarise.vim/'
+Plug 'mileszs/ack.vim'
+Plug 'tpope/vim-unimpaired'
 " Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
@@ -327,6 +330,11 @@ call plug#end()
       autocmd FileType dirvish command! -nargs=1 NF :e %<args>
     augroup END
   " }}}
+  " vim-unimpaired {{{
+  " }}}
+  " Ack.vim {{{
+    let g:ackprg = 'ag --nogroup --nocolor --column'
+  " }}}
 " }}}
 " Basic Settings  {{{
 scriptencoding utf8
@@ -439,7 +447,7 @@ augroup END
   map <leader>tm :tabmove 
   map <leader>t<leader> :tabnext 
   " Normal Mode {{{
-  nnoremap <F8> :source %<CR>
+  nnoremap <F8> :source ~/.config/nvim/init.vim<CR>
   nnoremap ZZ <Nop>
   nnoremap <Down> gj
   nnoremap <Up>   gk
@@ -459,13 +467,18 @@ augroup END
   nnoremap <leader><C-L> :Line<CR>
   nnoremap <Leader><CR> :nohlsearch<CR>
   nnoremap <Space><CR> V:!sh<CR>
+  nnoremap <Leader>gte V:TranslateVisual<CR>
+  nnoremap <Leader>gtj V:TranslateVisual ja:en<CR>
   " }}}
   " Termninal Mode {{{
   tnoremap <silent> <leader><C-[> <C-\><C-n>
   " }}}
   " Visual Mode {{{
   vnoremap <Space><CR> :!sh<CR>
-  vnoremap <Leader>gt :TranslateVisual<CR>
+  vnoremap <Leader>gte :TranslateVisual<CR>
+  vnoremap <Leader>gtj :TranslateVisual ja:en<CR>
+  " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
+  vmap <Enter> <Plug>(EasyAlign)
   " }}}
 " }}}
 " Colorscheme {{{
@@ -484,3 +497,4 @@ augroup END
   command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 " }}}
 " }}}
+"
