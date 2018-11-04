@@ -125,7 +125,7 @@ set -o AUTO_CD
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 # DO NOT EDIT END
 
-if [ $SHLVL = 1 ]; then
+if [ $SHLVL=1 -o $TERMTYPE="alacritty" ]; then
     [ -f "$HOME/.tmux/new-session" ] && alias tmuxopen="tmux -2 new-session \; source-file $HOME/.tmux/new-session"
 fi
 

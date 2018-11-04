@@ -99,6 +99,8 @@ Plug 'tpope/vim-repeat'
 Plug 'Shougo/vinarise.vim/'
 Plug 'mileszs/ack.vim'
 Plug 'tpope/vim-unimpaired'
+Plug 'qpkorr/vim-bufkill'
+Plug 'terryma/vim-multiple-cursors'
 " Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
@@ -107,6 +109,7 @@ Plug 'ryanoasis/vim-devicons'
 Plug 'airblade/vim-gitgutter'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'dracula/vim', { 'as': 'dracula' }
 " }}}
 call plug#end()
 " }}}
@@ -369,7 +372,7 @@ set lazyredraw
 set ffs=unix,dos,mac
 " Add a bit extra margin to the left
 set foldcolumn=1
-" set ambiwidth=double
+set ambiwidth=double
 set inccommand=split
 set wildmenu
 if has('mouse')
@@ -436,7 +439,7 @@ augroup END
   " Super useful when editing files in the same directory
   map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
   " Close all the buffers
-  map <leader>ba :bufdo bd<cr>
+  map <leader>bd :BD<cr>
 
   " Switch CWD to the directory of the open buffer
   map <leader>cd :cd %:p:h<cr>:pwd<cr>
@@ -444,8 +447,8 @@ augroup END
   map <leader>tn :tabnew<cr>
   map <leader>to :tabonly<cr>
   map <leader>tc :tabclose<cr>
-  map <leader>tm :tabmove 
-  map <leader>t<leader> :tabnext 
+  map <leader>tm :tabmove<cr>
+  map <leader>t<leader> :tabnext<cr>
   " Normal Mode {{{
   nnoremap <F8> :source ~/.config/nvim/init.vim<CR>
   nnoremap ZZ <Nop>
@@ -455,9 +458,11 @@ augroup END
   nnoremap k gk
   nnoremap h <Left>zv
   nnoremap l <Right>zv
+  nnoremap [q :cprevious<CR>
+  nnoremap ]q :cnext<CR>
+  nnoremap [Q :<C-u>cfirst<CR>
+  nnoremap ]Q :<C-u>clast<CR>
   nnoremap Y y$
-  nnoremap <C-n> :cn<CR>
-  nnoremap <C-p> :cp<CR>
   nnoremap <leader>a :cclose<CR>
   nnoremap <leader>st :split<CR>:terminal<CR>
   nnoremap <Leader><C-B> :Buffer<CR>
@@ -484,6 +489,7 @@ augroup END
 " Colorscheme {{{
   syntax enable
   set background=dark
+  set termguicolors
   colorscheme gruvbox
   let g:airline_theme = 'gruvbox'
 " }}}
