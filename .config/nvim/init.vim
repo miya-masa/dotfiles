@@ -107,237 +107,287 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'flazz/vim-colorschemes'
 Plug 'ryanoasis/vim-devicons'
 Plug 'airblade/vim-gitgutter'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
+Plug 'itchyny/lightline.vim'
+Plug 'maximbaz/lightline-ale'
 Plug 'dracula/vim', { 'as': 'dracula' }
 " }}}
 call plug#end()
 " }}}
 " Plugin Configuration {{{
-  " Plugin UltiSnips {{{
-    let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
-    let g:UltiSnipsExpandTrigger="<C-l>"
-  " }}}
-  " VimRestConsole {{{
-    let g:vrc_curl_opts = {
-          \ '-b': '/tmp/cookie.txt',
-          \ '-c': '/tmp/cookie.txt',
-          \ '-L': '',
-          \ '-i': '',
-          \ '--max-time': 60
-          \}
-    let g:vrc_auto_format_response_enabled = 1
-    let g:vrc_show_command = 1
-    let g:vrc_response_default_content_type = 'application/json'
-    let g:vrc_auto_format_response_patterns = {
-          \ 'json': 'jq "."',
-          \ 'xml': 'tidy -xml -i -'
-          \}
-    let g:vrc_trigger = '<Leader><C-j>'
-  " }}}
-  " CamelCaseMotion {{{
-    call camelcasemotion#CreateMotionMappings('<leader>')
-  " }}}
-  " Go {{{
-    " vim-go
-    let g:go_fmt_command = "goimports"
-    let g:go_autodetect_gopath = 1
-    let g:go_list_type = "quickfix"
+" Plugin UltiSnips {{{
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
+let g:UltiSnipsExpandTrigger="<C-l>"
+" }}}
+" VimRestConsole {{{
+let g:vrc_curl_opts = {
+      \ '-b': '/tmp/cookie.txt',
+      \ '-c': '/tmp/cookie.txt',
+      \ '-L': '',
+      \ '-i': '',
+      \ '--max-time': 60
+      \}
+let g:vrc_auto_format_response_enabled = 1
+let g:vrc_show_command = 1
+let g:vrc_response_default_content_type = 'application/json'
+let g:vrc_auto_format_response_patterns = {
+      \ 'json': 'jq "."',
+      \ 'xml': 'tidy -xml -i -'
+      \}
+let g:vrc_trigger = '<Leader><C-j>'
+" }}}
+" CamelCaseMotion {{{
+call camelcasemotion#CreateMotionMappings('<leader>')
+" }}}
+" Go {{{
+" vim-go
+let g:go_fmt_command = "goimports"
+let g:go_autodetect_gopath = 1
+let g:go_list_type = "quickfix"
 
-    " highlight
-    let g:go_highlight_types = 1
-    let g:go_highlight_fields = 1
-    let g:go_highlight_functions = 1
-    let g:go_highlight_methods = 1
-    let g:go_highlight_extra_types = 1
-    let g:go_highlight_generate_tags = 1
+" highlight
+let g:go_highlight_types = 1
+let g:go_highlight_fields = 1
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_extra_types = 1
+let g:go_highlight_generate_tags = 1
 
-    " lint
-    " let g:go_metalinter_enabled = ['vet', 'golint', 'staticcheck']
-    let g:go_metalinter_deadline = "30s"
-    let g:go_def_mode = 'godef'
-    let g:go_term_mode = 'vsplit'
+" lint
+" let g:go_metalinter_enabled = ['vet', 'golint', 'staticcheck']
+let g:go_metalinter_deadline = "30s"
+let g:go_def_mode = 'godef'
+let g:go_term_mode = 'vsplit'
 
-    " Guru Scope
-    " let g:go_guru_scope = []
+" Guru Scope
+" let g:go_guru_scope = []
 
-    augroup go
-      autocmd!
-      " Show by default 4 spaces for a tab
-      autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
-      autocmd BufRead $GOPATH/src/*.go
-            \  let s:tmp = matchlist(expand('%:p'),
-            \  $GOPATH.'/src/\([^/]\+/[^/]\+/[^/]\+/\)')
-            \| if len(s:tmp) > 1 |  exe 'silent :GoGuruScope ' . s:tmp[1] . '... -' . s:tmp[1] . 'vendor/...' | endif
-            \| unlet s:tmp
+augroup go
+  autocmd!
+  " Show by default 4 spaces for a tab
+  autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+  autocmd BufRead $GOPATH/src/*.go
+        \  let s:tmp = matchlist(expand('%:p'),
+        \  $GOPATH.'/src/\([^/]\+/[^/]\+/[^/]\+/\)')
+        \| if len(s:tmp) > 1 |  exe 'silent :GoGuruScope ' . s:tmp[1] . '... -' . s:tmp[1] . 'vendor/...' | endif
+        \| unlet s:tmp
 
-      " :GoBuild and :GoTestCompile
-      autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
-      " :GoTest
-      autocmd FileType go nmap <leader>gt  <Plug>(go-test)
-      " :GoRun
-      autocmd FileType go nmap <leader>gr  <Plug>(go-run)
-      " :GoDoc
-      autocmd FileType go nmap <Leader>gdoc <Plug>(go-doc)
-      " :GoCoverageToggle
-      autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
-      " :GoInfo
-      autocmd FileType go nmap <Leader>gi <Plug>(go-info)
-      " :GoMetaLinter
-      autocmd FileType go nmap <Leader>gl <Plug>(go-metalinter)
-      " :GoDef but opens in a vertical split
-      autocmd FileType go nmap <Leader>gv <Plug>(go-def-vertical)
-      " :GoDef but opens in a horizontal split
-      autocmd FileType go nmap <Leader>gs <Plug>(go-def-split)
-      " :GoTestFunc
-      autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
+  " :GoBuild and :GoTestCompile
+  autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
+  " :GoTest
+  autocmd FileType go nmap <leader>gt  <Plug>(go-test)
+  " :GoRun
+  autocmd FileType go nmap <leader>gr  <Plug>(go-run)
+  " :GoDoc
+  autocmd FileType go nmap <Leader>gdoc <Plug>(go-doc)
+  " :GoCoverageToggle
+  autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
+  " :GoInfo
+  autocmd FileType go nmap <Leader>gi <Plug>(go-info)
+  " :GoMetaLinter
+  autocmd FileType go nmap <Leader>gl <Plug>(go-metalinter)
+  " :GoDef but opens in a vertical split
+  autocmd FileType go nmap <Leader>gv <Plug>(go-def-vertical)
+  " :GoDef but opens in a horizontal split
+  autocmd FileType go nmap <Leader>gs <Plug>(go-def-split)
+  " :GoTestFunc
+  autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
-      " Open :GoDeclsDir with ctrl-g
-      autocmd FileType go imap <C-g> <esc>:GoDecls<cr>
-      autocmd FileType go nmap <C-g> :GoDeclsDir<cr>
+  " Open :GoDeclsDir with ctrl-g
+  autocmd FileType go imap <C-g> <esc>:GoDecls<cr>
+  autocmd FileType go nmap <C-g> :GoDeclsDir<cr>
 
-      " :GoAlternate  commands :A, :AV, :AS and :AT
-      autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
-      autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
-      autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
-      autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
-      autocmd Filetype go command! GoRunArgs :!go run % <args>
+  " :GoAlternate  commands :A, :AV, :AS and :AT
+  autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+  autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+  autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+  autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+  autocmd Filetype go command! GoRunArgs :!go run % <args>
 
-      " GoKeyword
-      autocmd FileType go set iskeyword=a-z,A-Z,48-57,&,*
-    augroup END
-    " build_go_files is a custom function that builds or compiles the test file.
-    " It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file
-    function! s:build_go_files()
-      let l:file = expand('%')
-      if l:file =~# '^\f\+_test\.go$'
-        call go#test#Test(0, 1)
-      elseif l:file =~# '^\f\+\.go$'
-        call go#cmd#Build(0)
-      endif
-    endfunction
-  " }}}
-  " EsFormatter {{{
-    augroup Vim-Esformatter
-      autocmd!
-      " for html
-      autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
-      " for css or scss
-      autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
-      " My Bundles here:
+  " GoKeyword
+  autocmd FileType go set iskeyword=a-z,A-Z,48-57,&,*
+augroup END
+" build_go_files is a custom function that builds or compiles the test file.
+" It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
+endfunction
+" }}}
+" EsFormatter {{{
+augroup Vim-Esformatter
+  autocmd!
+  " for html
+  autocmd FileType html,hbs noremap <buffer> <c-f> :call HtmlBeautify()<cr>
+  " for css or scss
+  autocmd FileType css noremap <buffer> <c-f> :call CSSBeautify()<cr>
+  " My Bundles here:
 
-      " will run esformatter after pressing <leader> followed by the 'e' and 's' keys
-      autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
-      autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
-    augroup END
-  " }}}
-  " EmmetPlugin {{{
-    let g:user_emmet_leader_key='<C-t>'
-  " }}}
-  " vim-json {{{
-    let g:vim_json_syntax_conceal = 0
-  " }}}
-  " EditSlack {{{
-    if filereadable(expand('~/.vimrc.slack'))
-      source ~/.vimrc.slack
-      command! SlackPG :tabe slack://pg
-      command! SlackCH :tabe slack://ch
-      command! SlackDM :tabe slack://dm
-      command! SlackME :tabe slack://dm/miyauchi.m
-    endif
-  " }}}
-  " Previm {{{
-    let g:previm_open_cmd = 'open -a Google\ Chrome'
+  " will run esformatter after pressing <leader> followed by the 'e' and 's' keys
+  autocmd FileType javascript noremap <silent>  <c-f> :Esformatter<CR>
+  autocmd FileType javascript vnoremap <silent>  <c-f> :EsformatterVisual<CR>
+augroup END
+" }}}
+" EmmetPlugin {{{
+let g:user_emmet_leader_key='<C-t>'
+" }}}
+" vim-json {{{
+let g:vim_json_syntax_conceal = 0
+" }}}
+" EditSlack {{{
+if filereadable(expand('~/.vimrc.slack'))
+  source ~/.vimrc.slack
+  command! SlackPG :tabe slack://pg
+  command! SlackCH :tabe slack://ch
+  command! SlackDM :tabe slack://dm
+  command! SlackME :tabe slack://dm/miyauchi.m
+endif
+" }}}
+" Previm {{{
+let g:previm_open_cmd = 'open -a Google\ Chrome'
 
-    augroup PrevimSettings
-      autocmd!
-      autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-    augroup END
-  " }}}
-  " IndentGuide {{{
-    let g:indent_guides_enable_on_vim_startup = 1
-  " }}}
-  " PlantUML {{{
-    augroup PlantUML
-      autocmd!
-      au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
-    augroup END
-  " }}}
-  " Javascript library syntax {{{
-    augroup JavascriptLibrariesSyntax
-      autocmd!
-      autocmd BufReadPre *.js let b:javascript_lib_use_underscore = 1
-      autocmd BufReadPre *.js let b:javascript_lib_use_react = 1
-    augroup END
-  " }}}
-  " Align {{{
-    let g:Align_xstrlen=3
-  " }}}
-  " SQLUtilities {{{
-    let g:sqlutil_align_comma=1
-  " }}}
-  " vim-airline {{{
-    let g:airline_powerline_fonts = 1
-  " }}}
-  " tmux-navigator {{{
-    nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
-  " }}}
-  " deoplete & deoplete-go {{{
-  let g:deoplete#enable_at_startup = 1
-  let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
-  let g:deoplete#sources#go#package_dot = 1
-  let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
-  " }}}
-  " FastFold {{{
-    let g:go_fold = 1
-  " }}}
-  " IndentGuide {{{
-    let g:indent_guides_start_level = 2
-    let g:indent_guides_guide_size = 1
-  " }}}
-  " ALE {{{
-    " let g:ale_linters = {
-    " \   'go': ['gometalinter'],
-    " \}
-    " let g:ale_go_gometalinter_options = '--fast'
-  " }}}
-  " calendar.vim {{{
-    let g:calendar_google_calendar = 1
-  " }}}
-  " fix-whitespace {{{
-    let g:extra_whitespace_ignored_filetypes = ['calendar']
-  " }}}
-  " tmuxline {{{
-  let g:tmuxline_powerline_separators = 0
-  let g:tmuxline_preset = {
-  \'a'    : '#S',
-  \'b'    : '#(tmux-mem-cpu-load --colors)',
-  \'c'    : ['#(whoami)'],
-  \'win'  : ['#I', '#W'],
-  \'cwin' : ['#I', '#W', '#F'],
-  \'x'    : 'Online: #{online_status}',
-  \'y'    : 'Batt: #{battery_icon} #{battery_percentage}',
-  \'z'    : ['%R', '%a', '%Y'],
-  \'options' : {'status-justify' : 'left'}}
-  " }}}
-  " vim-notes {{{
-    let g:notes_directories = ['~/work/Notes']
-    let g:notes_suffix = '.md'
-  " }}}
-  " YCM {{{
-  " }}}
-  " dirvish {{{
-  "
-    augroup dirvish
-      autocmd!
-      autocmd FileType dirvish command! -nargs=1 NF :e %<args>
-    augroup END
-  " }}}
-  " vim-unimpaired {{{
-  " }}}
-  " Ack.vim {{{
-    let g:ackprg = 'ag --nogroup --nocolor --column'
-  " }}}
+augroup PrevimSettings
+  autocmd!
+  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+augroup END
+" }}}
+" IndentGuide {{{
+let g:indent_guides_enable_on_vim_startup = 1
+" }}}
+" PlantUML {{{
+augroup PlantUML
+  autocmd!
+  au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
+augroup END
+" }}}
+" Javascript library syntax {{{
+augroup JavascriptLibrariesSyntax
+  autocmd!
+  autocmd BufReadPre *.js let b:javascript_lib_use_underscore = 1
+  autocmd BufReadPre *.js let b:javascript_lib_use_react = 1
+augroup END
+" }}}
+" Align {{{
+let g:Align_xstrlen=3
+" }}}
+" lightline {{{
+let g:lightline = {
+      \ 'colorscheme': 'gruvbox',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'gitbranch', 'readonly','absolutepath', 'modified' ]],
+      \   'right': [ [ 'lineinfo' ],
+      \              [ 'percent' ],
+      \              [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ],
+      \              [ 'linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok' ]]
+      \ },
+      \ 'component': {
+      \ 'mode': '%{lightline#mode()}',
+      \ 'absolutepath': '%F',
+      \ 'relativepath': '%f',
+      \ 'filename': '%t',
+      \ 'modified': '%M',
+      \ 'bufnum': '%n',
+      \ 'paste': '%{&paste?"PASTE":""}',
+      \ 'readonly': '%R',
+      \ 'charvalue': '%b',
+      \ 'charvaluehex': '%B',
+      \ 'fileencoding': '%{&fenc!=#""?&fenc:&enc}',
+      \ 'fileformat': '%{&ff}',
+      \ 'filetype': '%{&ft!=#""?&ft:"no ft"}',
+      \ 'percent': '%3p%%',
+      \ 'percentwin': '%P',
+      \ 'spell': '%{&spell?&spelllang:""}',
+      \ 'lineinfo': '%3l:%-2v',
+      \ 'line': '%l',
+      \ 'column': '%c',
+      \ 'close': '%999X X ',
+      \ 'winnr': '%{winnr()}'
+      \ },
+      \ 'component_function': {
+      \   'gitbranch': 'fugitive#head'
+      \ },
+      \ }
+let g:lightline.component_expand = {
+      \  'linter_checking': 'lightline#ale#checking',
+      \  'linter_warnings': 'lightline#ale#warnings',
+      \  'linter_errors': 'lightline#ale#errors',
+      \  'linter_ok': 'lightline#ale#ok',
+      \ }
+let g:lightline.component_type = {
+      \     'linter_checking': 'left',
+      \     'linter_warnings': 'warning',
+      \     'linter_errors': 'error',
+      \     'linter_ok': 'left',
+      \ }
+let g:lightline#ale#indicator_checking = "\uf110"
+let g:lightline#ale#indicator_warnings = "\uf071"
+let g:lightline#ale#indicator_errors = "\uf05e"
+let g:lightline#ale#indicator_ok = "\uf00c"
+
+" }}}
+" tmux-navigator {{{
+nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
+" }}}
+" deoplete & deoplete-go {{{
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
+let g:deoplete#sources#go#package_dot = 1
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+" }}}
+" FastFold {{{
+let g:go_fold = 1
+" }}}
+" IndentGuide {{{
+let g:indent_guides_start_level = 2
+let g:indent_guides_guide_size = 1
+" }}}
+" ALE {{{
+" let g:ale_linters = {
+" \   'go': ['gometalinter'],
+" \}
+" let g:ale_go_gometalinter_options = '--fast'
+" }}}
+" calendar.vim {{{
+let g:calendar_google_calendar = 1
+" }}}
+" fix-whitespace {{{
+let g:extra_whitespace_ignored_filetypes = ['calendar']
+" }}}
+" tmuxline {{{
+let g:tmuxline_powerline_separators = 0
+let g:tmuxline_preset = {
+      \'a'    : '#S',
+      \'b'    : '#(tmux-mem-cpu-load --colors)',
+      \'c'    : ['#(whoami)'],
+      \'win'  : ['#I', '#W'],
+      \'cwin' : ['#I', '#W', '#F'],
+      \'x'    : 'Online: #{online_status}',
+      \'y'    : 'Batt: #{battery_icon} #{battery_percentage}',
+      \'z'    : ['%R', '%a', '%Y'],
+      \'options' : {'status-justify' : 'left'}}
+" }}}
+" vim-notes {{{
+let g:notes_directories = ['~/work/Notes']
+let g:notes_suffix = '.md'
+" }}}
+" YCM {{{
+" }}}
+" dirvish {{{
+"
+augroup dirvish
+  autocmd!
+  autocmd FileType dirvish command! -nargs=1 NF :e %<args>
+augroup END
+" }}}
+" vim-unimpaired {{{
+" }}}
+" Ack.vim {{{
+let g:ackprg = 'ag --nogroup --nocolor --column'
+" }}}
 " }}}
 " Basic Settings  {{{
 scriptencoding utf8
@@ -435,72 +485,72 @@ augroup END
 " }}}
 " Key map {{{
 :let mapleader=","
-  " Opens a new tab with the current buffer's path
-  " Super useful when editing files in the same directory
-  map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
-  " Close all the buffers
-  map <leader>bd :BD<cr>
+" Opens a new tab with the current buffer's path
+" Super useful when editing files in the same directory
+map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
+" Close all the buffers
+map <leader>bd :BD<cr>
 
-  " Switch CWD to the directory of the open buffer
-  map <leader>cd :cd %:p:h<cr>:pwd<cr>
-  " Useful mappings for managing tabs
-  map <leader>tn :tabnew<cr>
-  map <leader>to :tabonly<cr>
-  map <leader>tc :tabclose<cr>
-  map <leader>tm :tabmove<cr>
-  map <leader>t<leader> :tabnext<cr>
-  " Normal Mode {{{
-  nnoremap <F8> :source ~/.config/nvim/init.vim<CR>
-  nnoremap ZZ <Nop>
-  nnoremap <Down> gj
-  nnoremap <Up>   gk
-  nnoremap j gj
-  nnoremap k gk
-  nnoremap h <Left>zv
-  nnoremap l <Right>zv
-  nnoremap [q :cprevious<CR>
-  nnoremap ]q :cnext<CR>
-  nnoremap [Q :<C-u>cfirst<CR>
-  nnoremap ]Q :<C-u>clast<CR>
-  nnoremap Y y$
-  nnoremap <leader>a :cclose<CR>
-  nnoremap <leader>st :split<CR>:terminal<CR>
-  nnoremap <Leader><C-B> :Buffer<CR>
-  nnoremap <Leader><C-A> :Ag<CR>
-  nnoremap <Leader><C-G> :GFiles<CR>
-  nnoremap <Leader><C-F> :Files<CR>
-  nnoremap <leader><C-L> :Line<CR>
-  nnoremap <Leader><CR> :nohlsearch<CR>
-  nnoremap <Space><CR> V:!sh<CR>
-  nnoremap <Leader>gte V:TranslateVisual<CR>
-  nnoremap <Leader>gtj V:TranslateVisual ja:en<CR>
-  " }}}
-  " Termninal Mode {{{
-  tnoremap <silent> <leader><C-[> <C-\><C-n>
-  " }}}
-  " Visual Mode {{{
-  vnoremap <Space><CR> :!sh<CR>
-  vnoremap <Leader>gte :TranslateVisual<CR>
-  vnoremap <Leader>gtj :TranslateVisual ja:en<CR>
-  " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
-  vmap <Enter> <Plug>(EasyAlign)
-  " }}}
+" Switch CWD to the directory of the open buffer
+map <leader>cd :cd %:p:h<cr>:pwd<cr>
+" Useful mappings for managing tabs
+map <leader>tn :tabnew<cr>
+map <leader>to :tabonly<cr>
+map <leader>tc :tabclose<cr>
+map <leader>tm :tabmove<cr>
+map <leader>t<leader> :tabnext<cr>
+" Normal Mode {{{
+nnoremap <F8> :source ~/.config/nvim/init.vim<CR>
+nnoremap ZZ <Nop>
+nnoremap <Down> gj
+nnoremap <Up>   gk
+nnoremap j gj
+nnoremap k gk
+nnoremap h <Left>zv
+nnoremap l <Right>zv
+nnoremap [q :cprevious<CR>
+nnoremap ]q :cnext<CR>
+nnoremap [Q :<C-u>cfirst<CR>
+nnoremap ]Q :<C-u>clast<CR>
+nnoremap Y y$
+nnoremap <leader>a :cclose<CR>
+nnoremap <leader>st :split<CR>:terminal<CR>
+nnoremap <Leader><C-B> :Buffer<CR>
+nnoremap <Leader><C-A> :Ag<CR>
+nnoremap <Leader><C-G> :GFiles<CR>
+nnoremap <Leader><C-F> :Files<CR>
+nnoremap <leader><C-L> :Line<CR>
+nnoremap <Leader><CR> :nohlsearch<CR>
+nnoremap <Space><CR> V:!sh<CR>
+nnoremap <Leader>gte V:TranslateVisual<CR>
+nnoremap <Leader>gtj V:TranslateVisual ja:en<CR>
+" }}}
+" Termninal Mode {{{
+tnoremap <silent> <leader><C-[> <C-\><C-n>
+" }}}
+" Visual Mode {{{
+vnoremap <Space><CR> :!sh<CR>
+vnoremap <Leader>gte :TranslateVisual<CR>
+vnoremap <Leader>gtj :TranslateVisual ja:en<CR>
+" Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
+vmap <Enter> <Plug>(EasyAlign)
+" }}}
 " }}}
 " Colorscheme {{{
-  syntax enable
-  set background=dark
-  set termguicolors
-  colorscheme gruvbox
-  let g:airline_theme = 'gruvbox'
+syntax enable
+set background=dark
+set termguicolors
+colorscheme gruvbox
+" let g:airline_theme = 'gruvbox'
 " }}}
 " Util Command {{{
 " Conv hex deg bin {{{
-  command! -nargs=1 ToH echo printf("%0x", <args>)
-  command! -nargs=1 ToD echo printf("%0d", <args>)
-  command! -nargs=1 ToB echo printf("%0b", <args>)
-  command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
-  command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
-  command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
+command! -nargs=1 ToH echo printf("%0x", <args>)
+command! -nargs=1 ToD echo printf("%0d", <args>)
+command! -nargs=1 ToB echo printf("%0b", <args>)
+command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
+command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
+command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 " }}}
 " }}}
 "
