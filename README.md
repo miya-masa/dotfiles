@@ -27,6 +27,10 @@
   ```
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
   ```
+* flake8
+  * `pip install flake8`
+* yapf
+  * `pip install flake8`
 
 ## nvim settings(Mac or Ubuntu)
 

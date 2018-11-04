@@ -101,6 +101,8 @@ Plug 'mileszs/ack.vim'
 Plug 'tpope/vim-unimpaired'
 Plug 'qpkorr/vim-bufkill'
 Plug 'terryma/vim-multiple-cursors'
+Plug 'davidhalter/jedi-vim'
+Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 " Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
@@ -388,6 +390,17 @@ augroup END
 " Ack.vim {{{
 let g:ackprg = 'ag --nogroup --nocolor --column'
 " }}}
+" jedi/yapf {{{
+augroup python
+  autocmd!
+  autocmd Filetype python map <C-F> :call yapf#YAPF()<cr>
+  autocmd Filetype python imap <C-F> <c-o>:call yapf#YAPF()<cr>
+augroup END
+" }}}
+" QuickRun {{{
+nnoremap <silent> <C-q> :QuickRun<CR>
+" }}}
+"
 " }}}
 " Basic Settings  {{{
 scriptencoding utf8
