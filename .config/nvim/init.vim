@@ -346,10 +346,12 @@ let g:indent_guides_start_level = 2
 let g:indent_guides_guide_size = 1
 " }}}
 " ALE {{{
-" let g:ale_linters = {
-" \   'go': ['gometalinter'],
-" \}
-" let g:ale_go_gometalinter_options = '--fast'
+  " let g:ale_linters = {
+  " \   'go': ['gometalinter'],
+  " \}
+  " let g:ale_go_gometalinter_options = '--fast'
+  nnoremap <silent> [a <Plug>(ale_previous_wrap)
+  nnoremap <silent> ]a <Plug>(ale_next_wrap)
 " }}}
 " calendar.vim {{{
 let g:calendar_google_calendar = 1
