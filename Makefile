@@ -20,3 +20,7 @@ git:
 fzf:
 	${PWD}/init_fzf.sh
 	ln -fs ${PWD}/.fzfadd.zsh ${HOME}/.fzfadd.zsh
+
+fish-mac:
+	brew install fish
+	curl https://git.io/fisher --create-dirs -sLo ~/.config/fish/functions/fisher.fish

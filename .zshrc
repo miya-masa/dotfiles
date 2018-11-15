@@ -38,13 +38,15 @@ zplug "zsh-users/zsh-completions"
 zplug "chrissicool/zsh-256color"
 zplug "mollifier/anyframe"
 zplug "mollifier/cd-gitroot"
-zplug "b4b4r07/enhancd", use:enhancd.sh
 zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
 # Support oh-my-zsh plugins and the like
 zplug "plugins/git",   from:oh-my-zsh
 zplug "plugins/docker-compose",   from:oh-my-zsh
 zplug "plugins/docker",   from:oh-my-zsh
+zplug "junegunn/fzf-bin", as:command, from:gh-r, rename-to:fzf
+zplug "junegunn/fzf", as:command, use:bin/fzf-tmux
 zplug "jocelynmallon/zshmarks"
+zplug "b4b4r07/enhancd", use:init.sh
 
 if ! zplug check --verbose; then
   printf "Install? [y/N]: "
@@ -54,6 +56,14 @@ if ! zplug check --verbose; then
 fi
 # Then, source plugins and add commands to $PATH
 zplug load
+autoload -Uz compinit && compinit
+
+## options
+set -o auto_list
+set -o auto_menu
+set -o auto_cd
+
+zstyle ':completion:*:default' menu select=1 
 
 
 # ~/.bashrc: executed by bash(1) for non-login shells.
@@ -117,9 +127,6 @@ alias ....='cd ../../..'
 alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
 alias b='jump '
 
-## options
-set -o AUTO_CD
-
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 # DO NOT EDIT HERE
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -129,3 +136,14 @@ if [ $SHLVL=1 -o $TERMTYPE="alacritty" ]; then
     [ -f "$HOME/.tmux/new-session" ] && alias tmuxopen="tmux -2 new-session \; source-file $HOME/.tmux/new-session"
 fi
 
+fpath=($HOME/.zsh/anyframe(N-/) $fpath)
+autoload -Uz anyframe-init
+anyframe-init
+
+autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
+add-zsh-hook chpwd chpwd_recent_dirs
+
+bindkey '^b' anyframe-widget-checkout-git-branch
+bindkey '^x^p' anyframe-widget-put-history
+bindkey '^x^i' anyframe-widget-insert-git-branch
+bindkey '^x^f' anyframe-widget-insert-filename

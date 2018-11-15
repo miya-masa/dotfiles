@@ -554,7 +554,7 @@ vmap <Enter> <Plug>(EasyAlign)
 " Colorscheme {{{
 syntax enable
 set background=dark
-set termguicolors
+" set termguicolors
 colorscheme gruvbox
 " let g:airline_theme = 'gruvbox'
 " }}}

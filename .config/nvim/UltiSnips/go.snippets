@@ -20,6 +20,10 @@ snippet uintp "convert pointer"
 uintp := func(i uint) *uint { return &i }
 endsnippet
 
+snippet timep "convert pointer"
+timep := func(t time.Time) *time.Time { return &t }
+endsnippet
+
 snippet iferr "if error"
 if err != nil {
 	return ${0:${VISUAL}}
@@ -94,4 +98,13 @@ snippet deq "deep equal"
 if !reflect.DeepEqual($1,$2) {
 	${0:${VISUAL}}
 }
+endsnippet
+
+snippet ctx "context background"
+ctx := context.Background()
+endsnippet
+
+snippet ctxc "context with cancel"
+ctx, cancel := context.WithCancel(ctx)
+defer cancel()
 endsnippet
