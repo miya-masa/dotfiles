@@ -103,6 +103,7 @@ Plug 'qpkorr/vim-bufkill'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'davidhalter/jedi-vim'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
+Plug 'Chiel92/vim-autoformat'
 " Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
@@ -143,6 +144,8 @@ call camelcasemotion#CreateMotionMappings('<leader>')
 " Go {{{
 " vim-go
 let g:go_fmt_command = "goimports"
+" realize the autoformat plugin.
+let g:go_fmt_autosave = 0
 let g:go_autodetect_gopath = 1
 let g:go_list_type = "quickfix"
 
@@ -155,7 +158,6 @@ let g:go_highlight_extra_types = 1
 let g:go_highlight_generate_tags = 1
 
 " lint
-" let g:go_metalinter_enabled = ['vet', 'golint', 'staticcheck']
 let g:go_metalinter_deadline = "30s"
 let g:go_def_mode = 'godef'
 let g:go_term_mode = 'vsplit'
@@ -351,6 +353,7 @@ let g:indent_guides_guide_size = 1
   " let g:ale_linters = {
   " \   'go': ['gometalinter'],
   " \}
+  " let g:ale_go_gometalinter_options = '--vendored-linters --disable-all --enable=gotype --enable=vet --enable=golint -t'
   " let g:ale_go_gometalinter_options = '--fast'
   nnoremap <silent> [a <Plug>(ale_previous_wrap)
   nnoremap <silent> ]a <Plug>(ale_next_wrap)
@@ -400,7 +403,14 @@ augroup python
 augroup END
 " }}}
 " QuickRun {{{
-nnoremap <silent> <C-q> :QuickRun<CR>
+  nnoremap <silent> <C-q> :QuickRun<CR>
+" }}}
+" Chiel92/vim-autoformat {{{
+augroup autoformat
+  autocmd!
+  autocmd BufWrite *.go :Autoformat
+  autocmd BufWrite *.json :Autoformat
+augroup END
 " }}}
 "
 " }}}
