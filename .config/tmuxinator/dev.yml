@@ -54,7 +54,9 @@ windows:
           - nvim
         - zsh:
   - sand-box:
-      layout: main-vertical
+      layout: tiled
       panes:
-        - dev:
-        - stg:
+        - sand1:
+        - sand2:
+        - sand3:
+        - sand4:
