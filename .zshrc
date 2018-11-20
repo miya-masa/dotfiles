@@ -127,6 +127,8 @@ alias ...='cd ../..'
 alias ....='cd ../../..'
 alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
 alias mux='tmuxinator'
+alias tm='tmux'
+alias tma='tmux a -t '
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
