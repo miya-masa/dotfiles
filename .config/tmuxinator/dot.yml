@@ -1,6 +1,6 @@
 # /Users/masayuki-miyauchi/.config/tmuxinator/dot-dev.yml
 
-name: dot-dev
+name: dot
 root: <%= @args[0] %>
 
 # Optional tmux socket
@@ -37,7 +37,7 @@ root: <%= @args[0] %>
 # startup_pane: 1
 
 # Controls whether the tmux session should be attached to automatically. Defaults to true.
-# attach: false
+attach: false
 
 # Runs after everything. Use it to attach to tmux with custom options etc.
 # post: tmux -CC attach -t dot-dev

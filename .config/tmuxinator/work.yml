@@ -1,6 +1,6 @@
 # /Users/masayuki-miyauchi/.config/tmuxinator/dot-dev.yml
 
-name: ops
+name: work
 root: <%= @args[0] %>
 
 # Optional tmux socket
@@ -43,17 +43,7 @@ attach: false
 # post: tmux -CC attach -t dot-dev
 
 windows:
-  - ops1:
-      layout: tiled
-      # Synchronize all panes of this window, can be enabled before or after the pane commands run.
-      # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
-      # synchronize: after
-      panes:
-        - ops1:
-        - ops2:
-        - ops3:
-        - ops4:
-  - ops2:
+  - work:
       layout: tiled
       panes:
         - ops1:
