@@ -6,7 +6,3 @@ if [ ! -e $HOME/.fzf ]; then
 fi
 
 $HOME/.fzf/install
-
-if [ -e $HOME/.fzf.zsh ]; then
-  echo "source ~/.fzfadd.zsh" >> $HOME/.fzf.zsh
-fi

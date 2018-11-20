@@ -13,6 +13,7 @@ export LANG=ja_JP.UTF-8
 export LC_TIME=C
 export LC_MESSAGES=C
 export PAGER=less
+export EDITOR=nvim
 
 ###
 ### history
@@ -125,16 +126,9 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
-alias b='jump '
+alias mux='tmuxinator'
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
-# DO NOT EDIT HERE
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-# DO NOT EDIT END
-
-if [ $SHLVL=1 -o $TERMTYPE="alacritty" ]; then
-    [ -f "$HOME/.tmux/new-session" ] && alias tmuxopen="tmux -2 new-session \; source-file $HOME/.tmux/new-session"
-fi
 
 fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
@@ -147,3 +141,7 @@ bindkey '^b' anyframe-widget-checkout-git-branch
 bindkey '^x^p' anyframe-widget-put-history
 bindkey '^x^i' anyframe-widget-insert-git-branch
 bindkey '^x^f' anyframe-widget-insert-filename
+
+# DO NOT EDIT HERE
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# DO NOT EDIT END

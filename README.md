@@ -30,7 +30,10 @@
 * flake8
   * `pip install flake8`
 * yapf
-  * `pip install flake8`
+  * `pip install yapf`
+
+* tmuxinator
+  * `gem install tmuxinator`
 
 ## nvim settings(Mac or Ubuntu)
 
