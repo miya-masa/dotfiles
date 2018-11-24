@@ -104,6 +104,9 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'davidhalter/jedi-vim'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'Chiel92/vim-autoformat'
+Plug 'scrooloose/vim-slumlord'
+Plug 'jceb/vim-orgmode'
+Plug 'mhinz/vim-startify'
 " Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
@@ -262,10 +265,10 @@ augroup END
 let g:indent_guides_enable_on_vim_startup = 1
 " }}}
 " PlantUML {{{
-augroup PlantUML
-  autocmd!
-  au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
-augroup END
+" augroup PlantUML
+"   autocmd!
+"   au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
+" augroup END
 " }}}
 " Javascript library syntax {{{
 augroup JavascriptLibrariesSyntax
@@ -412,6 +415,43 @@ augroup autoformat
   autocmd BufWrite *.json :Autoformat
 augroup END
 " }}}
+" mhinz/vim-startify {{{
+" startify
+let g:startify_files_number = 5
+let g:startify_list_order = [
+        \ ['MRU'],
+        \ 'files',
+        \ ['MRUDir'],
+        \ 'dir',
+        \ ['Session'],
+        \ 'sessions',
+        \ ['Bookmarks'],
+        \ 'bookmarks',
+        \ ]
+let g:startify_bookmarks = []
+
+function! s:filter_header(lines) abort
+    let longest_line   = max(map(copy(a:lines), 'len(v:val)'))
+    let centered_lines = map(copy(a:lines),
+        \ 'repeat(" ", (&columns / 2) - (longest_line / 2)) . v:val')
+    return centered_lines
+endfunction
+
+let g:startify_custom_header = s:filter_header([
+      \ '           _ ',
+      \ ' _ __ ___ (_)_   _  __ _       _ __ ___   __ _ ___  __ _  ',
+      \ '| `_ ` _ \| | | | |/ _` |_____| `_ ` _ \ / _` / __|/ _` | ',
+      \ '| | | | | | | |_| | (_| |_____| | | | | | (_| \__ \ (_| | ',
+      \ '|_| |_| |_|_|\__, |\__,_|     |_| |_| |_|\__,_|___/\__,_| ',
+      \ '             |___/ ',
+      \ '                  __     _____ __  __  ',
+      \ '                  \ \   / /_ _|  \/  | ',
+      \ '                   \ \ / / | || |\/| | ',
+      \ '                    \ V /  | || |  | | ',
+      \ '                     \_/  |___|_|  |_| ',
+      \ ])
+
+" }}}
 "
 " }}}
 " Basic Settings  {{{
@@ -426,8 +466,8 @@ set noerrorbells
 set novisualbell
 set t_vb=
 set tm=500
-" disable viminfo
-set viminfo=
+" viminfo
+set viminfo='100,n$HOME/.vim/files/info/viminfo
 " share clipboard
 set clipboard+=unnamedplus
 " disable 8 digits
@@ -454,6 +494,7 @@ if has('mouse')
   set mouse=a
 endif
 au FileType vim setlocal foldmethod=marker
+set dictionary=/usr/share/dict/words
 " }}}
 " Search {{{
 set ignorecase
