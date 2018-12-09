@@ -64,6 +64,7 @@ Plug 'bkad/CamelCaseMotion'
 Plug 'simeji/winresizer'
 Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
+Plug 'godlygeek/tabular'
 Plug 'kannokanno/previm'
 Plug 'vim-scripts/DrawIt'
 Plug 'tomtom/tcomment_vim'
@@ -417,25 +418,22 @@ augroup END
 " }}}
 " mhinz/vim-startify {{{
 " startify
-let g:startify_files_number = 5
-let g:startify_list_order = [
-        \ ['MRU'],
-        \ 'files',
-        \ ['MRUDir'],
-        \ 'dir',
-        \ ['Session'],
-        \ 'sessions',
-        \ ['Bookmarks'],
-        \ 'bookmarks',
-        \ ]
-let g:startify_bookmarks = []
+    let g:startify_files_number = 5
+    let g:startify_lists = [
+          \ { 'type': 'files',     'header': ['   MRU']            },
+          \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
+          \ { 'type': 'sessions',  'header': ['   Sessions']       },
+          \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
+          \ { 'type': 'commands',  'header': ['   Commands']       },
+          \ ]
+    let g:startify_bookmarks = ['~/.config/nvim/init.vim']
 
-function! s:filter_header(lines) abort
-    let longest_line   = max(map(copy(a:lines), 'len(v:val)'))
-    let centered_lines = map(copy(a:lines),
-        \ 'repeat(" ", (&columns / 2) - (longest_line / 2)) . v:val')
-    return centered_lines
-endfunction
+    function! s:filter_header(lines) abort
+        let longest_line   = max(map(copy(a:lines), 'len(v:val)'))
+        let centered_lines = map(copy(a:lines),
+            \ 'repeat(" ", (&columns / 2) - (longest_line / 2)) . v:val')
+        return centered_lines
+    endfunction
 
 let g:startify_custom_header = s:filter_header([
       \ '           _ ',
@@ -451,6 +449,9 @@ let g:startify_custom_header = s:filter_header([
       \ '                     \_/  |___|_|  |_| ',
       \ ])
 
+" }}}
+" kannokanno/previm {{{
+  let g:vim_markdown_folding_disabled = 1
 " }}}
 "
 " }}}
@@ -593,6 +594,9 @@ nnoremap <Leader>gtj V:TranslateVisual ja:en<CR>
 " }}}
 " Termninal Mode {{{
 tnoremap <silent> <leader><C-[> <C-\><C-n>
+" Termninal Mode {{{
+inoremap <silent> jj <ESC>
+" }}}
 " }}}
 " Visual Mode {{{
 vnoremap <Space><CR> :!sh<CR>

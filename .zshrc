@@ -19,8 +19,8 @@ export EDITOR=nvim
 ### history
 ###
 HISTFILE=~/.zsh_history
-HISTSIZE=50000
-SAVEHIST=50000
+HISTSIZE=500000
+SAVEHIST=500000
 
 # Check if zplug is installed
 if [[ ! -d ~/.zplug ]]; then
@@ -63,6 +63,8 @@ autoload -Uz compinit && compinit
 set -o auto_list
 set -o auto_menu
 set -o auto_cd
+set -o list_packed
+bindkey -v
 
 zstyle ':completion:*:default' menu select=1 
 
@@ -138,6 +140,7 @@ anyframe-init
 
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs
+
 
 bindkey '^b' anyframe-widget-checkout-git-branch
 bindkey '^x^p' anyframe-widget-put-history
