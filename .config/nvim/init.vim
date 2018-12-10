@@ -62,7 +62,6 @@ Plug 'ekalinin/Dockerfile.vim'
 Plug 'yaasita/edit-slack.vim'
 Plug 'bkad/CamelCaseMotion'
 Plug 'simeji/winresizer'
-Plug 'godlygeek/tabular'
 Plug 'plasticboy/vim-markdown'
 Plug 'godlygeek/tabular'
 Plug 'kannokanno/previm'
@@ -263,7 +262,8 @@ augroup PrevimSettings
 augroup END
 " }}}
 " IndentGuide {{{
-let g:indent_guides_enable_on_vim_startup = 1
+  let g:indent_guides_enable_on_vim_startup = 1
+  let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish']
 " }}}
 " PlantUML {{{
 " augroup PlantUML
@@ -366,7 +366,7 @@ let g:indent_guides_guide_size = 1
 let g:calendar_google_calendar = 1
 " }}}
 " fix-whitespace {{{
-let g:extra_whitespace_ignored_filetypes = ['calendar']
+  let g:extra_whitespace_ignored_filetypes = ['calendar', 'startify']
 " }}}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 0
