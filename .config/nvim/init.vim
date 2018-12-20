@@ -49,14 +49,14 @@ Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'jodosha/vim-godebug'
 " Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-else
-  Plug 'Shougo/deoplete.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
-Plug 'zchee/deoplete-go', { 'do': 'make'}
+" if has('nvim')
+"   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" else
+"   Plug 'Shougo/deoplete.nvim'
+"   Plug 'roxma/nvim-yarp'
+"   Plug 'roxma/vim-hug-neovim-rpc'
+" endif
+" Plug 'zchee/deoplete-go', { 'do': 'make'}
 Plug 'kylef/apiblueprint.vim'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'yaasita/edit-slack.vim'
@@ -104,9 +104,13 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'davidhalter/jedi-vim'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'Chiel92/vim-autoformat'
-Plug 'scrooloose/vim-slumlord'
+" Plug 'scrooloose/vim-slumlord'
 Plug 'jceb/vim-orgmode'
 Plug 'mhinz/vim-startify'
+Plug 'autozimu/LanguageClient-neovim', {
+    \ 'branch': 'next',
+    \ 'do': 'bash install.sh',
+    \ }
 " Plug 'edkolev/tmuxline.vim'
 
 " Plugin Display {{{
@@ -120,9 +124,20 @@ Plug 'dracula/vim', { 'as': 'dracula' }
 call plug#end()
 " }}}
 " Plugin Configuration {{{
+" autozimu/LanguageClient-neovim {{{
+    let g:LanguageClient_rootMarkers = {
+            \ 'go': ['.git', 'go.mod'],
+            \ }
+
+    let g:LanguageClient_serverCommands = {
+        \ 'go': ['bingo'],
+        \ }
+    let g:LanguageClient_diagnosticsEnable = 0
+" }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
 let g:UltiSnipsExpandTrigger="<C-l>"
+let g:UltiSnipsEditSplit="vertical"
 " }}}
 " VimRestConsole {{{
 let g:vrc_curl_opts = {
@@ -184,12 +199,8 @@ augroup go
   autocmd FileType go nmap <leader>gt  <Plug>(go-test)
   " :GoRun
   autocmd FileType go nmap <leader>gr  <Plug>(go-run)
-  " :GoDoc
-  autocmd FileType go nmap <Leader>gdoc <Plug>(go-doc)
   " :GoCoverageToggle
   autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
-  " :GoInfo
-  autocmd FileType go nmap <Leader>gi <Plug>(go-info)
   " :GoMetaLinter
   autocmd FileType go nmap <Leader>gl <Plug>(go-metalinter)
   " :GoDef but opens in a vertical split
@@ -198,6 +209,13 @@ augroup go
   autocmd FileType go nmap <Leader>gs <Plug>(go-def-split)
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
+
+  autocmd FileType go nmap <silent> <Leader>gi :call LanguageClient#textDocument_hover()<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_rename()<CR>
+  autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
+  autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
+
 
   " Open :GoDeclsDir with ctrl-g
   autocmd FileType go imap <C-g> <esc>:GoDecls<cr>
@@ -266,10 +284,10 @@ augroup END
   let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish']
 " }}}
 " PlantUML {{{
-" augroup PlantUML
-"   autocmd!
-"   au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
-" augroup END
+augroup PlantUML
+  autocmd!
+  au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
+augroup END
 " }}}
 " Javascript library syntax {{{
 augroup JavascriptLibrariesSyntax
@@ -341,10 +359,10 @@ let g:lightline#ale#indicator_ok = "\uf00c"
 nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " deoplete & deoplete-go {{{
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#sources#go#gocode_binary = $GOPATH.'/bin/gocode'
-let g:deoplete#sources#go#package_dot = 1
-let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+" let g:deoplete#enable_at_startup = 1
+" call deoplete#custom#option({
+"     \ 'max_list': 10000,
+"     \ })
 " }}}
 " FastFold {{{
 let g:go_fold = 1
@@ -506,6 +524,7 @@ set hlsearch
 set iskeyword=a-z,A-Z,48-57,_,.,-,>
 " }}}
 " Display {{{
+"
 set shellslash
 set number
 set showmatch matchtime=1
@@ -566,6 +585,7 @@ map <leader>to :tabonly<cr>
 map <leader>tc :tabclose<cr>
 map <leader>tm :tabmove<cr>
 map <leader>t<leader> :tabnext<cr>
+inoremap <C-Space> <C-x><C-o>
 " Normal Mode {{{
 nnoremap <F8> :source ~/.config/nvim/init.vim<CR>
 nnoremap ZZ <Nop>

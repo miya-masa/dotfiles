@@ -14,6 +14,7 @@ export LC_TIME=C
 export LC_MESSAGES=C
 export PAGER=less
 export EDITOR=nvim
+export TERM=xterm-256color
 
 ###
 ### history

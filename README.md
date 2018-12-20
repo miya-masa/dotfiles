@@ -35,6 +35,9 @@
 * tmuxinator
   * `gem install tmuxinator`
 
+* LSP
+  * go get -u github.com/sourcegraph/go-langserver 
+
 ## nvim settings(Mac or Ubuntu)
 
 1. Clone this repository
