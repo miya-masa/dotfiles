@@ -29,7 +29,6 @@ if [[ ! -d ~/.zplug ]]; then
   source ~/.zplug/init.zsh && zplug update --self
 fi
 source ~/.zplug/init.zsh
-
 zplug 'zplug/zplug', hook-build:'zplug --self-manage'
 zplug "mafredri/zsh-async"
 zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
@@ -37,16 +36,16 @@ zplug "zsh-users/zsh-syntax-highlighting"
 zplug "zsh-users/zsh-history-substring-search"
 zplug "zsh-users/zsh-autosuggestions"
 zplug "zsh-users/zsh-completions"
+zplug 'zsh-users/zaw'
 zplug "chrissicool/zsh-256color"
 zplug "mollifier/anyframe"
 zplug "mollifier/cd-gitroot"
 zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
-# Support oh-my-zsh plugins and the like
 zplug "plugins/git",   from:oh-my-zsh
 zplug "plugins/docker-compose",   from:oh-my-zsh
 zplug "plugins/docker",   from:oh-my-zsh
 zplug "junegunn/fzf-bin", as:command, from:gh-r, rename-to:fzf
-zplug "junegunn/fzf", as:command, use:bin/fzf-tmux
+zplug "junegunn/fzf", as:command, use:bin/fzf-tmu
 zplug "jocelynmallon/zshmarks"
 zplug "b4b4r07/enhancd", use:init.sh
 
@@ -56,18 +55,60 @@ if ! zplug check --verbose; then
     echo; zplug install
   fi
 fi
+
+autoload -Uz chpwd_recent_dirs cdr add-zsh-hook is-at-least
+if is-at-least 4.3.10; then
+add-zsh-hook chpwd chpwd_recent_dirs
+zstyle ':chpwd:*' recent-dirs-max 5000
+zstyle ':chpwd:*' recent-dirs-default yes
+fi
+
 # Then, source plugins and add commands to $PATH
 zplug load
-autoload -Uz compinit && compinit
+autoload -U compinit
+compinit
+
+bindkey "^p" reverse-menu-complete
+bindkey "^n" menu-complete
+
+zstyle ':completion:*:default' menu select=1
 
 ## options
 set -o auto_list
 set -o auto_menu
 set -o auto_cd
 set -o list_packed
-bindkey -v
+set -o no_beep
+set -o no_nomatch
+set -o prompt_subst
+set -o transient_rprompt
+set -o hist_ignore_dups
+set -o hist_ignore_all_dups
+set -o hist_reduce_blanks
+set -o hist_no_store
+set -o hist_verify
+set -o share_history
+set -o extended_history
+set -o append_history
+set -o auto_pushd
+set -o list_packed
+set -o list_types
+set -o no_flow_control
+set -o print_eight_bit
+set -o pushd_ignore_dups
+set -o rec_exact
+set -o autoremoveslash
+unset list_beep
+set -o complete_in_word
+set -o glob
+set -o glob_complete
+set -o extended_glob
+set -o mark_dirs
+set -o numeric_glob_sort
+set -o magic_equal_subst
+set -o always_last_prompt
 
-zstyle ':completion:*:default' menu select=1 
+bindkey -v
 
 
 # ~/.bashrc: executed by bash(1) for non-login shells.
@@ -144,7 +185,6 @@ add-zsh-hook chpwd chpwd_recent_dirs
 
 
 bindkey '^b' anyframe-widget-checkout-git-branch
-bindkey '^x^p' anyframe-widget-put-history
 bindkey '^x^i' anyframe-widget-insert-git-branch
 bindkey '^x^f' anyframe-widget-insert-filename
 
