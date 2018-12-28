@@ -148,7 +148,8 @@ anyframe-init
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs
 
-
+zstyle ":anyframe:selector:fzf-tmux:" command 'fzf-tmux --extended'
+zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
 bindkey '^b' anyframe-widget-checkout-git-branch
 bindkey '^x^i' anyframe-widget-insert-git-branch
 bindkey '^x^f' anyframe-widget-insert-filename
@@ -156,6 +157,20 @@ bindkey '^x^f' anyframe-widget-insert-filename
 # DO NOT EDIT HERE
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 # DO NOT EDIT END
+
+# fda - including hidden directories
+fda() {
+  local dir
+  dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) && cd "$dir"
+}
+
+# Another fd - cd into the selected directory
+# This one differs from the above, by only showing the sub directories and not
+#  showing the directories within those.
+fd() {
+  DIR=`find * -type d -print 2> /dev/null | fzf-tmux` \
+  && cd "$DIR"
+}
 
 ## options
 set -o auto_list
