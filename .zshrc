@@ -73,41 +73,6 @@ bindkey "^n" menu-complete
 
 zstyle ':completion:*:default' menu select=1
 
-## options
-set -o auto_list
-set -o auto_menu
-set -o auto_cd
-set -o list_packed
-set -o no_beep
-set -o no_nomatch
-set -o prompt_subst
-set -o transient_rprompt
-set -o hist_ignore_dups
-set -o hist_ignore_all_dups
-set -o hist_reduce_blanks
-set -o hist_no_store
-set -o hist_verify
-set -o share_history
-set -o extended_history
-set -o append_history
-set -o auto_pushd
-set -o list_packed
-set -o list_types
-set -o no_flow_control
-set -o print_eight_bit
-set -o pushd_ignore_dups
-set -o rec_exact
-set -o autoremoveslash
-unset list_beep
-set -o complete_in_word
-set -o glob
-set -o glob_complete
-set -o extended_glob
-set -o mark_dirs
-set -o numeric_glob_sort
-set -o magic_equal_subst
-set -o always_last_prompt
-
 bindkey -v
 
 
@@ -191,3 +156,37 @@ bindkey '^x^f' anyframe-widget-insert-filename
 # DO NOT EDIT HERE
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 # DO NOT EDIT END
+
+## options
+set -o auto_list
+set -o auto_menu
+set -o auto_cd
+set -o list_packed
+set -o no_beep
+set -o no_nomatch
+set -o prompt_subst
+set -o transient_rprompt
+set -o hist_ignore_dups
+set -o hist_ignore_all_dups
+set -o hist_reduce_blanks
+set -o hist_no_store
+set -o hist_verify
+set -o share_history
+set -o extended_history
+set -o append_history
+set -o auto_pushd
+set -o list_packed
+set -o list_types
+set -o no_flow_control
+set -o print_eight_bit
+set -o pushd_ignore_dups
+set -o rec_exact
+set -o autoremoveslash
+unset list_beep
+set -o glob
+set -o glob_complete
+set -o complete_in_word
+set -o numeric_glob_sort
+set -o mark_dirs
+set -o magic_equal_subst
+set -o always_last_prompt

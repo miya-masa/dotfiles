@@ -44,7 +44,7 @@ attach: false
 # post: tmux -CC attach -t api-dev
 
 windows:
-  - dev:
+  - dev1:
       layout: main-vertical
       # Synchronize all panes of this window, can be enabled before or after the pane commands run.
       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
@@ -52,6 +52,14 @@ windows:
       panes:
         - nvim:
           - nvim
+        - zsh:
+  - dev2:
+      layout: main-vertical
+      # Synchronize all panes of this window, can be enabled before or after the pane commands run.
+      # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
+      # synchronize: after
+      panes:
+        - nvim:
         - zsh:
   - sand-box:
       layout: tiled

@@ -130,7 +130,7 @@ call plug#end()
             \ }
 
     let g:LanguageClient_serverCommands = {
-        \ 'go': ['bingo'],
+        \ 'go': ['golsp'],
         \ }
     let g:LanguageClient_diagnosticsEnable = 0
 " }}}
@@ -175,7 +175,7 @@ let g:go_highlight_methods = 1
 let g:go_highlight_extra_types = 1
 let g:go_highlight_generate_tags = 1
 
-" lint
+let g:go_test_timeout = "100s"
 let g:go_metalinter_deadline = "30s"
 let g:go_def_mode = 'godef'
 let g:go_term_mode = 'vsplit'
@@ -425,6 +425,8 @@ augroup python
 augroup END
 " }}}
 " QuickRun {{{
+  let g:quickrun_config = {}
+  let g:quickrun_config.go = {'exec' : ['%c test']}
   nnoremap <silent> <C-q> :QuickRun<CR>
 " }}}
 " Chiel92/vim-autoformat {{{
@@ -609,8 +611,8 @@ nnoremap <Leader><C-F> :Files<CR>
 nnoremap <leader><C-L> :Line<CR>
 nnoremap <Leader><CR> :nohlsearch<CR>
 nnoremap <Space><CR> V:!sh<CR>
-nnoremap <Leader>gte V:TranslateVisual<CR>
-nnoremap <Leader>gtj V:TranslateVisual ja:en<CR>
+nnoremap <Leader>tve V:TranslateVisual<CR>
+nnoremap <Leader>tvj V:TranslateVisual ja:en<CR>
 " }}}
 " Termninal Mode {{{
 tnoremap <silent> <leader><C-[> <C-\><C-n>
@@ -620,8 +622,8 @@ inoremap <silent> jj <ESC>
 " }}}
 " Visual Mode {{{
 vnoremap <Space><CR> :!sh<CR>
-vnoremap <Leader>gte :TranslateVisual<CR>
-vnoremap <Leader>gtj :TranslateVisual ja:en<CR>
+vnoremap <Leader>tve :TranslateVisual<CR>
+vnoremap <Leader>tvj :TranslateVisual ja:en<CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
 " }}}
