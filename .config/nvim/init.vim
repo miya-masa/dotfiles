@@ -31,23 +31,83 @@ if !has('nvim')
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
+Plug 'AndrewRadev/splitjoin.vim'
+Plug 'Chiel92/vim-autoformat'
+Plug 'Konfekt/FastFold'
+Plug 'Shougo/vinarise.vim/'
 Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
-Plug 'thinca/vim-qfreplace'
-Plug 'thinca/vim-zenspace'
-Plug 'tpope/vim-fugitive'
-Plug 'justinmk/vim-dirvish'
-Plug 'kristijanhusak/vim-dirvish-git'
-Plug 'w0rp/ale'
-Plug 'mattn/emmet-vim'
+Plug 'VincentCordobes/vim-translate'
+Plug 'airblade/vim-gitgutter'
+Plug 'aklt/plantuml-syntax'
 Plug 'alpaca-tc/html5.vim'
-Plug 'othree/html5.vim'
-Plug 'mxw/vim-jsx'
-Plug 'miya-masa/vim-esformatter'
+Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
+Plug 'bkad/CamelCaseMotion'
+Plug 'bronson/vim-trailing-whitespace'
+Plug 'c9s/perlomni.vim'
+Plug 'cespare/vim-toml'
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'davidhalter/jedi-vim'
+Plug 'dhruvasagar/vim-table-mode'
+Plug 'diepm/vim-rest-console'
+Plug 'dracula/vim', { 'as': 'dracula' }
+Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
 Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
-Plug 'AndrewRadev/splitjoin.vim'
+Plug 'flazz/vim-colorschemes'
+Plug 'godlygeek/tabular'
+Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
+Plug 'honza/vim-snippets'
+Plug 'itchyny/calendar.vim'
+Plug 'itchyny/lightline.vim'
+Plug 'jceb/vim-orgmode'
+Plug 'jiangmiao/auto-pairs'
 Plug 'jodosha/vim-godebug'
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+Plug 'junegunn/vim-easy-align'
+Plug 'justinmk/vim-dirvish'
+Plug 'kannokanno/previm'
+Plug 'kristijanhusak/vim-dirvish-git'
+Plug 'kylef/apiblueprint.vim'
+Plug 'majutsushi/tagbar'
+Plug 'mattn/emmet-vim'
+Plug 'maximbaz/lightline-ale'
+Plug 'maxmellon/vim-jsx-pretty'
+Plug 'mhinz/vim-startify'
+Plug 'mileszs/ack.vim'
+Plug 'miya-masa/vim-esformatter'
+Plug 'morhetz/gruvbox'
+Plug 'mxw/vim-jsx'
+Plug 'nathanaelkane/vim-indent-guides'
+Plug 'othree/es.next.syntax.vim'
+Plug 'othree/html5.vim'
+Plug 'othree/javascript-libraries-syntax.vim'
+Plug 'othree/yajs.vim'
+Plug 'pangloss/vim-javascript'
+Plug 'plasticboy/vim-markdown'
+Plug 'qpkorr/vim-bufkill'
+Plug 'ryanoasis/vim-devicons'
+Plug 'sheerun/vim-polyglot'
+Plug 'simeji/winresizer'
+Plug 'ternjs/tern_for_vim'
+Plug 'terryma/vim-multiple-cursors'
+Plug 'thinca/vim-qfreplace'
+Plug 'thinca/vim-quickrun'
+Plug 'thinca/vim-zenspace'
+Plug 'tomtom/tcomment_vim'
+Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-rhubarb'
+Plug 'tpope/vim-sleuth'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-unimpaired'
+Plug 'vim-jp/vimdoc-ja'
+Plug 'vim-scripts/DrawIt'
+Plug 'w0rp/ale'
+Plug 'xolox/vim-misc'
+Plug 'xolox/vim-notes'
+Plug 'yaasita/edit-slack.vim'
 " Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
 " if has('nvim')
 "   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
@@ -57,70 +117,8 @@ Plug 'jodosha/vim-godebug'
 "   Plug 'roxma/vim-hug-neovim-rpc'
 " endif
 " Plug 'zchee/deoplete-go', { 'do': 'make'}
-Plug 'kylef/apiblueprint.vim'
-Plug 'ekalinin/Dockerfile.vim'
-Plug 'yaasita/edit-slack.vim'
-Plug 'bkad/CamelCaseMotion'
-Plug 'simeji/winresizer'
-Plug 'plasticboy/vim-markdown'
-Plug 'godlygeek/tabular'
-Plug 'kannokanno/previm'
-Plug 'vim-scripts/DrawIt'
-Plug 'tomtom/tcomment_vim'
-Plug 'tpope/vim-surround'
-Plug 'bronson/vim-trailing-whitespace'
-Plug 'nathanaelkane/vim-indent-guides'
-Plug 'vim-jp/vimdoc-ja'
-Plug 'aklt/plantuml-syntax'
-Plug 'cespare/vim-toml'
-Plug 'pangloss/vim-javascript'
-Plug 'othree/yajs.vim'
-Plug 'othree/es.next.syntax.vim'
-Plug 'othree/javascript-libraries-syntax.vim'
-Plug 'maxmellon/vim-jsx-pretty'
-Plug 'ternjs/tern_for_vim'
-Plug 'jiangmiao/auto-pairs'
-Plug 'c9s/perlomni.vim'
-Plug 'morhetz/gruvbox'
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
-Plug 'majutsushi/tagbar'
-Plug 'dhruvasagar/vim-table-mode'
-Plug 'thinca/vim-quickrun'
-Plug 'diepm/vim-rest-console'
-Plug 'VincentCordobes/vim-translate'
-Plug 'junegunn/vim-easy-align'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'Konfekt/FastFold'
-Plug 'itchyny/calendar.vim'
-Plug 'xolox/vim-notes'
-Plug 'xolox/vim-misc'
-Plug 'tpope/vim-repeat'
-Plug 'Shougo/vinarise.vim/'
-Plug 'mileszs/ack.vim'
-Plug 'tpope/vim-unimpaired'
-Plug 'qpkorr/vim-bufkill'
-Plug 'terryma/vim-multiple-cursors'
-Plug 'davidhalter/jedi-vim'
-Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
-Plug 'Chiel92/vim-autoformat'
-" Plug 'scrooloose/vim-slumlord'
-Plug 'jceb/vim-orgmode'
-Plug 'mhinz/vim-startify'
-Plug 'autozimu/LanguageClient-neovim', {
-    \ 'branch': 'next',
-    \ 'do': 'bash install.sh',
-    \ }
-" Plug 'edkolev/tmuxline.vim'
 
-" Plugin Display {{{
-Plug 'flazz/vim-colorschemes'
-Plug 'ryanoasis/vim-devicons'
-Plug 'airblade/vim-gitgutter'
-Plug 'itchyny/lightline.vim'
-Plug 'maximbaz/lightline-ale'
-Plug 'dracula/vim', { 'as': 'dracula' }
-" }}}
+"
 call plug#end()
 " }}}
 " Plugin Configuration {{{
@@ -296,9 +294,6 @@ augroup JavascriptLibrariesSyntax
   autocmd BufReadPre *.js let b:javascript_lib_use_react = 1
 augroup END
 " }}}
-" Align {{{
-let g:Align_xstrlen=3
-" }}}
 " lightline {{{
 let g:lightline = {
       \ 'colorscheme': 'gruvbox',
@@ -356,7 +351,7 @@ let g:lightline#ale#indicator_ok = "\uf00c"
 
 " }}}
 " tmux-navigator {{{
-nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
+  nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " deoplete & deoplete-go {{{
 " let g:deoplete#enable_at_startup = 1
@@ -365,11 +360,11 @@ nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 "     \ })
 " }}}
 " FastFold {{{
-let g:go_fold = 1
+  let g:go_fold = 1
 " }}}
 " IndentGuide {{{
-let g:indent_guides_start_level = 2
-let g:indent_guides_guide_size = 1
+  let g:indent_guides_start_level = 2
+  let g:indent_guides_guide_size = 1
 " }}}
 " ALE {{{
   " let g:ale_linters = {
@@ -479,71 +474,147 @@ let g:startify_custom_header = s:filter_header([
 scriptencoding utf8
 set helplang=ja,en
 
-set nowritebackup
-set nobackup
-set noswapfile
-set noundofile
+" Avoid garbled characters in Chinese language windows OS
+let $LANG='en'
+set langmenu=en
+source $VIMRUNTIME/delmenu.vim
+source $VIMRUNTIME/menu.vim
+
+" Set 7 lines to the cursor - when moving vertically using j/k
+set so=7
+
+" Turn on the Wild menu
+set wildmenu
+
+" Ignore compiled files
+set wildignore=*.o,*~,*.pyc
+if has("win16") || has("win32")
+    set wildignore+=.git\*,.hg\*,.svn\*
+else
+    set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
+endif
+
+" Height of the command bar
+set cmdheight=2
+
+" Ignore case when searching
+set ignorecase
+
+" When searching try to be smart about cases
+set smartcase
+
+" Highlight search results
+set hlsearch
+
+" Makes search act like search in modern browsers
+set incsearch
+
+set wrapscan
+
+" Don't redraw while executing macros (good performance config)
+set lazyredraw
+
+" For regular expressions turn magic on
+set magic
+
+" Show matching brackets when text indicator is over them
+set showmatch
+" How many tenths of a second to blink when matching brackets
+set mat=2
+
+" No annoying sound on errors
 set noerrorbells
 set novisualbell
 set t_vb=
 set tm=500
-" viminfo
-set viminfo='100,n$HOME/.vim/files/info/viminfo
-" share clipboard
-set clipboard+=unnamedplus
-" disable 8 digits
-set nrformats-=octal
-set timeout timeoutlen=3000 ttimeoutlen=50
-set hidden
-set history=500
-set formatoptions+=mM
-set virtualedit=block
-set whichwrap=b,s,[,],<,>
-set backspace=indent,eol,start
-set so=7
-set ruler
-set hid
-set lazyredraw
+
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
-" Add a bit extra margin to the left
-set foldcolumn=1
+
+" Turn backup off, since most stuff is in SVN, git et.c anyway...
+set nobackup
+set nowb
+set noswapfile
+
+" Use spaces instead of tabs
+set expandtab
+
+" Be smart when using tabs ;)
+set smarttab
+
+set ai "Auto indent
+set si "Smart indent
+set wrap "Wrap lines
+
+" viminfo
+set viminfo='100,n$HOME/.vim/files/info/viminfo
+
+" share clipboard
+set clipboard+=unnamedplus
+
+" disable 8 digits
+set nrformats-=octal
+
+set timeout timeoutlen=3000 ttimeoutlen=50
+
+set hidden
+
+set formatoptions+=mM
+
+set virtualedit=block
+
+set whichwrap=b,s,[,],<,>
+
+set backspace=indent,eol,start
+
+set ruler
+
+set lazyredraw
+
 set ambiwidth=double
+
 set inccommand=split
+
 set wildmenu
 if has('mouse')
   set mouse=a
 endif
+
 au FileType vim setlocal foldmethod=marker
+
 set dictionary=/usr/share/dict/words
-" }}}
-" Search {{{
-set ignorecase
-set smartcase
-set wrapscan
-set incsearch
-set hlsearch
+
 set iskeyword=a-z,A-Z,48-57,_,.,-,>
+
 " }}}
 " Display {{{
 "
 set shellslash
+
 set number
+
 set showmatch matchtime=1
+
 set ts=2 sw=2 sts=2
-set autoindent
-set smartindent
-set wrap
+
 set shiftwidth=2
-set expandtab
-set cinoptions+=:0
-set title
+
 set cmdheight=2
+
+" The value of this option influences when the last window will have a
+" 	status line:
+" 		2: always
 set laststatus=2
-set showcmd
+
+" 	lastline	When included, as much as possible of the last line
+" 			in a window will be displayed.  "@@@" is put in the
+" 			last columns of the last screen line to indicate the
+" 			rest of the line is not displayed.
 set display=lastline
+
 set list
 set listchars=tab:^\ ,trail:~
+
 " }}}
 " Spell Check {{{
 set spelllang=en,cjk
@@ -578,16 +649,29 @@ augroup END
 map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
 " Close all the buffers
 map <leader>bd :BD<cr>
+" Close all the buffers
+map <leader>ba :bufdo bd<cr>
 
 " Switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
+
 " Useful mappings for managing tabs
 map <leader>tn :tabnew<cr>
 map <leader>to :tabonly<cr>
 map <leader>tc :tabclose<cr>
 map <leader>tm :tabmove<cr>
 map <leader>t<leader> :tabnext<cr>
-inoremap <C-Space> <C-x><C-o>
+
+" Quickly open a buffer for scribble
+map <leader>q :e ~/buffer<cr>
+
+" Quickly open a markdown buffer for scribble
+map <leader>x :e ~/buffer.md<cr>
+
+" Toggle paste mode on and off
+map <leader>pp :setlocal paste!<cr>
+
+
 " Normal Mode {{{
 nnoremap <F8> :source ~/.config/nvim/init.vim<CR>
 nnoremap ZZ <Nop>
@@ -597,18 +681,16 @@ nnoremap j gj
 nnoremap k gk
 nnoremap h <Left>zv
 nnoremap l <Right>zv
-nnoremap [q :cprevious<CR>
-nnoremap ]q :cnext<CR>
-nnoremap [Q :<C-u>cfirst<CR>
-nnoremap ]Q :<C-u>clast<CR>
 nnoremap Y y$
 nnoremap <leader>a :cclose<CR>
 nnoremap <leader>st :split<CR>:terminal<CR>
 nnoremap <Leader><C-B> :Buffer<CR>
-nnoremap <Leader><C-A> :Ag<CR>
+cnoreabbrev Ack Ack!
+nnoremap <Leader><C-A> :Ack!<Space>
 nnoremap <Leader><C-G> :GFiles<CR>
 nnoremap <Leader><C-F> :Files<CR>
 nnoremap <leader><C-L> :Line<CR>
+nnoremap <leader><C-T> :Tags<CR>
 nnoremap <Leader><CR> :nohlsearch<CR>
 nnoremap <Space><CR> V:!sh<CR>
 nnoremap <Leader>tve V:TranslateVisual<CR>
@@ -616,33 +698,54 @@ nnoremap <Leader>tvj V:TranslateVisual ja:en<CR>
 " }}}
 " Termninal Mode {{{
 tnoremap <silent> <leader><C-[> <C-\><C-n>
-" Termninal Mode {{{
+
+" Insert Mode {{{
 inoremap <silent> jj <ESC>
+inoremap <C-Space> <C-x><C-o>
+
 " }}}
 " }}}
 " Visual Mode {{{
 vnoremap <Space><CR> :!sh<CR>
 vnoremap <Leader>tve :TranslateVisual<CR>
 vnoremap <Leader>tvj :TranslateVisual ja:en<CR>
+" Visual mode pressing * or # searches for the current selection
+" Super useful! From an idea by Michael Naumann
+vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
+vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
+
+if has("autocmd")
+    autocmd BufWritePre *.txt,*.js,*.py,*.wiki,*.sh,*.coffee,*.md :FixWhitespace<cr>
+endif
+
 " }}}
 " }}}
 " Colorscheme {{{
+" Enable syntax highlighting
 syntax enable
+
+" Enable 256 colors palette in Gnome Terminal
+if $COLORTERM == 'gnome-terminal'
+    set t_Co=256
+endif
+
+try
+  colorscheme gruvbox
+catch
+endtry
 set background=dark
-" set termguicolors
-colorscheme gruvbox
-" let g:airline_theme = 'gruvbox'
+
 " }}}
 " Util Command {{{
 " Conv hex deg bin {{{
-command! -nargs=1 ToH echo printf("%0x", <args>)
-command! -nargs=1 ToD echo printf("%0d", <args>)
-command! -nargs=1 ToB echo printf("%0b", <args>)
-command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
-command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
-command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
+  command! -nargs=1 ToH echo printf("%0x", <args>)
+  command! -nargs=1 ToD echo printf("%0d", <args>)
+  command! -nargs=1 ToB echo printf("%0b", <args>)
+  command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
+  command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
+  command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 " }}}
 " }}}
 "
