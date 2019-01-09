@@ -41,7 +41,7 @@ func Test${1:FuncName}(t *testing.T) {
 endsnippet
 
 snippet assert "assert snippet"
-t.Errorf("index:%+v name %+v \ninput %+v \nwant %+v \nbut  %+v",i ,c.name,${1:c.in}, ${2:c.exp}, ${3:act})
+t.Errorf("name %+v \ninput %+v \nwant %+v \nbut  %+v", c.name, ${1:c.in}, ${2:c.exp}, ${3:act})
 ${0:${VISUAL}}
 endsnippet
 
@@ -63,7 +63,7 @@ func Test$1(t *testing.T) {
 		},
 	}
 
-	for i, c := range cases {
+	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T){
 		// setup
 		${0:${VISUAL}}
@@ -102,9 +102,16 @@ endsnippet
 
 snippet ctx "context background"
 ctx := context.Background()
+${0:${VISUAL}}
 endsnippet
 
 snippet ctxc "context with cancel"
 ctx, cancel := context.WithCancel(ctx)
 defer cancel()
+${0:${VISUAL}}
+endsnippet
+
+snippet gdt "date example"
+time.Date(2000, 1, 2, 3, 4, 5, 0, time.UTC)
+${0:${VISUAL}}
 endsnippet

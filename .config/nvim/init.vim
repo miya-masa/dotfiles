@@ -468,6 +468,13 @@ let g:startify_custom_header = s:filter_header([
 " kannokanno/previm {{{
   let g:vim_markdown_folding_disabled = 1
 " }}}
+" VincentCordobes/vim-translate {{{
+  let g:translate#default_languages = {
+        \ 'en': 'ja',
+        \ 'ja': 'en'
+        \ }
+" }}}
+
 "
 " }}}
 " Basic Settings  {{{
@@ -475,8 +482,8 @@ scriptencoding utf8
 set helplang=ja,en
 
 " Avoid garbled characters in Chinese language windows OS
-let $LANG='en'
-set langmenu=en
+let $LANG='ja_JP.UTF-8'
+set langmenu=ja_JP.UTF-8
 source $VIMRUNTIME/delmenu.vim
 source $VIMRUNTIME/menu.vim
 
@@ -496,109 +503,75 @@ endif
 
 " Height of the command bar
 set cmdheight=2
-
 " Ignore case when searching
 set ignorecase
-
 " When searching try to be smart about cases
 set smartcase
-
 " Highlight search results
 set hlsearch
-
 " Makes search act like search in modern browsers
 set incsearch
-
 set wrapscan
-
 " Don't redraw while executing macros (good performance config)
 set lazyredraw
-
 " For regular expressions turn magic on
 set magic
-
 " Show matching brackets when text indicator is over them
 set showmatch
 " How many tenths of a second to blink when matching brackets
 set mat=2
-
 " No annoying sound on errors
 set noerrorbells
 set novisualbell
 set t_vb=
 set tm=500
-
 " Use Unix as the standard file type
 set ffs=unix,dos,mac
-
 " Turn backup off, since most stuff is in SVN, git et.c anyway...
 set nobackup
 set nowb
 set noswapfile
-
 " Use spaces instead of tabs
 set expandtab
-
 " Be smart when using tabs ;)
 set smarttab
-
 set ai "Auto indent
 set si "Smart indent
 set wrap "Wrap lines
-
 " viminfo
 set viminfo='100,n$HOME/.vim/files/info/viminfo
-
 " share clipboard
 set clipboard+=unnamedplus
-
 " disable 8 digits
 set nrformats-=octal
-
 set timeout timeoutlen=3000 ttimeoutlen=50
-
 set hidden
-
 set formatoptions+=mM
-
 set virtualedit=block
-
 set whichwrap=b,s,[,],<,>
-
 set backspace=indent,eol,start
-
 set ruler
-
 set lazyredraw
-
 set ambiwidth=double
-
 set inccommand=split
-
 set wildmenu
 if has('mouse')
   set mouse=a
 endif
-
 au FileType vim setlocal foldmethod=marker
-
+" Add a bit extra margin to the left
+set foldcolumn=1
 set dictionary=/usr/share/dict/words
-
 set iskeyword=a-z,A-Z,48-57,_,.,-,>
 
 " }}}
 " Display {{{
 "
 set shellslash
-
 set number
-
 set showmatch matchtime=1
-
 set ts=2 sw=2 sts=2
-
 set shiftwidth=2
-
 set cmdheight=2
 
 " The value of this option influences when the last window will have a
@@ -650,7 +623,7 @@ map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
 " Close all the buffers
 map <leader>bd :BD<cr>
 " Close all the buffers
-map <leader>ba :bufdo bd<cr>
+map <leader>ba :bufdo :BD<cr>
 
 " Switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
@@ -701,7 +674,7 @@ tnoremap <silent> <leader><C-[> <C-\><C-n>
 
 " Insert Mode {{{
 inoremap <silent> jj <ESC>
-inoremap <C-Space> <C-x><C-o>
+inoremap <Leader><C-Space> <C-x><C-o>
 
 " }}}
 " }}}
@@ -715,10 +688,6 @@ vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
 vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
-
-if has("autocmd")
-    autocmd BufWritePre *.txt,*.js,*.py,*.wiki,*.sh,*.coffee,*.md :FixWhitespace<cr>
-endif
 
 " }}}
 " }}}
@@ -748,4 +717,3 @@ set background=dark
   command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 " }}}
 " }}}
-"
