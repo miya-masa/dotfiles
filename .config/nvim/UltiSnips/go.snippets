@@ -115,3 +115,10 @@ snippet gdt "date example"
 time.Date(2000, 1, 2, 3, 4, 5, 0, time.UTC)
 ${0:${VISUAL}}
 endsnippet
+
+snippet herr "handle error"
+func (d *impl) handleError(err error) error {
+	${0:${VISUAL}}
+	return err
+}
+endsnippet

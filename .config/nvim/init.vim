@@ -360,7 +360,7 @@ let g:lightline#ale#indicator_ok = "\uf00c"
 "     \ })
 " }}}
 " FastFold {{{
-  let g:go_fold = 1
+  let g:go_fold = 0
 " }}}
 " IndentGuide {{{
   let g:indent_guides_start_level = 2
@@ -576,7 +576,6 @@ set shellslash
 set number
 set showmatch matchtime=1
 set ts=2 sw=2 sts=2
-set shiftwidth=2
 set cmdheight=2
 
 " The value of this option influences when the last window will have a
