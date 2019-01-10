@@ -47,7 +47,7 @@ zplug "plugins/docker",   from:oh-my-zsh
 zplug "junegunn/fzf-bin", as:command, from:gh-r, rename-to:fzf
 zplug "junegunn/fzf", as:command, use:bin/fzf-tmu
 zplug "jocelynmallon/zshmarks"
-zplug "b4b4r07/enhancd", use:init.sh
+# zplug "b4b4r07/enhancd", use:init.sh
 
 if ! zplug check --verbose; then
   printf "Install? [y/N]: "
@@ -145,14 +145,17 @@ fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
 anyframe-init
 
+bindkey '^e' anyframe-widget-checkout-git-branch
+bindkey '^g' anyframe-widget-cd-ghq-repository
+bindkey '^b' anyframe-widget-cdr
+bindkey '^x^i' anyframe-widget-insert-git-branch
+bindkey '^x^f' anyframe-widget-insert-filename
+
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs
 
 zstyle ":anyframe:selector:fzf-tmux:" command 'fzf-tmux --extended'
 zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
-bindkey '^b' anyframe-widget-checkout-git-branch
-bindkey '^x^i' anyframe-widget-insert-git-branch
-bindkey '^x^f' anyframe-widget-insert-filename
 
 # DO NOT EDIT HERE
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh

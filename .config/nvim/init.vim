@@ -474,7 +474,12 @@ let g:startify_custom_header = s:filter_header([
         \ 'ja': 'en'
         \ }
 " }}}
-
+" {{{ junegunn/fzf.vim
+  command! -nargs=0 Fq call fzf#run({
+  \ 'source': 'ghq list --full-path',
+  \ 'sink': 'Dirvish'
+  \ })
+" }}}
 "
 " }}}
 " Basic Settings  {{{
@@ -644,7 +649,6 @@ map <leader>x :e ~/buffer.md<cr>
 " Toggle paste mode on and off
 map <leader>pp :setlocal paste!<cr>
 
-
 " Normal Mode {{{
 nnoremap <F8> :source ~/.config/nvim/init.vim<CR>
 nnoremap ZZ <Nop>
@@ -664,6 +668,7 @@ nnoremap <Leader><C-G> :GFiles<CR>
 nnoremap <Leader><C-F> :Files<CR>
 nnoremap <leader><C-L> :Line<CR>
 nnoremap <leader><C-T> :Tags<CR>
+nnoremap <leader><C-R> :Fq<CR>
 nnoremap <Leader><CR> :nohlsearch<CR>
 nnoremap <Space><CR> V:!sh<CR>
 nnoremap <Leader>tve V:TranslateVisual<CR>
@@ -674,7 +679,6 @@ tnoremap <silent> <leader><C-[> <C-\><C-n>
 
 " Insert Mode {{{
 inoremap <silent> jj <ESC>
-inoremap <Leader><C-Space> <C-x><C-o>
 
 " }}}
 " }}}
