@@ -1,4 +1,4 @@
-all: git tmux zsh nvim fzf
+all: git tmux zsh nvim fzf tmuxinator
 
 $(HOME)/.config:
 	mkdir -p ${HOME}/.config
