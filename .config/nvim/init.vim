@@ -360,7 +360,7 @@ let g:lightline#ale#indicator_ok = "\uf00c"
 "     \ })
 " }}}
 " FastFold {{{
-  let g:go_fold = 0
+  let g:go_fold_enabled=0
 " }}}
 " IndentGuide {{{
   let g:indent_guides_start_level = 2
