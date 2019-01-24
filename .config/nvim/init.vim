@@ -52,7 +52,7 @@ Plug 'diepm/vim-rest-console'
 Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
-Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'flazz/vim-colorschemes'
 Plug 'godlygeek/tabular'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
@@ -109,13 +109,14 @@ Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
 Plug 'yaasita/edit-slack.vim'
 " Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
-" if has('nvim')
-"   Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-" else
-"   Plug 'Shougo/deoplete.nvim'
-"   Plug 'roxma/nvim-yarp'
-"   Plug 'roxma/vim-hug-neovim-rpc'
-" endif
+if has('nvim')
+  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+else
+  Plug 'Shougo/deoplete.nvim'
+  Plug 'roxma/nvim-yarp'
+  Plug 'roxma/vim-hug-neovim-rpc'
+endif
+" Plug 'Shougo/deoplete-lsp'
 " Plug 'zchee/deoplete-go', { 'do': 'make'}
 
 "
@@ -354,10 +355,10 @@ let g:lightline#ale#indicator_ok = "\uf00c"
   nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " deoplete & deoplete-go {{{
-" let g:deoplete#enable_at_startup = 1
-" call deoplete#custom#option({
-"     \ 'max_list': 10000,
-"     \ })
+  let g:deoplete#enable_at_startup = 1
+  call deoplete#custom#option({
+      \ 'max_list': 10000,
+      \ })
 " }}}
 " FastFold {{{
   let g:go_fold_enabled=0
@@ -372,8 +373,8 @@ let g:lightline#ale#indicator_ok = "\uf00c"
   " \}
   " let g:ale_go_gometalinter_options = '--vendored-linters --disable-all --enable=gotype --enable=vet --enable=golint -t'
   " let g:ale_go_gometalinter_options = '--fast'
-  nnoremap <silent> [a <Plug>(ale_previous_wrap)
-  nnoremap <silent> ]a <Plug>(ale_next_wrap)
+  nmap <silent> [a <Plug>(ale_previous_wrap)
+  nmap <silent> ]a <Plug>(ale_next_wrap)
 " }}}
 " calendar.vim {{{
 let g:calendar_google_calendar = 1

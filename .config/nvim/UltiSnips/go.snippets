@@ -41,7 +41,7 @@ func Test${1:FuncName}(t *testing.T) {
 endsnippet
 
 snippet assert "assert snippet"
-t.Errorf("name %+v \ninput %+v \nwant %+v \nbut  %+v", c.name, ${1:c.in}, ${2:c.exp}, ${3:act})
+t.Errorf("name %+v \ninput %+v \nwant %+v \nbut  %+v", t.Name(), ${1:c.in}, ${2:c.exp}, ${3:act})
 ${0:${VISUAL}}
 endsnippet
 
@@ -89,9 +89,8 @@ endsnippet
 
 snippet pr "print debug"
 //DEBUG: print debug
-fmt.Printf("####################################${1:tag} %+v\n", ${1})
+fmt.Printf("#################################### ${1:t} %+v\n", $1)
 ${0:${VISUAL}}
-
 endsnippet
 
 snippet deq "deep equal"
@@ -120,5 +119,26 @@ snippet herr "handle error"
 func (d *impl) handleError(err error) error {
 	${0:${VISUAL}}
 	return err
+}
+endsnippet
+
+snippet cli "urfave cli snippet"
+app := cli.NewApp()
+app.Name = "${1:name}"
+app.Usage = "${2:useage}"
+app.Flags = []cli.Flag{
+	cli.StringFlag{
+		Name:  "${3:flag}, ${4:f}",
+		Usage: "usage",
+	},
+}
+app.Action = func(c *cli.Context) error {
+	fmt.Println("Hello friend!")
+	return nil
+}
+
+err := app.Run(os.Args)
+if err != nil {
+	log.Fatal(err)
 }
 endsnippet
