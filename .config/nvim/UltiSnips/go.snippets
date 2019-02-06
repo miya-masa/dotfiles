@@ -142,3 +142,14 @@ if err != nil {
 	log.Fatal(err)
 }
 endsnippet
+
+
+snippet enum "go enumer"
+//go:generate enumer -type=${1:Type} -transform=${2:kebab|snake} -trimprefix=${1} ${3:-text|-json|-sql|-yaml}
+type ${1} uint8
+
+const (
+	_ ${1} = iota
+	${0:${VISUAL}}
+)
+endsnippet
