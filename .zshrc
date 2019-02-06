@@ -210,3 +210,4 @@ set -o magic_equal_subst
 set -o always_last_prompt
 
 eval "$(direnv hook zsh)"
+function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}

@@ -116,6 +116,7 @@ else
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
+Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 " Plug 'Shougo/deoplete-lsp'
 " Plug 'zchee/deoplete-go', { 'do': 'make'}
 
