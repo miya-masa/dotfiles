@@ -208,3 +208,5 @@ set -o numeric_glob_sort
 set -o mark_dirs
 set -o magic_equal_subst
 set -o always_last_prompt
+
+eval "$(direnv hook zsh)"

@@ -38,6 +38,9 @@
 * LSP
   * go get -u github.com/sourcegraph/go-langserver 
 
+* direnv
+  * https://direnv.net/
+
 ## nvim settings(Mac or Ubuntu)
 
 1. Clone this repository
