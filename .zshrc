@@ -211,3 +211,18 @@ set -o always_last_prompt
 
 eval "$(direnv hook zsh)"
 function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
+
+alias dps='docker ps'
+alias dim='docker images'
+alias drm='docker rm $(docker ps -aqf "status=exited") 2> /dev/null'
+alias drmi='docker rmi $(docker images -aqf "dangling=true") 2> /dev/null'
+alias dc='docker-compose'
+alias dcup='dc up'
+alias dcupd='dc up -d'
+alias dcdown='dc down'
+alias dcrun='dc run --service-ports'
+alias dcps='dc ps'
+
+function dcrm() {
+    dc stop $1 && dc rm -f $1
+}

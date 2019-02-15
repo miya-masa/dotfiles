@@ -28,3 +28,9 @@ fzf:
 fish-mac:
 	brew install fish
 	curl https://git.io/fisher --create-dirs -sLo ~/.config/fish/functions/fisher.fish
+
+ranger:
+	pip install ranger-fm
+
+pip3:
+	brew install python

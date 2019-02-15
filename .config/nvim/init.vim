@@ -65,8 +65,10 @@ Plug 'jodosha/vim-godebug'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/vim-easy-align'
-Plug 'justinmk/vim-dirvish'
 Plug 'kannokanno/previm'
+" Plug 'scrooloose/nerdtree'
+" Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'justinmk/vim-dirvish'
 Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'kylef/apiblueprint.vim'
 Plug 'majutsushi/tagbar'
@@ -116,6 +118,7 @@ else
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
+Plug 'deoplete-plugins/deoplete-docker'
 Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 " Plug 'Shougo/deoplete-lsp'
 " Plug 'zchee/deoplete-go', { 'do': 'make'}
@@ -357,9 +360,13 @@ let g:lightline#ale#indicator_ok = "\uf00c"
 " }}}
 " deoplete & deoplete-go {{{
   let g:deoplete#enable_at_startup = 1
+
+  " Pass a dictionary to set multiple options
   call deoplete#custom#option({
-      \ 'max_list': 10000,
-      \ })
+  \ 'auto_complete_delay': 200,
+  \ 'smart_case': v:true,
+  \ 'max_list': 500,
+  \ })
 " }}}
 " FastFold {{{
   let g:go_fold_enabled=0
@@ -404,10 +411,15 @@ let g:notes_suffix = '.md'
 " }}}
 " dirvish {{{
 "
-augroup dirvish
-  autocmd!
-  autocmd FileType dirvish command! -nargs=1 NF :e %<args>
-augroup END
+
+  command! -nargs=0 Fq call fzf#run({
+  \ 'source': 'ghq list --full-path',
+  \ 'sink': 'Dirvish'
+  \ })
+  augroup dirvish
+    autocmd!
+    autocmd FileType dirvish command! -nargs=1 NF :e %<args>
+  augroup END
 " }}}
 " vim-unimpaired {{{
 " }}}
@@ -424,7 +436,7 @@ augroup END
 " QuickRun {{{
   let g:quickrun_config = {}
   let g:quickrun_config.go = {'exec' : ['%c test']}
-  nnoremap <silent> <C-q> :QuickRun<CR>
+  nnoremap <silent> <C-q> :QuickRun -outputter message<CR>
 " }}}
 " Chiel92/vim-autoformat {{{
 augroup autoformat
@@ -481,6 +493,14 @@ let g:startify_custom_header = s:filter_header([
   \ 'source': 'ghq list --full-path',
   \ 'sink': 'Dirvish'
   \ })
+" }}}
+" {{{ scrooloose/nerdtree
+  " map - :NERDTreeToggle %:p:h<cr>
+  " command! -nargs=0 Fq call fzf#run({
+  " \ 'source': 'ghq list --full-path',
+  " \ 'sink': 'Dirvish'
+  " \ })
+  " let NERDTreeShowHidden=1
 " }}}
 "
 " }}}
@@ -626,7 +646,7 @@ augroup END
 " Opens a new tab with the current buffer's path
 " Super useful when editing files in the same directory
 map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
-" Close all the buffers
+" Close the buffers
 map <leader>bd :BD<cr>
 " Close all the buffers
 map <leader>ba :bufdo :BD<cr>
@@ -687,10 +707,6 @@ inoremap <silent> jj <ESC>
 vnoremap <Space><CR> :!sh<CR>
 vnoremap <Leader>tve :TranslateVisual<CR>
 vnoremap <Leader>tvj :TranslateVisual ja:en<CR>
-" Visual mode pressing * or # searches for the current selection
-" Super useful! From an idea by Michael Naumann
-vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
-vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
 
