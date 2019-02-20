@@ -380,6 +380,7 @@ Usage:
     font                        Install font
     gawk                        Install gawk
     tmux                        Install tmux
+    yarn                        Install yarn
 EOF
 }
 
@@ -426,6 +427,9 @@ function parse_params() {
                 ;;
             tmux)
                 tmux=true
+                ;;
+            yarn)
+                yarn=true
                 ;;
             *)
                 script_exit "Invalid parameter was provided: $param" 2
@@ -476,6 +480,11 @@ function _main() {
     brew install tmux
     brew install ruby
     gem install tmuxinator
+    exit 0
+  fi
+  if [[ -n ${yarn-} ]]; then
+    brew install yarn
+    yarn global add vim-node-rpc
     exit 0
   fi
 }

@@ -40,7 +40,6 @@ Plug 'VincentCordobes/vim-translate'
 Plug 'airblade/vim-gitgutter'
 Plug 'aklt/plantuml-syntax'
 Plug 'alpaca-tc/html5.vim'
-" Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
 Plug 'bkad/CamelCaseMotion'
 Plug 'bronson/vim-trailing-whitespace'
 Plug 'c9s/perlomni.vim'
@@ -53,7 +52,9 @@ Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'fgrsnau/ncm2-otherbuf'
 Plug 'flazz/vim-colorschemes'
+Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 Plug 'godlygeek/tabular'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'honza/vim-snippets'
@@ -64,11 +65,11 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'jodosha/vim-godebug'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
+Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
-Plug 'kannokanno/previm'
-" Plug 'scrooloose/nerdtree'
-" Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'junegunn/vim-peekaboo'
 Plug 'justinmk/vim-dirvish'
+Plug 'kannokanno/previm'
 Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'kylef/apiblueprint.vim'
 Plug 'majutsushi/tagbar'
@@ -81,16 +82,29 @@ Plug 'miya-masa/vim-esformatter'
 Plug 'morhetz/gruvbox'
 Plug 'mxw/vim-jsx'
 Plug 'nathanaelkane/vim-indent-guides'
+Plug 'neoclide/coc.nvim', {'tag': '*', 'do': { -> coc#util#install()}}
+
+" Plug 'ncm2/ncm2'
+" Plug 'ncm2/ncm2-bufword'
+" Plug 'ncm2/ncm2-path'
+" Plug 'ncm2/ncm2-tmux'
+" Plug 'ncm2/ncm2-ultisnips'
+" Plug 'ncm2/ncm2-vim'
+" Plug 'ncm2/ncm2-vim-lsp'
 Plug 'othree/es.next.syntax.vim'
 Plug 'othree/html5.vim'
 Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'othree/yajs.vim'
 Plug 'pangloss/vim-javascript'
 Plug 'plasticboy/vim-markdown'
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
 Plug 'qpkorr/vim-bufkill'
+Plug 'roxma/nvim-yarp'
 Plug 'ryanoasis/vim-devicons'
 Plug 'sheerun/vim-polyglot'
 Plug 'simeji/winresizer'
+Plug 'sodapopcan/vim-twiggy'
 Plug 'ternjs/tern_for_vim'
 Plug 'terryma/vim-multiple-cursors'
 Plug 'thinca/vim-qfreplace'
@@ -110,18 +124,14 @@ Plug 'w0rp/ale'
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
 Plug 'yaasita/edit-slack.vim'
-Plug 'fgrsnau/ncm2-otherbuf'
-Plug 'ncm2/ncm2'
-Plug 'ncm2/ncm2-bufword'
-Plug 'ncm2/ncm2-path'
-Plug 'ncm2/ncm2-ultisnips'
-Plug 'ncm2/ncm2-tmux'
-Plug 'ncm2/ncm2-vim'
-Plug 'ncm2/ncm2-vim-lsp'
-Plug 'prabirshrestha/async.vim'
-Plug 'prabirshrestha/vim-lsp'
-Plug 'roxma/nvim-yarp'
+
+" Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
+" Plug 'scrooloose/nerdtree'
+" Plug 'Xuyuanp/nerdtree-git-plugin'
+
 " Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+" Plug 'Shougo/deoplete-lsp'
+" Plug 'zchee/deoplete-go', { 'do': 'make'}
 " if has('nvim')
   " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 " else
@@ -130,9 +140,6 @@ Plug 'roxma/nvim-yarp'
 "   Plug 'roxma/vim-hug-neovim-rpc'
 " endif
 " Plug 'deoplete-plugins/deoplete-docker'
-Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
-" Plug 'Shougo/deoplete-lsp'
-" Plug 'zchee/deoplete-go', { 'do': 'make'}
 
 "
 call plug#end()
@@ -159,9 +166,15 @@ endif
 " }}}
 " ncm2/ncm2 {{{
     " enable ncm2 for all buffers
-    autocmd BufEnter * call ncm2#enable_for_buffer()
+    " autocmd BufEnter * call ncm2#enable_for_buffer()
     " IMPORTANT: :help Ncm2PopupOpen for more information
-    set completeopt=noinsert,menuone,noselect
+    " set completeopt=noinsert,menuone,noselect
+" }}}
+" coc/nvim {{{
+    " enable ncm2 for all buffers
+    " autocmd BufEnter * call ncm2#enable_for_buffer()
+    " IMPORTANT: :help Ncm2PopupOpen for more information
+    " set completeopt=noinsert,menuone,noselect
 " }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
