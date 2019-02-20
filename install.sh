@@ -372,6 +372,14 @@ Usage:
      -v|--verbose               Displays verbose output
     -nc|--no-colour             Disables colour output
     -cr|--cron                  Run silently unless we encounter an error
+    brew                        Install brew
+    zplug                       Install zplug
+    ag                          Install ag
+    fzf                         Install fzf
+    jq                          Install jq
+    font                        Install font
+    gawk                        Install gawk
+    tmux                        Install tmux
 EOF
 }
 
@@ -435,29 +443,36 @@ function _main() {
       _homebrew
     fi
     exit 0
-  elif [[ -n ${zplug-} ]]; then
+  fi
+  if [[ -n ${zplug-} ]]; then
     curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
     exit 0
-  elif [[ -n ${ag-} ]]; then
+  fi
+  if [[ -n ${ag-} ]]; then
     brew install the_silver_searcher
     exit 0
-  elif [[ -n ${fzf-} ]]; then
+  fi
+  if [[ -n ${fzf-} ]]; then
     if [ ! -e $HOME/.fzf ]; then
       git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf
     fi
     $HOME/.fzf/install
     exit 0
-  elif [[ -n ${jq-} ]]; then
+  fi
+  if [[ -n ${jq-} ]]; then
     brew install jq
     exit 0
-  elif [[ -n ${font-} ]]; then
+  fi
+  if [[ -n ${font-} ]]; then
     brew tap caskroom/fonts
     brew cask install font-hack-nerd-font
     exit 0
-  elif [[ -n ${gawk-} ]]; then
+  fi
+  if [[ -n ${gawk-} ]]; then
     brew install gawk
     exit 0
-  elif [[ -n ${tmux-} ]]; then
+  fi
+  if [[ -n ${tmux-} ]]; then
     brew install tmux
     brew install ruby
     gem install tmuxinator
