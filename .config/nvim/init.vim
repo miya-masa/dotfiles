@@ -146,13 +146,13 @@ call plug#end()
 " }}}
 " Plugin Configuration {{{
 "  prabirshrestha/vim-lsp {{{
-if executable('gopls')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'gopls',
-        \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
-        \ 'whitelist': ['go'],
-        \ })
-endif
+" if executable('gopls')
+"     au User lsp_setup call lsp#register_server({
+"         \ 'name': 'gopls',
+"         \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
+"         \ 'whitelist': ['go'],
+"         \ })
+" endif
 " }}}
 " autozimu/LanguageClient-neovim {{{
     " let g:LanguageClient_rootMarkers = {
@@ -171,10 +171,7 @@ endif
     " set completeopt=noinsert,menuone,noselect
 " }}}
 " coc/nvim {{{
-    " enable ncm2 for all buffers
-    " autocmd BufEnter * call ncm2#enable_for_buffer()
-    " IMPORTANT: :help Ncm2PopupOpen for more information
-    " set completeopt=noinsert,menuone,noselect
+  call coc#add_extension('coc-json', 'coc-snippets', 'coc-emmet')
 " }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
@@ -251,9 +248,9 @@ augroup go
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
-  autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gn :LspRename<CR>
+  autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gd <Plug>(coc-definition)<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gn <Plug>(coc-rename)<CR>
   autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
   autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
 
