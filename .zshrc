@@ -40,6 +40,7 @@ zplug 'zsh-users/zaw'
 zplug "chrissicool/zsh-256color"
 zplug "mollifier/anyframe"
 zplug "mollifier/cd-gitroot"
+zplug "soimort/translate-shell"
 zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
 zplug "plugins/git",   from:oh-my-zsh
 zplug "plugins/docker-compose",   from:oh-my-zsh

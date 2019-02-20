@@ -1,4 +1,9 @@
-all: git tmux zsh nvim fzf tmuxinator
+gvm:
+	curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
+	source ${HOME}/.gvm/scripts/gvm
+
+go:
+	 gvm install master
 
 $(HOME)/.config:
 	mkdir -p ${HOME}/.config
