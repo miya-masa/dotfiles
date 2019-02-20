@@ -40,7 +40,7 @@ Plug 'VincentCordobes/vim-translate'
 Plug 'airblade/vim-gitgutter'
 Plug 'aklt/plantuml-syntax'
 Plug 'alpaca-tc/html5.vim'
-Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
+" Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
 Plug 'bkad/CamelCaseMotion'
 Plug 'bronson/vim-trailing-whitespace'
 Plug 'c9s/perlomni.vim'
@@ -110,15 +110,26 @@ Plug 'w0rp/ale'
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
 Plug 'yaasita/edit-slack.vim'
+Plug 'fgrsnau/ncm2-otherbuf'
+Plug 'ncm2/ncm2'
+Plug 'ncm2/ncm2-bufword'
+Plug 'ncm2/ncm2-path'
+Plug 'ncm2/ncm2-ultisnips'
+Plug 'ncm2/ncm2-tmux'
+Plug 'ncm2/ncm2-vim'
+Plug 'ncm2/ncm2-vim-lsp'
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'roxma/nvim-yarp'
 " Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
-if has('nvim')
-  Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-else
-  Plug 'Shougo/deoplete.nvim'
-  Plug 'roxma/nvim-yarp'
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
-Plug 'deoplete-plugins/deoplete-docker'
+" if has('nvim')
+  " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" else
+"   Plug 'Shougo/deoplete.nvim'
+"   Plug 'roxma/nvim-yarp'
+"   Plug 'roxma/vim-hug-neovim-rpc'
+" endif
+" Plug 'deoplete-plugins/deoplete-docker'
 Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 " Plug 'Shougo/deoplete-lsp'
 " Plug 'zchee/deoplete-go', { 'do': 'make'}
@@ -127,15 +138,30 @@ Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 call plug#end()
 " }}}
 " Plugin Configuration {{{
+"  prabirshrestha/vim-lsp {{{
+if executable('gopls')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'gopls',
+        \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
+        \ 'whitelist': ['go'],
+        \ })
+endif
+" }}}
 " autozimu/LanguageClient-neovim {{{
-    let g:LanguageClient_rootMarkers = {
-            \ 'go': ['.git', 'go.mod'],
-            \ }
-
-    let g:LanguageClient_serverCommands = {
-        \ 'go': ['golsp'],
-        \ }
-    let g:LanguageClient_diagnosticsEnable = 0
+    " let g:LanguageClient_rootMarkers = {
+    "         \ 'go': ['.git', 'go.mod'],
+    "         \ }
+    "
+    " let g:LanguageClient_serverCommands = {
+    "     \ 'go': ['gopls'],
+    "     \ }
+    " let g:LanguageClient_diagnosticsEnable = 0
+" }}}
+" ncm2/ncm2 {{{
+    " enable ncm2 for all buffers
+    autocmd BufEnter * call ncm2#enable_for_buffer()
+    " IMPORTANT: :help Ncm2PopupOpen for more information
+    set completeopt=noinsert,menuone,noselect
 " }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
@@ -162,8 +188,7 @@ let g:vrc_trigger = '<Leader><C-j>'
 " CamelCaseMotion {{{
 call camelcasemotion#CreateMotionMappings('<leader>')
 " }}}
-" Go {{{
-" vim-go
+" vim-go {{{
 let g:go_fmt_command = "goimports"
 " realize the autoformat plugin.
 let g:go_fmt_autosave = 0
@@ -213,9 +238,9 @@ augroup go
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
-  autocmd FileType go nmap <silent> <Leader>gi :call LanguageClient#textDocument_hover()<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_rename()<CR>
+  autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gn :LspRename<CR>
   autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
   autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
 
@@ -359,14 +384,14 @@ let g:lightline#ale#indicator_ok = "\uf00c"
   nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " deoplete & deoplete-go {{{
-  let g:deoplete#enable_at_startup = 1
+  " let g:deoplete#enable_at_startup = 1
 
   " Pass a dictionary to set multiple options
-  call deoplete#custom#option({
-  \ 'auto_complete_delay': 200,
-  \ 'smart_case': v:true,
-  \ 'max_list': 500,
-  \ })
+  " call deoplete#custom#option({
+  " \ 'auto_complete_delay': 10,
+  " \ 'smart_case': v:true,
+  " \ 'max_list': 500,
+  " \ })
 " }}}
 " FastFold {{{
   let g:go_fold_enabled=0
@@ -381,8 +406,8 @@ let g:lightline#ale#indicator_ok = "\uf00c"
   " \}
   " let g:ale_go_gometalinter_options = '--vendored-linters --disable-all --enable=gotype --enable=vet --enable=golint -t'
   " let g:ale_go_gometalinter_options = '--fast'
-  nmap <silent> [a <Plug>(ale_previous_wrap)
-  nmap <silent> ]a <Plug>(ale_next_wrap)
+  nmap <silent> [j <Plug>(ale_previous_wrap)
+  nmap <silent> ]j <Plug>(ale_next_wrap)
 " }}}
 " calendar.vim {{{
 let g:calendar_google_calendar = 1
