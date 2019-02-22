@@ -139,6 +139,11 @@ alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
 alias mux='tmuxinator'
 alias tm='tmux'
 alias tma='tmux a -t '
+alias muxdev='mux dev'
+alias muxdot='mux dot'
+alias muxops='mux ops'
+alias muxwork='mux work'
+alias muxall='muxdev && muxdot && muxops && muxwork && tma dev'
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
