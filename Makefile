@@ -20,9 +20,6 @@ nvim: $(HOME)/.config
 git:
 	ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
 
-fzf:
-	${PWD}/init_fzf.sh
-
 fish-mac:
 	brew install fish
 	curl https://git.io/fisher --create-dirs -sLo ~/.config/fish/functions/fisher.fish

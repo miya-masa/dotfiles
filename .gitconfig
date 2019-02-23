@@ -34,3 +34,10 @@
 	hist = log --graph --format='%C(yellow)%h%C(auto)%d%C(reset) %s %C(green)<%an>%C(reset)'
 
 	mergeable = !git format-patch --stdout $(git rev-parse --abbrev-ref HEAD)..$(git rev-parse --abbrev-ref @{-1}) | git apply --check && echo ok
+
+[ghq]
+	root = ~/go/src
+	root = ~/.ghq
+[user]
+	email = miyauchi0623@gmail.com
+	name = miya-masa
