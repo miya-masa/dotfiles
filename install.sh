@@ -381,6 +381,8 @@ Usage:
     gawk                        Install gawk
     tmux                        Install tmux
     yarn                        Install yarn
+    ghq                         Install ghq
+    direnv                      Install direnv
 EOF
 }
 
@@ -430,6 +432,15 @@ function parse_params() {
                 ;;
             yarn)
                 yarn=true
+                ;;
+            ghq)
+                ghq=true
+                ;;
+            direnv)
+                direnv=true
+                ;;
+            go)
+                go=true
                 ;;
             *)
                 script_exit "Invalid parameter was provided: $param" 2
@@ -487,6 +498,20 @@ function _main() {
     yarn global add vim-node-rpc
     exit 0
   fi
+  if [[ -n ${ghq-} ]]; then
+    brew install ghq
+    exit 0
+  fi
+  if [[ -n ${direnv-} ]]; then
+    brew install direnv
+    exit 0
+  fi
+  if [[ -n ${go-} ]]; then
+    curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
+    source ${HOME}/.gvm/scripts/gvm
+    gvm install master
+    exit 0
+  fi
 }
 
 function _homebrew(){
@@ -497,8 +522,6 @@ function _homebrew(){
 function _linuxbrew(){
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
   sudo apt-get install build-essential
-  echo 'eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)' >>~/.zprofile
-  eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 }
 
 

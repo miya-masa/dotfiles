@@ -7,4 +7,4 @@ compinit
 colors
 
 [ -f ~/.zprofile.local ] && source ~/.zprofile.local
-[ -f ~/linuxbrew/.linuxbrew/bin/brew ] && source eval $(~/linuxbrew/.linuxbrew/bin/brew shellenv)
+[ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
