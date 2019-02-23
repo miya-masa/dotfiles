@@ -8,3 +8,4 @@ colors
 
 [ -f ~/.zprofile.local ] && source ~/.zprofile.local
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+[ -f ~/.gvm/scripts/gvm ] source ~/.gvm/scripts/gvm
