@@ -52,7 +52,6 @@ Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
-Plug 'fgrsnau/ncm2-otherbuf'
 Plug 'flazz/vim-colorschemes'
 Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 Plug 'godlygeek/tabular'
@@ -82,7 +81,7 @@ Plug 'miya-masa/vim-esformatter'
 Plug 'morhetz/gruvbox'
 Plug 'mxw/vim-jsx'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'neoclide/coc.nvim', {'tag': '*', 'do': { -> coc#util#install()}}
+" Plug 'neoclide/coc.nvim', {'tag': '*', 'do': { -> coc#util#install()}}
 Plug 'othree/es.next.syntax.vim'
 Plug 'othree/html5.vim'
 Plug 'othree/javascript-libraries-syntax.vim'
@@ -118,13 +117,14 @@ Plug 'xolox/vim-notes'
 Plug 'yaasita/edit-slack.vim'
 Plug 'tmux-plugins/vim-tmux-focus-events'
 
-" Plug 'ncm2/ncm2'
-" Plug 'ncm2/ncm2-bufword'
-" Plug 'ncm2/ncm2-path'
-" Plug 'ncm2/ncm2-tmux'
-" Plug 'ncm2/ncm2-ultisnips'
-" Plug 'ncm2/ncm2-vim'
-" Plug 'ncm2/ncm2-vim-lsp'
+Plug 'ncm2/ncm2'
+Plug 'ncm2/ncm2-bufword'
+Plug 'ncm2/ncm2-path'
+Plug 'ncm2/ncm2-tmux'
+Plug 'ncm2/ncm2-ultisnips'
+Plug 'ncm2/ncm2-vim'
+Plug 'ncm2/ncm2-vim-lsp'
+Plug 'fgrsnau/ncm2-otherbuf', { 'branch': 'ncm2' }
 
 " Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
 " Plug 'scrooloose/nerdtree'
@@ -147,13 +147,26 @@ call plug#end()
 " }}}
 " Plugin Configuration {{{
 "  prabirshrestha/vim-lsp {{{
-" if executable('gopls')
-"     au User lsp_setup call lsp#register_server({
-"         \ 'name': 'gopls',
-"         \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
-"         \ 'whitelist': ['go'],
-"         \ })
-" endif
+if executable('gopls')
+    augroup gopls
+    autocmd!
+      au User lsp_setup call lsp#register_server({
+          \ 'name': 'gopls',
+          \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
+          \ 'whitelist': ['go'],
+          \ })
+    augroup END
+endif
+augroup vim-lsp
+  autocmd!
+  autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
+  " enable ncm2 for all buffers
+  autocmd BufEnter * call ncm2#enable_for_buffer()
+  " IMPORTANT: :help Ncm2PopupOpen for more information
+  set completeopt=noinsert,menuone,noselect
+augroup END
 " }}}
 " autozimu/LanguageClient-neovim {{{
     " let g:LanguageClient_rootMarkers = {
@@ -166,13 +179,24 @@ call plug#end()
     " let g:LanguageClient_diagnosticsEnable = 0
 " }}}
 " ncm2/ncm2 {{{
-    " enable ncm2 for all buffers
-    " autocmd BufEnter * call ncm2#enable_for_buffer()
-    " IMPORTANT: :help Ncm2PopupOpen for more information
-    " set completeopt=noinsert,menuone,noselect
+
+augroup ncm2
+  autocmd!
+  " enable ncm2 for all buffers
+  autocmd BufEnter * call ncm2#enable_for_buffer()
+  " IMPORTANT: :help Ncm2PopupOpen for more information
+  set completeopt=noinsert,menuone,noselect
+augroup END
 " }}}
 " coc/nvim {{{
-  call coc#add_extension('coc-json', 'coc-snippets', 'coc-emmet')
+"
+" augroup coc
+"   autocmd!
+"   " call coc#add_extension('coc-json', 'coc-snippets', 'coc-emmet')
+"   " autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
+"   " autocmd FileType go nnoremap <silent> <Leader>gd <Plug>(coc-definition)<CR>
+"   " autocmd FileType go nnoremap <silent> <Leader>gn <Plug>(coc-rename)<CR>
+" augroup END
 " }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
@@ -249,9 +273,6 @@ augroup go
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
-  autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gd <Plug>(coc-definition)<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gn <Plug>(coc-rename)<CR>
   autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
   autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
 
