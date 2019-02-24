@@ -383,6 +383,8 @@ Usage:
     yarn                        Install yarn
     ghq                         Install ghq
     direnv                      Install direnv
+    go                          Install go gvm go tools
+    docker-lsp                  Install docker-langserver
 EOF
 }
 
@@ -442,6 +444,9 @@ function parse_params() {
             go)
                 go=true
                 ;;
+            dockerlsp)
+                dockerlsp=true
+                ;;
             *)
                 script_exit "Invalid parameter was provided: $param" 2
                 ;;
@@ -457,60 +462,52 @@ function _main() {
     else
       _homebrew
     fi
-    exit 0
   fi
   if [[ -n ${zplug-} ]]; then
     curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
-    exit 0
   fi
   if [[ -n ${ag-} ]]; then
     brew install the_silver_searcher
-    exit 0
   fi
   if [[ -n ${fzf-} ]]; then
     if [ ! -e $HOME/.fzf ]; then
       git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf
     fi
     $HOME/.fzf/install
-    exit 0
   fi
   if [[ -n ${jq-} ]]; then
     brew install jq
-    exit 0
   fi
   if [[ -n ${font-} ]]; then
     brew tap caskroom/fonts
     brew cask install font-hack-nerd-font
-    exit 0
   fi
   if [[ -n ${gawk-} ]]; then
     brew install gawk
-    exit 0
   fi
   if [[ -n ${tmux-} ]]; then
     brew install tmux
     brew install ruby
     gem install tmuxinator
-    exit 0
   fi
   if [[ -n ${yarn-} ]]; then
     brew install yarn
     yarn global add vim-node-rpc
-    exit 0
   fi
   if [[ -n ${ghq-} ]]; then
     brew install ghq
-    exit 0
   fi
   if [[ -n ${direnv-} ]]; then
     brew install direnv
-    exit 0
   fi
   if [[ -n ${go-} ]]; then
     curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
     source ${HOME}/.gvm/scripts/gvm
     gvm install master
-    exit 0
+    go get -u golang.org/x/tools/...
+  fi
+  if [[ -n ${dockerlsp-} ]]; then
+    yarn global add dockerfile-language-server-nodejs
   fi
 }
 

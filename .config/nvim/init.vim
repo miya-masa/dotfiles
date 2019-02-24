@@ -28,7 +28,6 @@ endif
 call plug#begin('~/.vim/plugged')
 
 if !has('nvim')
-  Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
 Plug 'AndrewRadev/splitjoin.vim'
@@ -81,17 +80,15 @@ Plug 'miya-masa/vim-esformatter'
 Plug 'morhetz/gruvbox'
 Plug 'mxw/vim-jsx'
 Plug 'nathanaelkane/vim-indent-guides'
-" Plug 'neoclide/coc.nvim', {'tag': '*', 'do': { -> coc#util#install()}}
 Plug 'othree/es.next.syntax.vim'
 Plug 'othree/html5.vim'
 Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'othree/yajs.vim'
 Plug 'pangloss/vim-javascript'
 Plug 'plasticboy/vim-markdown'
-Plug 'prabirshrestha/async.vim'
-Plug 'prabirshrestha/vim-lsp'
+" Plug 'prabirshrestha/async.vim'
+" Plug 'prabirshrestha/vim-lsp'
 Plug 'qpkorr/vim-bufkill'
-Plug 'roxma/nvim-yarp'
 Plug 'ryanoasis/vim-devicons'
 Plug 'sheerun/vim-polyglot'
 Plug 'simeji/winresizer'
@@ -101,7 +98,6 @@ Plug 'terryma/vim-multiple-cursors'
 Plug 'thinca/vim-qfreplace'
 Plug 'thinca/vim-quickrun'
 Plug 'thinca/vim-zenspace'
-Plug 'tomtom/tcomment_vim'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-repeat'
@@ -116,17 +112,17 @@ Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
 Plug 'yaasita/edit-slack.vim'
 Plug 'tmux-plugins/vim-tmux-focus-events'
-
+Plug 'tpope/vim-commentary'
+Plug 'roxma/nvim-yarp'
 Plug 'ncm2/ncm2'
 Plug 'ncm2/ncm2-bufword'
 Plug 'ncm2/ncm2-path'
 Plug 'ncm2/ncm2-tmux'
 Plug 'ncm2/ncm2-ultisnips'
 Plug 'ncm2/ncm2-vim'
-Plug 'ncm2/ncm2-vim-lsp'
+Plug 'Shougo/neco-vim'
 Plug 'fgrsnau/ncm2-otherbuf', { 'branch': 'ncm2' }
-
-" Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
+Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
 " Plug 'scrooloose/nerdtree'
 " Plug 'Xuyuanp/nerdtree-git-plugin'
 
@@ -137,7 +133,6 @@ Plug 'fgrsnau/ncm2-otherbuf', { 'branch': 'ncm2' }
   " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 " else
 "   Plug 'Shougo/deoplete.nvim'
-"   Plug 'roxma/nvim-yarp'
 "   Plug 'roxma/vim-hug-neovim-rpc'
 " endif
 " Plug 'deoplete-plugins/deoplete-docker'
@@ -147,46 +142,51 @@ call plug#end()
 " }}}
 " Plugin Configuration {{{
 "  prabirshrestha/vim-lsp {{{
-if executable('gopls')
-    augroup gopls
-    autocmd!
-      au User lsp_setup call lsp#register_server({
-          \ 'name': 'gopls',
-          \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
-          \ 'whitelist': ['go'],
-          \ })
-    augroup END
-endif
-augroup vim-lsp
-  autocmd!
-  autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
-  " enable ncm2 for all buffers
-  autocmd BufEnter * call ncm2#enable_for_buffer()
-  " IMPORTANT: :help Ncm2PopupOpen for more information
-  set completeopt=noinsert,menuone,noselect
-augroup END
+" if executable('gopls')
+"     augroup gopls
+"     autocmd!
+"       au User lsp_setup call lsp#register_server({
+"           \ 'name': 'gopls',
+"           \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
+"           \ 'whitelist': ['go'],
+"           \ })
+"     augroup END
+" endif
+" augroup vim-lsp
+"   autocmd!
+"   autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
+"   autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
+"   autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
+"   " enable ncm2 for all buffers
+"   autocmd BufEnter * call ncm2#enable_for_buffer()
+"   " IMPORTANT: :help Ncm2PopupOpen for more information
+"   set completeopt=noinsert,menuone,noselect
+" augroup END
 " }}}
 " autozimu/LanguageClient-neovim {{{
-    " let g:LanguageClient_rootMarkers = {
-    "         \ 'go': ['.git', 'go.mod'],
-    "         \ }
-    "
-    " let g:LanguageClient_serverCommands = {
-    "     \ 'go': ['gopls'],
-    "     \ }
-    " let g:LanguageClient_diagnosticsEnable = 0
-" }}}
-" ncm2/ncm2 {{{
+     let g:LanguageClient_rootMarkers = {
+             \ 'go': ['.git', 'go.mod'],
+             \ 'Dockerfile': ['.git', 'go.mod'],
+             \ }
+     let g:LanguageClient_serverCommands = {
+         \ 'go': ['gopls'],
+         \ 'Dockerfile': ['docker-langserver', '--stdio'],
+         \ }
+    let g:LanguageClient_diagnosticsEnable = 0
+    nnoremap <silent> <Leader>gi :call LanguageClient#textDocument_hover()<CR>
+    nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
+    nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_typeDefinition()<CR>
+    nnoremap <F5> :call LanguageClient_contextMenu()<CR>
+"  }}}
+"  ncm2/ncm2 {{{
 
-augroup ncm2
-  autocmd!
-  " enable ncm2 for all buffers
-  autocmd BufEnter * call ncm2#enable_for_buffer()
+  augroup ncm2
+    autocmd!
+    " enable ncm2 for all buffers
+    autocmd BufEnter * call ncm2#enable_for_buffer()
+  augroup END
   " IMPORTANT: :help Ncm2PopupOpen for more information
   set completeopt=noinsert,menuone,noselect
-augroup END
 " }}}
 " coc/nvim {{{
 "
