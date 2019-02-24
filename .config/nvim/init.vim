@@ -86,8 +86,8 @@ Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'othree/yajs.vim'
 Plug 'pangloss/vim-javascript'
 Plug 'plasticboy/vim-markdown'
-" Plug 'prabirshrestha/async.vim'
-" Plug 'prabirshrestha/vim-lsp'
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
 Plug 'qpkorr/vim-bufkill'
 Plug 'ryanoasis/vim-devicons'
 Plug 'sheerun/vim-polyglot'
@@ -115,6 +115,7 @@ Plug 'tmux-plugins/vim-tmux-focus-events'
 Plug 'tpope/vim-commentary'
 Plug 'roxma/nvim-yarp'
 Plug 'ncm2/ncm2'
+Plug 'ncm2/ncm2-vim-lsp'
 Plug 'ncm2/ncm2-bufword'
 Plug 'ncm2/ncm2-path'
 Plug 'ncm2/ncm2-tmux'
@@ -122,7 +123,7 @@ Plug 'ncm2/ncm2-ultisnips'
 Plug 'ncm2/ncm2-vim'
 Plug 'Shougo/neco-vim'
 Plug 'fgrsnau/ncm2-otherbuf', { 'branch': 'ncm2' }
-Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
+" Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
 " Plug 'scrooloose/nerdtree'
 " Plug 'Xuyuanp/nerdtree-git-plugin'
 
@@ -142,41 +143,47 @@ call plug#end()
 " }}}
 " Plugin Configuration {{{
 "  prabirshrestha/vim-lsp {{{
-" if executable('gopls')
-"     augroup gopls
-"     autocmd!
-"       au User lsp_setup call lsp#register_server({
-"           \ 'name': 'gopls',
-"           \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
-"           \ 'whitelist': ['go'],
-"           \ })
-"     augroup END
-" endif
-" augroup vim-lsp
-"   autocmd!
-"   autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
-"   autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
-"   autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
-"   " enable ncm2 for all buffers
-"   autocmd BufEnter * call ncm2#enable_for_buffer()
-"   " IMPORTANT: :help Ncm2PopupOpen for more information
-"   set completeopt=noinsert,menuone,noselect
-" augroup END
+if executable('gopls')
+    augroup gopls
+    autocmd!
+      au User lsp_setup call lsp#register_server({
+          \ 'name': 'gopls',
+          \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
+          \ 'whitelist': ['go'],
+          \ })
+    augroup END
+endif
+if executable('docker-langserver')
+    augroup docker-langserver
+    autocmd!
+      au User lsp_setup call lsp#register_server({
+          \ 'name': 'docker-langserver',
+          \ 'cmd': {server_info->['docker-langserver', '-stdio']},
+          \ 'whitelist': ['Dockerfile'],
+          \ })
+    augroup END
+endif
+augroup vim-lsp
+  autocmd!
+  autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
+  autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
+augroup END
 " }}}
 " autozimu/LanguageClient-neovim {{{
-     let g:LanguageClient_rootMarkers = {
-             \ 'go': ['.git', 'go.mod'],
-             \ 'Dockerfile': ['.git', 'go.mod'],
-             \ }
-     let g:LanguageClient_serverCommands = {
-         \ 'go': ['gopls'],
-         \ 'Dockerfile': ['docker-langserver', '--stdio'],
-         \ }
-    let g:LanguageClient_diagnosticsEnable = 0
-    nnoremap <silent> <Leader>gi :call LanguageClient#textDocument_hover()<CR>
-    nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
-    nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_typeDefinition()<CR>
-    nnoremap <F5> :call LanguageClient_contextMenu()<CR>
+    " let g:LanguageClient_rootMarkers = {
+    "         \ 'go': ['.git', 'go.mod'],
+    "         \ 'Dockerfile': ['.git', 'go.mod'],
+    "         \ }
+    " let g:LanguageClient_serverCommands = {
+    "     \ 'go': ['gopls'],
+    "     \ 'Dockerfile': ['docker-langserver', '--stdio'],
+    "     \ }
+    " let g:LanguageClient_diagnosticsEnable = 0
+    " nnoremap <silent> <Leader>gi :call LanguageClient#textDocument_hover()<CR>
+    " nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
+    " nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_typeDefinition()<CR>
+    " nnoremap <F5> :call LanguageClient_contextMenu()<CR>
 "  }}}
 "  ncm2/ncm2 {{{
 
