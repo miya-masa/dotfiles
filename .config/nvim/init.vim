@@ -121,6 +121,7 @@ Plug 'ncm2/ncm2-path'
 Plug 'ncm2/ncm2-tmux'
 Plug 'ncm2/ncm2-ultisnips'
 Plug 'ncm2/ncm2-vim'
+Plug 'filipekiss/ncm2-look.vim'
 Plug 'Shougo/neco-vim'
 Plug 'fgrsnau/ncm2-otherbuf', { 'branch': 'ncm2' }
 " Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
@@ -194,17 +195,9 @@ augroup END
   augroup END
   " IMPORTANT: :help Ncm2PopupOpen for more information
   set completeopt=noinsert,menuone,noselect
-" }}}
-" coc/nvim {{{
-"
-" augroup coc
-"   autocmd!
-"   " call coc#add_extension('coc-json', 'coc-snippets', 'coc-emmet')
-"   " autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
-"   " autocmd FileType go nnoremap <silent> <Leader>gd <Plug>(coc-definition)<CR>
-"   " autocmd FileType go nnoremap <silent> <Leader>gn <Plug>(coc-rename)<CR>
-" augroup END
-" }}}
+  nnoremap <Leader>lt :LookToggleBuffer<CR>
+
+"  }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
 let g:UltiSnipsExpandTrigger="<C-l>"
@@ -681,9 +674,10 @@ set listchars=tab:^\ ,trail:~
 " }}}
 " Spell Check {{{
 set spelllang=en,cjk
+set spell
 
 fun! s:SpellConf()
-  redir! => syntax
+ redir! => syntax
   silent syntax
   redir END
 
@@ -697,7 +691,7 @@ fun! s:SpellConf()
     syntax match SpellMaybeCode /\<\h\l*[_A-Z]\h\{-}\>/ contains=@NoSpell transparent
   endif
 
-  syntax cluster Spell add=SpellNotAscii,SpellMaybeCode
+  syntax cluster Spell add=SpellMaybeCode
 endfunc
 
 augroup spell_check

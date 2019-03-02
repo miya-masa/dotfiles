@@ -7,9 +7,6 @@
 [diff]
 	renames = true
 
-[diff]
-	renames = true
-
 [alias]
 	rpo = remote prune origin
 
@@ -44,3 +41,5 @@
 [user]
 	email = miyauchi0623@gmail.com
 	name = miya-masa
+[core]
+	editor = nvim

@@ -32,7 +32,7 @@
   * `pip install yapf`
 
 * LSP
-  * go get -u github.com/sourcegraph/go-langserver 
+  * go get -u github.com/sourcegraph/go-langserver
 
 * direnv
   * https://direnv.net/
@@ -50,3 +50,5 @@
 ## other recommended
 
 * https://github.com/mhinz/neovim-remote
+
+
