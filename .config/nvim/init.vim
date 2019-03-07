@@ -123,21 +123,6 @@ Plug 'ncm2/ncm2-ultisnips'
 Plug 'ncm2/ncm2-vim'
 Plug 'filipekiss/ncm2-look.vim'
 Plug 'Shougo/neco-vim'
-Plug 'fgrsnau/ncm2-otherbuf', { 'branch': 'ncm2' }
-" Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
-" Plug 'scrooloose/nerdtree'
-" Plug 'Xuyuanp/nerdtree-git-plugin'
-
-" Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
-" Plug 'Shougo/deoplete-lsp'
-" Plug 'zchee/deoplete-go', { 'do': 'make'}
-" if has('nvim')
-  " Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-" else
-"   Plug 'Shougo/deoplete.nvim'
-"   Plug 'roxma/vim-hug-neovim-rpc'
-" endif
-" Plug 'deoplete-plugins/deoplete-docker'
 
 "
 call plug#end()
@@ -169,15 +154,15 @@ augroup vim-lsp
   autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
   autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
   autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
-augroup END
+" augroup END
 " }}}
 " autozimu/LanguageClient-neovim {{{
     " let g:LanguageClient_rootMarkers = {
     "         \ 'go': ['.git', 'go.mod'],
-    "         \ 'Dockerfile': ['.git', 'go.mod'],
+    "         \ 'Dockerfile': ['.git'],
     "         \ }
     " let g:LanguageClient_serverCommands = {
-    "     \ 'go': ['gopls'],
+    "     \ 'go': ['gopls', '-mode', 'stdio'],
     "     \ 'Dockerfile': ['docker-langserver', '--stdio'],
     "     \ }
     " let g:LanguageClient_diagnosticsEnable = 0
@@ -416,14 +401,16 @@ let g:lightline#ale#indicator_ok = "\uf00c"
   nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " deoplete & deoplete-go {{{
-  " let g:deoplete#enable_at_startup = 1
+  let g:deoplete#enable_at_startup = 1
 
   " Pass a dictionary to set multiple options
   " call deoplete#custom#option({
-  " \ 'auto_complete_delay': 10,
   " \ 'smart_case': v:true,
   " \ 'max_list': 500,
+  " \ 'camel_case': v:true,
   " \ })
+	" " Change the source rank
+	" call deoplete#custom#source('dictionary', 'rank', 50)
 " }}}
 " FastFold {{{
   let g:go_fold_enabled=0
