@@ -67,7 +67,7 @@ Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
 Plug 'junegunn/vim-peekaboo'
 Plug 'justinmk/vim-dirvish'
-Plug 'kannokanno/previm'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }}
 Plug 'kristijanhusak/vim-dirvish-git'
 Plug 'kylef/apiblueprint.vim'
 Plug 'majutsushi/tagbar'
@@ -149,12 +149,13 @@ if executable('docker-langserver')
           \ })
     augroup END
 endif
+let g:lsp_diagnostics_enabled = 0
 augroup vim-lsp
   autocmd!
   autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
   autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
   autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
-" augroup END
+augroup END
 " }}}
 " autozimu/LanguageClient-neovim {{{
     " let g:LanguageClient_rootMarkers = {
@@ -177,10 +178,12 @@ augroup vim-lsp
     autocmd!
     " enable ncm2 for all buffers
     autocmd BufEnter * call ncm2#enable_for_buffer()
+    autocmd BufEnter * nnoremap <Leader>l :LookToggleBuffer<CR>
   augroup END
   " IMPORTANT: :help Ncm2PopupOpen for more information
   set completeopt=noinsert,menuone,noselect
-  nnoremap <Leader>lt :LookToggleBuffer<CR>
+  call ncm2#override_source('buflook', {'priority': 3})
+  let g:ncm2_look_enabled = 1
 
 "  }}}
 " Plugin UltiSnips {{{
@@ -315,14 +318,6 @@ if filereadable(expand('~/.vimrc.slack'))
   command! SlackDM :tabe slack://dm
   command! SlackME :tabe slack://dm/miyauchi.m
 endif
-" }}}
-" Previm {{{
-let g:previm_open_cmd = 'open -a Google\ Chrome'
-
-augroup PrevimSettings
-  autocmd!
-  autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
-augroup END
 " }}}
 " IndentGuide {{{
   let g:indent_guides_enable_on_vim_startup = 1
@@ -744,7 +739,6 @@ nnoremap <Leader>tvj V:TranslateVisual ja:en<CR>
 tnoremap <silent> <leader><C-[> <C-\><C-n>
 
 " Insert Mode {{{
-inoremap <silent> jj <ESC>
 
 " }}}
 " }}}
