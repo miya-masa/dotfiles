@@ -40,6 +40,11 @@ func Test${1:FuncName}(t *testing.T) {
 }
 endsnippet
 
+snippet stas "stretchr assert snippet"
+assert.Equalf(t, ${1:c.exp}, ${2:c.act}, "input %v", pretty.Sprint(${3:c.in}))
+${0:${VISUAL}}
+endsnippet
+
 snippet assert "assert snippet"
 t.Errorf("name %+v \ninput %+v \nwant %+v \nbut  %+v", t.Name(), ${1:c.in}, ${2:c.exp}, ${3:act})
 ${0:${VISUAL}}

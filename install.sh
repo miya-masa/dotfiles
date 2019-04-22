@@ -385,6 +385,7 @@ Usage:
     direnv                      Install direnv
     go                          Install go gvm go tools
     docker-lsp                  Install docker-langserver
+    editorconfig                Install editorconfig
 EOF
 }
 
@@ -447,6 +448,9 @@ function parse_params() {
             dockerlsp)
                 dockerlsp=true
                 ;;
+            editorconfig)
+                editorconfig=true
+                ;;
             *)
                 script_exit "Invalid parameter was provided: $param" 2
                 ;;
@@ -508,6 +512,9 @@ function _main() {
   fi
   if [[ -n ${dockerlsp-} ]]; then
     yarn global add dockerfile-language-server-nodejs
+  fi
+  if [[ -n ${editorconfig-} ]]; then
+    brew install editorconfig
   fi
 }
 
