@@ -451,6 +451,9 @@ function parse_params() {
             editorconfig)
                 editorconfig=true
                 ;;
+            golangcilint)
+                golangcilint=true
+                ;;
             *)
                 script_exit "Invalid parameter was provided: $param" 2
                 ;;
@@ -516,6 +519,11 @@ function _main() {
   if [[ -n ${editorconfig-} ]]; then
     brew install editorconfig
   fi
+  if [[ -n ${golangcilint-} ]]; then
+    brew install golangci/tap/golangci-lint
+  fi
+
+brew install golangci/tap/golangci-lint
 }
 
 function _homebrew(){

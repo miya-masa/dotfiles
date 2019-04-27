@@ -158,3 +158,13 @@ const (
 	${0:${VISUAL}}
 )
 endsnippet
+
+snippet errch "err chan"
+	errCh :=  make(chan error, 1)
+	${0:${VISUAL}}
+endsnippet
+
+snippet makech "make chan"
+	${1:val}Ch :=  make(chan ${2:string}, ${3:0})
+	${0:${VISUAL}}
+endsnippet

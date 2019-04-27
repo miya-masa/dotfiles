@@ -218,7 +218,7 @@ let g:vrc_trigger = '<Leader><C-j>'
 call camelcasemotion#CreateMotionMappings('<leader>')
 " }}}
 " vim-go {{{
-let g:go_fmt_command = "goimports"
+let g:go_fmt_command = ""
 " realize the autoformat plugin.
 let g:go_fmt_autosave = 0
 let g:go_autodetect_gopath = 1
@@ -266,6 +266,9 @@ augroup go
   autocmd FileType go nmap <Leader>gs <Plug>(go-def-split)
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
+
+  " :GoImports
+  autocmd FileType go nnoremap <Leader><C-i> :GoImports<CR>
 
   autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
   autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
@@ -421,11 +424,13 @@ let g:lightline#ale#indicator_ok = "\uf00c"
   let g:indent_guides_guide_size = 1
 " }}}
 " ALE {{{
-  " let g:ale_linters = {
-  " \   'go': ['gometalinter'],
-  " \}
+  let g:ale_linters = {
+  \   'go': ['golangci-lint'],
+  \}
+
   " let g:ale_go_gometalinter_options = '--vendored-linters --disable-all --enable=gotype --enable=vet --enable=golint -t'
-  " let g:ale_go_gometalinter_options = '--fast'
+  " let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused'
+  let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused --tests=false'
   nmap <silent> [j <Plug>(ale_previous_wrap)
   nmap <silent> ]j <Plug>(ale_next_wrap)
 " }}}
