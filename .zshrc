@@ -232,3 +232,8 @@ alias dcps='dc ps'
 function dcrm() {
     dc stop $1 && dc rm -f $1
 }
+
+# Load rbenv automatically by appending
+# the following to ~/.zshrc:
+
+eval "$(rbenv init -)"

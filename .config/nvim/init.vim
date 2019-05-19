@@ -30,8 +30,8 @@ call plug#begin('~/.vim/plugged')
 if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
-Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Chiel92/vim-autoformat'
+Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Konfekt/FastFold'
 Plug 'Shougo/vinarise.vim/'
 Plug 'SirVer/ultisnips'
@@ -136,24 +136,24 @@ call plug#end()
 " Plugin Configuration {{{
 "  prabirshrestha/vim-lsp {{{
 if executable('gopls')
-    augroup gopls
+  augroup gopls
     autocmd!
-      au User lsp_setup call lsp#register_server({
+    au User lsp_setup call lsp#register_server({
           \ 'name': 'gopls',
           \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
           \ 'whitelist': ['go'],
           \ })
-    augroup END
+  augroup END
 endif
 if executable('docker-langserver')
-    augroup docker-langserver
+  augroup docker-langserver
     autocmd!
-      au User lsp_setup call lsp#register_server({
+    au User lsp_setup call lsp#register_server({
           \ 'name': 'docker-langserver',
           \ 'cmd': {server_info->['docker-langserver', '-stdio']},
           \ 'whitelist': ['Dockerfile'],
           \ })
-    augroup END
+  augroup END
 endif
 let g:lsp_diagnostics_enabled = 0
 augroup vim-lsp
@@ -164,32 +164,32 @@ augroup vim-lsp
 augroup END
 " }}}
 " autozimu/LanguageClient-neovim {{{
-    " let g:LanguageClient_rootMarkers = {
-    "         \ 'go': ['.git', 'go.mod'],
-    "         \ 'Dockerfile': ['.git'],
-    "         \ }
-    " let g:LanguageClient_serverCommands = {
-    "     \ 'go': ['gopls', '-mode', 'stdio'],
-    "     \ 'Dockerfile': ['docker-langserver', '--stdio'],
-    "     \ }
-    " let g:LanguageClient_diagnosticsEnable = 0
-    " nnoremap <silent> <Leader>gi :call LanguageClient#textDocument_hover()<CR>
-    " nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
-    " nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_typeDefinition()<CR>
-    " nnoremap <F5> :call LanguageClient_contextMenu()<CR>
+" let g:LanguageClient_rootMarkers = {
+"         \ 'go': ['.git', 'go.mod'],
+"         \ 'Dockerfile': ['.git'],
+"         \ }
+" let g:LanguageClient_serverCommands = {
+"     \ 'go': ['gopls', '-mode', 'stdio'],
+"     \ 'Dockerfile': ['docker-langserver', '--stdio'],
+"     \ }
+" let g:LanguageClient_diagnosticsEnable = 0
+" nnoremap <silent> <Leader>gi :call LanguageClient#textDocument_hover()<CR>
+" nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
+" nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_typeDefinition()<CR>
+" nnoremap <F5> :call LanguageClient_contextMenu()<CR>
 "  }}}
 "  ncm2/ncm2 {{{
 
-  augroup ncm2
-    autocmd!
-    " enable ncm2 for all buffers
-    autocmd BufEnter * call ncm2#enable_for_buffer()
-    autocmd BufEnter * nnoremap <Leader>l :LookToggleBuffer<CR>
-  augroup END
-  " IMPORTANT: :help Ncm2PopupOpen for more information
-  set completeopt=noinsert,menuone,noselect
-  call ncm2#override_source('buflook', {'priority': 3})
-  let g:ncm2_look_enabled = 1
+augroup ncm2
+  autocmd!
+  " enable ncm2 for all buffers
+  autocmd BufEnter * call ncm2#enable_for_buffer()
+  autocmd BufEnter * nnoremap <Leader>l :LookToggleBuffer<CR>
+augroup END
+" IMPORTANT: :help Ncm2PopupOpen for more information
+set completeopt=noinsert,menuone,noselect
+call ncm2#override_source('buflook', {'priority': 3})
+let g:ncm2_look_enabled = 1
 
 "  }}}
 " Plugin UltiSnips {{{
@@ -218,9 +218,8 @@ let g:vrc_trigger = '<Leader><C-j>'
 call camelcasemotion#CreateMotionMappings('<leader>')
 " }}}
 " vim-go {{{
-let g:go_fmt_command = ""
-" realize the autoformat plugin.
-let g:go_fmt_autosave = 0
+let g:go_fmt_command = "goimports"
+let g:go_fmt_autosave = 1
 let g:go_autodetect_gopath = 1
 let g:go_list_type = "quickfix"
 
@@ -329,8 +328,8 @@ if filereadable(expand('~/.vimrc.slack'))
 endif
 " }}}
 " IndentGuide {{{
-  let g:indent_guides_enable_on_vim_startup = 1
-  let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish']
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish']
 " }}}
 " PlantUML {{{
 augroup PlantUML
@@ -402,43 +401,41 @@ let g:lightline#ale#indicator_ok = "\uf00c"
 
 " }}}
 " tmux-navigator {{{
-  nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
+nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " deoplete & deoplete-go {{{
-  let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_at_startup = 1
 
-  " Pass a dictionary to set multiple options
-  " call deoplete#custom#option({
-  " \ 'smart_case': v:true,
-  " \ 'max_list': 500,
-  " \ 'camel_case': v:true,
-  " \ })
-	" " Change the source rank
-	" call deoplete#custom#source('dictionary', 'rank', 50)
+" Pass a dictionary to set multiple options
+" call deoplete#custom#option({
+" \ 'smart_case': v:true,
+" \ 'max_list': 500,
+" \ 'camel_case': v:true,
+" \ })
+" " Change the source rank
+" call deoplete#custom#source('dictionary', 'rank', 50)
 " }}}
 " FastFold {{{
-  let g:go_fold_enabled=0
+let g:go_fold_enabled=0
 " }}}
 " IndentGuide {{{
-  let g:indent_guides_start_level = 2
-  let g:indent_guides_guide_size = 1
+let g:indent_guides_start_level = 2
+let g:indent_guides_guide_size = 1
 " }}}
 " ALE {{{
-  let g:ale_linters = {
-  \   'go': ['golangci-lint'],
-  \}
+let g:ale_linters = {
+      \   'go': ['gofmt', 'golangci-lint', 'gopls', 'govet'],
+      \}
 
-  " let g:ale_go_gometalinter_options = '--vendored-linters --disable-all --enable=gotype --enable=vet --enable=golint -t'
-  " let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused'
-  let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused --tests=false'
-  nmap <silent> [j <Plug>(ale_previous_wrap)
-  nmap <silent> ]j <Plug>(ale_next_wrap)
+let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused --tests=false'
+nmap <silent> [j <Plug>(ale_previous_wrap)
+nmap <silent> ]j <Plug>(ale_next_wrap)
 " }}}
 " calendar.vim {{{
 let g:calendar_google_calendar = 1
 " }}}
 " fix-whitespace {{{
-  let g:extra_whitespace_ignored_filetypes = ['calendar', 'startify']
+let g:extra_whitespace_ignored_filetypes = ['calendar', 'startify']
 " }}}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 0
@@ -462,14 +459,14 @@ let g:notes_suffix = '.md'
 " dirvish {{{
 "
 
-  command! -nargs=0 Fq call fzf#run({
-  \ 'source': 'ghq list --full-path',
-  \ 'sink': 'Dirvish'
-  \ })
-  augroup dirvish
-    autocmd!
-    autocmd FileType dirvish command! -nargs=1 NF :e %<args>
-  augroup END
+command! -nargs=0 Fq call fzf#run({
+      \ 'source': 'ghq list --full-path',
+      \ 'sink': 'Dirvish'
+      \ })
+augroup dirvish
+  autocmd!
+  autocmd FileType dirvish command! -nargs=1 NF :e %<args>
+augroup END
 " }}}
 " vim-unimpaired {{{
 " }}}
@@ -484,35 +481,34 @@ augroup python
 augroup END
 " }}}
 " QuickRun {{{
-  let g:quickrun_config = {}
-  let g:quickrun_config.go = {'exec' : ['%c test']}
-  nnoremap <silent> <C-q> :QuickRun -outputter message<CR>
+let g:quickrun_config = {}
+let g:quickrun_config.go = {'exec' : ['%c test']}
+nnoremap <silent> <C-q> :QuickRun -outputter message<CR>
 " }}}
 " Chiel92/vim-autoformat {{{
 augroup autoformat
   autocmd!
-  autocmd BufWrite *.go :Autoformat
   autocmd BufWrite *.json :Autoformat
 augroup END
 " }}}
 " mhinz/vim-startify {{{
 " startify
-    let g:startify_files_number = 5
-    let g:startify_lists = [
-          \ { 'type': 'files',     'header': ['   MRU']            },
-          \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
-          \ { 'type': 'sessions',  'header': ['   Sessions']       },
-          \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
-          \ { 'type': 'commands',  'header': ['   Commands']       },
-          \ ]
-    let g:startify_bookmarks = ['~/.config/nvim/init.vim']
+let g:startify_files_number = 5
+let g:startify_lists = [
+      \ { 'type': 'files',     'header': ['   MRU']            },
+      \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
+      \ { 'type': 'sessions',  'header': ['   Sessions']       },
+      \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
+      \ { 'type': 'commands',  'header': ['   Commands']       },
+      \ ]
+let g:startify_bookmarks = ['~/.config/nvim/init.vim']
 
-    function! s:filter_header(lines) abort
-        let longest_line   = max(map(copy(a:lines), 'len(v:val)'))
-        let centered_lines = map(copy(a:lines),
-            \ 'repeat(" ", (&columns / 2) - (longest_line / 2)) . v:val')
-        return centered_lines
-    endfunction
+function! s:filter_header(lines) abort
+  let longest_line   = max(map(copy(a:lines), 'len(v:val)'))
+  let centered_lines = map(copy(a:lines),
+        \ 'repeat(" ", (&columns / 2) - (longest_line / 2)) . v:val')
+  return centered_lines
+endfunction
 
 let g:startify_custom_header = s:filter_header([
       \ '           _ ',
@@ -530,27 +526,27 @@ let g:startify_custom_header = s:filter_header([
 
 " }}}
 " kannokanno/previm {{{
-  let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_folding_disabled = 1
 " }}}
 " VincentCordobes/vim-translate {{{
-  let g:translate#default_languages = {
-        \ 'en': 'ja',
-        \ 'ja': 'en'
-        \ }
+let g:translate#default_languages = {
+      \ 'en': 'ja',
+      \ 'ja': 'en'
+      \ }
 " }}}
 " {{{ junegunn/fzf.vim
-  command! -nargs=0 Fq call fzf#run({
-  \ 'source': 'ghq list --full-path',
-  \ 'sink': 'Dirvish'
-  \ })
+command! -nargs=0 Fq call fzf#run({
+      \ 'source': 'ghq list --full-path',
+      \ 'sink': 'Dirvish'
+      \ })
 " }}}
 " {{{ scrooloose/nerdtree
-  " map - :NERDTreeToggle %:p:h<cr>
-  " command! -nargs=0 Fq call fzf#run({
-  " \ 'source': 'ghq list --full-path',
-  " \ 'sink': 'Dirvish'
-  " \ })
-  " let NERDTreeShowHidden=1
+" map - :NERDTreeToggle %:p:h<cr>
+" command! -nargs=0 Fq call fzf#run({
+" \ 'source': 'ghq list --full-path',
+" \ 'sink': 'Dirvish'
+" \ })
+" let NERDTreeShowHidden=1
 " }}}
 "
 " }}}
@@ -573,9 +569,9 @@ set wildmenu
 " Ignore compiled files
 set wildignore=*.o,*~,*.pyc
 if has("win16") || has("win32")
-    set wildignore+=.git\*,.hg\*,.svn\*
+  set wildignore+=.git\*,.hg\*,.svn\*
 else
-    set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
+  set wildignore+=*/.git/*,*/.hg/*,*/.svn/*,*/.DS_Store
 endif
 
 " Height of the command bar
@@ -651,14 +647,14 @@ set ts=2 sw=2 sts=2
 set cmdheight=2
 
 " The value of this option influences when the last window will have a
-" 	status line:
-" 		2: always
+"   status line:
+"     2: always
 set laststatus=2
 
-" 	lastline	When included, as much as possible of the last line
-" 			in a window will be displayed.  "@@@" is put in the
-" 			last columns of the last screen line to indicate the
-" 			rest of the line is not displayed.
+"   lastline  When included, as much as possible of the last line
+"       in a window will be displayed.  "@@@" is put in the
+"       last columns of the last screen line to indicate the
+"       rest of the line is not displayed.
 set display=lastline
 
 set list
@@ -670,7 +666,7 @@ set spelllang=en,cjk
 set spell
 
 fun! s:SpellConf()
- redir! => syntax
+  redir! => syntax
   silent syntax
   redir END
 
@@ -768,7 +764,7 @@ syntax enable
 
 " Enable 256 colors palette in Gnome Terminal
 if $COLORTERM == 'gnome-terminal'
-    set t_Co=256
+  set t_Co=256
 endif
 
 try
@@ -780,11 +776,11 @@ set background=dark
 " }}}
 " Util Command {{{
 " Conv hex deg bin {{{
-  command! -nargs=1 ToH echo printf("%0x", <args>)
-  command! -nargs=1 ToD echo printf("%0d", <args>)
-  command! -nargs=1 ToB echo printf("%0b", <args>)
-  command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
-  command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
-  command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
+command! -nargs=1 ToH echo printf("%0x", <args>)
+command! -nargs=1 ToD echo printf("%0d", <args>)
+command! -nargs=1 ToB echo printf("%0b", <args>)
+command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
+command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
+command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 " }}}
 " }}}
