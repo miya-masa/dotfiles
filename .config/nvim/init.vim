@@ -31,6 +31,7 @@ if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
 Plug 'Chiel92/vim-autoformat'
+Plug 'buoto/gotests-vim'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Konfekt/FastFold'
 Plug 'Shougo/vinarise.vim/'
@@ -66,6 +67,7 @@ Plug 'jodosha/vim-godebug'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/gv.vim'
+Plug 'easymotion/vim-easymotion'
 Plug 'junegunn/vim-easy-align'
 Plug 'junegunn/vim-peekaboo'
 Plug 'justinmk/vim-dirvish'
@@ -98,8 +100,6 @@ Plug 'ryanoasis/vim-devicons'
 Plug 'sheerun/vim-polyglot'
 Plug 'simeji/winresizer'
 Plug 'sodapopcan/vim-twiggy'
-Plug 'ternjs/tern_for_vim'
-Plug 'terryma/vim-multiple-cursors'
 Plug 'thinca/vim-qfreplace'
 Plug 'thinca/vim-quickrun'
 Plug 'thinca/vim-zenspace'
@@ -156,6 +156,11 @@ if executable('docker-langserver')
   augroup END
 endif
 let g:lsp_diagnostics_enabled = 0
+let g:lsp_signs_enabled = 0
+let g:lsp_virtual_text_enabled = 0
+let g:lsp_highlights_enabled = 0
+let g:lsp_textprop_enabled = 0
+let g:lsp_highlight_references_enabled = 0
 augroup vim-lsp
   autocmd!
   autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
@@ -548,6 +553,11 @@ command! -nargs=0 Fq call fzf#run({
 " \ })
 " let NERDTreeShowHidden=1
 " }}}
+" {{{ buoto/gotests-vim
+let g:gotests_template_dir = $HOME . '/.config/nvim/gotests'
+" }}}
+
+
 "
 " }}}
 " Basic Settings  {{{
@@ -660,33 +670,6 @@ set display=lastline
 set list
 set listchars=tab:^\ ,trail:~
 
-" }}}
-" Spell Check {{{
-set spelllang=en,cjk
-set spell
-
-fun! s:SpellConf()
-  redir! => syntax
-  silent syntax
-  redir END
-
-  set spell
-
-  if syntax =~? '/<comment\>'
-    syntax spell default
-    syntax match SpellMaybeCode /\<\h\l*[_A-Z]\h\{-}\>/ contains=@NoSpell transparent containedin=Comment contained
-  else
-    syntax spell toplevel
-    syntax match SpellMaybeCode /\<\h\l*[_A-Z]\h\{-}\>/ contains=@NoSpell transparent
-  endif
-
-  syntax cluster Spell add=SpellMaybeCode
-endfunc
-
-augroup spell_check
-  autocmd!
-  autocmd BufReadPost,BufNewFile,Syntax * call s:SpellConf()
-augroup END
 " }}}
 " Key map {{{
 :let mapleader=","
