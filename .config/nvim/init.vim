@@ -119,54 +119,35 @@ Plug 'yaasita/edit-slack.vim'
 Plug 'tmux-plugins/vim-tmux-focus-events'
 Plug 'tpope/vim-commentary'
 Plug 'roxma/nvim-yarp'
-Plug 'ncm2/ncm2'
-Plug 'ncm2/ncm2-vim-lsp'
-Plug 'ncm2/ncm2-bufword'
-Plug 'ncm2/ncm2-path'
-Plug 'ncm2/ncm2-tmux'
-Plug 'ncm2/ncm2-ultisnips'
-Plug 'ncm2/ncm2-vim'
-Plug 'filipekiss/ncm2-look.vim'
+" Install nightly build, replace ./install.sh with install.cmd on windows
+" Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
+" Or install latest release tag
+Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
 Plug 'Shougo/neco-vim'
 Plug 'editorconfig/editorconfig-vim'
 
 "
 call plug#end()
 " }}}
-" Plugin Configuration {{{
-"  prabirshrestha/vim-lsp {{{
-if executable('gopls')
-  augroup gopls
+"Plugin Configuration {{{
+"  neoclide/coc.nvim {{{
+  autocmd FileType json syntax match Comment +\/\/.\+$+
+  function! SetupCommandAbbrs(from, to)
+    exec 'cnoreabbrev <expr> '.a:from
+          \ .' ((getcmdtype() ==# ":" && getcmdline() ==# "'.a:from.'")'
+          \ .'? ("'.a:to.'") : ("'.a:from.'"))'
+  endfunction
+  augroup coc
     autocmd!
-    au User lsp_setup call lsp#register_server({
-          \ 'name': 'gopls',
-          \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
-          \ 'whitelist': ['go'],
-          \ })
+    autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
+    autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
+    autocmd FileType go nmap <silent> <Leader>gn <Plug>(coc-declaration)
+    autocmd FileType go nmap <silent> <Leader>gr <Plug>(coc-rename)
   augroup END
-endif
-if executable('docker-langserver')
-  augroup docker-langserver
-    autocmd!
-    au User lsp_setup call lsp#register_server({
-          \ 'name': 'docker-langserver',
-          \ 'cmd': {server_info->['docker-langserver', '-stdio']},
-          \ 'whitelist': ['Dockerfile'],
-          \ })
-  augroup END
-endif
-let g:lsp_diagnostics_enabled = 0
-let g:lsp_signs_enabled = 0
-let g:lsp_virtual_text_enabled = 0
-let g:lsp_highlights_enabled = 0
-let g:lsp_textprop_enabled = 0
-let g:lsp_highlight_references_enabled = 0
-augroup vim-lsp
-  autocmd!
-  autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
-augroup END
+
+
+" Use C to open coc config
+call SetupCommandAbbrs('C', 'CocConfig')
 " }}}
 " autozimu/LanguageClient-neovim {{{
 " let g:LanguageClient_rootMarkers = {
@@ -182,20 +163,6 @@ augroup END
 " nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
 " nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_typeDefinition()<CR>
 " nnoremap <F5> :call LanguageClient_contextMenu()<CR>
-"  }}}
-"  ncm2/ncm2 {{{
-
-augroup ncm2
-  autocmd!
-  " enable ncm2 for all buffers
-  autocmd BufEnter * call ncm2#enable_for_buffer()
-  autocmd BufEnter * nnoremap <Leader>l :LookToggleBuffer<CR>
-augroup END
-" IMPORTANT: :help Ncm2PopupOpen for more information
-set completeopt=noinsert,menuone,noselect
-call ncm2#override_source('buflook', {'priority': 3})
-let g:ncm2_look_enabled = 1
-
 "  }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
@@ -224,7 +191,7 @@ call camelcasemotion#CreateMotionMappings('<leader>')
 " }}}
 " vim-go {{{
 let g:go_fmt_command = "goimports"
-let g:go_fmt_autosave = 1
+let g:go_fmt_autosave = 0
 let g:go_autodetect_gopath = 1
 let g:go_list_type = "quickfix"
 
@@ -258,16 +225,12 @@ augroup go
   autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
   " :GoTest
   autocmd FileType go nmap <leader>gt  <Plug>(go-test)
-  " :GoRun
-  autocmd FileType go nmap <leader>gr  <Plug>(go-run)
   " :GoCoverageToggle
   autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
   " :GoMetaLinter
   autocmd FileType go nmap <Leader>gl <Plug>(go-metalinter)
   " :GoDef but opens in a vertical split
   autocmd FileType go nmap <Leader>gv <Plug>(go-def-vertical)
-  " :GoDef but opens in a horizontal split
-  autocmd FileType go nmap <Leader>gs <Plug>(go-def-split)
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
 
@@ -429,10 +392,11 @@ let g:indent_guides_guide_size = 1
 " }}}
 " ALE {{{
 let g:ale_linters = {
-      \   'go': ['gofmt', 'golangci-lint', 'gopls', 'govet'],
+      \   'go': ['gopls', 'golangci-lint'],
       \}
 
 let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused --tests=false'
+let g:ale_go_golangci_lint_package = 1
 nmap <silent> [j <Plug>(ale_previous_wrap)
 nmap <silent> ]j <Plug>(ale_next_wrap)
 " }}}
