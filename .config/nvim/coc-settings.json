@@ -1,6 +1,7 @@
 {
   "diagnostic.enable": false,
-  "coc.preferences.hoverTarget": "preview",
+  "coc.preferences.hoverTarget": "float",
+  "coc.preferences.previewAutoClose": false,
   "languageserver": {
     "golang": {
       "command": "gopls",
