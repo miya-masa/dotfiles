@@ -125,6 +125,7 @@ Plug 'roxma/nvim-yarp'
 Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
 Plug 'Shougo/neco-vim'
 Plug 'editorconfig/editorconfig-vim'
+Plug 'sjl/gundo.vim'
 
 "
 call plug#end()
@@ -239,11 +240,6 @@ augroup go
 
   autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
   autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
-
-
-  " Open :GoDeclsDir with ctrl-g
-  autocmd FileType go imap <C-g> <esc>:GoDecls<cr>
-  autocmd FileType go nmap <C-g> :GoDeclsDir<cr>
 
   " :GoAlternate  commands :A, :AV, :AS and :AT
   autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
@@ -519,6 +515,9 @@ command! -nargs=0 Fq call fzf#run({
 " }}}
 " {{{ buoto/gotests-vim
 let g:gotests_template_dir = $HOME . '/.config/nvim/gotests'
+" }}}
+" {{{ sjl/gudo
+let g:gundo_prefer_python3=1
 " }}}
 
 
