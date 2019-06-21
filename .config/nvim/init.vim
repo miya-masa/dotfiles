@@ -126,6 +126,7 @@ Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
 Plug 'Shougo/neco-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'sjl/gundo.vim'
+Plug 'vim-scripts/BufOnly.vim'
 
 "
 call plug#end()
@@ -729,4 +730,17 @@ command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
 command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
 command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 " }}}
+command! SI :call SelfImport()
+" }}}
+" Util function {{{
+function! SelfImport()
+  let bufPath = expand("%:p")
+  let fileName = expand("%")
+  let importPath = substitute(substitute(bufPath, $GOPATH . "/src/", "", "g"),"/" . fileName, "", "g")
+  let selfImport = ". \"" . importPath . "\""
+
+  let pos = getpos(".")
+  execute ":normal i" . selfImport
+  :call setpos('.', pos)
+endfunction
 " }}}
