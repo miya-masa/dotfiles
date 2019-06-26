@@ -127,6 +127,7 @@ Plug 'Shougo/neco-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'sjl/gundo.vim'
 Plug 'vim-scripts/BufOnly.vim'
+Plug 'itchyny/vim-gitbranch'
 
 "
 call plug#end()
@@ -193,7 +194,7 @@ call camelcasemotion#CreateMotionMappings('<leader>')
 " }}}
 " vim-go {{{
 let g:go_fmt_command = "goimports"
-let g:go_fmt_autosave = 0
+let g:go_fmt_autosave = 1
 let g:go_autodetect_gopath = 1
 let g:go_list_type = "quickfix"
 
@@ -235,10 +236,6 @@ augroup go
   autocmd FileType go nmap <Leader>gv <Plug>(go-def-vertical)
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
-
-  " :GoImports
-  autocmd FileType go nnoremap <Leader><C-i> :GoImports<CR>
-
   autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
   autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
 
@@ -344,7 +341,7 @@ let g:lightline = {
       \ 'winnr': '%{winnr()}'
       \ },
       \ 'component_function': {
-      \   'gitbranch': 'fugitive#head'
+      \   'gitbranch': 'gitbranch#name'
       \ },
       \ }
 let g:lightline.component_expand = {
@@ -389,7 +386,7 @@ let g:indent_guides_guide_size = 1
 " }}}
 " ALE {{{
 let g:ale_linters = {
-      \   'go': ['gopls', 'golangci-lint'],
+      \   'go': ['goimports', 'gopls', 'golangci-lint'],
       \}
 
 let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused --tests=false'

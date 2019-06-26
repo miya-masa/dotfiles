@@ -52,24 +52,23 @@ endsnippet
 
 snippet casetest "casetest snip"
 func Test$1(t *testing.T) {
-	type in struct {
+	type fields struct {
 	}
-	type exp struct {
-		err	error
+	type args struct {
 	}
-	cases := []struct {
-		name  string
-		in in
+	testCases := []struct {
+		name    string
+		fields  fields
+		args    args
 
-		exp exp
+		want    struct{}
+		wantErr bool
 	}{
-		{
-			name : "success",
-		},
+		// TODO
 	}
 
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T){
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T){
 		// setup
 		${0:${VISUAL}}
 		// execute
