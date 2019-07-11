@@ -147,6 +147,8 @@ alias muxall='muxdev && muxdot && muxops && muxwork && tma dev'
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
+eval "$(fasd --init auto)"
+
 fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
 anyframe-init
@@ -179,6 +181,11 @@ fda() {
 fd() {
   DIR=`find * -type d -print 2> /dev/null | fzf-tmux` \
   && cd "$DIR"
+}
+
+v() {
+  local file
+  file="$(fasd -Rfl "$1" | fzf -1 -0 --no-sort +m)" && vi "${file}" || return 1
 }
 
 ## options

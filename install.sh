@@ -386,6 +386,9 @@ Usage:
     go                          Install go gvm go tools
     docker-lsp                  Install docker-langserver
     editorconfig                Install editorconfig
+    golangcilint                Install golangcilint
+    ranger                      Install ranger
+    fasd                        Install fasd
 EOF
 }
 
@@ -454,6 +457,12 @@ function parse_params() {
             golangcilint)
                 golangcilint=true
                 ;;
+            ranger)
+                ranger=true
+                ;;
+            fasd)
+                fasd=true
+                ;;
             *)
                 script_exit "Invalid parameter was provided: $param" 2
                 ;;
@@ -521,6 +530,12 @@ function _main() {
   fi
   if [[ -n ${golangcilint-} ]]; then
     brew install golangci/tap/golangci-lint
+  fi
+  if [[ -n ${fasd-} ]]; then
+    brew install fasd
+  fi
+  if [[ -n ${ranger-} ]]; then
+    brew install ranger
   fi
 
 brew install golangci/tap/golangci-lint

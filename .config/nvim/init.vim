@@ -30,7 +30,7 @@ call plug#begin('~/.vim/plugged')
 if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
-Plug 'Chiel92/vim-autoformat'
+" Plug 'Chiel92/vim-autoformat'
 Plug 'buoto/gotests-vim'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Konfekt/FastFold'
@@ -55,7 +55,7 @@ Plug 'elzr/vim-json'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'flazz/vim-colorschemes'
 Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
-Plug 'godlygeek/tabular'
+Plug 'tpope/vim-markdown'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'honza/vim-snippets'
 Plug 'itchyny/calendar.vim'
@@ -92,7 +92,8 @@ Plug 'othree/html5.vim'
 Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'othree/yajs.vim'
 Plug 'pangloss/vim-javascript'
-Plug 'plasticboy/vim-markdown'
+" Plug 'godlygeek/tabular'
+" Plug 'plasticboy/vim-markdown'
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/vim-lsp'
 Plug 'qpkorr/vim-bufkill'
@@ -128,6 +129,8 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'sjl/gundo.vim'
 Plug 'vim-scripts/BufOnly.vim'
 Plug 'itchyny/vim-gitbranch'
+Plug 'francoiscabrol/ranger.vim'
+Plug 'rbgrouleff/bclose.vim'
 
 "
 call plug#end()
@@ -291,7 +294,7 @@ endif
 " }}}
 " IndentGuide {{{
 let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish']
+let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft']
 " }}}
 " PlantUML {{{
 augroup PlantUML
@@ -379,6 +382,7 @@ let g:deoplete#enable_at_startup = 1
 " }}}
 " FastFold {{{
 let g:go_fold_enabled=0
+let g:markdown_fold_enabled=0
 " }}}
 " IndentGuide {{{
 let g:indent_guides_start_level = 2
@@ -488,9 +492,6 @@ let g:startify_custom_header = s:filter_header([
       \ ])
 
 " }}}
-" kannokanno/previm {{{
-let g:vim_markdown_folding_disabled = 1
-" }}}
 " VincentCordobes/vim-translate {{{
 let g:translate#default_languages = {
       \ 'en': 'ja',
@@ -514,10 +515,12 @@ command! -nargs=0 Fq call fzf#run({
 " {{{ buoto/gotests-vim
 let g:gotests_template_dir = $HOME . '/.config/nvim/gotests'
 " }}}
-" {{{ sjl/gudo
+" {{{ sjl/gundo
 let g:gundo_prefer_python3=1
 " }}}
-
+" {{{ Plug 'francoiscabrol/ranger.vim'
+let g:ranger_command_override = 'ranger --cmd "set show_hidden=true"'
+" }}}
 
 "
 " }}}
@@ -732,7 +735,7 @@ command! SI :call SelfImport()
 " Util function {{{
 function! SelfImport()
   let bufPath = expand("%:p")
-  let fileName = expand("%")
+  let fileName = substitute(expand("%"), expand("%:h") . "/", "", "g")
   let importPath = substitute(substitute(bufPath, $GOPATH . "/src/", "", "g"),"/" . fileName, "", "g")
   let selfImport = ". \"" . importPath . "\""
 
