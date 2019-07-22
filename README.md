@@ -54,5 +54,3 @@
 
 * https://github.com/mhinz/neovim-remote
 
-
-

@@ -123,7 +123,7 @@ Plug 'roxma/nvim-yarp'
 " Install nightly build, replace ./install.sh with install.cmd on windows
 " Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
 " Or install latest release tag
-Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'Shougo/neco-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'sjl/gundo.vim'
@@ -239,7 +239,7 @@ augroup go
   autocmd FileType go nmap <Leader>gv <Plug>(go-def-vertical)
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
-  autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
+  autocmd FileType go nnoremap <Leader>gs :GoFillStruct<CR>
   autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
 
   " :GoAlternate  commands :A, :AV, :AS and :AT
