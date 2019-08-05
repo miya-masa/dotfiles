@@ -131,6 +131,7 @@ Plug 'vim-scripts/BufOnly.vim'
 Plug 'itchyny/vim-gitbranch'
 Plug 'francoiscabrol/ranger.vim'
 Plug 'rbgrouleff/bclose.vim'
+Plug 'stephpy/vim-yaml'
 
 "
 call plug#end()
@@ -383,6 +384,7 @@ let g:deoplete#enable_at_startup = 1
 " FastFold {{{
 let g:go_fold_enabled=0
 let g:markdown_fold_enabled=0
+let g:yaml_fold_enabled=1
 " }}}
 " IndentGuide {{{
 let g:indent_guides_start_level = 2
@@ -606,6 +608,7 @@ if has('mouse')
   set mouse=a
 endif
 au FileType vim setlocal foldmethod=marker
+au FileType yaml setlocal foldmethod=indent
 " Add a bit extra margin to the left
 set foldcolumn=1
 set dictionary=/usr/share/dict/words

@@ -136,14 +136,9 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
-alias mux='tmuxinator'
 alias tm='tmux'
 alias tma='tmux a -t '
-alias muxdev='mux dev'
-alias muxdot='mux dot'
-alias muxops='mux ops'
-alias muxwork='mux work'
-alias muxall='muxdev && muxdot && muxops && muxwork && tma dev'
+alias git='lab'
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
@@ -244,3 +239,6 @@ function dcrm() {
 # the following to ~/.zshrc:
 
 eval "$(rbenv init -)"
+fpath=(~/.config/lab/_lab $fpath)
+fpath=(~/.config/lab $fpath)
+
