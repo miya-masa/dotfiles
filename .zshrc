@@ -136,7 +136,18 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
-alias tm='tmux'
+# tm - create new tmux session, or switch to existing one. Works from within tmux too. (@bag-man)
+# `tm` will allow you to select your tmux session via fzf.
+# `tm irc` will attach to the irc session (if it exists), else it will create it.
+
+tm() {
+  [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
+  if [ $1 ]; then
+    tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
+  fi
+  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
+}
+
 alias tma='tmux a -t '
 alias git='lab'
 
@@ -148,7 +159,16 @@ fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
 anyframe-init
 
-bindkey '^e' anyframe-widget-checkout-git-branch
+# fbr - checkout git branch (including remote branches)
+fbr() {
+  local branches branch
+  branches=$(git branch --all | grep -v HEAD) &&
+  branch=$(echo "$branches" |
+           fzf-tmux -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
+  git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+}
+zle -N fbr
+bindkey '^e' fbr
 bindkey '^g' anyframe-widget-cd-ghq-repository
 bindkey '^b' anyframe-widget-cdr
 bindkey '^x^i' anyframe-widget-insert-git-branch
@@ -164,18 +184,22 @@ zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 # DO NOT EDIT END
 
-# fda - including hidden directories
-fda() {
+# fd - including hidden directories
+fd() {
   local dir
   dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) && cd "$dir"
 }
 
-# Another fd - cd into the selected directory
-# This one differs from the above, by only showing the sub directories and not
-#  showing the directories within those.
-fd() {
-  DIR=`find * -type d -print 2> /dev/null | fzf-tmux` \
-  && cd "$DIR"
+# Install (one or multiple) selected application(s)
+# using "brew search" as source input
+# mnemonic [B]rew [I]nstall [P]lugin
+bip() {
+  local inst=$(brew search | fzf -m)
+
+  if [[ $inst ]]; then
+    for prog in $(echo $inst);
+    do; brew install $prog; done;
+  fi
 }
 
 v() {

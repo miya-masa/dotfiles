@@ -150,6 +150,10 @@ call plug#end()
     autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
     autocmd FileType go nmap <silent> <Leader>gn <Plug>(coc-declaration)
     autocmd FileType go nmap <silent> <Leader>gr <Plug>(coc-rename)
+    autocmd FileType java nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
+    autocmd FileType java nmap <silent> <Leader>gd <Plug>(coc-definition)
+    autocmd FileType java nmap <silent> <Leader>gn <Plug>(coc-declaration)
+    autocmd FileType java nmap <silent> <Leader>gr <Plug>(coc-rename)
   augroup END
 
 
