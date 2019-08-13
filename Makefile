@@ -1,9 +1,6 @@
 $(HOME)/.config:
 	mkdir -p ${HOME}/.config
 
-tmuxinator: $(HOME)/.config
-	ln -fs ${PWD}/.config/tmuxinator ${HOME}/.config/tmuxinator
-
 lab: $(HOME)/.config
 	mkdir -p ${HOME}/.config/lab
 	ln -fs ${PWD}/.config/lab/_lab ${HOME}/.config/lab/_lab
@@ -23,13 +20,3 @@ nvim: $(HOME)/.config
 
 git:
 	ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
-
-fish-mac:
-	brew install fish
-	curl https://git.io/fisher --create-dirs -sLo ~/.config/fish/functions/fisher.fish
-
-ranger:
-	pip install ranger-fm
-
-pip3:
-	brew install python

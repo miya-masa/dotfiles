@@ -374,21 +374,10 @@ Usage:
     -cr|--cron                  Run silently unless we encounter an error
     brew                        Install brew
     zplug                       Install zplug
-    ag                          Install ag
-    fzf                         Install fzf
-    jq                          Install jq
-    font                        Install font
-    gawk                        Install gawk
-    tmux                        Install tmux
     yarn                        Install yarn
-    ghq                         Install ghq
-    direnv                      Install direnv
     go                          Install go gvm go tools
     docker-lsp                  Install docker-langserver
-    editorconfig                Install editorconfig
-    golangcilint                Install golangcilint
-    ranger                      Install ranger
-    fasd                        Install fasd
+    nvim                        Install nvim
 EOF
 }
 
@@ -418,32 +407,8 @@ function parse_params() {
             zplug)
                 zplug=true
                 ;;
-            ag)
-                ag=true
-                ;;
-            fzf)
-                fzf=true
-                ;;
-            jq)
-                jq=true
-                ;;
-            font)
-                font=true
-                ;;
-            gawk)
-                gawk=true
-                ;;
-            tmux)
-                tmux=true
-                ;;
             yarn)
                 yarn=true
-                ;;
-            ghq)
-                ghq=true
-                ;;
-            direnv)
-                direnv=true
                 ;;
             go)
                 go=true
@@ -451,17 +416,8 @@ function parse_params() {
             dockerlsp)
                 dockerlsp=true
                 ;;
-            editorconfig)
-                editorconfig=true
-                ;;
-            golangcilint)
-                golangcilint=true
-                ;;
-            ranger)
-                ranger=true
-                ;;
-            fasd)
-                fasd=true
+            nvim)
+                dockerlsp=true
                 ;;
             *)
                 script_exit "Invalid parameter was provided: $param" 2
@@ -482,39 +438,8 @@ function _main() {
   if [[ -n ${zplug-} ]]; then
     curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
   fi
-  if [[ -n ${ag-} ]]; then
-    brew install the_silver_searcher
-  fi
-  if [[ -n ${fzf-} ]]; then
-    if [ ! -e $HOME/.fzf ]; then
-      git clone --depth 1 https://github.com/junegunn/fzf.git $HOME/.fzf
-    fi
-    $HOME/.fzf/install
-  fi
-  if [[ -n ${jq-} ]]; then
-    brew install jq
-  fi
-  if [[ -n ${font-} ]]; then
-    brew tap caskroom/fonts
-    brew cask install font-hack-nerd-font
-  fi
-  if [[ -n ${gawk-} ]]; then
-    brew install gawk
-  fi
-  if [[ -n ${tmux-} ]]; then
-    brew install tmux
-    brew install ruby
-    gem install tmuxinator
-  fi
   if [[ -n ${yarn-} ]]; then
-    brew install yarn
     yarn global add vim-node-rpc
-  fi
-  if [[ -n ${ghq-} ]]; then
-    brew install ghq
-  fi
-  if [[ -n ${direnv-} ]]; then
-    brew install direnv
   fi
   if [[ -n ${go-} ]]; then
     curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
@@ -525,20 +450,11 @@ function _main() {
   if [[ -n ${dockerlsp-} ]]; then
     yarn global add dockerfile-language-server-nodejs
   fi
-  if [[ -n ${editorconfig-} ]]; then
-    brew install editorconfig
+  if [[ -n ${nvim-} ]]; then
+    pip3 install neovim
+    pip3 install neovim-remote
+    npm install -g neovim-remote
   fi
-  if [[ -n ${golangcilint-} ]]; then
-    brew install golangci/tap/golangci-lint
-  fi
-  if [[ -n ${fasd-} ]]; then
-    brew install fasd
-  fi
-  if [[ -n ${ranger-} ]]; then
-    brew install ranger
-  fi
-
-brew install golangci/tap/golangci-lint
 }
 
 function _homebrew(){
