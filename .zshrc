@@ -249,15 +249,6 @@ alias dim='docker images'
 alias drm='docker rm $(docker ps -aqf "status=exited") 2> /dev/null'
 alias drmi='docker rmi $(docker images -aqf "dangling=true") 2> /dev/null'
 alias dc='docker-compose'
-alias dcup='dc up'
-alias dcupd='dc up -d'
-alias dcdown='dc down'
-alias dcrun='dc run --service-ports'
-alias dcps='dc ps'
-
-function dcrm() {
-    dc stop $1 && dc rm -f $1
-}
 
 # Load rbenv automatically by appending
 # the following to ~/.zshrc:
@@ -265,4 +256,12 @@ function dcrm() {
 eval "$(rbenv init -)"
 fpath=(~/.config/lab/_lab $fpath)
 fpath=(~/.config/lab $fpath)
+
+#### functions
+#
+
+# dcrm () { docker-compose stop $1 && docker-compose rm -f $1 }
+tmn() { tmux new-session -s $1 -n $1 }
+de () { docker exec -it $1 /bin/bash  }
+dceb () { docker-compose exec $1 /bin/bash  }
 
