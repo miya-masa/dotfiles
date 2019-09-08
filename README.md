@@ -37,6 +37,9 @@
 * direnv
   * https://direnv.net/
 
+* goimports-update-ignore
+  * `go get github.com/pwaller/goimports-update-ignore`
+
 ## nvim settings(Mac or Ubuntu)
 
 1. Clone this repository
@@ -50,5 +53,4 @@
 ## other recommended
 
 * https://github.com/mhinz/neovim-remote
-
 

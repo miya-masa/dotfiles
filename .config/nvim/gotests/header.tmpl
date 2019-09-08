@@ -1,7 +1,7 @@
 {{define "header"}}
 {{range .Comments}}{{.}}
 {{end}}
-package {{.Package}}
+package {{.Package}}_test
 
 import (
 {{range .Imports}}{{.Name}} {{.Path}}

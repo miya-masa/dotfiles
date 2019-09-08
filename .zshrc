@@ -136,22 +136,39 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
-alias mux='tmuxinator'
-alias tm='tmux'
+# tm - create new tmux session, or switch to existing one. Works from within tmux too. (@bag-man)
+# `tm` will allow you to select your tmux session via fzf.
+# `tm irc` will attach to the irc session (if it exists), else it will create it.
+
+tm() {
+  [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
+  if [ $1 ]; then
+    tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
+  fi
+  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
+}
+
 alias tma='tmux a -t '
-alias muxdev='mux dev'
-alias muxdot='mux dot'
-alias muxops='mux ops'
-alias muxwork='mux work'
-alias muxall='muxdev && muxdot && muxops && muxwork && tma dev'
+alias git='lab'
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+
+eval "$(fasd --init auto)"
 
 fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
 anyframe-init
 
-bindkey '^e' anyframe-widget-checkout-git-branch
+# fbr - checkout git branch (including remote branches)
+fbr() {
+  local branches branch
+  branches=$(git branch --all | grep -v HEAD) &&
+  branch=$(echo "$branches" |
+           fzf-tmux -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
+  git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+}
+zle -N fbr
+bindkey '^e' fbr
 bindkey '^g' anyframe-widget-cd-ghq-repository
 bindkey '^b' anyframe-widget-cdr
 bindkey '^x^i' anyframe-widget-insert-git-branch
@@ -167,18 +184,27 @@ zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 # DO NOT EDIT END
 
-# fda - including hidden directories
-fda() {
+# fd - including hidden directories
+fd() {
   local dir
   dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) && cd "$dir"
 }
 
-# Another fd - cd into the selected directory
-# This one differs from the above, by only showing the sub directories and not
-#  showing the directories within those.
-fd() {
-  DIR=`find * -type d -print 2> /dev/null | fzf-tmux` \
-  && cd "$DIR"
+# Install (one or multiple) selected application(s)
+# using "brew search" as source input
+# mnemonic [B]rew [I]nstall [P]lugin
+bip() {
+  local inst=$(brew search | fzf -m)
+
+  if [[ $inst ]]; then
+    for prog in $(echo $inst);
+    do; brew install $prog; done;
+  fi
+}
+
+v() {
+  local file
+  file="$(fasd -Rfl "$1" | fzf -1 -0 --no-sort +m)" && vi "${file}" || return 1
 }
 
 ## options
@@ -223,17 +249,19 @@ alias dim='docker images'
 alias drm='docker rm $(docker ps -aqf "status=exited") 2> /dev/null'
 alias drmi='docker rmi $(docker images -aqf "dangling=true") 2> /dev/null'
 alias dc='docker-compose'
-alias dcup='dc up'
-alias dcupd='dc up -d'
-alias dcdown='dc down'
-alias dcrun='dc run --service-ports'
-alias dcps='dc ps'
-
-function dcrm() {
-    dc stop $1 && dc rm -f $1
-}
 
 # Load rbenv automatically by appending
 # the following to ~/.zshrc:
 
 eval "$(rbenv init -)"
+fpath=(~/.config/lab/_lab $fpath)
+fpath=(~/.config/lab $fpath)
+
+#### functions
+#
+
+# dcrm () { docker-compose stop $1 && docker-compose rm -f $1 }
+tmn() { tmux new-session -s $1 -n $1 }
+de () { docker exec -it $1 /bin/bash  }
+dceb () { docker-compose exec $1 /bin/bash  }
+

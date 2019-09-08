@@ -30,7 +30,7 @@ call plug#begin('~/.vim/plugged')
 if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
-Plug 'Chiel92/vim-autoformat'
+" Plug 'Chiel92/vim-autoformat'
 Plug 'buoto/gotests-vim'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Konfekt/FastFold'
@@ -55,7 +55,7 @@ Plug 'elzr/vim-json'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'flazz/vim-colorschemes'
 Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
-Plug 'godlygeek/tabular'
+Plug 'tpope/vim-markdown'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'honza/vim-snippets'
 Plug 'itchyny/calendar.vim'
@@ -92,7 +92,8 @@ Plug 'othree/html5.vim'
 Plug 'othree/javascript-libraries-syntax.vim'
 Plug 'othree/yajs.vim'
 Plug 'pangloss/vim-javascript'
-Plug 'plasticboy/vim-markdown'
+" Plug 'godlygeek/tabular'
+" Plug 'plasticboy/vim-markdown'
 Plug 'prabirshrestha/async.vim'
 Plug 'prabirshrestha/vim-lsp'
 Plug 'qpkorr/vim-bufkill'
@@ -119,54 +120,45 @@ Plug 'yaasita/edit-slack.vim'
 Plug 'tmux-plugins/vim-tmux-focus-events'
 Plug 'tpope/vim-commentary'
 Plug 'roxma/nvim-yarp'
-Plug 'ncm2/ncm2'
-Plug 'ncm2/ncm2-vim-lsp'
-Plug 'ncm2/ncm2-bufword'
-Plug 'ncm2/ncm2-path'
-Plug 'ncm2/ncm2-tmux'
-Plug 'ncm2/ncm2-ultisnips'
-Plug 'ncm2/ncm2-vim'
-Plug 'filipekiss/ncm2-look.vim'
+" Install nightly build, replace ./install.sh with install.cmd on windows
+" Plug 'neoclide/coc.nvim', {'do': './install.sh nightly'}
+" Or install latest release tag
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'Shougo/neco-vim'
 Plug 'editorconfig/editorconfig-vim'
+Plug 'sjl/gundo.vim'
+Plug 'vim-scripts/BufOnly.vim'
+Plug 'itchyny/vim-gitbranch'
+Plug 'francoiscabrol/ranger.vim'
+Plug 'rbgrouleff/bclose.vim'
+Plug 'stephpy/vim-yaml'
 
 "
 call plug#end()
 " }}}
-" Plugin Configuration {{{
-"  prabirshrestha/vim-lsp {{{
-if executable('gopls')
-  augroup gopls
+"Plugin Configuration {{{
+"  neoclide/coc.nvim {{{
+  autocmd FileType json syntax match Comment +\/\/.\+$+
+  function! SetupCommandAbbrs(from, to)
+    exec 'cnoreabbrev <expr> '.a:from
+          \ .' ((getcmdtype() ==# ":" && getcmdline() ==# "'.a:from.'")'
+          \ .'? ("'.a:to.'") : ("'.a:from.'"))'
+  endfunction
+  augroup coc
     autocmd!
-    au User lsp_setup call lsp#register_server({
-          \ 'name': 'gopls',
-          \ 'cmd': {server_info->['gopls', '-mode', 'stdio']},
-          \ 'whitelist': ['go'],
-          \ })
+    autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
+    autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
+    autocmd FileType go nmap <silent> <Leader>gn <Plug>(coc-declaration)
+    autocmd FileType go nmap <silent> <Leader>gr <Plug>(coc-rename)
+    autocmd FileType java nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
+    autocmd FileType java nmap <silent> <Leader>gd <Plug>(coc-definition)
+    autocmd FileType java nmap <silent> <Leader>gn <Plug>(coc-declaration)
+    autocmd FileType java nmap <silent> <Leader>gr <Plug>(coc-rename)
   augroup END
-endif
-if executable('docker-langserver')
-  augroup docker-langserver
-    autocmd!
-    au User lsp_setup call lsp#register_server({
-          \ 'name': 'docker-langserver',
-          \ 'cmd': {server_info->['docker-langserver', '-stdio']},
-          \ 'whitelist': ['Dockerfile'],
-          \ })
-  augroup END
-endif
-let g:lsp_diagnostics_enabled = 0
-let g:lsp_signs_enabled = 0
-let g:lsp_virtual_text_enabled = 0
-let g:lsp_highlights_enabled = 0
-let g:lsp_textprop_enabled = 0
-let g:lsp_highlight_references_enabled = 0
-augroup vim-lsp
-  autocmd!
-  autocmd FileType go nmap <silent> <Leader>gi :LspHover<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gd :LspDefinition<CR>
-  autocmd FileType go nnoremap <silent> <Leader>gn :LspDeclaration<CR>
-augroup END
+
+
+" Use C to open coc config
+call SetupCommandAbbrs('C', 'CocConfig')
 " }}}
 " autozimu/LanguageClient-neovim {{{
 " let g:LanguageClient_rootMarkers = {
@@ -182,20 +174,6 @@ augroup END
 " nnoremap <silent> <Leader>gd :call LanguageClient#textDocument_definition()<CR>
 " nnoremap <silent> <Leader>gn :call LanguageClient#textDocument_typeDefinition()<CR>
 " nnoremap <F5> :call LanguageClient_contextMenu()<CR>
-"  }}}
-"  ncm2/ncm2 {{{
-
-augroup ncm2
-  autocmd!
-  " enable ncm2 for all buffers
-  autocmd BufEnter * call ncm2#enable_for_buffer()
-  autocmd BufEnter * nnoremap <Leader>l :LookToggleBuffer<CR>
-augroup END
-" IMPORTANT: :help Ncm2PopupOpen for more information
-set completeopt=noinsert,menuone,noselect
-call ncm2#override_source('buflook', {'priority': 3})
-let g:ncm2_look_enabled = 1
-
 "  }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
@@ -258,29 +236,16 @@ augroup go
   autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
   " :GoTest
   autocmd FileType go nmap <leader>gt  <Plug>(go-test)
-  " :GoRun
-  autocmd FileType go nmap <leader>gr  <Plug>(go-run)
   " :GoCoverageToggle
   autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
   " :GoMetaLinter
   autocmd FileType go nmap <Leader>gl <Plug>(go-metalinter)
   " :GoDef but opens in a vertical split
   autocmd FileType go nmap <Leader>gv <Plug>(go-def-vertical)
-  " :GoDef but opens in a horizontal split
-  autocmd FileType go nmap <Leader>gs <Plug>(go-def-split)
   " :GoTestFunc
   autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
-
-  " :GoImports
-  autocmd FileType go nnoremap <Leader><C-i> :GoImports<CR>
-
-  autocmd FileType go nnoremap <Leader>fs :GoFillStruct<CR>
+  autocmd FileType go nnoremap <Leader>gs :GoFillStruct<CR>
   autocmd FileType go nnoremap <Leader>ie :GoIfErr<CR>
-
-
-  " Open :GoDeclsDir with ctrl-g
-  autocmd FileType go imap <C-g> <esc>:GoDecls<cr>
-  autocmd FileType go nmap <C-g> :GoDeclsDir<cr>
 
   " :GoAlternate  commands :A, :AV, :AS and :AT
   autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
@@ -334,7 +299,7 @@ endif
 " }}}
 " IndentGuide {{{
 let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish']
+let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft']
 " }}}
 " PlantUML {{{
 augroup PlantUML
@@ -384,7 +349,7 @@ let g:lightline = {
       \ 'winnr': '%{winnr()}'
       \ },
       \ 'component_function': {
-      \   'gitbranch': 'fugitive#head'
+      \   'gitbranch': 'gitbranch#name'
       \ },
       \ }
 let g:lightline.component_expand = {
@@ -422,6 +387,8 @@ let g:deoplete#enable_at_startup = 1
 " }}}
 " FastFold {{{
 let g:go_fold_enabled=0
+let g:markdown_fold_enabled=0
+let g:yaml_fold_enabled=1
 " }}}
 " IndentGuide {{{
 let g:indent_guides_start_level = 2
@@ -429,10 +396,11 @@ let g:indent_guides_guide_size = 1
 " }}}
 " ALE {{{
 let g:ale_linters = {
-      \   'go': ['gofmt', 'golangci-lint', 'gopls', 'govet'],
+      \   'go': ['goimports', 'gopls', 'golangci-lint'],
       \}
 
 let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused --tests=false'
+let g:ale_go_golangci_lint_package = 1
 nmap <silent> [j <Plug>(ale_previous_wrap)
 nmap <silent> ]j <Plug>(ale_next_wrap)
 " }}}
@@ -530,9 +498,6 @@ let g:startify_custom_header = s:filter_header([
       \ ])
 
 " }}}
-" kannokanno/previm {{{
-let g:vim_markdown_folding_disabled = 1
-" }}}
 " VincentCordobes/vim-translate {{{
 let g:translate#default_languages = {
       \ 'en': 'ja',
@@ -556,7 +521,12 @@ command! -nargs=0 Fq call fzf#run({
 " {{{ buoto/gotests-vim
 let g:gotests_template_dir = $HOME . '/.config/nvim/gotests'
 " }}}
-
+" {{{ sjl/gundo
+let g:gundo_prefer_python3=1
+" }}}
+" {{{ Plug 'francoiscabrol/ranger.vim'
+let g:ranger_command_override = 'ranger --cmd "set show_hidden=true"'
+" }}}
 
 "
 " }}}
@@ -642,6 +612,7 @@ if has('mouse')
   set mouse=a
 endif
 au FileType vim setlocal foldmethod=marker
+au FileType yaml setlocal foldmethod=indent
 " Add a bit extra margin to the left
 set foldcolumn=1
 set dictionary=/usr/share/dict/words
@@ -766,4 +737,17 @@ command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
 command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
 command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 " }}}
+command! SI :call SelfImport()
+" }}}
+" Util function {{{
+function! SelfImport()
+  let bufPath = expand("%:p")
+  let fileName = substitute(expand("%"), expand("%:h") . "/", "", "g")
+  let importPath = substitute(substitute(bufPath, $GOPATH . "/src/", "", "g"),"/" . fileName, "", "g")
+  let selfImport = ". \"" . importPath . "\""
+
+  let pos = getpos(".")
+  execute ":normal i" . selfImport
+  :call setpos('.', pos)
+endfunction
 " }}}
