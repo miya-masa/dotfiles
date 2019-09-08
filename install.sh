@@ -362,99 +362,35 @@ function run_as_root() {
 }
 
 
-# DESC: Usage help
-# ARGS: None
-# OUTS: None
-function script_usage() {
-    cat << EOF
-Usage:
-     -h|--help                  Displays this help
-     -v|--verbose               Displays verbose output
-    -nc|--no-colour             Disables colour output
-    -cr|--cron                  Run silently unless we encounter an error
-    brew                        Install brew
-    zplug                       Install zplug
-    yarn                        Install yarn
-    go                          Install go gvm go tools
-    docker-lsp                  Install docker-langserver
-    nvim                        Install nvim
-EOF
-}
-
-
-# DESC: Parameter parser
-# ARGS: $@ (optional): Arguments provided to the script
-# OUTS: Variables indicating command-line parameters and options
-function parse_params() {
-    local param
-    while [[ $# -gt 0 ]]; do
-        param="$1"
-        shift
-        case $param in
-            -h|--help)
-                script_usage
-                exit 0
-                ;;
-            -v|--verbose)
-                verbose=true
-                ;;
-            -nc|--no-colour)
-                no_colour=true
-                ;;
-            brew)
-                brew=true
-                ;;
-            zplug)
-                zplug=true
-                ;;
-            yarn)
-                yarn=true
-                ;;
-            go)
-                go=true
-                ;;
-            dockerlsp)
-                dockerlsp=true
-                ;;
-            nvim)
-                dockerlsp=true
-                ;;
-            *)
-                script_exit "Invalid parameter was provided: $param" 2
-                ;;
-        esac
-    done
-}
-
 function _main() {
+  password
+  cd $HOME
   if [[ -n ${brew-} ]]; then
     uname=`uname`
     if [[ $uname="Linux" ]]; then
+      sudo apt-get update
       _linuxbrew
     else
       _homebrew
     fi
   fi
-  if [[ -n ${zplug-} ]]; then
-    curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
-  fi
-  if [[ -n ${yarn-} ]]; then
-    yarn global add vim-node-rpc
-  fi
-  if [[ -n ${go-} ]]; then
-    curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer | bash
-    source ${HOME}/.gvm/scripts/gvm
-    gvm install master
-    go get -u golang.org/x/tools/...
-  fi
-  if [[ -n ${dockerlsp-} ]]; then
-    yarn global add dockerfile-language-server-nodejs
-  fi
-  if [[ -n ${nvim-} ]]; then
-    pip3 install neovim
-    pip3 install neovim-remote
-    npm install -g neovim-remote
-  fi
+  brew install git
+  git clone https://github.com/miya-masa/dotfiles.git
+  cd dotfiles
+  brew bundle
+  pip3 install neovim
+  pip3 install neovim-remote
+  yarn install neovim
+  go get -u golang.org/x/tools/...
+  curl -fsSL https://get.docker.com -o get-docker.sh
+  echo "$password" | sudo -S sh get-docker.sh
+  rm get-docker.sh
+  curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+  # https://docs.docker.com/compose/install/
+  # yarn global add dockerfile-language-server-nodejs
+  # go get tool (gopls)
+  # zsh 起動
+  # neovim 起動
 }
 
 function _homebrew(){
@@ -467,6 +403,13 @@ function _linuxbrew(){
   sudo apt-get install build-essential
 }
 
+password(){
+    if ! ${password+:} false
+    then
+        printf "password: "
+        read -s password
+    fi
+}
 
 # DESC: Main control flow
 # ARGS: $@ (optional): Arguments provided to the script
@@ -476,7 +419,6 @@ function main() {
     trap script_trap_exit EXIT
 
     script_init "$@"
-    parse_params "$@"
     colour_init
     _main "$@"
 }
