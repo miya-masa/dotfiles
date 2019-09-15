@@ -25,8 +25,7 @@ SAVEHIST=500000
 
 # Check if zplug is installed
 if [[ ! -d ~/.zplug ]]; then
-  git clone https://github.com/zplug/zplug ~/.zplug
-  source ~/.zplug/init.zsh && zplug update --self
+  curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 fi
 source ~/.zplug/init.zsh
 zplug 'zplug/zplug', hook-build:'zplug --self-manage'
@@ -56,6 +55,9 @@ if ! zplug check --verbose; then
     echo; zplug install
   fi
 fi
+
+export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
 
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook is-at-least
 if is-at-least 4.3.10; then
@@ -149,8 +151,7 @@ tm() {
 }
 
 alias tma='tmux a -t '
-alias git='lab'
-
+[ -x "`which lab`" ] && alias git='lab'
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
 eval "$(fasd --init auto)"
