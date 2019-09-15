@@ -380,7 +380,7 @@ function _main() {
   brew bundle
   pip3 install neovim
   pip3 install neovim-remote
-  yarn install neovim
+  yarn add neovim
   go get -u golang.org/x/tools/...
   curl -fsSL https://get.docker.com -o get-docker.sh
   echo "$password" | sudo -S sh get-docker.sh
