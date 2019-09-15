@@ -70,5 +70,19 @@ sudo apt install -y gnome-tweak-tool
 
 wget -O mac-fonts.zip http://drive.noobslab.com/data/Mac/macfonts.zip && \
 sudo unzip mac-fonts.zip -d /usr/share/fonts; rm mac-fonts.zip && \
-sudo fc-cache -f -v 
+sudo fc-cache -f -v
+
+git clone git@github.com:miiton/Cica.git
+cd Cica
+docker-compose build ; docker-compose run --rm cica  # ./dist/ に出力される
+sudo cp ./dist/Cica* /usr/share/fonts
+cd ../
+rm -rf Cica
+sudo fc-cache -f -v
+
+# tmux battery
+sudo apt install -y acpi
+# tmux plugin
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
 ```
