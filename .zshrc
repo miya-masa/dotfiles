@@ -129,9 +129,15 @@ fi
 #export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
 # some more ls aliases
-alias ll='ls -GalF --color'
-alias la='ls -GA --color'
-alias l='ls -GCF'
+if [ $(uname) = "Darwin" ]; then
+    alias ll='ls -GalF'
+    alias la='ls -GA'
+    alias l='ls -GCF'
+elif [ $(uname) = "Linux" ]; then
+    alias ll='ls -alF --color'
+    alias la='ls -A --color'
+    alias l='ls -CF --color'
+fi
 
 # move directories
 alias ..='cd ..'
