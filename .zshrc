@@ -182,6 +182,11 @@ set -o numeric_glob_sort
 set -o mark_dirs
 set -o magic_equal_subst
 set -o always_last_prompt
+set -o interactivecomments
 
 eval "$(direnv hook zsh)"
 function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
+
+export NVM_DIR="$HOME/.config"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

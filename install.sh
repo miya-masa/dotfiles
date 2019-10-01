@@ -386,6 +386,10 @@ function _main() {
   echo "$password" | sudo -S sh get-docker.sh
   rm get-docker.sh
   curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | zsh
+  # restart zsh and terminal
+  nvm install --lts
+  # npm i -g bash-language-server
   # https://docs.docker.com/compose/install/
   # yarn global add dockerfile-language-server-nodejs
   # go get tool (gopls)

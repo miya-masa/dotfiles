@@ -1,0 +1,74 @@
+extends sh
+
+snippet shtmpl "sh template"
+#!/usr/bin/env bash
+#
+# Usage:
+#   script.sh
+#
+# Depends on:
+#  list
+#  of
+#  programs
+#  expected
+#  in
+#  environment
+#
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+# $_ME
+#
+# Set to the program's basename.
+_ME=$(basename "${0}")
+
+###############################################################################
+# Help
+###############################################################################
+
+# _print_help()
+#
+# Usage:
+#   _print_help
+#
+# Print the program help information.
+_print_help() {
+  cat <<HEREDOC
+
+Usage:
+  ${_ME} [<arguments>]
+  ${_ME} -h | --help
+
+Options:
+  -h --help  Show this screen.
+HEREDOC
+}
+
+###############################################################################
+# Program Functions
+###############################################################################
+
+_sample() {
+  printf "Perform a sample operation.\\n"
+}
+
+###############################################################################
+# Main
+###############################################################################
+
+_main() {
+  if [[ "${1:-}" =~ ^-h|--help$  ]]
+  then
+    _print_help
+  else
+    _simple "$@"
+  fi
+}
+
+_main "$@"
+endsnippet
