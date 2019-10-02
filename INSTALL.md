@@ -72,9 +72,11 @@ wget -O mac-fonts.zip http://drive.noobslab.com/data/Mac/macfonts.zip && \
 sudo unzip mac-fonts.zip -d /usr/share/fonts; rm mac-fonts.zip && \
 sudo fc-cache -f -v
 
+# install font
 git clone git@github.com:miiton/Cica.git
 cd Cica
-docker-compose build ; docker-compose run --rm cica  # ./dist/ に出力される
+# output to ./dist/
+docker-compose build ; docker-compose run --rm cica
 sudo cp ./dist/Cica* /usr/share/fonts
 cd ../
 rm -rf Cica
@@ -82,7 +84,15 @@ sudo fc-cache -f -v
 
 # tmux battery
 sudo apt install -y acpi
+
 # tmux plugin
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+# yarnのインストール
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt update && sudo apt -y install yarn
+
+# rangerのインストール
 
 ```

@@ -192,3 +192,24 @@ snippet makech "make chan"
 	${1:val}Ch :=  make(chan ${2:string}, ${3:0})
 	${0:${VISUAL}}
 endsnippet
+
+snippet mainsc "for programming contest"
+import (
+	"bufio"
+	"os"
+)
+
+func main() {
+	sc := bufio.NewScanner(os.Stdin)
+	${0:${VISUAL}}
+}
+
+func mustAtoi(s string) int {
+	i, err := strconv.Atoi()
+	if err != nil {
+		panic(err)
+	}
+	return i
+}
+endsnippet
+
