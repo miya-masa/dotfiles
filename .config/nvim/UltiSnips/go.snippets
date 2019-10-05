@@ -116,7 +116,7 @@ ${0:${VISUAL}}
 endsnippet
 
 
-snippet pr "print debug"
+snippet prd "print debug"
 //DEBUG: print debug
 fmt.Printf("#################################### ${1:t} %+v\n", pretty.Sprint($1))
 ${0:${VISUAL}}
@@ -204,8 +204,8 @@ func main() {
 	${0:${VISUAL}}
 }
 
-func mustAtoi(s string) int {
-	i, err := strconv.Atoi()
+func toI(s string) int {
+	i, err := strconv.Atoi(s)
 	if err != nil {
 		panic(err)
 	}
