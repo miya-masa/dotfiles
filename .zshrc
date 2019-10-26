@@ -8,6 +8,7 @@
 #   |_  / __| '_ \| '__/ __|
 #  _ / /\__ \ | | | | | (__
 # (_)___|___/_| |_|_|  \___|
+
 export LANG=ja_JP.UTF-8
 export LC_TIME=C
 export LC_MESSAGES=C
@@ -28,22 +29,15 @@ if [[ ! -d ~/.zplug ]]; then
 fi
 source ~/.zplug/init.zsh
 zplug 'zplug/zplug', hook-build:'zplug --self-manage'
-zplug "mafredri/zsh-async"
-zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
-zplug "zsh-users/zsh-syntax-highlighting"
-zplug "zsh-users/zsh-history-substring-search"
-zplug "zsh-users/zsh-autosuggestions"
-zplug "zsh-users/zsh-completions"
-zplug 'zsh-users/zaw'
+zplug "romkatv/powerlevel10k", as:theme, depth:1
 zplug "chrissicool/zsh-256color"
 zplug "mollifier/anyframe"
-zplug "mollifier/cd-gitroot"
+zplug "zsh-users/zsh-autosuggestions"
 zplug "soimort/translate-shell"
-zplug "zsh-users/zsh-history-substring-search", hook-build:"__zsh_version 4.3"
 zplug "plugins/git",   from:oh-my-zsh
 zplug "plugins/docker-compose",   from:oh-my-zsh
 zplug "plugins/docker",   from:oh-my-zsh
-zplug "jocelynmallon/zshmarks"
+zplug "b4b4r07/enhancd", use:init.sh
 
 if ! zplug check --verbose; then
   printf "Install? [y/N]: "
@@ -67,7 +61,6 @@ bindkey '^x^f' anyframe-widget-insert-filename
 bindkey -v
 
 zstyle ':completion:*:default' menu select=1
-
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -118,7 +111,6 @@ fi
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
-eval "$(fasd --init auto)"
 fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
 anyframe-init
@@ -139,17 +131,17 @@ add-zsh-hook chpwd chpwd_recent_dirs
 zstyle ":anyframe:selector:fzf-tmux:" command 'fzf-tmux --extended'
 zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
 
-# # DO NOT EDIT HERE
+# DO NOT EDIT HERE
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-# # DO NOT EDIT END
+# DO NOT EDIT END
 
-# # fd - including hidden directories
+# fd - including hidden directories
 fd() {
   local dir
   dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) && cd "$dir"
 }
 
-## options
+# # options
 set -o auto_list
 set -o auto_menu
 set -o auto_cd
@@ -187,6 +179,5 @@ set -o interactivecomments
 eval "$(direnv hook zsh)"
 function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 
-export NVM_DIR="$HOME/.config"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
