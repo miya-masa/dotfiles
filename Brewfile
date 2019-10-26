@@ -31,7 +31,7 @@ brew "node"
 brew "pandoc"
 brew "plantuml"
 brew "protobuf"
-brew "ranger", link: false
+brew "ranger"
 brew "rbenv"
 brew "the_silver_searcher"
 brew "tig"
