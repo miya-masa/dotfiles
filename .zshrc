@@ -181,3 +181,4 @@ function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
