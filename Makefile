@@ -12,6 +12,7 @@ tmux:
 
 zsh:
 	ln -fs ${PWD}/.zshrc ${HOME}/.zshrc
+	ln -fs ${PWD}/.p10k.zsh ${HOME}/.p10k.zsh
 	ln -fs ${PWD}/.zprofile ${HOME}/.zprofile
 
 nvim: $(HOME)/.config
