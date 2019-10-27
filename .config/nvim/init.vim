@@ -10,7 +10,11 @@
 "  / / / / / / /__| |/ / / / / / / /
 " /_/_/ /_/_/\__(_)___/_/_/ /_/ /_/
 "
-source $HOME/.config/nvim/vimrcs/plugin.vim
-source $HOME/.config/nvim/vimrcs/basic.vim
-source $HOME/.config/nvim/vimrcs/keymapping.vim
-source $HOME/.config/nvim/vimrcs/filetype.vim
+
+set runtimepath+=$HOME/.vim
+
+runtime! vimrcs/basic.vim
+runtime! vimrcs/plugin.vim
+runtime! vimrcs/colorscheme.vim
+runtime! vimrcs/keymapping.vim
+runtime! vimrcs/filetype.vim

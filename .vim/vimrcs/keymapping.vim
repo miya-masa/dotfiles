@@ -8,8 +8,8 @@ nnoremap k gk
 nnoremap h <Left>zv
 nnoremap l <Right>zv
 nnoremap Y y$
-nnoremap <Leader><S-\> :vertical
-nnoremap <Leader>- :split
+nnoremap <Leader><S-\> :vertical<CR>
+nnoremap <Leader>- :split<CR>
 nmap <silent> [j <Plug>(ale_previous_wrap)
 nmap <silent> ]j <Plug>(ale_next_wrap)
 nnoremap <silent> <C-q> :QuickRun -outputter message<CR>
@@ -22,10 +22,12 @@ nnoremap <leader><C-L> :Line<CR>
 nnoremap <leader><C-T> :Tags<CR>
 nnoremap <leader><C-R> :Fq<CR>
 nnoremap <Space><CR> V:!sh<CR>
-nnoremap <Leader>tve V:TranslateVisual<CR>
-nnoremap <Leader>tvre V:TranslateReplace<CR>
-nnoremap <Leader>tvj V:TranslateVisual ja:en<CR>
-nnoremap <Leader>tvrj V:TranslateReplace ja:en<CR>
+nnoremap <Leader>tv V:TranslateVisual<CR>
+nnoremap <Leader>tvr V:TranslateReplace<CR>
+nnoremap - :Ranger<CR>
+nmap <silent> <Leader>ig <Plug>IndentGuidesToggle
+nmap <silent> <Leader>ie <Plug>IndentGuidesEnable
+nmap <silent> <Leader>id <Plug>IndentGuidesDisable
 " }}}
 
 " Terminal Mode {{{
@@ -40,4 +42,3 @@ vnoremap <Leader>tvj :TranslateVisual ja:en<CR>
 vnoremap <Leader>tvrj :TranslateReplace ja:en<CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
-" }}}

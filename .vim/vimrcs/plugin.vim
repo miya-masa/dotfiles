@@ -62,6 +62,8 @@ Plug 'maxmellon/vim-jsx-pretty'
 Plug 'mhinz/vim-startify'
 Plug 'mileszs/ack.vim'
 Plug 'morhetz/gruvbox'
+Plug 'shinchu/lightline-gruvbox.vim'
+Plug 'tpope/vim-unimpaired'
 Plug 'mxw/vim-jsx'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'othree/es.next.syntax.vim'
@@ -93,6 +95,8 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'sjl/gundo.vim'
 Plug 'itchyny/vim-gitbranch'
 Plug 'francoiscabrol/ranger.vim'
+" Required bclose for ranger.vim
+Plug 'rbgrouleff/bclose.vim'
 Plug 'stephpy/vim-yaml'
 
 "
@@ -163,25 +167,60 @@ let g:go_term_mode = 'vsplit'
 " IndentGuide {{{
   let g:indent_guides_enable_on_vim_startup = 1
   let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft']
-  let g:indent_guides_start_level = 2
+  let g:indent_guides_start_level = 1
   let g:indent_guides_guide_size = 1
+  let g:indent_guides_default_mapping = 0
 " }}}
 " lightline {{{
   let g:lightline = {
-        \ 'colorscheme': 'gruvbox',
-        \ }
+    \ 'colorscheme': 'gruvbox',
+    \ 'active': {
+    \   'left': [ [ 'mode', 'paste' ],
+    \             [ 'gitbranch', 'readonly','absolutepath', 'modified' ]],
+    \   'right': [ [ 'lineinfo' ],
+    \              [ 'percent' ],
+    \              [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ],
+    \              [ 'linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok' ]]
+    \ },
+    \ 'component': {
+    \ 'mode': '%{lightline#mode()}',
+    \ 'absolutepath': '%F',
+    \ 'relativepath': '%f',
+    \ 'filename': '%t',
+    \ 'modified': '%M',
+    \ 'bufnum': '%n',
+    \ 'paste': '%{&paste?"PASTE":""}',
+    \ 'readonly': '%R',
+    \ 'charvalue': '%b',
+    \ 'charvaluehex': '%B',
+    \ 'fileencoding': '%{&fenc!=#""?&fenc:&enc}',
+    \ 'fileformat': '%{&ff}',
+    \ 'filetype': '%{&ft!=#""?&ft:"no ft"}',
+    \ 'percent': '%3p%%',
+    \ 'percentwin': '%P',
+    \ 'spell': '%{&spell?&spelllang:""}',
+    \ 'lineinfo': '%3l:%-2v',
+    \ 'line': '%l',
+    \ 'column': '%c',
+    \ 'close': '%999X X ',
+    \ 'winnr': '%{winnr()}'
+    \ },
+    \ 'component_function': {
+    \   'gitbranch': 'gitbranch#name'
+    \ },
+    \ }
   let g:lightline.component_expand = {
-        \  'linter_checking': 'lightline#ale#checking',
-        \  'linter_warnings': 'lightline#ale#warnings',
-        \  'linter_errors': 'lightline#ale#errors',
-        \  'linter_ok': 'lightline#ale#ok',
-        \ }
+    \  'linter_checking': 'lightline#ale#checking',
+    \  'linter_warnings': 'lightline#ale#warnings',
+    \  'linter_errors': 'lightline#ale#errors',
+    \  'linter_ok': 'lightline#ale#ok',
+    \ }
   let g:lightline.component_type = {
-        \     'linter_checking': 'left',
-        \     'linter_warnings': 'warning',
-        \     'linter_errors': 'error',
-        \     'linter_ok': 'left',
-        \ }
+    \     'linter_checking': 'left',
+    \     'linter_warnings': 'warning',
+    \     'linter_errors': 'error',
+    \     'linter_ok': 'left',
+    \ }
   let g:lightline#ale#indicator_checking = "\uf110"
   let g:lightline#ale#indicator_warnings = "\uf071"
   let g:lightline#ale#indicator_errors = "\uf05e"
@@ -264,13 +303,14 @@ let g:translate#default_languages = {
       \ }
 " }}}
 " {{{ buoto/gotests-vim
-let g:gotests_template_dir = $HOME . '/.config/nvim/gotests'
+  let g:gotests_template_dir = $HOME . '/.config/nvim/gotests'
 " }}}
 " {{{ sjl/gundo
-let g:gundo_prefer_python3=1
+  let g:gundo_prefer_python3=1
 " }}}
 " {{{ Plug 'francoiscabrol/ranger.vim'
-let g:ranger_command_override = 'ranger --cmd "set show_hidden=true"'
+  let g:ranger_command_override = 'ranger --cmd "set show_hidden=true"'
+  let g:ranger_map_keys = 0
 " }}}
 " {{{ Plug 'sheerun/vim-polyglot'
   let g:polyglot_disabled = ['go']
