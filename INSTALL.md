@@ -58,7 +58,7 @@ im-config -n fcitx
 # input method off -> muhennkann
 
 
-# macbuntuのインストール
+# install mackbuntu macbuntu
 sudo add-apt-repository ppa:noobslab/macbuntu && \
 sudo apt update && \
 
@@ -87,6 +87,7 @@ sudo apt install -y acpi
 
 # tmux plugin
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+# exexudte prefix I in tmux
 
 # yarnのインストール
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
