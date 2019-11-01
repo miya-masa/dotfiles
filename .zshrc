@@ -53,7 +53,7 @@ compinit
 
 bindkey "^p" reverse-menu-complete
 bindkey "^n" menu-complete
-bindkey '^e' fbr
+bindkey '^e' anyframe-widget-checkout-git-branch
 bindkey '^g' anyframe-widget-cd-ghq-repository
 bindkey '^b' anyframe-widget-cdr
 bindkey '^x^i' anyframe-widget-insert-git-branch

@@ -2,7 +2,7 @@
   augroup go
     autocmd!
     " Show by default 4 spaces for a tab
-    autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+    autocmd BufNewFile,BufRead FileType go setlocal noexpandtab tabstop=4 shiftwidth=4
     autocmd BufRead $GOPATH/src/*.go
           \  let s:tmp = matchlist(expand('%:p'),
           \  $GOPATH.'/src/\([^/]\+/[^/]\+/[^/]\+/\)')
@@ -21,6 +21,7 @@
     " :GoTestFunc
     autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
     autocmd FileType go nnoremap <Leader>gs :GoFillStruct<CR>
+    autocmd FileType go nnoremap <Leader>g<C-g> :GoDeclsDir<CR>
     autocmd FileType go nnoremap <Leader>ge :GoIfErr<CR>
 
     " :GoAlternate  commands :A, :AV, :AS and :AT

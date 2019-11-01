@@ -94,9 +94,8 @@ Plug 'Shougo/neco-vim'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'sjl/gundo.vim'
 Plug 'itchyny/vim-gitbranch'
-Plug 'francoiscabrol/ranger.vim'
-" Required bclose for ranger.vim
-Plug 'rbgrouleff/bclose.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'stephpy/vim-yaml'
 
 "
@@ -308,11 +307,10 @@ let g:translate#default_languages = {
 " {{{ sjl/gundo
   let g:gundo_prefer_python3=1
 " }}}
-" {{{ Plug 'francoiscabrol/ranger.vim'
-  let g:ranger_command_override = 'ranger --cmd "set show_hidden=true"'
-  let g:ranger_map_keys = 0
-" }}}
 " {{{ Plug 'sheerun/vim-polyglot'
   let g:polyglot_disabled = ['go']
 " }}}
 
+" {{{ Plug 'scrooloose/nerdtree'
+  let NERDTreeShowHidden=1
+" }}}

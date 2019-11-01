@@ -14,6 +14,11 @@ set autoread
 " Share clipboard
 set clipboard+=unnamedplus
 
+" viminfo
+set viminfo='100,n$HOME/.vim/files/info/viminfo
+
+set formatoptions+=mM
+
 " With a map leader it's possible to do extra key combinations
 " like <leader>w saves the current file
 let mapleader = ","
@@ -23,8 +28,16 @@ nmap <leader>w :w!<cr>
 
 " :W sudo saves the file
 " (useful for handling the permission-denied error)
-command W w !sudo tee % > /dev/null
+command! W w !sudo tee % > /dev/null
 
+" Preview substitute
+set inccommand=split
+
+set ambiwidth=double
+
+set list
+
+set listchars=tab:^\ ,trail:~
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 " => VIM user interface
@@ -47,6 +60,7 @@ set display=lastline
 " Avoid garbled characters in Chinese language windows OS
 scriptencoding utf8
 set helplang=ja,en
+
 " Avoid garbled characters in Chinese language windows OS
 let $LANG='ja_JP.UTF-8'
 set langmenu=ja_JP.UTF-8
@@ -75,7 +89,8 @@ set hid
 
 " Configure backspace so it acts as it should act
 set backspace=eol,start,indent
-set whichwrap+=<,>,h,l
+
+set whichwrap=b,s,[,],<,>
 
 " Ignore case when searching
 set ignorecase
@@ -327,4 +342,5 @@ function! SelfImport()
   execute ":normal i" . selfImport
   :call setpos('.', pos)
 endfunction
+
 
