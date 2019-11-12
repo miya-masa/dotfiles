@@ -51,6 +51,10 @@ zplug load
 autoload -U compinit
 compinit
 
+fpath=($HOME/.zsh/anyframe(N-/) $fpath)
+autoload -Uz anyframe-init
+anyframe-init
+
 bindkey "^p" reverse-menu-complete
 bindkey "^n" menu-complete
 bindkey '^e' anyframe-widget-checkout-git-branch
@@ -100,7 +104,7 @@ tm() {
   if [ $1 ]; then
     tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
   fi
-  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf-tmux --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
+  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
 }
 
 if [[ -x "`which lab`" ]]; then
@@ -111,16 +115,12 @@ fi
 
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
-fpath=($HOME/.zsh/anyframe(N-/) $fpath)
-autoload -Uz anyframe-init
-anyframe-init
-
 # fbr - checkout git branch (including remote branches)
 fbr() {
   local branches branch
   branches=$(git branch --all | grep -v HEAD) &&
   branch=$(echo "$branches" |
-           fzf-tmux -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
+           fzf -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
   git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
 }
 zle -N fbr
@@ -128,8 +128,8 @@ zle -N fbr
 autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
 add-zsh-hook chpwd chpwd_recent_dirs
 
-zstyle ":anyframe:selector:fzf-tmux:" command 'fzf-tmux --extended'
-zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
+zstyle ":anyframe:selector:" use fzf
+zstyle ":anyframe:selector:fzf:" command 'fzf --height=25%'
 
 # DO NOT EDIT HERE
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -138,7 +138,7 @@ zstyle ":anyframe:selector:fzf:" command 'fzf --extended'
 # fd - including hidden directories
 fd() {
   local dir
-  dir=$(find ${1:-.} -type d 2> /dev/null | fzf-tmux +m) && cd "$dir"
+  dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) && cd "$dir"
 }
 
 # # options

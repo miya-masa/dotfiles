@@ -37,6 +37,7 @@
     autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
     autocmd FileType go nmap <silent> <Leader>gn <Plug>(coc-declaration)
     autocmd FileType go nmap <silent> <Leader>gr <Plug>(coc-rename)
+    autocmd FileType go nmap <Leader>im :GoImport
   augroup END
   " build_go_files is a custom function that builds or compiles the test file.
   " It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file

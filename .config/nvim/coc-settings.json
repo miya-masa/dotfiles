@@ -6,7 +6,11 @@
     "golang": {
       "command": "gopls",
       "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-      "filetypes": ["go"]
+      "filetypes": ["go"],
+      "settings": {
+        "usePlaceholders": true,
+        "completeUnimported": true
+      }
     },
     "dockerfile": {
       "command": "docker-langserver",

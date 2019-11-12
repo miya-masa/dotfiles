@@ -24,7 +24,7 @@ nnoremap <leader><C-R> :Fq<CR>
 nnoremap <Space><CR> V:!sh<CR>
 nnoremap <Leader>tv V:TranslateVisual<CR>
 nnoremap <Leader>tvr V:TranslateReplace<CR>
-nnoremap - :NERDTree<CR>
+nnoremap - :NERDTreeToggle<CR>
 
 nmap <silent> <Leader>ig <Plug>IndentGuidesToggle
 nmap <silent> <Leader>ie <Plug>IndentGuidesEnable
