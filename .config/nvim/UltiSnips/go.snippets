@@ -104,7 +104,7 @@ func Test$1(t *testing.T) {
 endsnippet
 
 snippet mockgen "generate mock"
-//go:generate mockgen -destination ./${1:package}mock/${2:filename}.go -package $1mock -source ./$2.go
+//go:generate mockgen -destination ./$\{GOPACKAGE\}mock/$\{GOFILE\} -package $\{GOPACKAGE\}mock -source ./$\{GOFILE\}
 ${0:${VISUAL}}
 endsnippet
 

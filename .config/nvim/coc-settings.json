@@ -1,7 +1,8 @@
 {
-  "diagnostic.enable": false,
+  "diagnostic.displayByAle": true,
   "coc.preferences.hoverTarget": "float",
   "coc.preferences.previewAutoClose": false,
+  "coc.preferences.jumpCommand": "split",
   "languageserver": {
     "golang": {
       "command": "gopls",
