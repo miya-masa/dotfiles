@@ -56,7 +56,6 @@ Plug 'mattn/emmet-vim'
 Plug 'joshdick/onedark.vim'
 Plug 'kristijanhusak/vim-hybrid-material'
 Plug 'jonathanfilip/vim-lucius'
-Plug 'maximbaz/lightline-ale'
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'mhinz/vim-startify'
 Plug 'mileszs/ack.vim'
@@ -170,59 +169,50 @@ let g:go_term_mode = 'vsplit'
   let g:indent_guides_default_mapping = 0
 " }}}
 " lightline {{{
+"
+  function! CocCurrentFunction()
+      return get(b:, 'coc_current_function', '')
+  endfunction
+
   let g:lightline = {
-    \ 'colorscheme': 'gruvbox',
-    \ 'active': {
-    \   'left': [ [ 'mode', 'paste' ],
-    \             [ 'gitbranch', 'readonly','absolutepath', 'modified' ]],
-    \   'right': [ [ 'lineinfo' ],
-    \              [ 'percent' ],
-    \              [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ],
-    \              [ 'linter_checking', 'linter_errors', 'linter_warnings', 'linter_ok' ]]
-    \ },
-    \ 'component': {
-    \ 'mode': '%{lightline#mode()}',
-    \ 'absolutepath': '%F',
-    \ 'relativepath': '%f',
-    \ 'filename': '%t',
-    \ 'modified': '%M',
-    \ 'bufnum': '%n',
-    \ 'paste': '%{&paste?"PASTE":""}',
-    \ 'readonly': '%R',
-    \ 'charvalue': '%b',
-    \ 'charvaluehex': '%B',
-    \ 'fileencoding': '%{&fenc!=#""?&fenc:&enc}',
-    \ 'fileformat': '%{&ff}',
-    \ 'filetype': '%{&ft!=#""?&ft:"no ft"}',
-    \ 'percent': '%3p%%',
-    \ 'percentwin': '%P',
-    \ 'spell': '%{&spell?&spelllang:""}',
-    \ 'lineinfo': '%3l:%-2v',
-    \ 'line': '%l',
-    \ 'column': '%c',
-    \ 'close': '%999X X ',
-    \ 'winnr': '%{winnr()}'
-    \ },
-    \ 'component_function': {
-    \   'gitbranch': 'gitbranch#name'
-    \ },
+    \   'colorscheme': 'gruvbox',
+    \   'active': {
+    \     'left': [[ 'mode', 'paste' ],
+    \               [ 'gitbranch', 'readonly', 'absolutepath', 'modified' ]],
+    \     'right': [[ 'lineinfo' ],
+    \                [ 'percent' ],
+    \                [ 'cocstatus', 'currentfunction' ],
+    \                [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ]]
+    \   },
+    \   'component': {
+    \     'mode': '%{lightline#mode()}',
+    \     'absolutepath': '%F',
+    \     'relativepath': '%f',
+    \     'filename': '%t',
+    \     'modified': '%M',
+    \     'bufnum': '%n',
+    \     'paste': '%{&paste?"PASTE":""}',
+    \     'readonly': '%R',
+    \     'charvalue': '%b',
+    \     'charvaluehex': '%B',
+    \     'fileencoding': '%{&fenc!=#""?&fenc:&enc}',
+    \     'fileformat': '%{&ff}',
+    \     'filetype': '%{&ft!=#""?&ft:"no ft"}',
+    \     'percent': '%3p%%',
+    \     'percentwin': '%P',
+    \     'spell': '%{&spell?&spelllang:""}',
+    \     'lineinfo': '%3l:%-2v',
+    \     'line': '%l',
+    \     'column': '%c',
+    \     'close': '%999X X ',
+    \     'winnr': '%{winnr()}'
+    \   },
+    \   'component_function': {
+    \       'gitbranch': 'gitbranch#name',
+    \       'cocstatus': 'coc#status',
+    \       'currentfunction': 'CocCurrentFunction'
+    \   }
     \ }
-  let g:lightline.component_expand = {
-    \  'linter_checking': 'lightline#ale#checking',
-    \  'linter_warnings': 'lightline#ale#warnings',
-    \  'linter_errors': 'lightline#ale#errors',
-    \  'linter_ok': 'lightline#ale#ok',
-    \ }
-  let g:lightline.component_type = {
-    \     'linter_checking': 'left',
-    \     'linter_warnings': 'warning',
-    \     'linter_errors': 'error',
-    \     'linter_ok': 'left',
-    \ }
-  let g:lightline#ale#indicator_checking = "\uf110"
-  let g:lightline#ale#indicator_warnings = "\uf071"
-  let g:lightline#ale#indicator_errors = "\uf05e"
-  let g:lightline#ale#indicator_ok = "\uf00c"
 
 " }}}
 " tmux-navigator {{{
@@ -232,6 +222,7 @@ let g:go_term_mode = 'vsplit'
 let g:ale_linters = {
       \   'go': ['goimports', 'gopls', 'golangci-lint'],
       \}
+let g:ale_pattern_options = {'\.go$': {'ale_enabled': 0}}
 
 let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused --tests=false'
 let g:ale_go_golangci_lint_package = 1

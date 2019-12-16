@@ -10,8 +10,10 @@ nnoremap l <Right>zv
 nnoremap Y y$
 nnoremap <Leader><S-\> :vertical<CR>
 nnoremap <Leader>- :split<CR>
-nmap <silent> [j <Plug>(ale_previous_wrap)
-nmap <silent> ]j <Plug>(ale_next_wrap)
+nmap <silent> [j <Plug>(coc-diagnostic-previous)
+nmap <silent> ]j <Plug>(coc-diagnostic-next)
+" nmap <silent> [j <Plug>(ale_previous_wrap)
+" nmap <silent> ]j <Plug>(ale_next_wrap)
 nnoremap <silent> <C-q> :QuickRun -outputter message<CR>
 nnoremap <Leader><C-B> :Buffer<CR>
 cnoreabbrev Ack Ack!

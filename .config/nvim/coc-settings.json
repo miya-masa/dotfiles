@@ -1,18 +1,9 @@
 {
-  "diagnostic.displayByAle": true,
   "coc.preferences.hoverTarget": "float",
   "coc.preferences.previewAutoClose": false,
   "coc.preferences.jumpCommand": "split",
+  "coc.preferences.currentFunctionSymbolAutoUpdate": true,
   "languageserver": {
-    "golang": {
-      "command": "gopls",
-      "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-      "filetypes": ["go"],
-      "settings": {
-        "usePlaceholders": true,
-        "completeUnimported": true
-      }
-    },
     "dockerfile": {
       "command": "docker-langserver",
       "filetypes": ["dockerfile"],
