@@ -3,6 +3,7 @@
     autocmd!
     " Show by default 4 spaces for a tab
     autocmd BufNewFile,BufRead FileType go setlocal noexpandtab tabstop=4 shiftwidth=4
+    autocmd BufWritePre FileType go :call CocAction('runCommand', 'editor.action.organizeImport')
     autocmd BufRead $GOPATH/src/*.go
           \  let s:tmp = matchlist(expand('%:p'),
           \  $GOPATH.'/src/\([^/]\+/[^/]\+/[^/]\+/\)')
@@ -37,7 +38,7 @@
     autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
     autocmd FileType go nmap <silent> <Leader>gn <Plug>(coc-declaration)
     autocmd FileType go nmap <silent> <Leader>gr <Plug>(coc-rename)
-    autocmd FileType go nmap <Leader>im :GoImport
+    autocmd FileType go nmap <silent> <Leader><C-F> :GoImports<CR>
   augroup END
   " build_go_files is a custom function that builds or compiles the test file.
   " It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file

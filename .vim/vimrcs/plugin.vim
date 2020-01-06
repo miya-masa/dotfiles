@@ -137,7 +137,7 @@ call camelcasemotion#CreateMotionMappings('<leader>')
 " }}}
 " vim-go {{{
 let g:go_fmt_command = "goimports"
-let g:go_fmt_autosave = 1
+let g:go_fmt_autosave = 0
 let g:go_autodetect_gopath = 1
 let g:go_list_type = "quickfix"
 
@@ -219,14 +219,14 @@ let g:go_term_mode = 'vsplit'
   nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " ALE {{{
-let g:ale_linters = {
-      \   'go': ['goimports', 'gopls', 'golangci-lint'],
-      \}
-let g:ale_pattern_options = {'\.go$': {'ale_enabled': 0}}
-
-let g:ale_go_golangci_lint_options = '--fast --disable=typecheck --enable=staticcheck --enable=gosimple --enable=unused --tests=false'
-let g:ale_go_golangci_lint_package = 1
-" }}}
+let g:ale_pattern_options = {
+\   '\.go$': {
+\       'ale_enabled': 0,
+\   },
+\   '\.md$': {
+\       'ale_enabled': 0,
+\   }
+\}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 0
 let g:tmuxline_preset = {
