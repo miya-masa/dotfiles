@@ -95,7 +95,12 @@ alias dim='docker images'
 alias drm='docker rm $(docker ps -aqf "status=exited") 2> /dev/null'
 alias drmi='docker rmi $(docker images -aqf "dangling=true") 2> /dev/null'
 alias dc='docker-compose'
-tmn() { tmux new-session -s $1 -n $1 }
+tmn() {
+  if type "autojump" > /dev/null 2>&1; then
+    j $1
+  fi
+  tmux new-session -s $1 -n $1
+}
 de () { docker exec -it $1 /bin/bash  }
 dceb () { docker-compose exec $1 /bin/bash  }
 tm() {

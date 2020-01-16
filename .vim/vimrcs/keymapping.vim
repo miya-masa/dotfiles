@@ -19,14 +19,14 @@ nnoremap <Leader><C-B> :Buffer<CR>
 cnoreabbrev Ack Ack!
 nnoremap <Leader><C-A> :Ack!<Space>
 nnoremap <Leader><C-G> :GFiles<CR>
-nnoremap <Leader><C-F> :Files<CR>
 nnoremap <leader><C-L> :Line<CR>
-nnoremap <leader><C-T> :Tags<CR>
-nnoremap <leader><C-R> :Fq<CR>
+nnoremap <Leader><C-T> :Tags<CR>
+nnoremap <Leader><C-R> :Fq<CR>
 nnoremap <Space><CR> V:!sh<CR>
 nnoremap <Leader>tv V:TranslateVisual<CR>
 nnoremap <Leader>tvr V:TranslateReplace<CR>
 nnoremap - :NERDTreeToggle<CR>
+nnoremap <Leader>y :NERDTreeFind<CR>
 
 nmap <silent> <Leader>ig <Plug>IndentGuidesToggle
 nmap <silent> <Leader>ie <Plug>IndentGuidesEnable
