@@ -13,23 +13,20 @@
     " :GoBuild and :GoTestCompile
     autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
     " :GoTest
-    autocmd FileType go nmap <leader>gt  <Plug>(go-test)
+    autocmd FileType go nmap <leader>gt :TestFile<CR>
     " :GoCoverageToggle
     autocmd FileType go nmap <Leader>gc <Plug>(go-coverage-toggle)
-    " :GoDef but opens in a vertical split
-    autocmd FileType go nmap <Leader>g- <Plug>(go-def-vertical)
-    autocmd FileType go nmap <Leader>g<S-\> <Plug>(go-def-split)
     " :GoTestFunc
-    autocmd FileType go nmap <Leader>gf <Plug>(go-test-func)
+    autocmd FileType go nmap <Leader>gf :TestNearest<CR>
     autocmd FileType go nnoremap <Leader>gs :GoFillStruct<CR>
     autocmd FileType go nnoremap <Leader>g<C-g> :GoDeclsDir<CR>
     autocmd FileType go nnoremap <Leader>ge :GoIfErr<CR>
 
     " :GoAlternate  commands :A, :AV, :AS and :AT
-    autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
-    autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
-    autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
-    autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+    autocmd Filetype go command! -bang A call s:switch(<bang>0, 'edit')
+    autocmd Filetype go command! -bang AV call s:switch(<bang>0, 'vsplit')
+    autocmd Filetype go command! -bang AS call s:switch(<bang>0, 'split')
+    autocmd Filetype go command! -bang AT call s:switch(<bang>0, 'tabe')
     autocmd Filetype go command! GoRunArgs :!go run % <args>
 
   " GoKeyword
@@ -48,6 +45,31 @@
       call go#test#Test(0, 1)
     elseif l:file =~# '^\f\+\.go$'
       call go#cmd#Build(0)
+    endif
+  endfunction
+
+  function! s:switch(bang, cmd) abort
+    let file = expand('%')
+    if empty(file)
+      echo "no buffer name"
+      return
+    elseif file =~# '^\f\+_test\.go$'
+      let l:root = split(file, '_test.go$')[0]
+      let l:alt_file = l:root . ".go"
+    elseif file =~# '^\f\+\.go$'
+      let l:root = split(file, ".go$")[0]
+      let l:alt_file = l:root . '_test.go'
+    else
+      echo "not a go file"
+      return
+    endif
+    if !filereadable(alt_file) && !bufexists(alt_file) && !a:bang
+      echo "couldn't find ".alt_file
+      return
+    elseif empty(a:cmd)
+      execute ":" . go#config#AlternateMode() . " " . alt_file
+    else
+      execute ":" . a:cmd . " " . alt_file
     endif
   endfunction
 " }}}

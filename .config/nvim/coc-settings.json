@@ -3,6 +3,7 @@
   "coc.preferences.previewAutoClose": false,
   "coc.preferences.jumpCommand": "split",
   "coc.preferences.currentFunctionSymbolAutoUpdate": true,
+  "suggest.timeout": 5000,
   "languageserver": {
     "dockerfile": {
       "command": "docker-langserver",

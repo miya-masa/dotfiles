@@ -90,6 +90,8 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
+Plug 'tpope/vim-dispatch'
+Plug 'janko/vim-test'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'vim-scripts/DrawIt'
 Plug 'w0rp/ale'
@@ -303,4 +305,7 @@ let g:translate#default_languages = {
 
 " {{{ Plug 'scrooloose/nerdtree'
   let NERDTreeShowHidden=1
+" }}}
+" {{{ Plug 'janko/vim-test'
+  let test#strategy = "dispatch"
 " }}}
