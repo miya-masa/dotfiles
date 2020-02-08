@@ -51,7 +51,7 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'jonathanfilip/vim-lucius'
 Plug 'joshdick/onedark.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
+olug 'junegunn/fzf.vim'
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
 Plug 'junegunn/vim-peekaboo'
@@ -97,6 +97,11 @@ Plug 'vim-scripts/DrawIt'
 Plug 'w0rp/ale'
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
+Plug 'bronson/vim-trailing-whitespace'
+Plug 'terryma/vim-expand-region'
+Plug 'kana/vim-operator-replace'
+Plug 'junegunn/goyo.vim'
+Plug 'kana/vim-operator-user'
 
 "
 call plug#end()
@@ -247,7 +252,7 @@ let g:notes_directories = ['~/work/Notes']
 let g:notes_suffix = '.md'
 " }}}
 " Ack.vim {{{
-  let g:ackprg = 'ag --nogroup --nocolor --column'
+  let g:ackprg = 'ag --nogroup --nocolor --column --vimgrep'
 " }}}
 " QuickRun {{{
 let g:quickrun_config = {}
@@ -307,5 +312,8 @@ let g:translate#default_languages = {
   let NERDTreeShowHidden=1
 " }}}
 " {{{ Plug 'janko/vim-test'
-  let test#strategy = "dispatch"
+    let test#strategy = "dispatch"
+" }}}
+"  Plug 'kana/vim-operator-replace' {{{
+  map ! <Plug>(operator-replace)
 " }}}

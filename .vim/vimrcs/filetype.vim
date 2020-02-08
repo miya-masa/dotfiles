@@ -3,7 +3,7 @@
     autocmd!
     " Show by default 4 spaces for a tab
     autocmd BufNewFile,BufRead FileType go setlocal noexpandtab tabstop=4 shiftwidth=4
-    autocmd BufWritePre FileType go :call CocAction('runCommand', 'editor.action.organizeImport')
+    autocmd BufWritePre FileType go :GoImports<CR>
     autocmd BufRead $GOPATH/src/*.go
           \  let s:tmp = matchlist(expand('%:p'),
           \  $GOPATH.'/src/\([^/]\+/[^/]\+/[^/]\+/\)')
