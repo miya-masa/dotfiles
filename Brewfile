@@ -71,6 +71,7 @@ brew "songmu/tap/gocredits"
 brew "universal-ctags/universal-ctags/universal-ctags", args: ["HEAD"]
 brew "z80oolong/tmux/tmux"
 brew "zaquestion/tap/lab"
+brew "vault"
 cask "alacritty"
 cask "alfred"
 cask "drawio"

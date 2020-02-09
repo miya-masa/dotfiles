@@ -51,7 +51,7 @@ Plug 'jiangmiao/auto-pairs'
 Plug 'jonathanfilip/vim-lucius'
 Plug 'joshdick/onedark.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-olug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf.vim'
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
 Plug 'junegunn/vim-peekaboo'
