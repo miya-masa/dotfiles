@@ -79,16 +79,6 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
-if [ $(uname) = "Darwin" ]; then
-    alias ll='ls -GalF'
-    alias la='ls -GA'
-    alias l='ls -GCF'
-elif [ $(uname) = "Linux" ]; then
-    alias ll='ls -alF --color'
-    alias la='ls -A --color'
-    alias l='ls -CF --color'
-    export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
-fi
 alias tma='tmux a -t '
 alias dps='docker ps'
 alias dim='docker images'
@@ -186,8 +176,9 @@ function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
 
-# autojump
-[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh
-
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-
+autoload -U +X bashcompinit && bashcompinit
+if [ $(uname) = "Darwin" ]; then
+   . ~/.zshrc_darwin
+elif [ $(uname) = "Linux" ]; then
+   . ~/.zshrc_linux
+fi
