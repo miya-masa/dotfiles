@@ -45,11 +45,11 @@ HEREDOC
 ###############################################################################
 
 _install() {
+  sudo apt update
   brew bundle --file=./Brewfile_linux
   sudo apt install -y curl
   curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
   echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-  sudo apt update
   sudo apt install -y autojump \
     bazel \
     gawk \
@@ -58,11 +58,15 @@ _install() {
     postgresql \
     gcc make \
     pkg-config autoconf automake \
+    python3 \
+    python3-pip \
     python3-docutils \
     libseccomp-dev \
     libjansson-dev \
     libyaml-dev \
     libxml2-dev
+  pip3 install pynvim
+  npm install -g neovim
   rm -rf ctags
   git clone https://github.com/universal-ctags/ctags.git
   cd ctags
@@ -71,7 +75,7 @@ _install() {
   sudo make
   sudo make install
   cd ../
-  rm -rf ctags
+  sudo rm -rf ctags
 }
 
 ###############################################################################
