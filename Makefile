@@ -21,6 +21,6 @@ deploy: $(HOME)/.config $(HOME)/.vim
 	ln -fs ${PWD}/.zshrc_darwin ${HOME}/.zshrc_darwin
 	ln -fs ${PWD}/.p10k.zsh ${HOME}/.p10k.zsh
 	ln -fs ${PWD}/.zprofile ${HOME}/.zprofile
-	ln -fs ${PWD}/.config/nvim ${HOME}/.config/nvim
 	ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
-	ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim/vimrcs
+	ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim
+	ln -Fs ${PWD}/.config/nvim ${HOME}/.config
