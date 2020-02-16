@@ -169,6 +169,13 @@ set -o magic_equal_subst
 set -o always_last_prompt
 set -o interactivecomments
 
+autoload -U +X bashcompinit && bashcompinit
+if [ $(uname) = "Darwin" ]; then
+   . ~/.zshrc_darwin
+elif [ $(uname) = "Linux" ]; then
+   . ~/.zshrc_linux
+fi
+
 eval "$(direnv hook zsh)"
 function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 
@@ -176,9 +183,3 @@ function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
 
-autoload -U +X bashcompinit && bashcompinit
-if [ $(uname) = "Darwin" ]; then
-   . ~/.zshrc_darwin
-elif [ $(uname) = "Linux" ]; then
-   . ~/.zshrc_linux
-fi
