@@ -3,6 +3,7 @@
   "coc.preferences.previewAutoClose": false,
   "coc.preferences.jumpCommand": "split",
   "coc.preferences.currentFunctionSymbolAutoUpdate": true,
+  "python.jediEnabled": false,
   "suggest.timeout": 5000,
   "languageserver": {
     "dockerfile": {

@@ -91,6 +91,7 @@ Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-dispatch'
+Plug 'tpope/vim-projectionist'
 Plug 'janko/vim-test'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'vim-scripts/DrawIt'
@@ -317,3 +318,14 @@ let g:translate#default_languages = {
 "  Plug 'kana/vim-operator-replace' {{{
   map ! <Plug>(operator-replace)
 " }}}
+"
+"  Plug 'tpop/projectionist' {{{
+let g:projectionist_heuristics = {
+      \ "go.mod": {
+      \   "*_test.go": {"type": "test", "alternate": "{}.go"},
+      \   "*.go": {"type": "source", "alternate": "{}_test.go"}
+      \ }}
+" }}}
+"
+
+let g:rooter_manual_only = 1
