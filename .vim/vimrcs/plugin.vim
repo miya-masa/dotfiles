@@ -144,6 +144,7 @@ let g:vrc_trigger = '<Leader><C-j>'
 call camelcasemotion#CreateMotionMappings('<leader>')
 " }}}
 " vim-go {{{
+let g:go_gopls_enabled = 0
 let g:go_fmt_command = "goimports"
 let g:go_fmt_autosave = 0
 let g:go_autodetect_gopath = 1
@@ -171,7 +172,7 @@ let g:go_term_mode = 'vsplit'
 " }}}
 " IndentGuide {{{
   let g:indent_guides_enable_on_vim_startup = 1
-  let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft']
+  let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf']
   let g:indent_guides_start_level = 1
   let g:indent_guides_guide_size = 1
   let g:indent_guides_default_mapping = 0
@@ -329,3 +330,10 @@ let g:projectionist_heuristics = {
 "
 
 let g:rooter_manual_only = 1
+
+"  Plug junegunn/fzf'' {{{
+command! -bang -nargs=* GGrep
+  \ call fzf#vim#grep(
+  \   'git grep --line-number '.shellescape(<q-args>), 0,
+  \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
+" }}}

@@ -23,8 +23,8 @@ nnoremap <leader><C-L> :Line<CR>
 nnoremap <Leader><C-T> :Tags<CR>
 nnoremap <Leader><C-R> :Fq<CR>
 nnoremap <Space><CR> V:!sh<CR>
-nnoremap <Leader>tv V:TranslateVisual<CR>
-nnoremap <Leader>tvr V:TranslateReplace<CR>
+nnoremap <Leader>tsl V:TranslateVisual<CR>
+nnoremap <Leader>tslr V:TranslateReplace<CR>
 nnoremap - :NERDTreeToggle<CR>
 nnoremap <Leader>y :NERDTreeFind<CR>
 
@@ -39,9 +39,7 @@ tnoremap <silent> <leader><C-[> <C-\><C-n>
 
 " Visual Mode {{{
 vnoremap <Space><CR> :!sh<CR>
-vnoremap <Leader>tve :TranslateVisual<CR>
-vnoremap <Leader>tvre :TranslateReplace<CR>
-vnoremap <Leader>tvj :TranslateVisual ja:en<CR>
-vnoremap <Leader>tvrj :TranslateReplace ja:en<CR>
+vnoremap <Leader>tsv :TranslateVisual<CR>
+vnoremap <Leader>tsvr :TranslateReplace<CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)

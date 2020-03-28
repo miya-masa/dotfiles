@@ -1,10 +1,10 @@
 " Golang {{{
 augroup go
   autocmd!
+  autocmd FileType go command! -nargs=0 Format :call CocAction('format')
   " Show by default 4 spaces for a tab
   autocmd BufNewFile,BufRead FileType go setlocal noexpandtab tabstop=4 shiftwidth=4
-  autocmd BufWritePre FileType go GoImports<CR>
-  " autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+  autocmd BufWritePre *.go :Format
   " autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
   autocmd BufRead $GOPATH/src/*.go
         \  let s:tmp = matchlist(expand('%:p'),
@@ -31,8 +31,6 @@ augroup go
   autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
   autocmd FileType go nmap <silent> <Leader>gn <Plug>(coc-declaration)
   autocmd FileType go nmap <silent> <Leader>gr <Plug>(coc-rename)
-  " autocmd FileType go command! -nargs=0 Format :call CocAction('format')
-  " autocmd FileType go nmap <silent> <Leader><C-F> :Format<CR>
   autocmd FileType go nmap <silent> <Leader><C-F> :GoImports<CR>
 augroup END
 " build_go_files is a custom function that builds or compiles the test file.
@@ -84,13 +82,13 @@ augroup END
 " Vim script {{{
 augroup vimscript
   autocmd!
-  autocmd Filetype vim set foldmethod=marker
-  autocmd Filetype vim set foldmarker={{{,}}}
+  autocmd Filetype vim setlocal foldmethod=marker
+  autocmd Filetype vim setlocal foldmarker={{{,}}}
 augroup END
 " }}}
 " Yaml {{{
 augroup yaml
   autocmd!
-  autocmd Filetype yaml set foldmethod=indent
+  autocmd Filetype yaml setlocal foldmethod=indent
 augroup END
 " }}}

@@ -93,6 +93,7 @@ tmn() {
 }
 de () { docker exec -it $1 /bin/bash  }
 dceb () { docker-compose exec $1 /bin/bash  }
+jwt-show () { echo $1 | jwt -show - }
 tm() {
   [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
   if [ $1 ]; then
@@ -105,8 +106,6 @@ if [[ -x "`which lab`" ]]; then
   fpath=(~/.config/lab/_lab $fpath)
   fpath=(~/.config/lab $fpath)
 fi
-
-[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
 # fbr - checkout git branch (including remote branches)
 fbr() {
@@ -175,6 +174,7 @@ if [ $(uname) = "Darwin" ]; then
 elif [ $(uname) = "Linux" ]; then
    . ~/.zshrc_linux
 fi
+[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
 eval "$(direnv hook zsh)"
 function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
