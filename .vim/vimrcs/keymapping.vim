@@ -12,16 +12,12 @@ nnoremap <Leader><S-\> :vertical<CR>
 nnoremap <Leader>- :split<CR>
 nmap <silent> [j <Plug>(coc-diagnostic-previous)
 nmap <silent> ]j <Plug>(coc-diagnostic-next)
-" nmap <silent> [j <Plug>(ale_previous_wrap)
-" nmap <silent> ]j <Plug>(ale_next_wrap)
 nnoremap <silent> <C-q> :QuickRun -outputter message<CR>
 nnoremap <Leader><C-B> :Buffer<CR>
-cnoreabbrev Ack Ack!
-nnoremap <Leader><C-A> :Ack!<Space>
+nnoremap <Leader><C-R> :Rg<Space>
 nnoremap <Leader><C-G> :GFiles<CR>
 nnoremap <leader><C-L> :Line<CR>
 nnoremap <Leader><C-T> :Tags<CR>
-nnoremap <Leader><C-R> :Fq<CR>
 nnoremap <Space><CR> V:!sh<CR>
 nnoremap <Leader>tsl V:TranslateVisual<CR>
 nnoremap <Leader>tslr V:TranslateReplace<CR>

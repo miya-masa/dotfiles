@@ -23,32 +23,21 @@ HISTFILE=~/.zsh_history
 HISTSIZE=500000
 SAVEHIST=500000
 
-# Check if zplug is installed
-if [[ ! -d ~/.zplug ]]; then
-  curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
+# Check if zinit is installed
+if [[ ! -d ~/.zinit ]]; then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
 fi
-source ~/.zplug/init.zsh
-zplug 'zplug/zplug', hook-build:'zplug --self-manage'
-zplug "romkatv/powerlevel10k", as:theme, depth:1
-zplug "chrissicool/zsh-256color"
-zplug "mollifier/anyframe"
-zplug "zsh-users/zsh-autosuggestions"
-zplug "soimort/translate-shell"
-zplug "plugins/git",   from:oh-my-zsh
-zplug "plugins/docker-compose",   from:oh-my-zsh
-zplug "plugins/docker",   from:oh-my-zsh
+source ~/.zinit/bin/zinit.zsh
+zinit ice depth=1; zinit light romkatv/powerlevel10k
+zinit light "chrissicool/zsh-256color"
+zinit light "mollifier/anyframe"
+zinit light "zsh-users/zsh-autosuggestions"
+zinit light "soimort/translate-shell"
+zinit snippet OMZP::git
+zinit snippet OMZP::docker/_docker
 
-if ! zplug check --verbose; then
-  printf "Install? [y/N]: "
-  if read -q; then
-    echo; zplug install
-  fi
-fi
-
-# Then, source plugins and add commands to $PATH
-zplug load
-autoload -U compinit
-compinit
+zinit wait lucid atload"zicompinit; zicdreplay" blockf for \
+    zsh-users/zsh-completions
 
 fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
@@ -183,3 +172,5 @@ function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
 
+export PATH="/usr/local/opt/gettext/bin:$PATH"
+### End of Zinit's installer chunk

@@ -4,6 +4,10 @@
   "coc.preferences.jumpCommand": "split",
   "coc.preferences.currentFunctionSymbolAutoUpdate": true,
   "python.jediEnabled": false,
+  "go.goplsOptions": {
+    "completeUnimported":true,
+    "usePlaceholders":true
+  },
   "suggest.timeout": 5000,
   "languageserver": {
     "dockerfile": {

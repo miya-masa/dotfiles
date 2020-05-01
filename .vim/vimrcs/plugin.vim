@@ -37,9 +37,9 @@ Plug 'diepm/vim-rest-console'
 Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'easymotion/vim-easymotion'
 Plug 'editorconfig/editorconfig-vim'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'flazz/vim-colorschemes'
 Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
@@ -138,7 +138,7 @@ let g:vrc_auto_format_response_patterns = {
       \ 'json': 'jq "."',
       \ 'xml': 'tidy -xml -i -'
       \}
-let g:vrc_trigger = '<Leader><C-j>'
+let g:vrc_trigger = '<Leader><C-o>'
 " }}}
 " CamelCaseMotion {{{
 call camelcasemotion#CreateMotionMappings('<leader>')
@@ -147,8 +147,14 @@ call camelcasemotion#CreateMotionMappings('<leader>')
 let g:go_gopls_enabled = 0
 let g:go_fmt_command = "goimports"
 let g:go_fmt_autosave = 0
-let g:go_autodetect_gopath = 1
+let g:go_mod_fmt_autosave = 0
+let g:go_autodetect_gopath = 0
 let g:go_list_type = "quickfix"
+let g:go_doc_keywordprg_enabled = 0
+let g:go_def_mapping_enabled = 0
+let g:go_template_autocreate = 0
+let g:go_echo_go_info = 0
+let g:go_echo_command_info = 1
 
 " highlight
 let g:go_highlight_types = 1
