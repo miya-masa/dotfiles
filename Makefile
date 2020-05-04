@@ -16,6 +16,7 @@ deploy: $(HOME)/.config $(HOME)/.vim
 	mkdir -p ${HOME}/.tmux
 	ln -fs ${PWD}/.tmux/tmuxline.conf ${HOME}/.tmux/tmuxline.conf
 	ln -fs ${PWD}/.tmux.conf ${HOME}/.tmux.conf
+	ln -fs ${PWD}/.tmux.conf.local ${HOME}/.tmux.conf.local
 	ln -fs ${PWD}/.zshrc ${HOME}/.zshrc
 	ln -fs ${PWD}/.zshrc_linux ${HOME}/.zshrc_linux
 	ln -fs ${PWD}/.zshrc_darwin ${HOME}/.zshrc_darwin

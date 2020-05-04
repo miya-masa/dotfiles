@@ -82,6 +82,7 @@ Plug 'thinca/vim-qfreplace'
 Plug 'thinca/vim-quickrun'
 Plug 'thinca/vim-zenspace'
 Plug 'tmux-plugins/vim-tmux-focus-events'
+Plug 'edkolev/tmuxline.vim'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-fugitive'
@@ -243,17 +244,23 @@ let g:ale_pattern_options = {
 \   }
 \}
 " tmuxline {{{
-let g:tmuxline_powerline_separators = 0
-let g:tmuxline_preset = {
+let g:tmuxline_powerline_separators = 1
+ let g:tmuxline_preset = {
       \'a'    : '#S',
-      \'b'    : '#(tmux-mem-cpu-load --colors)',
-      \'c'    : ['#(whoami)'],
+      \'b'    : ['#(tmux-mem-cpu-load --colors --interval 5)'],
+      \'c'    : '#H',
       \'win'  : ['#I', '#W'],
       \'cwin' : ['#I', '#W', '#F'],
-      \'x'    : 'Online: #{online_status}',
-      \'y'    : 'Batt: #{battery_icon} #{battery_percentage}',
-      \'z'    : ['%R', '%a', '%Y'],
-      \'options' : {'status-justify' : 'left'}}
+      \'x'    : ['Batt: #{battery_percentage}', 'Online: #{online_status}'],
+      \'y'    : ['%R', '%a', '%Y'],
+      \'z'    : '#H'}
+let g:tmuxline_separators = {
+    \ 'left' : '',
+    \ 'left_alt': '>',
+    \ 'right' : '',
+    \ 'right_alt' : '<',
+    \ 'space' : ' '}
+
 " }}}
 " vim-notes {{{
 let g:notes_directories = ['~/work/Notes']
