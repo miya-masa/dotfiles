@@ -3,6 +3,10 @@
   "coc.preferences.previewAutoClose": false,
   "coc.preferences.jumpCommand": "split",
   "coc.preferences.currentFunctionSymbolAutoUpdate": true,
+  "snippets.ultisnips.directories": [
+    "UltiSnips",
+    "gosnippets/UltiSnips"
+  ],
   "python.jediEnabled": false,
   "go.goplsOptions": {
     "completeUnimported":true,

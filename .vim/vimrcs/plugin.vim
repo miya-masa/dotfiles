@@ -116,6 +116,8 @@ call plug#end()
           \ .'? ("'.a:to.'") : ("'.a:from.'"))'
   endfunction
 
+  let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml']
+
 " Use C to open coc config
 call SetupCommandAbbrs('C', 'CocConfig')
 " }}}
