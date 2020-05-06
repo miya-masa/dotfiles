@@ -116,7 +116,7 @@ call plug#end()
           \ .'? ("'.a:to.'") : ("'.a:from.'"))'
   endfunction
 
-  let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml']
+  let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
 
 " Use C to open coc config
 call SetupCommandAbbrs('C', 'CocConfig')
@@ -249,12 +249,12 @@ let g:ale_pattern_options = {
 let g:tmuxline_powerline_separators = 1
  let g:tmuxline_preset = {
       \'a'    : '#S',
-      \'b'    : ['#(tmux-mem-cpu-load --colors --interval 5)'],
-      \'c'    : ['uptime:#(uptime | cut -d " " -f 1,2,3)','#(whoami)'],
+      \'b'    : ['#[fg=green,bg=default,bright]#(tmux-mem-cpu-load) '],
+      \'c'    : ['#(uptime | cut -d " " -f 1,2,3)','#(whoami)'],
       \'win'  : ['#I', '#W'],
       \'cwin' : ['#I', '#W', '#F'],
       \'x'    : ['Batt: #{battery_percentage}', 'Online: #{online_status}'],
-      \'y'    : ['#(date)'],
+      \'y'    : ['%Y/%m/%d %H:%M'],
       \'z'    : '#H'}
 let g:tmuxline_separators = {
     \ 'left' : '',
