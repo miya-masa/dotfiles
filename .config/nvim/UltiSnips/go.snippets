@@ -137,7 +137,7 @@ endsnippet
 
 snippet prt "print output test"
 //DEBUG: print test
-fmt.Printf("%s ${1:val} = %+v\n", func() string { _, f, line, _ := runtime.Caller(0); return fmt.Sprintf("%s:%d:", f, line) }(), $1)
+fmt.Printf("\n\n\n%s ######################## ${1:val} = %+v ##############################\n\n\n", func() string { _, f, line, _ := runtime.Caller(0); return fmt.Sprintf("%s:%d:", f, line) }(), $1)
 ${0:${VISUAL}}
 endsnippet
 

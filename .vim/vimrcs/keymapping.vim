@@ -12,7 +12,7 @@ nnoremap <Leader><S-\> :vertical<CR>
 nnoremap <Leader>- :split<CR>
 nmap <silent> [j <Plug>(coc-diagnostic-previous)
 nmap <silent> ]j <Plug>(coc-diagnostic-next)
-nnoremap <silent> <C-q> :QuickRun -outputter message<CR>
+nnoremap <silet> <C-q> :QuickRun -outputter message<CR>
 nnoremap <Leader><C-B> :Buffer<CR>
 nnoremap <Leader><C-R> :Rg<Space>
 nnoremap <Leader><C-G> :GFiles<CR>
@@ -27,15 +27,21 @@ nnoremap <Leader>y :NERDTreeFind<CR>
 nmap <silent> <Leader>ig <Plug>IndentGuidesToggle
 nmap <silent> <Leader>ie <Plug>IndentGuidesEnable
 nmap <silent> <Leader>id <Plug>IndentGuidesDisable
+nmap <silent> <Leader>w :w!<CR>
 " }}}
 
 " Terminal Mode {{{
 tnoremap <silent> <leader><C-[> <C-\><C-n>
 " }}}
 
+" Insert Mode {{{
+inoremap <silent> jj <ESC>
+" }}}
+
 " Visual Mode {{{
 vnoremap <Space><CR> :!sh<CR>
-vnoremap <Leader>tsv :TranslateVisual<CR>
-vnoremap <Leader>tsvr :TranslateReplace<CR>
+vnoremap <Leader>tsl :TranslateVisual<CR>
+vnoremap <Leader>tslr :TranslateReplace<CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
+" }}}
