@@ -10,8 +10,6 @@ nnoremap l <Right>zv
 nnoremap Y y$
 nnoremap <Leader><S-\> :vertical<CR>
 nnoremap <Leader>- :split<CR>
-nmap <silent> [j <Plug>(coc-diagnostic-previous)
-nmap <silent> ]j <Plug>(coc-diagnostic-next)
 nnoremap <silet> <C-q> :QuickRun -outputter message<CR>
 nnoremap <Leader><C-B> :Buffer<CR>
 nnoremap <Leader><C-R> :Rg<Space>

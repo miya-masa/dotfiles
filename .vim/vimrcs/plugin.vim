@@ -65,7 +65,7 @@ Plug 'mileszs/ack.vim'
 Plug 'morhetz/gruvbox'
 Plug 'mxw/vim-jsx'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'othree/es.next.syntax.vim'
 Plug 'othree/html5.vim'
 Plug 'othree/yajs.vim'
@@ -104,22 +104,47 @@ Plug 'terryma/vim-expand-region'
 Plug 'kana/vim-operator-replace'
 Plug 'junegunn/goyo.vim'
 Plug 'kana/vim-operator-user'
+Plug 'prabirshrestha/async.vim'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
+Plug 'prabirshrestha/asyncomplete-buffer.vim'
+Plug 'prabirshrestha/asyncomplete-file.vim'
+Plug 'mattn/vim-lsp-settings'
+Plug 'thomasfaingnaert/vim-lsp-snippets'
+Plug 'thomasfaingnaert/vim-lsp-ultisnips'
 
 "
 call plug#end()
 " }}}
-"Plugin Configuration {{{
+" Plug 'prabirshrestha/asyncomplete.vim' {{{
+call asyncomplete#register_source(asyncomplete#sources#buffer#get_source_options({
+    \ 'name': 'buffer',
+    \ 'whitelist': ['*'],
+    \ 'blacklist': ['go'],
+    \ 'completor': function('asyncomplete#sources#buffer#completor'),
+    \ 'config': {
+    \    'max_buffer_size': 5000000,
+    \  },
+    \ }))
+call asyncomplete#register_source(asyncomplete#sources#file#get_source_options({
+    \ 'name': 'file',
+    \ 'whitelist': ['*'],
+    \ 'priority': 10,
+    \ 'completor': function('asyncomplete#sources#file#completor')
+    \ }))
+"}}}
 "  neoclide/coc.nvim {{{
-  function! SetupCommandAbbrs(from, to)
-    exec 'cnoreabbrev <expr> '.a:from
-          \ .' ((getcmdtype() ==# ":" && getcmdline() ==# "'.a:from.'")'
-          \ .'? ("'.a:to.'") : ("'.a:from.'"))'
-  endfunction
+  " function! SetupCommandAbbrs(from, to)
+  "   exec 'cnoreabbrev <expr> '.a:from
+  "         \ .' ((getcmdtype() ==# ":" && getcmdline() ==# "'.a:from.'")'
+  "         \ .'? ("'.a:to.'") : ("'.a:from.'"))'
+  " endfunction
 
-  let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
+  " let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
 
 " Use C to open coc config
-call SetupCommandAbbrs('C', 'CocConfig')
+" call SetupCommandAbbrs('C', 'CocConfig')
 " }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]

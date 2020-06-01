@@ -1,15 +1,35 @@
+" LSP {{{
+nmap <silent> [j :LspPreviousDiagnostic<cr>
+nmap <silent> ]j :LspNextDiagnostic<cr>
+" autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
+nmap <silent> <Leader>gi :LspHover<CR>
+" autocmd FileType go nmap <silent> gm <Plug>(coc-implementation)
+nmap <silent> gm :LSPImplementation<cr>
+" autocmd FileType go nmap <silent> gr <Plug>(coc-references)
+nmap <silent> gr :LSPReference<cr>
+" autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
+nmap <silent> <Leader>gd :LspDefinition<cr>
+nmap <silent> <Leader>gn :LspDeclaration<cr>
+" autocmd FileType go nmap <silent> <F2> <Plug>(coc-rename)
+nmap <silent> <F2> :LspRename<cr>
+" autocmd FileType go nmap <silent> <Leader><C-F> :GoImports<CR>
+" autocmd FileType go nmap <silent> <Leader><C-F> :Format <CR>
+nmap <silent> <Leader><C-F> :LspDocumentFormat<cr>
+" }}
 " Golang {{{
 augroup go
   autocmd!
-  autocmd FileType go command! -nargs=0 Format :call CocAction('format')
-  autocmd FileType go command! -nargs=0 GoTagsAdd :CocCommand go.tags.add
-  autocmd FileType go command! -nargs=0 GoTagsAddPrompt :CocCommand go.tags.add.prompt
-  autocmd FileType go command! -nargs=0 GoInstallGopls :CocCommand go.install.gopls
+  " autocmd FileType go command! -nargs=0 Format :call CocAction('format')
+  " autocmd FileType go command! -nargs=0 Format :call CocAction('format')
+  " autocmd FileType go command! -nargs=0 GoTagsAdd :CocCommand go.tags.add
+  " autocmd FileType go command! -nargs=0 GoTagsAddPrompt :CocCommand go.tags.add.prompt
+  " autocmd FileType go command! -nargs=0 GoInstallGopls :CocCommand go.install.gopls
 
   " Show by default 4 spaces for a tab
   autocmd BufNewFile,BufRead FileType go setlocal noexpandtab tabstop=4 shiftwidth=4
   " autocmd BufWritePre *.go :Format
-  autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+  " autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+  autocmd BufWritePre *.go :LspCodeAction source.organizeImports
 
   " :GoBuild and :GoTestCompile
   autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
@@ -25,14 +45,6 @@ augroup go
 
 " GoKeyword
   autocmd FileType go set iskeyword=a-z,A-Z,48-57,&,*
-  autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
-  autocmd FileType go nmap <silent> gm <Plug>(coc-implementation)
-  autocmd FileType go nmap <silent> gr <Plug>(coc-references)
-  autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
-  autocmd FileType go nmap <silent> <Leader>gn <Plug>(coc-declaration)
-  autocmd FileType go nmap <silent> <F2> <Plug>(coc-rename)
-  " autocmd FileType go nmap <silent> <Leader><C-F> :GoImports<CR>
-  autocmd FileType go nmap <silent> <Leader><C-F> :Format <CR>
   autocmd FileType go nmap <silent> <Leader>sj :SplitjoinJoin <CR>
   autocmd FileType go nmap <silent> <Leader>ss :SplitjoinSplit <CR>
 
