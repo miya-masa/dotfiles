@@ -25,7 +25,7 @@ nnoremap <Leader>y :NERDTreeFind<CR>
 nmap <silent> <Leader>ig <Plug>IndentGuidesToggle
 nmap <silent> <Leader>ie <Plug>IndentGuidesEnable
 nmap <silent> <Leader>id <Plug>IndentGuidesDisable
-nmap <silent> <Leader>w :w!<CR>
+nmap <silent> <Leader><Space> :w!<CR>
 " }}}
 
 " Terminal Mode {{{

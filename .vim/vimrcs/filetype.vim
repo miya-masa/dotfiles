@@ -1,35 +1,28 @@
 " LSP {{{
-nmap <silent> [j :LspPreviousDiagnostic<cr>
-nmap <silent> ]j :LspNextDiagnostic<cr>
-" autocmd FileType go nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
-nmap <silent> <Leader>gi :LspHover<CR>
-" autocmd FileType go nmap <silent> gm <Plug>(coc-implementation)
-nmap <silent> gm :LSPImplementation<cr>
-" autocmd FileType go nmap <silent> gr <Plug>(coc-references)
-nmap <silent> gr :LSPReference<cr>
-" autocmd FileType go nmap <silent> <Leader>gd <Plug>(coc-definition)
-nmap <silent> <Leader>gd :LspDefinition<cr>
-nmap <silent> <Leader>gn :LspDeclaration<cr>
-" autocmd FileType go nmap <silent> <F2> <Plug>(coc-rename)
-nmap <silent> <F2> :LspRename<cr>
-" autocmd FileType go nmap <silent> <Leader><C-F> :GoImports<CR>
-" autocmd FileType go nmap <silent> <Leader><C-F> :Format <CR>
-nmap <silent> <Leader><C-F> :LspDocumentFormat<cr>
+autocmd CursorHold * silent call CocActionAsync('highlight')
+nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
+nmap <silent> gm <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+nmap <silent> <Leader>gd <Plug>(coc-definition)
+nmap <silent> <Leader>gn <Plug>(coc-declaration)
+nmap <silent> <F2> <Plug>(coc-rename)
+nmap <silent> <Leader><C-F> :Format<CR>
+autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+" Use `[j` and `]j` to navigate diagnostics
+nmap <silent> [j <Plug>(coc-diagnostic-prev)
+nmap <silent> ]j <Plug>(coc-diagnostic-next)
+
 " }}
 " Golang {{{
 augroup go
   autocmd!
   " autocmd FileType go command! -nargs=0 Format :call CocAction('format')
-  " autocmd FileType go command! -nargs=0 Format :call CocAction('format')
-  " autocmd FileType go command! -nargs=0 GoTagsAdd :CocCommand go.tags.add
-  " autocmd FileType go command! -nargs=0 GoTagsAddPrompt :CocCommand go.tags.add.prompt
-  " autocmd FileType go command! -nargs=0 GoInstallGopls :CocCommand go.install.gopls
+  autocmd FileType go command! -nargs=0 GoTagsAdd :CocCommand go.tags.add
+  autocmd FileType go command! -nargs=0 GoTagsAddPrompt :CocCommand go.tags.add.prompt
+  autocmd FileType go command! -nargs=0 GoInstallGopls :CocCommand go.install.gopls
 
   " Show by default 4 spaces for a tab
   autocmd BufNewFile,BufRead FileType go setlocal noexpandtab tabstop=4 shiftwidth=4
-  " autocmd BufWritePre *.go :Format
-  " autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
-  autocmd BufWritePre *.go :LspCodeAction source.organizeImports
 
   " :GoBuild and :GoTestCompile
   autocmd FileType go nmap <leader>gb :<C-u>call <SID>build_go_files()<CR>
@@ -60,26 +53,11 @@ function! s:build_go_files()
   endif
 endfunction
 " }}}
-" Java {{{
-  augroup java
-    autocmd!
-    autocmd FileType java nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
-    autocmd FileType java nmap <silent> <Leader>gd <Plug>(coc-definition)
-    autocmd FileType java nmap <silent> <Leader>gn <Plug>(coc-declaration)
-    autocmd FileType java nmap <silent> <Leader>gr <Plug>(coc-rename)
-  augroup END
-" }}}
 " JSON {{{
   augroup json
     autocmd!
     autocmd FileType json syntax match Comment +\/\/.\+$+
   augroup END
-" }}}
-" PlantUML {{{
-augroup PlantUML
-  autocmd!
-  au FileType plantuml command! OpenUml :!open -a Google\ Chrome %
-augroup END
 " }}}
 " Javascript {{{
 augroup Javascript

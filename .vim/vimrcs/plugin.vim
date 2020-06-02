@@ -17,8 +17,8 @@ if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
 Plug 'AndrewRadev/splitjoin.vim'
-Plug 'Shougo/neco-vim'
 Plug 'Shougo/vinarise.vim'
+Plug 'godoctor/godoctor.vim'
 Plug 'SirVer/ultisnips'
 Plug 'VincentCordobes/vim-translate'
 Plug 'Xuyuanp/nerdtree-git-plugin'
@@ -30,11 +30,9 @@ Plug 'buoto/gotests-vim'
 Plug 'c9s/perlomni.vim'
 Plug 'cespare/vim-toml'
 Plug 'christoomey/vim-tmux-navigator'
-Plug 'cocopon/lightline-hybrid.vim'
 Plug 'davidhalter/jedi-vim'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'diepm/vim-rest-console'
-Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'easymotion/vim-easymotion'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
@@ -48,31 +46,25 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }}
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
 Plug 'jiangmiao/auto-pairs'
-Plug 'jonathanfilip/vim-lucius'
-Plug 'joshdick/onedark.vim'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
 Plug 'junegunn/vim-peekaboo'
-Plug 'kristijanhusak/vim-hybrid-material'
 Plug 'kylef/apiblueprint.vim'
 Plug 'majutsushi/tagbar'
 Plug 'mattn/emmet-vim'
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'mhinz/vim-startify'
 Plug 'mileszs/ack.vim'
-Plug 'morhetz/gruvbox'
 Plug 'mxw/vim-jsx'
 Plug 'nathanaelkane/vim-indent-guides'
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'othree/es.next.syntax.vim'
 Plug 'othree/html5.vim'
 Plug 'othree/yajs.vim'
 Plug 'pangloss/vim-javascript'
 Plug 'ryanoasis/vim-devicons'
 Plug 'scrooloose/nerdtree'
-Plug 'sheerun/vim-polyglot'
 Plug 'shinchu/lightline-gruvbox.vim'
 Plug 'simeji/winresizer'
 Plug 'sjl/gundo.vim'
@@ -104,47 +96,28 @@ Plug 'terryma/vim-expand-region'
 Plug 'kana/vim-operator-replace'
 Plug 'junegunn/goyo.vim'
 Plug 'kana/vim-operator-user'
-Plug 'prabirshrestha/async.vim'
-Plug 'prabirshrestha/vim-lsp'
-Plug 'prabirshrestha/asyncomplete.vim'
-Plug 'prabirshrestha/asyncomplete-lsp.vim'
-Plug 'prabirshrestha/asyncomplete-buffer.vim'
-Plug 'prabirshrestha/asyncomplete-file.vim'
-Plug 'mattn/vim-lsp-settings'
-Plug 'thomasfaingnaert/vim-lsp-snippets'
-Plug 'thomasfaingnaert/vim-lsp-ultisnips'
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'sebdah/vim-delve'
+
+Plug 'kristijanhusak/vim-hybrid-material'
+Plug 'morhetz/gruvbox'
+Plug 'jonathanfilip/vim-lucius'
+Plug 'joshdick/onedark.vim'
+Plug 'cocopon/lightline-hybrid.vim'
+Plug 'dracula/vim', { 'as': 'dracula' }
+
 
 "
 call plug#end()
 " }}}
-" Plug 'prabirshrestha/asyncomplete.vim' {{{
-call asyncomplete#register_source(asyncomplete#sources#buffer#get_source_options({
-    \ 'name': 'buffer',
-    \ 'whitelist': ['*'],
-    \ 'blacklist': ['go'],
-    \ 'completor': function('asyncomplete#sources#buffer#completor'),
-    \ 'config': {
-    \    'max_buffer_size': 5000000,
-    \  },
-    \ }))
-call asyncomplete#register_source(asyncomplete#sources#file#get_source_options({
-    \ 'name': 'file',
-    \ 'whitelist': ['*'],
-    \ 'priority': 10,
-    \ 'completor': function('asyncomplete#sources#file#completor')
-    \ }))
-"}}}
 "  neoclide/coc.nvim {{{
-  " function! SetupCommandAbbrs(from, to)
-  "   exec 'cnoreabbrev <expr> '.a:from
-  "         \ .' ((getcmdtype() ==# ":" && getcmdline() ==# "'.a:from.'")'
-  "         \ .'? ("'.a:to.'") : ("'.a:from.'"))'
-  " endfunction
+  inoremap <silent><expr> <c-0> coc#refresh()
+  let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
+  " Add `:Format` command to format current buffer.
+  command! -nargs=0 Format :call CocAction('format')
 
-  " let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
-
-" Use C to open coc config
-" call SetupCommandAbbrs('C', 'CocConfig')
+  " Add `:OR` command for organize imports of the current buffer.
+  command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
 " }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
@@ -169,7 +142,8 @@ let g:vrc_auto_format_response_patterns = {
 let g:vrc_trigger = '<Leader><C-o>'
 " }}}
 " CamelCaseMotion {{{
-call camelcasemotion#CreateMotionMappings('<leader>')
+  let g:camelcasemotion_key = ','
+  " script_31337_path_and_na[m]e_without_extension_11
 " }}}
 " vim-go {{{
 let g:go_gopls_enabled = 0
@@ -346,10 +320,6 @@ let g:translate#default_languages = {
 " {{{ sjl/gundo
   let g:gundo_prefer_python3=1
 " }}}
-" {{{ Plug 'sheerun/vim-polyglot'
-  let g:polyglot_disabled = ['go']
-" }}}
-
 " {{{ Plug 'scrooloose/nerdtree'
   let NERDTreeShowHidden=1
 " }}}
