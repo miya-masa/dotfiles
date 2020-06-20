@@ -137,14 +137,8 @@ endsnippet
 
 snippet prt "print output test"
 //DEBUG: print test
-fmt.Printf("\n\n\n%s ######################## ${1:val} = %+v ##############################\n\n\n", func() string { _, f, line, _ := runtime.Caller(0); return fmt.Sprintf("%s:%d:", f, line) }(), $1)
+fmt.Printf("\n\n\n%s ######################## ${1:val} = %+v ##############################\n", func() string { _, f, line, _ := runtime.Caller(0); return fmt.Sprintf("%s:%d:", f, line) }(), $1)
 ${0:${VISUAL}}
-endsnippet
-
-snippet deq "deep equal"
-if !reflect.DeepEqual($1,$2) {
-	${0:${VISUAL}}
-}
 endsnippet
 
 snippet ctx "context background"
@@ -158,9 +152,12 @@ defer cancel()
 ${0:${VISUAL}}
 endsnippet
 
-snippet gdt "date example"
-time.Date(2000, 1, 2, 3, 4, 5, 0, time.UTC)
-${0:${VISUAL}}
+snippet timeex "time exammple"
+time.Date(2000, 1, 2, 3, 4, 5, 0, time.UTC)${0:${VISUAL}}
+endsnippet
+
+snippet timeexs "time exammple as string"
+"2000-01-02T03:04:05.00Z"${0:${VISUAL}}
 endsnippet
 
 snippet herr "handle error"
@@ -203,13 +200,13 @@ const (
 endsnippet
 
 snippet errch "err chan"
-	errCh :=  make(chan error, 1)
-	${0:${VISUAL}}
+errCh :=  make(chan error, 1)
+${0:${VISUAL}}
 endsnippet
 
 snippet makech "make chan"
-	${1:val}Ch :=  make(chan ${2:string}, ${3:0})
-	${0:${VISUAL}}
+${1:val}Ch :=  make(chan ${2:string}, ${3:0})
+${0:${VISUAL}}
 endsnippet
 
 snippet mainsc "for programming contest"
@@ -238,3 +235,270 @@ fmt.Printf("=========%s=========\n", "${1:Hello}")
 ${0:${VISUAL}}
 endsnippet
 
+# shorthand variable declaration
+snippet : "v := value"
+${1} := ${0}
+endsnippet
+
+# append assignment
+snippet ap= "a = append(a, value)"
+${1:slice} = append($1, ${0:value})
+endsnippet
+
+# case
+snippet case "case ...:"
+case ${1:value}:
+	${0:${VISUAL}}
+endsnippet
+
+# constant
+snippet con "const XXX Type = ..."
+const ${1:NAME} ${2:Type} = ${0:0}
+endsnippet
+
+# constants
+snippet cons "const ( ... )"
+const (
+	${1:NAME} ${2:Type} = ${3:value}
+	${0}
+)
+endsnippet
+
+# default case
+snippet default "default: ..."
+default:
+	${0:${VISUAL}}
+endsnippet
+
+# defer
+snippet df "defer someFunction()"
+defer ${1:func}(${2})
+${0}
+endsnippet
+
+snippet def "defer func() { ... }"
+defer func() {
+	${0:${VISUAL}}
+}()
+endsnippet
+
+# defer recover
+snippet defr
+defer func() {
+	if err := recover(); err != nil {
+		${0:${VISUAL}}
+	}
+}()
+endsnippet
+
+# if condition
+snippet if "if ... { ... }"
+if ${1:condition} {
+	${0:${VISUAL}}
+}
+endsnippet
+
+# else snippet
+snippet else
+else {
+	${0:${VISUAL}}
+}
+endsnippet
+
+# if inline error
+snippet ife "If with inline error"
+if err := ${1:condition}; err != nil {
+	${0:${VISUAL}}
+}
+endsnippet
+
+# error snippet
+snippet errn "Error return" !b
+if err != nil {
+	return err
+}
+${0}
+endsnippet
+
+# error log snippet
+snippet errl "Error with log.Fatal(err)" !b
+if err != nil {
+	log.Fatal(err)
+}
+${0}
+endsnippet
+
+# error multiple return
+snippet errn, "Error return with two return values" !b
+if err != nil {
+	return ${1:nil}, ${2:err}
+}
+${0}
+endsnippet
+
+# error panic
+snippet errp "Error panic" !b
+if err != nil {
+	panic(${1})
+}
+${0}
+endsnippet
+
+# error test
+snippet errt "Error test fatal " !b
+if err != nil {
+	t.Fatal(err)
+}
+${0}
+endsnippet
+
+# fallthrough
+snippet ft "fallthrough"
+fallthrough
+endsnippet
+
+# for loop
+snippet for "for ... { ... }"
+for ${1} {
+	${0:${VISUAL}}
+}
+endsnippet
+
+# for integer loop
+snippet fori "for 0..N-1 { ... }"
+for ${1:i} := 0; $1 < ${2:N}; $1++ {
+	${0:${VISUAL}}
+}
+endsnippet
+
+# for range loop
+snippet forr "for k, v := range items { ... }"
+for ${2:k}, ${3:v} := range ${1} {
+	${0:${VISUAL}}
+}
+endsnippet
+
+snippet forsel "for select"
+for {
+	select {
+		case ${2:${1:result} := }<- ${3:channel}:
+			${0}
+	}
+}
+endsnippet
+
+snippet selc "select case" !b
+case ${1:${2:var} := }<-${3:channel}:
+  ${0}
+endsnippet
+
+# Fmt Printf debug
+snippet ff "fmt.Printf(...)"
+fmt.Printf("$1 = %+v\n", ${1:${VISUAL}})
+endsnippet
+
+# Fmt Printf debug with hash
+snippet ffh "fmt.Printf(#...) hash"
+fmt.Printf("$1 = %#v\n", ${1:${VISUAL}})
+endsnippet
+
+# Fmt Println debug
+snippet fn "fmt.Println(...)"
+fmt.Println("${1:${VISUAL}}")
+endsnippet
+
+# select
+snippet select "select { case a := <-chan: ... }"
+select {
+case ${1:v1} := <-${2:chan1}
+	${0}
+}
+endsnippet
+
+# struct
+snippet st "type T struct { ... }"
+type ${1:Type} struct {
+	${0}
+}
+endsnippet
+
+# switch
+snippet switch "switch x { ... }"
+switch ${1:var} {
+case ${2:value1}:
+	${0}
+}
+endsnippet
+
+snippet tswitch "type switch x { ... }"
+switch ${2:$1 := }${1:v}.(type) {
+	${0}
+}
+endsnippet
+
+# sprintf
+snippet sp "fmt.Sprintf(...)"
+fmt.Sprintf("%${1:s}", ${2:var})
+endsnippet
+
+# goroutine named function
+snippet go "go someFunc(...)"
+go ${1:funcName}(${0})
+endsnippet
+
+# goroutine anonymous function
+snippet gof "go func() { ... }()"
+go func() {
+	${1:${VISUAL}}
+}()
+${0}
+endsnippet
+
+snippet hf "http.HandlerFunc"
+func ${1:handler}(w http.ResponseWriter, r *http.Request) {
+	${0:fmt.Fprintf(w, "hello world")}
+}
+endsnippet
+
+snippet hhf "mux.HandleFunc" !b
+${1:http}.HandleFunc("${2:/}", func(w http.ResponseWriter, r *http.Request) {
+	${0:fmt.Fprintf(w, "hello world")}
+})
+endsnippet
+
+# quick test server
+snippet tsrv "httptest.NewServer"
+ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, ${1:`response`})
+}))
+defer ts.Close()
+
+${0:someUrl} = ts.URL
+endsnippet
+
+snippet example "func ExampleXYZ() { ... }"
+func Example${1:Method}() {
+	${0:${VISUAL}}
+	// Output:
+}
+endsnippet
+
+snippet benchmark "func BenchmarkXYZ(b *testing.B) { ... }"
+func Benchmark${1:Method}(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		${0:${VISUAL}}
+	}
+}
+endsnippet
+
+# variable declaration
+snippet var "var x Type [= ...]"
+var ${1:x} ${2:Type}${3: = ${0:value}}
+endsnippet
+
+# variables declaration
+snippet vars "var ( ... )"
+var (
+	${1:x} ${2:Type}${3: = ${0:value}}
+)
+endsnippet

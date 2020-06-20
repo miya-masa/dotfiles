@@ -16,6 +16,7 @@ call plug#begin('~/.vim/plugged')
 if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
+Plug 'Chiel92/vim-autoformat'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Shougo/vinarise.vim'
 Plug 'godoctor/godoctor.vim'
@@ -35,7 +36,7 @@ Plug 'dhruvasagar/vim-table-mode'
 Plug 'diepm/vim-rest-console'
 Plug 'easymotion/vim-easymotion'
 Plug 'editorconfig/editorconfig-vim'
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
 Plug 'flazz/vim-colorschemes'
@@ -85,7 +86,9 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-projectionist'
-Plug 'janko/vim-test'
+Plug 'vim-test/vim-test'
+Plug 'miya-masa/fillstruct-vim'
+Plug 'miya-masa/gotest-compiler-vim'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'vim-scripts/DrawIt'
 Plug 'w0rp/ale'
@@ -98,7 +101,6 @@ Plug 'junegunn/goyo.vim'
 Plug 'kana/vim-operator-user'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'sebdah/vim-delve'
-
 Plug 'kristijanhusak/vim-hybrid-material'
 Plug 'morhetz/gruvbox'
 Plug 'jonathanfilip/vim-lucius'
@@ -111,13 +113,13 @@ Plug 'dracula/vim', { 'as': 'dracula' }
 call plug#end()
 " }}}
 "  neoclide/coc.nvim {{{
-  inoremap <silent><expr> <c-0> coc#refresh()
-  let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
-  " Add `:Format` command to format current buffer.
-  command! -nargs=0 Format :call CocAction('format')
+inoremap <silent><expr> <c-0> coc#refresh()
+let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
+" Add `:Format` command to format current buffer.
+command! -nargs=0 Format :call CocAction('format')
 
-  " Add `:OR` command for organize imports of the current buffer.
-  command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
+" Add `:OR` command for organize imports of the current buffer.
+command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
 " }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
@@ -142,125 +144,127 @@ let g:vrc_auto_format_response_patterns = {
 let g:vrc_trigger = '<Leader><C-o>'
 " }}}
 " CamelCaseMotion {{{
-  let g:camelcasemotion_key = ','
-  " script_31337_path_and_na[m]e_without_extension_11
+let g:camelcasemotion_key = ','
+" script_31337_path_and_na[m]e_without_extension_11
 " }}}
 " vim-go {{{
-let g:go_gopls_enabled = 0
-let g:go_fmt_command = "goimports"
-let g:go_fmt_autosave = 0
-let g:go_mod_fmt_autosave = 0
-let g:go_autodetect_gopath = 0
-let g:go_list_type = "quickfix"
-let g:go_doc_keywordprg_enabled = 0
-let g:go_def_mapping_enabled = 0
-let g:go_template_autocreate = 0
-let g:go_echo_go_info = 0
-let g:go_echo_command_info = 1
+" let g:go_gopls_enabled = 0
+" let g:go_fmt_command = "goimports"
+" let g:go_fmt_autosave = 0
+" let g:go_mod_fmt_autosave = 0
+" let g:go_autodetect_gopath = 0
+" let g:go_list_type = "quickfix"
+" let g:go_doc_keywordprg_enabled = 0
+" let g:go_def_mapping_enabled = 0
+" let g:go_template_autocreate = 0
+" let g:go_echo_go_info = 0
+" let g:go_echo_command_info = 1
 
-" highlight
-let g:go_highlight_types = 1
-let g:go_highlight_fields = 1
-let g:go_highlight_functions = 1
-let g:go_highlight_methods = 1
-let g:go_highlight_extra_types = 1
-let g:go_highlight_generate_tags = 1
+" " highlight
+" let g:go_highlight_types = 0
+" let g:go_highlight_fields = 0
+" let g:go_highlight_functions = 0
+" let g:go_highlight_methods = 0
+" let g:go_highlight_extra_types = 0
+" let g:go_highlight_generate_tags = 0
+" let g:go_auto_sameids = 0
 
-let g:go_test_timeout = "100s"
-let g:go_metalinter_deadline = "30s"
-let g:go_def_mode = 'godef'
-let g:go_term_mode = 'vsplit'
+" let g:go_test_timeout = "100s"
+" let g:go_metalinter_deadline = "30s"
+" let g:go_def_mode = 'godef'
+" let g:go_term_mode = 'vsplit'
 
 " }}}
-  " EmmetPlugin {{{
-  let g:user_emmet_leader_key='<C-t>'
+" EmmetPlugin {{{
+let g:user_emmet_leader_key='<C-t>'
 " }}}
 " vim-json {{{
-  let g:vim_json_syntax_conceal = 0
+let g:vim_json_syntax_conceal = 0
 " }}}
 " IndentGuide {{{
-  let g:indent_guides_enable_on_vim_startup = 1
-  let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree']
-  let g:indent_guides_start_level = 1
-  let g:indent_guides_guide_size = 1
-  let g:indent_guides_default_mapping = 0
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree']
+let g:indent_guides_start_level = 1
+let g:indent_guides_guide_size = 1
+let g:indent_guides_default_mapping = 0
 " }}}
 " lightline {{{
 "
-  function! CocCurrentFunction()
-      return get(b:, 'coc_current_function', '')
-  endfunction
+function! CocCurrentFunction()
+  return get(b:, 'coc_current_function', '')
+endfunction
 
-  let g:lightline = {
-    \   'colorscheme': 'gruvbox',
-    \   'active': {
-    \     'left': [[ 'mode', 'paste' ],
-    \               [ 'gitbranch', 'readonly', 'absolutepath', 'modified' ]],
-    \     'right': [[ 'lineinfo' ],
-    \                [ 'percent' ],
-    \                [ 'cocstatus', 'currentfunction' ],
-    \                [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ]]
-    \   },
-    \   'component': {
-    \     'mode': '%{lightline#mode()}',
-    \     'absolutepath': '%F',
-    \     'relativepath': '%f',
-    \     'filename': '%t',
-    \     'modified': '%M',
-    \     'bufnum': '%n',
-    \     'paste': '%{&paste?"PASTE":""}',
-    \     'readonly': '%R',
-    \     'charvalue': '%b',
-    \     'charvaluehex': '%B',
-    \     'fileencoding': '%{&fenc!=#""?&fenc:&enc}',
-    \     'fileformat': '%{&ff}',
-    \     'filetype': '%{&ft!=#""?&ft:"no ft"}',
-    \     'percent': '%3p%%',
-    \     'percentwin': '%P',
-    \     'spell': '%{&spell?&spelllang:""}',
-    \     'lineinfo': '%3l:%-2v',
-    \     'line': '%l',
-    \     'column': '%c',
-    \     'close': '%999X X ',
-    \     'winnr': '%{winnr()}'
-    \   },
-    \   'component_function': {
-    \       'gitbranch': 'gitbranch#name',
-    \       'cocstatus': 'coc#status',
-    \       'currentfunction': 'CocCurrentFunction'
-    \   }
-    \ }
+let g:lightline = {
+      \   'colorscheme': 'gruvbox',
+      \   'active': {
+      \     'left': [[ 'mode', 'paste' ],
+      \               [ 'gitbranch', 'readonly', 'absolutepath', 'modified' ]],
+      \     'right': [[ 'lineinfo' ],
+      \                [ 'percent' ],
+      \                [ 'cocstatus', 'currentfunction' ],
+      \                [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ]]
+      \   },
+      \   'component': {
+      \     'mode': '%{lightline#mode()}',
+      \     'absolutepath': '%F',
+      \     'relativepath': '%f',
+      \     'filename': '%t',
+      \     'modified': '%M',
+      \     'bufnum': '%n',
+      \     'paste': '%{&paste?"PASTE":""}',
+      \     'readonly': '%R',
+      \     'charvalue': '%b',
+      \     'charvaluehex': '%B',
+      \     'fileencoding': '%{&fenc!=#""?&fenc:&enc}',
+      \     'fileformat': '%{&ff}',
+      \     'filetype': '%{&ft!=#""?&ft:"no ft"}',
+      \     'percent': '%3p%%',
+      \     'percentwin': '%P',
+      \     'spell': '%{&spell?&spelllang:""}',
+      \     'lineinfo': '%3l:%-2v',
+      \     'line': '%l',
+      \     'column': '%c',
+      \     'close': '%999X X ',
+      \     'winnr': '%{winnr()}'
+      \   },
+      \   'component_function': {
+      \       'gitbranch': 'gitbranch#name',
+      \       'cocstatus': 'coc#status',
+      \       'currentfunction': 'CocCurrentFunction'
+      \   }
+      \ }
 
 " }}}
 " tmux-navigator {{{
-  nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
+nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " ALE {{{
 let g:ale_pattern_options = {
-\   '\.go$': {
-\       'ale_enabled': 0,
-\   },
-\   '\.md$': {
-\       'ale_enabled': 0,
-\   }
-\}
+      \   '\.go$': {
+      \       'ale_enabled': 0,
+      \   },
+      \   '\.md$': {
+      \       'ale_enabled': 0,
+      \   }
+      \}
+" }}}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 1
- let g:tmuxline_preset = {
+let g:tmuxline_preset = {
       \'a'    : '#S',
-      \'b'    : ['#[fg=green,bg=default,bright]#(tmux-mem-cpu-load) '],
+      \'b'    : ['#[fg=green,bg=default,bright]#(tmux-mem-cpu-load -a 0 -m 2 --interval 5) '],
       \'c'    : ['#(uptime | cut -d " " -f 1,2,3)','#(whoami)'],
       \'win'  : ['#I', '#W'],
       \'cwin' : ['#I', '#W', '#F'],
-      \'x'    : ['Batt: #{battery_percentage}', 'Online: #{online_status}'],
+      \'x'    : ['Batt: #{battery_percentage}'],
       \'y'    : ['%Y/%m/%d %H:%M'],
       \'z'    : '#H'}
 let g:tmuxline_separators = {
-    \ 'left' : '',
-    \ 'left_alt': '>',
-    \ 'right' : '',
-    \ 'right_alt' : '<',
-    \ 'space' : ' '}
+      \ 'left' : '',
+      \ 'left_alt': '>',
+      \ 'right' : '',
+      \ 'right_alt' : '<',
+      \ 'space' : ' '}
 
 " }}}
 " vim-notes {{{
@@ -268,7 +272,7 @@ let g:notes_directories = ['~/work/Notes']
 let g:notes_suffix = '.md'
 " }}}
 " Ack.vim {{{
-  let g:ackprg = 'ag --nogroup --nocolor --column --vimgrep'
+let g:ackprg = 'ag --nogroup --nocolor --column --vimgrep'
 " }}}
 " QuickRun {{{
 let g:quickrun_config = {}
@@ -315,19 +319,19 @@ let g:translate#default_languages = {
       \ }
 " }}}
 " {{{ buoto/gotests-vim
-  let g:gotests_template_dir = $HOME . '/.config/nvim/gotests'
+let g:gotests_template_dir = $HOME . '/.config/nvim/gotests'
 " }}}
 " {{{ sjl/gundo
-  let g:gundo_prefer_python3=1
+let g:gundo_prefer_python3=1
 " }}}
 " {{{ Plug 'scrooloose/nerdtree'
-  let NERDTreeShowHidden=1
+let NERDTreeShowHidden=1
 " }}}
 " {{{ Plug 'janko/vim-test'
-    let test#strategy = "dispatch"
+let test#strategy = "dispatch"
 " }}}
 "  Plug 'kana/vim-operator-replace' {{{
-  map ! <Plug>(operator-replace)
+map ! <Plug>(operator-replace)
 " }}}
 "
 "  Plug 'tpop/projectionist' {{{
@@ -337,13 +341,19 @@ let g:projectionist_heuristics = {
       \   "*.go": {"type": "source", "alternate": "{}_test.go"}
       \ }}
 " }}}
+" Plug 'Chiel92/vim-autoformat' {{{
+" }}}
+" Plug 'Plug 'tpope/vim-dispatch'' {{{
+let g:dispatch_compilers = {'go test': 'gotest'}
+" }}}
 "
+
 
 let g:rooter_manual_only = 1
 
 "  Plug junegunn/fzf'' {{{
 command! -bang -nargs=* GGrep
-  \ call fzf#vim#grep(
-  \   'git grep --line-number '.shellescape(<q-args>), 0,
-  \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
+      \ call fzf#vim#grep(
+      \   'git grep --line-number '.shellescape(<q-args>), 0,
+      \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
 " }}}

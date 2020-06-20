@@ -25,3 +25,4 @@ deploy: $(HOME)/.config $(HOME)/.vim
 	ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
 	ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim
 	ln -Fs ${PWD}/.config/nvim ${HOME}/.config
+	ln -Fs ${PWD}/.config/alacritty ${HOME}/.config

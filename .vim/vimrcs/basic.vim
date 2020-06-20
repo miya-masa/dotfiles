@@ -19,14 +19,7 @@ set formatoptions+=mM
 
 " With a map leader it's possible to do extra key combinations
 " like <leader>w saves the current file
-let mapleader = ","
-
-" Fast saving
-nmap <leader>w :w!<cr>
-
-" :W sudo saves the file
-" (useful for handling the permission-denied error)
-command! W w !sudo tee % > /dev/null
+let g:mapleader = ","
 
 " Preview substitute
 set inccommand=split
@@ -41,7 +34,7 @@ set listchars=tab:^\ ,trail:~
 " => VIM user interface {{{
 
 " Set 7 lines to the cursor - when moving vertically using j/k
-set so=7
+set scrolloff=7
 
 " Display line number
 set number
@@ -83,7 +76,7 @@ set ruler
 set cmdheight=2
 
 " A buffer becomes hidden when it is abandoned
-set hid
+set hidden
 
 " Configure backspace so it acts as it should act
 set backspace=eol,start,indent
@@ -111,13 +104,13 @@ set magic
 " Show matching brackets when text indicator is over them
 set showmatch
 " How many tenths of a second to blink when matching brackets
-set mat=2
+set matchtime=2
 
 " No annoying sound on errors
 set noerrorbells
 set novisualbell
 set t_vb=
-set tm=500
+set timeoutlen=500
 
 " Properly disable sound on errors on MacVim
 if has("gui_macvim")
@@ -131,7 +124,7 @@ set foldcolumn=1
 " => Files, backups and undo {{{
 " Turn backup off, since most stuff is in SVN, git et.c anyway...
 set nobackup
-set nowb
+set nowritebackup
 set noswapfile
 " }}}
 " => Text, tab and indent related {{{
@@ -211,9 +204,6 @@ try
   set stal=1
 catch
 endtry
-
-" Return to last edit position when opening files (You want this!)
-au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
 " }}}
 " => Status line {{{
