@@ -382,6 +382,7 @@ function _main() {
   pip3 install neovim-remote
   yarn add neovim
   go get -u golang.org/x/tools/...
+  go get -u github.com/haya14busa/gopkgs/cmd/gopkgs
   curl -fsSL https://get.docker.com -o get-docker.sh
   echo "$password" | sudo -S sh get-docker.sh
   rm get-docker.sh

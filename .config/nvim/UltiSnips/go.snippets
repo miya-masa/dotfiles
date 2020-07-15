@@ -60,7 +60,7 @@ func Test${1:FuncName}(t *testing.T) {
 	t.Log("Set Up")
 	${0:${VISUAL}}
 
-	t.Log("Execute")
+	t.Log("Exercise")
 
 	t.Log("Verification")
 }
@@ -108,7 +108,7 @@ func Test$1(t *testing.T) {
 			t.Log("Set Up")
 			${0:${VISUAL}}
 
-			t.Log("Execute")
+			t.Log("Exercise")
 
 			t.Log("Verification")
 		})
@@ -123,8 +123,7 @@ endsnippet
 
 snippet gomock "gomock"
 ctrl := gomock.NewController(t)
-defer ctrl.Finish()
-mock${1:varname} := ${2:packagename}.NewMock${3:ifname}(ctrl)
+res := ${1:packagename}mock.NewMock${2:Name}(ctrl)
 ${0:${VISUAL}}
 endsnippet
 

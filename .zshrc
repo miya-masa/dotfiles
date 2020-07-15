@@ -173,3 +173,5 @@ export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
 
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 ### End of Zinit's installer chunk
+
+[[ ! -f "${GOPATH}/src/github.com/sachaos/todoist/todoist_functions_fzf.sh" ]] || source "$GOPATH/src/github.com/sachaos/todoist/todoist_functions_fzf.sh"

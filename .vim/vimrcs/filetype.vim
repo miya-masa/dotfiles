@@ -1,5 +1,8 @@
 " LSP {{{
-autocmd CursorHold * silent call CocActionAsync('highlight')
+augroup Lsp
+  autocmd!
+  autocmd CursorHold * silent call CocActionAsync('highlight')
+augroup END
 nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
 nmap <silent> gm <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
@@ -18,16 +21,19 @@ xmap ic <Plug>(coc-classobj-i)
 omap ic <Plug>(coc-classobj-i)
 xmap ac <Plug>(coc-classobj-a)
 omap ac <Plug>(coc-classobj-a)
+" }}}
 
-" }}
 " Golang {{{
 augroup go
   autocmd!
   autocmd BufWritePre *.go :Autoformat
-  autocmd FileType go nnoremap <Leader><C-F> :call CocAction('runCommand', 'editor.action.organizeImport')<CR>
+  autocmd FileType go nnoremap <Leader><C-F> :Autoformat<CR>
   autocmd FileType go command! -nargs=0 GoTagsAdd :CocCommand go.tags.add
   autocmd FileType go command! -nargs=0 GoTagsAddPrompt :CocCommand go.tags.add.prompt
   autocmd FileType go command! -nargs=0 GoInstallGopls :CocCommand go.install.gopls
+  autocmd FileType go command! -nargs=0 GoGenerate :Dispatch! go generate %:p:h
+  autocmd FileType go command! -nargs=0 GoGenerateTest :CocCommand go.test.generate.exported
+  autocmd FileType go command! -nargs=0 GoImpl :CocCommand go.impl.cursor
 
   " Show by default 4 spaces for a tab
   autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
@@ -43,25 +49,16 @@ augroup go
   " :GoTestFunc
   autocmd FileType go nnoremap <Leader>gf :TestNearest<CR>
   autocmd FileType go nnoremap <Leader>gs :FillStruct<CR>
-  " autocmd FileType go nnoremap <Leader>g<C-g> :GoDeclsDir<CR>
-  autocmd Filetype go command! GoRunArgs :!go run % <args>
+  autocmd FileType go nnoremap <Leader>gb :GoBuild<CR>
+  autocmd Filetype go command! GoRunArgs :Dispatch go run <arg> %
+  autocmd Filetype go command! GoRun :Dispatch go run %
+  autocmd Filetype go command! GoBuild :Dispatch go build %:p:h
 
 " GoKeyword
   autocmd FileType go set iskeyword=a-z,A-Z,48-57,&,*
   autocmd FileType go nnoremap <silent> <Leader>sj :SplitjoinJoin <CR>
   autocmd FileType go nnoremap <silent> <Leader>ss :SplitjoinSplit <CR>
-
 augroup END
-" build_go_files is a custom function that builds or compiles the test file.
-" It calls :GoBuild if its a Go file, or :GoTestCompile if it's a test file
-" function! s:build_go_files()
-"   let l:file = expand('%')
-"   if l:file =~# '^\f\+_test\.go$'
-"     call go#test#Test(0, 1)
-"   elseif l:file =~# '^\f\+\.go$'
-"     call go#cmd#Build(0)
-"   endif
-" endfunction
 " }}}
 " JSON {{{
   augroup json

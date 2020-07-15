@@ -37,11 +37,15 @@ Plug 'diepm/vim-rest-console'
 Plug 'easymotion/vim-easymotion'
 Plug 'editorconfig/editorconfig-vim'
 " Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'antoinemadec/coc-fzf'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
 Plug 'flazz/vim-colorschemes'
 Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
+Plug 'google/vim-maktaba'
+Plug 'google/vim-coverage'
+Plug 'google/vim-glaive'
 Plug 'honza/vim-snippets'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }}
 Plug 'itchyny/lightline.vim'
@@ -71,7 +75,6 @@ Plug 'simeji/winresizer'
 Plug 'sjl/gundo.vim'
 Plug 'sodapopcan/vim-twiggy'
 Plug 'stephpy/vim-yaml'
-Plug 'thinca/vim-qfreplace'
 Plug 'thinca/vim-quickrun'
 Plug 'thinca/vim-zenspace'
 Plug 'tmux-plugins/vim-tmux-focus-events'
@@ -91,7 +94,7 @@ Plug 'miya-masa/fillstruct-vim'
 Plug 'miya-masa/gotest-compiler-vim'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'vim-scripts/DrawIt'
-Plug 'w0rp/ale'
+" Plug 'w0rp/ale'
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
 Plug 'bronson/vim-trailing-whitespace'
@@ -107,7 +110,8 @@ Plug 'jonathanfilip/vim-lucius'
 Plug 'joshdick/onedark.vim'
 Plug 'cocopon/lightline-hybrid.vim'
 Plug 'dracula/vim', { 'as': 'dracula' }
-
+Plug 'raghur/vim-ghost', {'do': ':GhostInstall'}
+Plug 'stefandtw/quickfix-reflector.vim'
 
 "
 call plug#end()
@@ -239,14 +243,14 @@ let g:lightline = {
 nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
 " }}}
 " ALE {{{
-let g:ale_pattern_options = {
-      \   '\.go$': {
-      \       'ale_enabled': 0,
-      \   },
-      \   '\.md$': {
-      \       'ale_enabled': 0,
-      \   }
-      \}
+" let g:ale_pattern_options = {
+"       \   '\.go$': {
+"       \       'ale_enabled': 0,
+"       \   },
+"       \   '\.md$': {
+"       \       'ale_enabled': 0,
+"       \   }
+"       \}
 " }}}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 1
@@ -329,6 +333,11 @@ let NERDTreeShowHidden=1
 " }}}
 " {{{ Plug 'janko/vim-test'
 let test#strategy = "dispatch"
+let test#go#gotest#options = {
+  \ 'nearest': '-count=1',
+  \ 'file':    '-count=1',
+  \ 'suite':   '-count=1',
+\}
 " }}}
 "  Plug 'kana/vim-operator-replace' {{{
 map ! <Plug>(operator-replace)
@@ -346,14 +355,40 @@ let g:projectionist_heuristics = {
 " Plug 'Plug 'tpope/vim-dispatch'' {{{
 let g:dispatch_compilers = {'go test': 'gotest'}
 " }}}
-"
+" Plug 'antoinemadec/coc-fzf' {{{
+nnoremap <silent> <leader><space>c  :<C-u>CocFzfList commands<CR>
+nnoremap <silent> <leader><space>e  :<C-u>CocFzfList extensions<CR>
+nnoremap <silent> <leader><space>l  :<C-u>CocFzfList location<CR>
+nnoremap <silent> <leader><space>o  :<C-u>CocFzfList outline<CR>
+nnoremap <silent> <leader><space>s  :<C-u>CocFzfList symbols<CR>
+" }}}
+" Plug 'google/vim-glaive' {{{
+  call glaive#Install()
+" }}}
+" vim-ghost {{{
+function! s:SetupGhostBuffer()
+  set ft=markdown
+endfunction
 
+augroup vim-ghost
+    au!
+    au User vim-ghost#connected call s:SetupGhostBuffer()
+augroup END
 
-let g:rooter_manual_only = 1
-
+" }}}
 "  Plug junegunn/fzf'' {{{
 command! -bang -nargs=* GGrep
       \ call fzf#vim#grep(
       \   'git grep --line-number '.shellescape(<q-args>), 0,
       \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
 " }}}
+
+" Plug 'airblade/vim-rooter' {{{
+let g:rooter_manual_only = 1
+" }}}
+"
+" Plug 'tpope/vim-markdown'
+let g:markdown_fenced_languages = ['plantuml', 'go', 'java', 'bash=sh']
+" }}}
+"
+

@@ -18,6 +18,13 @@
       "command": "docker-langserver",
       "filetypes": ["dockerfile"],
       "args": ["--stdio"]
+    },
+    "golangci-lint-languageserver": {
+      "command": "golangci-lint-langserver",
+      "filetypes": ["go"],
+      "initializationOptions": {
+        "command": ["golangci-lint", "run", "--disable", "errcheck", "--out-format", "json"]
+      }
     }
   }
 }
