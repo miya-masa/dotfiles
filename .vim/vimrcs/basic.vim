@@ -27,7 +27,6 @@ set inccommand=split
 set ambiwidth=double
 
 set list
-
 set listchars=tab:^\ ,trail:~
 
 " }}}
@@ -51,11 +50,9 @@ set display=lastline
 " Avoid garbled characters in Chinese language windows OS
 scriptencoding utf8
 set helplang=ja,en
-
-" Avoid garbled characters in Chinese language windows OS
 let $LANG='ja_JP.UTF-8'
-set langmenu=ja_JP.UTF-8
 source $VIMRUNTIME/delmenu.vim
+set langmenu=ja_JP.UTF-8
 source $VIMRUNTIME/menu.vim
 
 " Turn on the Wild menu
@@ -158,10 +155,6 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " }}}
 " => Moving around, tabs, windows and buffers {{{
 
-" Map <Space> to / (search) and Ctrl-<Space> to ? (backwards search)
-map <space> /
-map <c-space> ?
-
 " Disable highlight when <leader><cr> is pressed
 map <silent> <leader><cr> :noh<cr>
 
@@ -182,7 +175,6 @@ map <leader>tn :tabnew<cr>
 map <leader>to :tabonly<cr>
 map <leader>tc :tabclose<cr>
 map <leader>tm :tabmove
-map <leader>t<leader> :tabnext
 
 " Let 'tl' toggle between this and the last accessed tab
 let g:lasttab = 1
@@ -290,6 +282,7 @@ command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
 command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
 command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 command! SI :call SelfImport()
+command! GoPkgs :call fzf#run({'source': 'gopkgs', 'sink': 'normal o'})
 
 function! SelfImport()
   let bufPath = expand("%:p")
@@ -300,6 +293,6 @@ function! SelfImport()
   let pos = getpos(".")
   execute ":normal i" . selfImport
   :call setpos('.', pos)
-endfunction
 
+endfunction
 " }}}

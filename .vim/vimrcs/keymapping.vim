@@ -39,7 +39,7 @@ inoremap <silent> jj <ESC>
 " Visual Mode {{{
 vnoremap <Space><CR> :!sh<CR>
 vnoremap <Leader>tsl :TranslateVisual<CR>
-vnoremap <Leader>tslr :TranslateReplace<CR>
+vnoremap <Leader>tsr :TranslateReplace<CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
 " }}}

@@ -38,8 +38,6 @@ augroup go
   " Show by default 4 spaces for a tab
   autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
 
-  " :GoBuild and :GoTestCompile
-  " autocmd FileType go nnoremap <leader>gb :<C-u>call <SID>build_go_files()<CR>
   " :GoTest
   autocmd FileType go nnoremap ]] /^func<CR>:nohlsearch<CR>
   autocmd FileType go nnoremap [[ ?^func<CR>:nohlsearch<CR>

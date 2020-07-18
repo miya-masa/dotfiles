@@ -19,33 +19,22 @@ endif
 Plug 'Chiel92/vim-autoformat'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Shougo/vinarise.vim'
-Plug 'godoctor/godoctor.vim'
 Plug 'SirVer/ultisnips'
 Plug 'VincentCordobes/vim-translate'
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'airblade/vim-rooter'
 Plug 'aklt/plantuml-syntax'
-Plug 'alpaca-tc/html5.vim'
 Plug 'bkad/CamelCaseMotion'
-Plug 'buoto/gotests-vim'
-Plug 'c9s/perlomni.vim'
 Plug 'cespare/vim-toml'
 Plug 'christoomey/vim-tmux-navigator'
-Plug 'davidhalter/jedi-vim'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'diepm/vim-rest-console'
 Plug 'easymotion/vim-easymotion'
-Plug 'editorconfig/editorconfig-vim'
-" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'antoinemadec/coc-fzf'
 Plug 'ekalinin/Dockerfile.vim'
 Plug 'elzr/vim-json'
 Plug 'flazz/vim-colorschemes'
-Plug 'fszymanski/fzf-gitignore', {'do': ':UpdateRemotePlugins'}
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
-Plug 'google/vim-maktaba'
-Plug 'google/vim-coverage'
-Plug 'google/vim-glaive'
 Plug 'honza/vim-snippets'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }}
 Plug 'itchyny/lightline.vim'
@@ -61,30 +50,22 @@ Plug 'majutsushi/tagbar'
 Plug 'mattn/emmet-vim'
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'mhinz/vim-startify'
-Plug 'mileszs/ack.vim'
 Plug 'mxw/vim-jsx'
 Plug 'nathanaelkane/vim-indent-guides'
-Plug 'othree/es.next.syntax.vim'
-Plug 'othree/html5.vim'
-Plug 'othree/yajs.vim'
-Plug 'pangloss/vim-javascript'
 Plug 'ryanoasis/vim-devicons'
 Plug 'scrooloose/nerdtree'
 Plug 'shinchu/lightline-gruvbox.vim'
 Plug 'simeji/winresizer'
 Plug 'sjl/gundo.vim'
-Plug 'sodapopcan/vim-twiggy'
 Plug 'stephpy/vim-yaml'
 Plug 'thinca/vim-quickrun'
 Plug 'thinca/vim-zenspace'
 Plug 'tmux-plugins/vim-tmux-focus-events'
 Plug 'edkolev/tmuxline.vim'
 Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-markdown'
 Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-dispatch'
@@ -104,12 +85,12 @@ Plug 'junegunn/goyo.vim'
 Plug 'kana/vim-operator-user'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'sebdah/vim-delve'
-Plug 'kristijanhusak/vim-hybrid-material'
-Plug 'morhetz/gruvbox'
-Plug 'jonathanfilip/vim-lucius'
-Plug 'joshdick/onedark.vim'
+" Plug 'kristijanhusak/vim-hybrid-material'
+" Plug 'morhetz/gruvbox'
+" Plug 'jonathanfilip/vim-lucius'
+" Plug 'joshdick/onedark.vim'
 Plug 'cocopon/lightline-hybrid.vim'
-Plug 'dracula/vim', { 'as': 'dracula' }
+" Plug 'dracula/vim', { 'as': 'dracula' }
 Plug 'raghur/vim-ghost', {'do': ':GhostInstall'}
 Plug 'stefandtw/quickfix-reflector.vim'
 
@@ -275,9 +256,6 @@ let g:tmuxline_separators = {
 let g:notes_directories = ['~/work/Notes']
 let g:notes_suffix = '.md'
 " }}}
-" Ack.vim {{{
-let g:ackprg = 'ag --nogroup --nocolor --column --vimgrep'
-" }}}
 " QuickRun {{{
 let g:quickrun_config = {}
 let g:quickrun_config.go = {'exec' : ['%c test']}
@@ -342,15 +320,12 @@ let test#go#gotest#options = {
 "  Plug 'kana/vim-operator-replace' {{{
 map ! <Plug>(operator-replace)
 " }}}
-"
 "  Plug 'tpop/projectionist' {{{
 let g:projectionist_heuristics = {
       \ "go.mod": {
       \   "*_test.go": {"type": "test", "alternate": "{}.go"},
       \   "*.go": {"type": "source", "alternate": "{}_test.go"}
       \ }}
-" }}}
-" Plug 'Chiel92/vim-autoformat' {{{
 " }}}
 " Plug 'Plug 'tpope/vim-dispatch'' {{{
 let g:dispatch_compilers = {'go test': 'gotest'}
@@ -361,9 +336,6 @@ nnoremap <silent> <leader><space>e  :<C-u>CocFzfList extensions<CR>
 nnoremap <silent> <leader><space>l  :<C-u>CocFzfList location<CR>
 nnoremap <silent> <leader><space>o  :<C-u>CocFzfList outline<CR>
 nnoremap <silent> <leader><space>s  :<C-u>CocFzfList symbols<CR>
-" }}}
-" Plug 'google/vim-glaive' {{{
-  call glaive#Install()
 " }}}
 " vim-ghost {{{
 function! s:SetupGhostBuffer()
@@ -382,7 +354,6 @@ command! -bang -nargs=* GGrep
       \   'git grep --line-number '.shellescape(<q-args>), 0,
       \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
 " }}}
-
 " Plug 'airblade/vim-rooter' {{{
 let g:rooter_manual_only = 1
 " }}}
@@ -390,5 +361,3 @@ let g:rooter_manual_only = 1
 " Plug 'tpope/vim-markdown'
 let g:markdown_fenced_languages = ['plantuml', 'go', 'java', 'bash=sh']
 " }}}
-"
-
