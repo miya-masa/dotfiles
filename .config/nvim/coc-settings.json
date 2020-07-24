@@ -10,7 +10,10 @@
   "python.jediEnabled": false,
   "go.goplsOptions": {
     "completeUnimported":true,
-    "usePlaceholders":true
+    "usePlaceholders":true,
+    "analyses": {
+      "fillstruct": true
+    }
   },
   "suggest.timeout": 5000,
   "languageserver": {

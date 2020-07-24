@@ -282,7 +282,12 @@ command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
 command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
 command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 command! SI :call SelfImport()
-command! GoPkgs :call fzf#run({'source': 'gopkgs', 'sink': 'normal o'})
+
+function! s:insert_sink(line)
+  execute 'normal! o"'. a:line. '"'
+endfunction
+command! GoPkgs :call fzf#run(fzf#wrap({'source': 'gopkgs', 'sink': funcref('s:insert_sink')}))
+
 
 function! SelfImport()
   let bufPath = expand("%:p")
