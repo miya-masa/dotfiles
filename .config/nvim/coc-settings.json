@@ -10,7 +10,10 @@
   "python.jediEnabled": false,
   "go.goplsOptions": {
     "completeUnimported":true,
-    "usePlaceholders":true
+    "usePlaceholders":true,
+    "analyses": {
+      "fillstruct": true
+    }
   },
   "suggest.timeout": 5000,
   "languageserver": {
@@ -18,6 +21,13 @@
       "command": "docker-langserver",
       "filetypes": ["dockerfile"],
       "args": ["--stdio"]
+    },
+    "golangci-lint-languageserver": {
+      "command": "golangci-lint-langserver",
+      "filetypes": ["go"],
+      "initializationOptions": {
+        "command": ["golangci-lint", "run", "--disable", "errcheck", "--out-format", "json"]
+      }
     }
   }
 }

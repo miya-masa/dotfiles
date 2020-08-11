@@ -19,14 +19,7 @@ set formatoptions+=mM
 
 " With a map leader it's possible to do extra key combinations
 " like <leader>w saves the current file
-let mapleader = ","
-
-" Fast saving
-nmap <leader>w :w!<cr>
-
-" :W sudo saves the file
-" (useful for handling the permission-denied error)
-command! W w !sudo tee % > /dev/null
+let g:mapleader = ","
 
 " Preview substitute
 set inccommand=split
@@ -34,14 +27,13 @@ set inccommand=split
 set ambiwidth=double
 
 set list
-
 set listchars=tab:^\ ,trail:~
 
 " }}}
 " => VIM user interface {{{
 
 " Set 7 lines to the cursor - when moving vertically using j/k
-set so=7
+set scrolloff=7
 
 " Display line number
 set number
@@ -58,11 +50,9 @@ set display=lastline
 " Avoid garbled characters in Chinese language windows OS
 scriptencoding utf8
 set helplang=ja,en
-
-" Avoid garbled characters in Chinese language windows OS
 let $LANG='ja_JP.UTF-8'
-set langmenu=ja_JP.UTF-8
 source $VIMRUNTIME/delmenu.vim
+set langmenu=ja_JP.UTF-8
 source $VIMRUNTIME/menu.vim
 
 " Turn on the Wild menu
@@ -83,7 +73,7 @@ set ruler
 set cmdheight=2
 
 " A buffer becomes hidden when it is abandoned
-set hid
+set hidden
 
 " Configure backspace so it acts as it should act
 set backspace=eol,start,indent
@@ -111,13 +101,13 @@ set magic
 " Show matching brackets when text indicator is over them
 set showmatch
 " How many tenths of a second to blink when matching brackets
-set mat=2
+set matchtime=2
 
 " No annoying sound on errors
 set noerrorbells
 set novisualbell
 set t_vb=
-set tm=500
+set timeoutlen=500
 
 " Properly disable sound on errors on MacVim
 if has("gui_macvim")
@@ -131,7 +121,7 @@ set foldcolumn=1
 " => Files, backups and undo {{{
 " Turn backup off, since most stuff is in SVN, git et.c anyway...
 set nobackup
-set nowb
+set nowritebackup
 set noswapfile
 " }}}
 " => Text, tab and indent related {{{
@@ -165,10 +155,6 @@ vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
 " }}}
 " => Moving around, tabs, windows and buffers {{{
 
-" Map <Space> to / (search) and Ctrl-<Space> to ? (backwards search)
-map <space> /
-map <c-space> ?
-
 " Disable highlight when <leader><cr> is pressed
 map <silent> <leader><cr> :noh<cr>
 
@@ -189,7 +175,6 @@ map <leader>tn :tabnew<cr>
 map <leader>to :tabonly<cr>
 map <leader>tc :tabclose<cr>
 map <leader>tm :tabmove
-map <leader>t<leader> :tabnext
 
 " Let 'tl' toggle between this and the last accessed tab
 let g:lasttab = 1
@@ -211,9 +196,6 @@ try
   set stal=1
 catch
 endtry
-
-" Return to last edit position when opening files (You want this!)
-au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
 " }}}
 " => Status line {{{
@@ -301,6 +283,12 @@ command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
 command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 command! SI :call SelfImport()
 
+function! s:insert_sink(line)
+  execute 'normal! o"'. a:line. '"'
+endfunction
+command! GoPkgs :call fzf#run(fzf#wrap({'source': 'gopkgs', 'sink': funcref('s:insert_sink')}))
+
+
 function! SelfImport()
   let bufPath = expand("%:p")
   let fileName = substitute(expand("%"), expand("%:h") . "/", "", "g")
@@ -310,6 +298,6 @@ function! SelfImport()
   let pos = getpos(".")
   execute ":normal i" . selfImport
   :call setpos('.', pos)
-endfunction
 
+endfunction
 " }}}
