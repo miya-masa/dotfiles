@@ -46,15 +46,14 @@ HEREDOC
 
 _install() {
   sudo apt update
-  brew bundle --file=./Brewfile_linux
+  sudo add-apt-repository universe \
   sudo apt install -y curl
-  curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-  echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
   sudo apt install -y autojump \
     asciidoc \
     ripgrep \
-    bazel \
     gawk \
+    gnome-tweak-tool \
+    gtk2-engines-murrine gtk2-engines-pixbuf \
     nodejs \
     npm \
     postgresql \
@@ -67,8 +66,8 @@ _install() {
     libjansson-dev \
     libyaml-dev \
     libxml2-dev
-  pip3 install pynvim
-  npm install -g neovim
+  sudo pip3 install pynvim
+  sudo npm install -g neovim
   rm -rf ctags
   git clone https://github.com/universal-ctags/ctags.git
   cd ctags
@@ -78,6 +77,16 @@ _install() {
   sudo make install
   cd ../
   sudo rm -rf ctags
+  if !(type "brew" > /dev/null 2>&1); then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
+    test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+    test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
+    echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
+  fi
+  brew bundle --file=./Brewfile_linux
+  curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
+  echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
 }
 
 ###############################################################################
