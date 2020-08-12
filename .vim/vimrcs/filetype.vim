@@ -6,6 +6,8 @@ augroup END
 nmap <silent> <Leader>gi :call CocActionAsync("doHover")<CR>
 nmap <silent> gm <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+nmap <silent> gy <Plug>(coc-type-definition)
+inoremap <silent><expr> <c-x><c-o> coc#refresh()
 nmap <silent> <Leader>gd <Plug>(coc-definition)
 nmap <silent> <Leader>gn <Plug>(coc-declaration)
 nmap <silent> <F2> <Plug>(coc-rename)
@@ -22,12 +24,13 @@ omap ic <Plug>(coc-classobj-i)
 xmap ac <Plug>(coc-classobj-a)
 omap ac <Plug>(coc-classobj-a)
 " }}}
-
 " Golang {{{
 augroup go
   autocmd!
-  autocmd BufWritePre *.go :Autoformat
-  autocmd FileType go nnoremap <Leader><C-F> :Autoformat<CR>
+  " Add `:OR` command for organize imports of the current buffer.
+  autocmd BufWritePre *.go :call CocAction('runCommand', 'editor.action.organizeImport')
+  command! -nargs=0 Format :call CocAction('format')
+  autocmd FileType go nnoremap <Leader><C-F> :Format<CR>
   autocmd FileType go command! -nargs=0 GoTagsAdd :CocCommand go.tags.add
   autocmd FileType go command! -nargs=0 GoTagsAddPrompt :CocCommand go.tags.add.prompt
   autocmd FileType go command! -nargs=0 GoInstallGopls :CocCommand go.install.gopls

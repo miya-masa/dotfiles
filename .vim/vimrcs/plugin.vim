@@ -16,12 +16,6 @@ call plug#begin('~/.vim/plugged')
 if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
-" Plug 'dracula/vim', { 'as': 'dracula' }
-" Plug 'jonathanfilip/vim-lucius'
-" Plug 'joshdick/onedark.vim'
-" Plug 'kristijanhusak/vim-hybrid-material'
-" Plug 'morhetz/gruvbox'
-" Plug 'w0rp/ale'
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Chiel92/vim-autoformat'
 Plug 'Shougo/vinarise.vim'
@@ -94,6 +88,8 @@ Plug 'vim-scripts/DrawIt'
 Plug 'vim-test/vim-test'
 Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
+Plug 'kamykn/spelunker.vim'
+Plug 'kamykn/popup-menu.nvim'
 
 call plug#end()
 " }}}
@@ -168,7 +164,7 @@ let g:vim_json_syntax_conceal = 0
 " }}}
 " IndentGuide {{{
 let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree']
+let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx']
 let g:indent_guides_start_level = 1
 let g:indent_guides_guide_size = 1
 let g:indent_guides_default_mapping = 0
@@ -221,17 +217,6 @@ let g:lightline = {
 
 " }}}
 " tmux-navigator {{{
-nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
-" }}}
-" ALE {{{
-" let g:ale_pattern_options = {
-"       \   '\.go$': {
-"       \       'ale_enabled': 0,
-"       \   },
-"       \   '\.md$': {
-"       \       'ale_enabled': 0,
-"       \   }
-"       \}
 " }}}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 1
@@ -308,6 +293,8 @@ let g:gundo_prefer_python3=1
 " }}}
 " {{{ Plug 'scrooloose/nerdtree'
 let NERDTreeShowHidden=1
+let g:NERDTreeMapJumpPrevSibling=""
+let g:NERDTreeMapJumpNextSibling=""
 " }}}
 " {{{ Plug 'janko/vim-test'
 let test#strategy = "dispatch"

@@ -17,3 +17,5 @@
 	editor = nvim
 [push]
 	default = current
+[pull]
+	rebase = false
