@@ -10,22 +10,17 @@ nnoremap l <Right>zv
 nnoremap Y y$
 nnoremap <Leader><S-\> :vertical<CR>
 nnoremap <Leader>- :split<CR>
-nnoremap <silet> <C-q> :QuickRun -outputter message<CR>
 nnoremap <Leader><C-B> :Buffer<CR>
 nnoremap <Leader><C-R> :Rg<Space>
 nnoremap <Leader><C-G> :GFiles<CR>
+nnoremap <Leader><C-F> :Files<CR>
 nnoremap <leader><C-L> :Line<CR>
 nnoremap <Leader><C-T> :Tags<CR>
-nnoremap <Space><CR> V:!sh<CR>
+nnoremap <Leader>w :w!<CR>
 nnoremap <Leader>tsl V:TranslateVisual<CR>
-nnoremap <Leader>tslr V:TranslateReplace<CR>
+nnoremap <Leader>tsr V:TranslateReplace<CR>
 nnoremap - :NERDTreeToggle<CR>
 nnoremap <Leader>y :NERDTreeFind<CR>
-
-nmap <silent> <Leader>ig <Plug>IndentGuidesToggle
-nmap <silent> <Leader>ie <Plug>IndentGuidesEnable
-nmap <silent> <Leader>id <Plug>IndentGuidesDisable
-nmap <silent> <Leader><Space> :w!<CR>
 " }}}
 
 " Terminal Mode {{{
@@ -37,7 +32,6 @@ inoremap <silent> jj <ESC>
 " }}}
 
 " Visual Mode {{{
-vnoremap <Space><CR> :!sh<CR>
 vnoremap <Leader>tsl :TranslateVisual<CR>
 vnoremap <Leader>tsr :TranslateReplace<CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
