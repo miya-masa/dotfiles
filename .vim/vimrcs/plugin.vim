@@ -350,3 +350,7 @@ let g:markdown_fenced_languages = ['plantuml', 'go', 'java', 'bash=sh']
 " Plug 'Yggdroot/indentLine'
 let g:indentLine_fileTypeExclude = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx', 'go']
 "
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always --hidden --iglob ''!.git'' --smart-case -- '.shellescape(<q-args>), 1,
+  \   fzf#vim#with_preview(), <bang>0)

@@ -59,7 +59,6 @@ augroup go
   autocmd FileType go set iskeyword=a-z,A-Z,48-57,&,*
   autocmd FileType go nnoremap <silent> <Leader>sj :SplitjoinJoin <CR>
   autocmd FileType go nnoremap <silent> <Leader>ss :SplitjoinSplit <CR>
-  autocmd FileType go set autochdir
 augroup END
 " }}}
 " JSON {{{

@@ -29,6 +29,7 @@ tnoremap <silent> <leader><C-[> <C-\><C-n>
 
 " Insert Mode {{{
 inoremap <silent> jj <ESC>
+inoremap <C-H> <BS>
 " }}}
 
 " Visual Mode {{{
@@ -36,4 +37,10 @@ vnoremap <Leader>tsl :TranslateVisual<CR>
 vnoremap <Leader>tsr :TranslateReplace<CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
+" }}}
+
+" Commandline Mode {{{
+cnoremap <C-H> <BS>
+cnoremap <C-F> <Right>
+cnoremap <C-B> <Left>
 " }}}
