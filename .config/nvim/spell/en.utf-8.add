@@ -30,3 +30,8 @@ unmarshal
 oauth
 oauth
 dredd
+gitlabCI
+gitlab
+retryable
+commands
+Plugin

@@ -59,11 +59,11 @@ Plug 'mhinz/vim-startify'
 Plug 'miya-masa/fillstruct-vim'
 Plug 'miya-masa/gotest-compiler-vim'
 Plug 'mxw/vim-jsx'
-Plug 'nathanaelkane/vim-indent-guides'
+Plug 'Yggdroot/indentLine'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'raghur/vim-ghost', {'do': ':GhostInstall'}
 Plug 'ryanoasis/vim-devicons'
-Plug 'scrooloose/nerdtree'
+Plug 'preservim/nerdtree'
 Plug 'sebdah/vim-delve'
 Plug 'shinchu/lightline-gruvbox.vim'
 Plug 'simeji/winresizer'
@@ -305,7 +305,7 @@ let test#go#gotest#options = {
 \}
 " }}}
 "  Plug 'kana/vim-operator-replace' {{{
-map ! <Plug>(operator-replace)
+nmap ! <Plug>(operator-replace)
 " }}}
 "  Plug 'tpop/projectionist' {{{
 let g:projectionist_heuristics = {
@@ -347,3 +347,10 @@ let g:rooter_manual_only = 1
 " Plug 'tpope/vim-markdown'
 let g:markdown_fenced_languages = ['plantuml', 'go', 'java', 'bash=sh']
 " }}}
+" Plug 'Yggdroot/indentLine'
+let g:indentLine_fileTypeExclude = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx', 'go']
+"
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always --hidden --iglob ''!.git'' --smart-case -- '.shellescape(<q-args>), 1,
+  \   fzf#vim#with_preview(), <bang>0)
