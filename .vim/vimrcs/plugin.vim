@@ -305,7 +305,7 @@ let test#go#gotest#options = {
 \}
 " }}}
 "  Plug 'kana/vim-operator-replace' {{{
-map ! <Plug>(operator-replace)
+nmap ! <Plug>(operator-replace)
 " }}}
 "  Plug 'tpop/projectionist' {{{
 let g:projectionist_heuristics = {
