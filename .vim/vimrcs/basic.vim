@@ -24,7 +24,7 @@ let g:mapleader = ","
 " Preview substitute
 set inccommand=split
 
-set ambiwidth=double
+set ambiwidth=single
 
 set list
 set listchars=tab:^\ ,trail:~

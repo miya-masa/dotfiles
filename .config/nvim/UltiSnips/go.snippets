@@ -67,13 +67,7 @@ func Test${1:FuncName}(t *testing.T) {
 endsnippet
 
 snippet as "stretchr assert snippet"
-assert.Equal(t, ${1:tt.want}, ${2:got})
-${0:${VISUAL}}
-endsnippet
-
-snippet asf "stretchr assert snippet"
-assert.Equalf(t, ${1:tt.want}, ${2:got}, "input %v", pretty.Sprint(${3:tt.args}))
-${0:${VISUAL}}
+assert.Equal(t, ${1:tt.want}, ${2:got})${0:${VISUAL}}
 endsnippet
 
 snippet casebench "casetest snip"
@@ -141,14 +135,17 @@ ${0:${VISUAL}}
 endsnippet
 
 snippet ctx "context background"
-ctx := context.Background()
-${0:${VISUAL}}
+ctx := context.Background()${0:${VISUAL}}
 endsnippet
 
 snippet cctx "context with cancel"
 ctx, cancel := context.WithCancel(ctx)
-defer cancel()
-${0:${VISUAL}}
+defer cancel()${0:${VISUAL}}
+endsnippet
+
+snippet ctxd "context with cancel"
+ctx, cancel := context.WithTimeout(context.Background(), ${1:time.Second})
+defer cancel()${0:${VISUAL}}
 endsnippet
 
 snippet timeex "time exammple"
@@ -500,4 +497,13 @@ snippet vars "var ( ... )"
 var (
 	${1:x} ${2:Type}${3: = ${0:value}}
 )
+endsnippet
+
+snippet reqerr "req error"
+require.NoError(t, err)${0:${VISUAL}}
+endsnippet
+
+
+snippet aserr "req error"
+assert.Equal(t, tt.wantErr, err != nil, err)${0:${VISUAL}}
 endsnippet
