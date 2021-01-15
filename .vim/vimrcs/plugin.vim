@@ -90,6 +90,7 @@ Plug 'xolox/vim-misc'
 Plug 'xolox/vim-notes'
 Plug 'kamykn/spelunker.vim'
 Plug 'kamykn/popup-menu.nvim'
+Plug 'airblade/vim-gitgutter'
 
 call plug#end()
 " }}}

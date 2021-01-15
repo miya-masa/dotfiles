@@ -7,6 +7,11 @@
   "explorer.previewAction.onHover": false,
   "explorer.icon.enableNerdfont": true,
   "explorer.file.autoReveal": true,
+  "git.addedSign.hlGroup": "GitGutterAdd",
+  "git.changedSign.hlGroup": "GitGutterChange",
+  "git.removedSign.hlGroup": "GitGutterDelete",
+  "git.topRemovedSign.hlGroup": "GitGutterDelete",
+  "git.changeRemovedSign.hlGroup": "GitGutterChangeDelete",
   "snippets.ultisnips.directories": [
     "UltiSnips",
     "gosnippets/UltiSnips"
@@ -47,9 +52,16 @@
           "run",
           "--enable-all",
           "--disable",
+          "--skip-files=.*_test.go",
+          "--skip-files=.*wire.*.go",
+          "--skip-files=.*mock.*.go",
           "errcheck",
           "--disable",
           "lll",
+          "--disable",
+          "funlen",
+          "--disable",
+          "godox",
           "--out-format",
           "json"
         ]
