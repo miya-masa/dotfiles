@@ -113,6 +113,7 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 augroup go
   autocmd!
   " Add `:OR` command for organize imports of the current buffer.
+  autocmd BufWritePre *.go :silent call CocAction('runCommand', 'editor.action.organizeImport')
   autocmd FileType go command! -nargs=0 GoTagsAdd :CocCommand go.tags.add
   autocmd FileType go command! -nargs=0 GoTagsAddPrompt :CocCommand go.tags.add.prompt
   autocmd FileType go command! -nargs=0 GoInstallGopls :CocCommand go.install.gopls

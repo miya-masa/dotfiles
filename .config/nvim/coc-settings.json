@@ -7,30 +7,64 @@
   "explorer.previewAction.onHover": false,
   "explorer.icon.enableNerdfont": true,
   "explorer.file.autoReveal": true,
+  "git.addedSign.hlGroup": "GitGutterAdd",
+  "git.changedSign.hlGroup": "GitGutterChange",
+  "git.removedSign.hlGroup": "GitGutterDelete",
+  "git.topRemovedSign.hlGroup": "GitGutterDelete",
+  "git.changeRemovedSign.hlGroup": "GitGutterChangeDelete",
   "snippets.ultisnips.directories": [
     "UltiSnips",
     "gosnippets/UltiSnips"
   ],
   "python.jediEnabled": false,
   "go.goplsOptions": {
-    "completeUnimported":true,
-    "usePlaceholders":true,
+    "buildFlags": [
+      "-tags=integration"
+    ],
+    "completeUnimported": true,
+    "usePlaceholders": true,
+    "gofumpt": true,
     "analyses": {
-      "fillstruct": true
+      "fillreturns": true,
+      "fillstruct": true,
+      "simplifyrange": true
     }
   },
   "suggest.timeout": 5000,
   "languageserver": {
     "dockerfile": {
       "command": "docker-langserver",
-      "filetypes": ["dockerfile"],
-      "args": ["--stdio"]
+      "filetypes": [
+        "dockerfile"
+      ],
+      "args": [
+        "--stdio"
+      ]
     },
     "golangci-lint-languageserver": {
       "command": "golangci-lint-langserver",
-      "filetypes": ["go"],
+      "filetypes": [
+        "go"
+      ],
       "initializationOptions": {
-        "command": ["golangci-lint", "run", "--disable", "errcheck", "--out-format", "json"]
+        "command": [
+          "golangci-lint",
+          "run",
+          "--enable-all",
+          "--disable",
+          "--skip-files=.*_test.go",
+          "--skip-files=.*wire.*.go",
+          "--skip-files=.*mock.*.go",
+          "errcheck",
+          "--disable",
+          "lll",
+          "--disable",
+          "funlen",
+          "--disable",
+          "godox",
+          "--out-format",
+          "json"
+        ]
       }
     }
   }
