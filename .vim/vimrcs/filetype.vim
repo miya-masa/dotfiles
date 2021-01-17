@@ -114,9 +114,6 @@ augroup go
   autocmd!
   " Add `:OR` command for organize imports of the current buffer.
   autocmd BufWritePre *.go :silent call CocAction('runCommand', 'editor.action.organizeImport')
-  autocmd FileType go command! -nargs=0 GoTagsAdd :CocCommand go.tags.add
-  autocmd FileType go command! -nargs=0 GoTagsAddPrompt :CocCommand go.tags.add.prompt
-  autocmd FileType go command! -nargs=0 GoInstallGopls :CocCommand go.install.gopls
   autocmd FileType go command! -nargs=0 GoGenerate :Dispatch! go generate %:p:h
   autocmd FileType go command! -nargs=0 GoGenerateTest :CocCommand go.test.generate.exported
   autocmd FileType go command! -nargs=0 GoImpl :CocCommand go.impl.cursor
@@ -127,16 +124,12 @@ augroup go
   " :GoTest
   autocmd FileType go nnoremap ]] /^func<CR>:nohlsearch<CR>
   autocmd FileType go nnoremap [[ ?^func<CR>:nohlsearch<CR>
-  autocmd FileType go nnoremap <leader>gt :TestFile<CR>
   " :GoCoverageToggle
   " autocmd FileType go nnoremap <Leader>gc <Plug>(go-coverage-toggle)
   " :GoTestFunc
   autocmd FileType go nnoremap <Leader>gf :TestNearest<CR>
-  autocmd FileType go nnoremap <Leader>gs :FillStruct<CR>
-  autocmd FileType go nnoremap <Leader>gb :GoBuild<CR>
-  autocmd Filetype go command! GoRunArgs :Dispatch go run <arg> %
-  autocmd Filetype go command! GoRun :Dispatch go run %
-  autocmd Filetype go command! GoBuild :Dispatch go build %:p:h
+  autocmd FileType go nnoremap <leader>gt :TestFile<CR>
+  autocmd FileType go nmap <leader>ca  <Plug>(coc-codeaction)
 
 " GoKeyword
   autocmd FileType go set iskeyword=a-z,A-Z,48-57,&,*
