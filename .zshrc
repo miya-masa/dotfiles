@@ -28,17 +28,22 @@ if [[ ! -d ~/.zinit ]]; then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
 fi
 source ~/.zinit/bin/zinit.zsh
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+zinit wait lucid light-mode for \
+  atinit"zicompinit; zicdreplay" \
+      zdharma/fast-syntax-highlighting \
+  atload"_zsh_autosuggest_start" \
+      zsh-users/zsh-autosuggestions \
+  blockf atpull'zinit creinstall -q .' \
+      zsh-users/zsh-completions
+
 zinit ice depth=1; zinit light romkatv/powerlevel10k
-zinit light "chrissicool/zsh-256color"
-zinit light "mollifier/anyframe"
-zinit light "zsh-users/zsh-autosuggestions"
+
 zinit light "soimort/translate-shell"
-zinit snippet OMZP::git
-zinit snippet OMZP::docker/_docker
 
-zinit wait lucid atload"zicompinit; zicdreplay" blockf for \
-    zsh-users/zsh-completions
-
+zinit light "mollifier/anyframe"
 fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
 anyframe-init
@@ -53,6 +58,9 @@ bindkey '^x^f' anyframe-widget-insert-filename
 bindkey -v
 
 zstyle ':completion:*:default' menu select=1
+zstyle ":anyframe:selector:" use fzf
+zstyle ":anyframe:selector:fzf:" command 'fzf --height=25%'
+
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -104,12 +112,6 @@ fbr() {
   git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
 }
 zle -N fbr
-
-autoload -Uz chpwd_recent_dirs cdr add-zsh-hook
-add-zsh-hook chpwd chpwd_recent_dirs
-
-zstyle ":anyframe:selector:" use fzf
-zstyle ":anyframe:selector:fzf:" command 'fzf --height=25%'
 
 # DO NOT EDIT HERE
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -173,7 +175,6 @@ export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
 
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 ### End of Zinit's installer chunk
-
-[[ ! -f "${GOPATH}/src/github.com/sachaos/todoist/todoist_functions_fzf.sh" ]] || source "$GOPATH/src/github.com/sachaos/todoist/todoist_functions_fzf.sh"
+#
 source <(kubectl completion zsh)
 source ~/.minikube-completion
