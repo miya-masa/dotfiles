@@ -10,6 +10,7 @@
 [ghq]
 	root = ~/go/src
 	root = ~/.ghq
+
 [user]
 	email = miyauchi0623@gmail.com
 	name = miya-masa
