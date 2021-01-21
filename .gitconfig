@@ -8,8 +8,9 @@
 	renames = true
 
 [ghq]
-	root = ~/go/src
 	root = ~/.ghq
+	root = ~/go/src
+
 [core]
 	editor = nvim
 	hooksPath = .config/git/hooks
