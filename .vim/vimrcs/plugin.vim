@@ -16,14 +16,7 @@ call plug#begin('~/.vim/plugged')
 if !has('nvim')
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
-" Plug 'dracula/vim', { 'as': 'dracula' }
-" Plug 'jonathanfilip/vim-lucius'
-" Plug 'joshdick/onedark.vim'
-" Plug 'kristijanhusak/vim-hybrid-material'
-" Plug 'morhetz/gruvbox'
-" Plug 'w0rp/ale'
 Plug 'AndrewRadev/splitjoin.vim'
-Plug 'Chiel92/vim-autoformat'
 Plug 'Shougo/vinarise.vim'
 Plug 'SirVer/ultisnips'
 Plug 'VincentCordobes/vim-translate'
@@ -40,8 +33,6 @@ Plug 'dhruvasagar/vim-table-mode'
 Plug 'diepm/vim-rest-console'
 Plug 'easymotion/vim-easymotion'
 Plug 'edkolev/tmuxline.vim'
-Plug 'ekalinin/Dockerfile.vim'
-Plug 'elzr/vim-json'
 Plug 'flazz/vim-colorschemes'
 Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'honza/vim-snippets'
@@ -54,7 +45,6 @@ Plug 'junegunn/fzf.vim'
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
-Plug 'junegunn/vim-peekaboo'
 Plug 'kana/vim-operator-replace'
 Plug 'kana/vim-operator-user'
 Plug 'kylef/apiblueprint.vim'
@@ -62,20 +52,18 @@ Plug 'majutsushi/tagbar'
 Plug 'mattn/emmet-vim'
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'mhinz/vim-startify'
-Plug 'miya-masa/fillstruct-vim'
-Plug 'miya-masa/gotest-compiler-vim'
+" Plug 'miya-masa/gotest-compiler-vim'
 Plug 'mxw/vim-jsx'
-Plug 'nathanaelkane/vim-indent-guides'
+Plug 'Yggdroot/indentLine'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'raghur/vim-ghost', {'do': ':GhostInstall'}
 Plug 'ryanoasis/vim-devicons'
-Plug 'scrooloose/nerdtree'
+Plug 'preservim/nerdtree'
 Plug 'sebdah/vim-delve'
 Plug 'shinchu/lightline-gruvbox.vim'
 Plug 'simeji/winresizer'
 Plug 'sjl/gundo.vim'
 Plug 'stefandtw/quickfix-reflector.vim'
-Plug 'stephpy/vim-yaml'
 Plug 'terryma/vim-expand-region'
 Plug 'thinca/vim-quickrun'
 Plug 'thinca/vim-zenspace'
@@ -92,19 +80,15 @@ Plug 'tpope/vim-unimpaired'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'vim-scripts/DrawIt'
 Plug 'vim-test/vim-test'
-Plug 'xolox/vim-misc'
-Plug 'xolox/vim-notes'
+Plug 'kamykn/spelunker.vim'
+Plug 'kamykn/popup-menu.nvim'
+Plug 'airblade/vim-gitgutter'
 
 call plug#end()
 " }}}
 "  neoclide/coc.nvim {{{
-inoremap <silent><expr> <c-0> coc#refresh()
 let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
-" Add `:Format` command to format current buffer.
-command! -nargs=0 Format :call CocAction('format')
 
-" Add `:OR` command for organize imports of the current buffer.
-command! -nargs=0 OR :call CocAction('runCommand', 'editor.action.organizeImport')
 " }}}
 " Plugin UltiSnips {{{
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "~/.config/nvim/UltiSnips", "UltiSnips_local"]
@@ -168,7 +152,7 @@ let g:vim_json_syntax_conceal = 0
 " }}}
 " IndentGuide {{{
 let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree']
+let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx']
 let g:indent_guides_start_level = 1
 let g:indent_guides_guide_size = 1
 let g:indent_guides_default_mapping = 0
@@ -221,17 +205,6 @@ let g:lightline = {
 
 " }}}
 " tmux-navigator {{{
-nnoremap <silent> <BS> :TmuxNavigateLeft<cr>
-" }}}
-" ALE {{{
-" let g:ale_pattern_options = {
-"       \   '\.go$': {
-"       \       'ale_enabled': 0,
-"       \   },
-"       \   '\.md$': {
-"       \       'ale_enabled': 0,
-"       \   }
-"       \}
 " }}}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 1
@@ -308,6 +281,8 @@ let g:gundo_prefer_python3=1
 " }}}
 " {{{ Plug 'scrooloose/nerdtree'
 let NERDTreeShowHidden=1
+let g:NERDTreeMapJumpPrevSibling=""
+let g:NERDTreeMapJumpNextSibling=""
 " }}}
 " {{{ Plug 'janko/vim-test'
 let test#strategy = "dispatch"
@@ -318,7 +293,7 @@ let test#go#gotest#options = {
 \}
 " }}}
 "  Plug 'kana/vim-operator-replace' {{{
-map ! <Plug>(operator-replace)
+nmap ! <Plug>(operator-replace)
 " }}}
 "  Plug 'tpop/projectionist' {{{
 let g:projectionist_heuristics = {
@@ -360,3 +335,10 @@ let g:rooter_manual_only = 1
 " Plug 'tpope/vim-markdown'
 let g:markdown_fenced_languages = ['plantuml', 'go', 'java', 'bash=sh']
 " }}}
+" Plug 'Yggdroot/indentLine'
+let g:indentLine_fileTypeExclude = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx', 'go']
+"
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always --hidden --iglob ''!.git'' --smart-case -- '.shellescape(<q-args>), 1,
+  \   fzf#vim#with_preview(), <bang>0)
