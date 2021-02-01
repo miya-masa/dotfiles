@@ -21,6 +21,8 @@ nnoremap <Leader>tsl V:TranslateVisual<CR>
 nnoremap <Leader>tsr V:TranslateReplace<CR>
 nnoremap - :NERDTreeToggle<CR>
 nnoremap <Leader>y :NERDTreeFind<CR>
+nmap <Leader>gx <Plug>(openbrowser-smart-search)
+
 " }}}
 
 " Terminal Mode {{{
@@ -37,6 +39,7 @@ vnoremap <Leader>tsl :TranslateVisual<CR>
 vnoremap <Leader>tsr :TranslateReplace<CR>
 " Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
 vmap <Enter> <Plug>(EasyAlign)
+vmap <Leader>gx <Plug>(openbrowser-smart-search)
 " }}}
 
 " Commandline Mode {{{

@@ -117,6 +117,7 @@ augroup go
   autocmd FileType go command! -nargs=0 GoGenerate :Dispatch! go generate %:p:h
   autocmd FileType go command! -nargs=0 GoGenerateTest :CocCommand go.test.generate.exported
   autocmd FileType go command! -nargs=0 GoImpl :CocCommand go.impl.cursor
+  autocmd FileType go command! -nargs=+ DockerLogs :Dispatch docker-compose logs -f <args>
 
   " Show by default 4 spaces for a tab
   autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
