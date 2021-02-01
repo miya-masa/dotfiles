@@ -176,5 +176,10 @@ export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 ### End of Zinit's installer chunk
 #
-source <(kubectl completion zsh)
-source ~/.minikube-completion
+#
+if [[ -x "`which kubectl`" ]]; then
+  source <(kubectl completion zsh)
+fi
+
+[ -f ~/.minikube-completion ] && source ~/.minikube-completion
+
