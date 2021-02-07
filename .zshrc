@@ -30,6 +30,8 @@ fi
 source ~/.zinit/bin/zinit.zsh
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
+autoload -Uz compinit
+compinit
 
 zinit wait lucid light-mode for \
   atinit"zicompinit; zicdreplay" \
@@ -181,5 +183,6 @@ if [[ -x "`which kubectl`" ]]; then
   source <(kubectl completion zsh)
 fi
 
-[ -f ~/.minikube-completion ] && source ~/.minikube-completion
-
+if [[ -x "`which minikube`" ]]; then
+  source <(minikube completion zsh)
+fi
