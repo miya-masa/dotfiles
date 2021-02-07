@@ -8,8 +8,8 @@
 	renames = true
 
 [ghq]
-	root = ~/.ghq
 	root = ~/go/src
+	root = ~/.ghq
 
 [core]
 	editor = nvim
@@ -20,3 +20,5 @@
 	rebase = false
 [user]
 	useConfigOnly = true
+[init]
+	defaultBranch = main
