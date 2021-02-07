@@ -45,27 +45,27 @@ HEREDOC
 ###############################################################################
 
 _install() {
-  sudo apt update
-  sudo add-apt-repository universe \
-  sudo apt install -y curl
-  sudo apt install -y autojump \
-    asciidoc \
-    ripgrep \
-    gawk \
-    gnome-tweak-tool \
-    gtk2-engines-murrine gtk2-engines-pixbuf \
-    nodejs \
-    npm \
-    postgresql \
-    gcc make \
-    pkg-config autoconf automake \
-    python3 \
-    python3-pip \
-    python3-docutils \
-    libseccomp-dev \
-    libjansson-dev \
-    libyaml-dev \
-    libxml2-dev
+  # sudo apt update
+  # sudo add-apt-repository universe \
+  # sudo apt install -y curl
+  # sudo apt install -y autojump \
+  #   asciidoc \
+  #   ripgrep \
+  #   gawk \
+  #   gnome-tweak-tool \
+  #   gtk2-engines-murrine gtk2-engines-pixbuf \
+  #   nodejs \
+  #   npm \
+  #   postgresql \
+  #   gcc make \
+  #   pkg-config autoconf automake \
+  #   python3 \
+  #   python3-pip \
+  #   python3-docutils \
+  #   libseccomp-dev \
+  #   libjansson-dev \
+  #   libyaml-dev \
+  #   libxml2-dev
   sudo pip3 install pynvim
   sudo npm install -g neovim
   rm -rf ctags
