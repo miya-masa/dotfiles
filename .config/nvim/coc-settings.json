@@ -50,11 +50,10 @@
         "command": [
           "golangci-lint",
           "run",
-          "--enable-all",
-          "--disable",
           "--skip-files=.*_test.go",
           "--skip-files=.*wire.*.go",
           "--skip-files=.*mock.*.go",
+          "--disable",
           "errcheck",
           "--disable",
           "lll",

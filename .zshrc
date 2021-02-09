@@ -30,6 +30,8 @@ fi
 source ~/.zinit/bin/zinit.zsh
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
+autoload -Uz compinit
+compinit
 
 zinit wait lucid light-mode for \
   atinit"zicompinit; zicdreplay" \
@@ -176,5 +178,11 @@ export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 ### End of Zinit's installer chunk
 #
-source <(kubectl completion zsh)
-source ~/.minikube-completion
+#
+if [[ -x "`which kubectl`" ]]; then
+  source <(kubectl completion zsh)
+fi
+
+if [[ -x "`which minikube`" ]]; then
+  source <(minikube completion zsh)
+fi

@@ -52,7 +52,7 @@ Plug 'majutsushi/tagbar'
 Plug 'mattn/emmet-vim'
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'mhinz/vim-startify'
-" Plug 'miya-masa/gotest-compiler-vim'
+Plug 'miya-masa/gotest-compiler-vim'
 Plug 'mxw/vim-jsx'
 Plug 'Yggdroot/indentLine'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
