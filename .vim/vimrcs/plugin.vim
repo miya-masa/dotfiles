@@ -83,6 +83,7 @@ Plug 'vim-test/vim-test'
 Plug 'kamykn/spelunker.vim'
 Plug 'kamykn/popup-menu.nvim'
 Plug 'airblade/vim-gitgutter'
+Plug 'tyru/open-browser.vim'
 
 call plug#end()
 " }}}
