@@ -22,7 +22,6 @@ nnoremap <Leader>tsr V:TranslateReplace<CR>
 nnoremap - :NERDTreeToggle<CR>
 nnoremap <Leader>y :NERDTreeFind<CR>
 nmap <Leader>gx <Plug>(openbrowser-smart-search)
-
 " }}}
 
 " Terminal Mode {{{
