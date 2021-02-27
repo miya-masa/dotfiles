@@ -1,5 +1,5 @@
 export GOPATH="$HOME/go"
-export PATH=$GOPATH/bin:$PATH
+export PATH=$GOPATH/bin:$PATH:/usr/local/go/bin
 export XDG_CONFIG_HOME=$HOME/.config
 export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
 export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH

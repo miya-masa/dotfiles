@@ -3,10 +3,6 @@
   "coc.preferences.previewAutoClose": false,
   "coc.preferences.jumpCommand": "split",
   "coc.preferences.currentFunctionSymbolAutoUpdate": true,
-  "explorer.icon.enableVimDevicons": true,
-  "explorer.previewAction.onHover": false,
-  "explorer.icon.enableNerdfont": true,
-  "explorer.file.autoReveal": true,
   "git.addedSign.hlGroup": "GitGutterAdd",
   "git.changedSign.hlGroup": "GitGutterChange",
   "git.removedSign.hlGroup": "GitGutterDelete",
@@ -29,6 +25,12 @@
       "fillstruct": true,
       "simplifyrange": true
     }
+  },
+  "go.tests": {
+    "generateFlags": [
+      "-template",
+      "testify"
+    ]
   },
   "suggest.timeout": 5000,
   "languageserver": {

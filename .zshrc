@@ -33,6 +33,21 @@ autoload -Uz _zinit
 autoload -Uz compinit
 compinit
 
+# Load OMZ Git library
+zinit snippet OMZL::git.zsh
+
+# Load Git plugin from OMZ
+zinit snippet OMZP::git
+zinit cdclear -q # <- forget completions provided up to this moment
+
+setopt promptsubst
+
+# Load theme from OMZ
+zinit snippet OMZT::gnzh
+
+# Load normal GitHub plugin with theme depending on OMZ Git library
+zinit light "dracula/zsh"
+
 zinit wait lucid light-mode for \
   atinit"zicompinit; zicdreplay" \
       zdharma/fast-syntax-highlighting \
