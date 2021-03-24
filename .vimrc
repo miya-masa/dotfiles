@@ -4,16 +4,11 @@
 "  / / / / / / / /_/ / /_/ /_____/ / / / / / /_/ (__  ) /_/ / (__  )
 " /_/ /_/ /_/_/\__, /\__,_/     /_/ /_/ /_/\__,_/____/\__,_/ /____/
 "             /____/
-"        _
-" __   _(_)_ __ ___  _ __ ___
-" \ \ / / | '_ ` _ \| '__/ __|
-"  \ V /| | | | | | | | | (__
-" (_)_/ |_|_| |_| |_|_|  \___|
-
-set runtimepath+=$HOME/.vim
-
-source ~/.vim/vimrcs/basic.vim
-source ~/.vim/vimrcs/plugin.vim
-source ~/.vim/vimrcs/colorscheme.vim
-source ~/.vim/vimrcs/keymapping.vim
-source ~/.vim/vimrcs/filetype.vim
+"     _       _ __        _
+"    (_)___  (_) /__   __(_)___ ___
+"   / / __ \/ / __/ | / / / __ `__ \
+"  / / / / / / /__| |/ / / / / / / /
+" /_/_/ /_/_/\__(_)___/_/_/ /_/ /_/
+"
+"
+source ~/.vimrc

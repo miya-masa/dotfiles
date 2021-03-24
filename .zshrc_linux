@@ -10,3 +10,14 @@ eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
 [[ -f $HOME/.keychain/masayuki-desktop-sh ]] && \
 	source $HOME/.keychain/masayuki-desktop-sh
+
+
+alias redoc-cli='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable redoc-cli'
+alias aws='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable aws'
+alias golangci-lint='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable golangci-lint'
+alias dredd='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable dredd'
+alias goodman='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable goodman'
+alias wire='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable wire'
+alias oas3-tools='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable oas3-tools'
+alias goreleaser-tools='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable goreleaser'
+alias licensed='docker run -v ${PWD}:/work reg.aptpod.io/intdash-service/ci:stable licensed'

@@ -8,6 +8,7 @@ filetype indent on
 
 " Set to auto read when a file is changed from the outside
 set autoread
+autocmd FocusGained,BufEnter * checktime
 
 " Share clipboard
 set clipboard+=unnamedplus
@@ -213,8 +214,6 @@ map 0 ^
 map <leader>ss :setlocal spell!<cr>
 
 " Shortcuts using <leader>
-map <leader>sn ]s
-map <leader>sp [s
 map <leader>sa zg
 map <leader>s? z=
 " }}}
@@ -227,9 +226,6 @@ map <leader>q :e ~/buffer<cr>
 
 " Quickly open a markdown buffer for scribble
 map <leader>x :e ~/buffer.md<cr>
-
-" Toggle paste mode on and off
-map <leader>pp :setlocal paste!<cr>
 
 " }}}
 " => Helper functions {{{
@@ -281,12 +277,12 @@ command! -nargs=1 ToB echo printf("%0b", <args>)
 command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
 command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
 command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
-command! SI :call SelfImport()
+command! Si :call SelfImport()
 
 function! s:insert_sink(line)
   execute 'normal! o"'. a:line. '"'
 endfunction
-command! GoPkgs :call fzf#run(fzf#wrap({'source': 'gopkgs', 'sink': funcref('s:insert_sink')}))
+command! Gopkgs :call fzf#run(fzf#wrap({'source': 'gopkgs', 'sink': funcref('s:insert_sink')}))
 
 
 function! SelfImport()

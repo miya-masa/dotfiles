@@ -52,17 +52,6 @@
         "command": [
           "golangci-lint",
           "run",
-          "--skip-files=.*_test.go",
-          "--skip-files=.*wire.*.go",
-          "--skip-files=.*mock.*.go",
-          "--disable",
-          "errcheck",
-          "--disable",
-          "lll",
-          "--disable",
-          "funlen",
-          "--disable",
-          "godox",
           "--out-format",
           "json"
         ]

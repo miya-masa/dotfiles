@@ -107,6 +107,8 @@ command! -nargs=0 OR   :call CocAction('runCommand', 'editor.action.organizeImpo
 " provide custom statusline: lightline.vim, vim-airline.
 set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
+command! -nargs=+ DockerLogs :Dispatch docker-compose logs -f <args>
+
 "
 " }}}
 " Golang {{{
@@ -117,16 +119,15 @@ augroup go
   autocmd FileType go command! -nargs=0 GoGenerate :Dispatch! go generate %:p:h
   autocmd FileType go command! -nargs=0 GoGenerateTest :CocCommand go.test.generate.exported
   autocmd FileType go command! -nargs=0 GoImpl :CocCommand go.impl.cursor
-  autocmd FileType go command! -nargs=+ DockerLogs :Dispatch docker-compose logs -f <args>
 
   " Show by default 4 spaces for a tab
   autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
 
-  " :GoTest
   autocmd FileType go nnoremap ]] /^func<CR>:nohlsearch<CR>
   autocmd FileType go nnoremap [[ ?^func<CR>:nohlsearch<CR>
   " :GoCoverageToggle
   " autocmd FileType go nnoremap <Leader>gc <Plug>(go-coverage-toggle)
+  " :GoTest
   " :GoTestFunc
   autocmd FileType go nnoremap <Leader>gf :TestNearest<CR>
   autocmd FileType go nnoremap <leader>gt :TestFile<CR>

@@ -201,3 +201,7 @@ fi
 if [[ -x "`which minikube`" ]]; then
   source <(minikube completion zsh)
 fi
+
+if [[ -x "`which jira`" ]]; then
+  eval "$(jira --completion-script-bash)"
+fi
