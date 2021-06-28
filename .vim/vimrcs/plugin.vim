@@ -85,11 +85,12 @@ Plug 'kamykn/spelunker.vim'
 Plug 'kamykn/popup-menu.nvim'
 Plug 'airblade/vim-gitgutter'
 Plug 'tyru/open-browser.vim'
+Plug 'tyru/operator-camelize.vim'
 
 call plug#end()
 " }}}
 "  neoclide/coc.nvim {{{
-let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh']
+let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh', 'coc-explorer']
 
 " }}}
 " Plugin UltiSnips {{{
@@ -154,7 +155,7 @@ let g:vim_json_syntax_conceal = 0
 " }}}
 " IndentGuide {{{
 let g:indent_guides_enable_on_vim_startup = 1
-let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx']
+let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx', 'coc-explorer']
 let g:indent_guides_start_level = 1
 let g:indent_guides_guide_size = 1
 let g:indent_guides_default_mapping = 0
@@ -334,13 +335,16 @@ command! -bang -nargs=* GGrep
 " Plug 'airblade/vim-rooter' {{{
 let g:rooter_manual_only = 1
 " }}}
-" Plug 'tpope/vim-markdown'
+" Plug 'tpope/vim-markdown' {{{
 let g:markdown_fenced_languages = ['plantuml', 'go', 'java', 'bash=sh']
 " }}}
-" Plug 'Yggdroot/indentLine'
-let g:indentLine_fileTypeExclude = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx', 'go']
-"
+" Plug 'Yggdroot/indentLine' {{{
+let g:indentLine_fileTypeExclude = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx', 'go', 'coc-explorer']
+" }}}
 command! -bang -nargs=* Rg
   \ call fzf#vim#grep(
   \   'rg --column --line-number --no-heading --color=always --hidden --iglob ''!.git'' --smart-case -- '.shellescape(<q-args>), 1,
   \   fzf#vim#with_preview(), <bang>0)
+
+" Plug 'coc-explorer' {{{
+" }}}

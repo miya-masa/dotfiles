@@ -1,5 +1,5 @@
 {
-  "coc.preferences.hoverTarget": "float",
+  "coc.preferences.enableMarkdown": true,
   "coc.preferences.previewAutoClose": false,
   "coc.preferences.jumpCommand": "split",
   "coc.preferences.currentFunctionSymbolAutoUpdate": true,
@@ -8,6 +8,9 @@
   "git.removedSign.hlGroup": "GitGutterDelete",
   "git.topRemovedSign.hlGroup": "GitGutterDelete",
   "git.changeRemovedSign.hlGroup": "GitGutterChangeDelete",
+  "explorer.icon.enableNerdfont": true,
+  "explorer.file.showHiddenFiles": true,
+  "explorer.file.autoReveal": true,
   "snippets.ultisnips.directories": [
     "UltiSnips",
     "gosnippets/UltiSnips"
@@ -23,7 +26,10 @@
     "analyses": {
       "fillreturns": true,
       "fillstruct": true,
-      "simplifyrange": true
+      "simplifyrange": true,
+      "tests": true,
+      "bools": true,
+      "structtag": true
     }
   },
   "go.tests": {

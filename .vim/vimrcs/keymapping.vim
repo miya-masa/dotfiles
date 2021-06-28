@@ -19,8 +19,10 @@ nnoremap <Leader><C-T> :Tags<CR>
 nnoremap <Leader>w :w!<CR>
 nnoremap <Leader>tsl V:TranslateVisual<CR>
 nnoremap <Leader>tsr V:TranslateReplace<CR>
-nnoremap - :NERDTreeToggle<CR>
-nnoremap <Leader>y :NERDTreeFind<CR>
+" nnoremap - :NERDTreeToggle<CR>
+nnoremap - :CocCommand explorer<CR>
+" nnoremap <Leader>y :call CocAction('runCommand', 'explorer.doAction', 'closest', ['reveal:0'], [['relative', 0, 'file']])<CR>
+" nnoremap <Leader>y :NERDTreeFind<CR>
 nmap <Leader>gx <Plug>(openbrowser-smart-search)
 " }}}
 
@@ -45,4 +47,11 @@ vmap <Leader>gx <Plug>(openbrowser-smart-search)
 cnoremap <C-H> <BS>
 cnoremap <C-F> <Right>
 cnoremap <C-B> <Left>
+" }}}
+"
+"
+
+" Mapping {{{
+map <Leader>cc <Plug>(operator-camelize)
+map <Leader>C <Plug>(operator-decamelize)
 " }}}

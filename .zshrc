@@ -205,3 +205,7 @@ fi
 if [[ -x "`which jira`" ]]; then
   eval "$(jira --completion-script-bash)"
 fi
+
+[[ ! -f ~/.cargo/env ]] || source ~/.cargo/env
+
+export PATH="$HOME/.poetry/bin:$PATH"

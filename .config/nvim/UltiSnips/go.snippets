@@ -117,7 +117,7 @@ endsnippet
 
 snippet gomock "gomock"
 ctrl := gomock.NewController(t)
-res := ${1:packagename}mock.NewMock${2:Name}(ctrl)
+defer ctrl.Finish()
 ${0:${VISUAL}}
 endsnippet
 
@@ -506,4 +506,12 @@ endsnippet
 
 snippet aserr "req error"
 assert.Equal(t, tt.wantErr, err != nil, err)${0:${VISUAL}}
+endsnippet
+
+snippet log "info logging"
+logger.L().Info(${1:"message"})${0:${VISUAL}}
+endsnippet
+
+snippet logc "info logging"
+logger.C(ctx).Info(${1:"message"})${0:${VISUAL}}
 endsnippet

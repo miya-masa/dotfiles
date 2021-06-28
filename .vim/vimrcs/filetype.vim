@@ -118,6 +118,9 @@ augroup go
   autocmd BufWritePre *.go :silent call CocAction('runCommand', 'editor.action.organizeImport')
   autocmd FileType go command! -nargs=0 GoGenerate :Dispatch! go generate %:p:h
   autocmd FileType go command! -nargs=0 GoGenerateTest :CocCommand go.test.generate.exported
+  autocmd FileType go command! -nargs=0 GoGenerateTestFunc :CocCommand go.test.generate.function
+  autocmd FileType go command! -nargs=* GoAddTag :CocCommand go.tags.add <args>
+  autocmd FileType go command! -nargs=* GoRemoveTag :CocCommand go.tags.remove <args>
   autocmd FileType go command! -nargs=0 GoImpl :CocCommand go.impl.cursor
 
   " Show by default 4 spaces for a tab
@@ -130,7 +133,9 @@ augroup go
   " :GoTest
   " :GoTestFunc
   autocmd FileType go nnoremap <Leader>gf :TestNearest<CR>
+  autocmd FileType go nnoremap <Leader>ggf :TestNearest -tags integration<CR>
   autocmd FileType go nnoremap <leader>gt :TestFile<CR>
+  autocmd FileType go nnoremap <Leader>ggt :TestFile -tags integration<CR>
   autocmd FileType go nmap <leader>ca  <Plug>(coc-codeaction)
 
 " GoKeyword
@@ -170,5 +175,31 @@ augroup END
 augroup yaml
   autocmd!
   autocmd Filetype yaml setlocal foldmethod=indent
+augroup END
+" }}}
+"
+"
+
+if !exists("g:quickrun_config")
+  let g:quickrun_config={}
+endif
+
+" Rust {{{
+augroup rust
+  autocmd!
+
+  autocmd FileType rust nnoremap <Leader>gf :TestNearest<CR>
+  autocmd FileType rust nnoremap <Leader>ggf :TestNearest<CR>
+  autocmd FileType rust nnoremap <leader>gt :TestFile<CR>
+  autocmd FileType rust nnoremap <Leader>ggt :TestFile<CR>
+  autocmd FileType rust nmap <leader>ca  <Plug>(coc-codeaction)
+
+" GoKeyword
+  autocmd FileType rust set iskeyword=a-z,A-Z,48-57,&,*
+  autocmd FileType rust nnoremap <silent> <Leader>sj :SplitjoinJoin <CR>
+  autocmd FileType rust nnoremap <silent> <Leader>ss :SplitjoinSplit <CR>
+
+  autocmd BufNewFile,BufRead *.rs let g:quickrun_config.rust = {'exec' : 'cargo run'}
+
 augroup END
 " }}}
