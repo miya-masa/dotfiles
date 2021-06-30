@@ -290,9 +290,9 @@ let g:NERDTreeMapJumpNextSibling=""
 " {{{ Plug 'janko/vim-test'
 let test#strategy = "dispatch"
 let test#go#gotest#options = {
-  \ 'nearest': '-count=1',
-  \ 'file':    '-count=1',
-  \ 'suite':   '-count=1',
+  \ 'nearest': '-count=1 -timeout=3s',
+  \ 'file':    '-count=1 -timeout=10s',
+  \ 'suite':   '-count=1 -timeout=2m',
 \}
 " }}}
 "  Plug 'kana/vim-operator-replace' {{{
