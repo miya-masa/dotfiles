@@ -66,6 +66,8 @@ _install() {
     libseccomp-dev \
     libjansson-dev \
     libyaml-dev \
+    xsel \
+    keychain \
     libxml2-dev
   sudo pip3 install pynvim
   sudo npm install -g neovim
