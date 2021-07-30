@@ -20,7 +20,6 @@ Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Shougo/vinarise.vim'
 Plug 'SirVer/ultisnips'
 Plug 'VincentCordobes/vim-translate'
-Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'airblade/vim-rooter'
 Plug 'aklt/plantuml-syntax'
 Plug 'antoinemadec/coc-fzf'
@@ -58,7 +57,6 @@ Plug 'Yggdroot/indentLine'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'raghur/vim-ghost', {'do': ':GhostInstall'}
 Plug 'ryanoasis/vim-devicons'
-Plug 'preservim/nerdtree'
 Plug 'sebdah/vim-delve'
 Plug 'shinchu/lightline-gruvbox.vim'
 Plug 'simeji/winresizer'
@@ -86,6 +84,9 @@ Plug 'kamykn/popup-menu.nvim'
 Plug 'airblade/vim-gitgutter'
 Plug 'tyru/open-browser.vim'
 Plug 'tyru/operator-camelize.vim'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+Plug 'kyoh86/vim-go-coverage'
+
 
 call plug#end()
 " }}}
@@ -290,8 +291,8 @@ let g:NERDTreeMapJumpNextSibling=""
 " {{{ Plug 'janko/vim-test'
 let test#strategy = "dispatch"
 let test#go#gotest#options = {
-  \ 'nearest': '-count=1 -timeout=3s',
-  \ 'file':    '-count=1 -timeout=10s',
+  \ 'nearest': '-count=1 -timeout=10s',
+  \ 'file':    '-count=1 -timeout=30s',
   \ 'suite':   '-count=1 -timeout=2m',
 \}
 " }}}
@@ -346,5 +347,16 @@ command! -bang -nargs=* Rg
   \   'rg --column --line-number --no-heading --color=always --hidden --iglob ''!.git'' --smart-case -- '.shellescape(<q-args>), 1,
   \   fzf#vim#with_preview(), <bang>0)
 
-" Plug 'coc-explorer' {{{
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  highlight = {
+    enable = true
+  }
+}
+EOF
+" }}}
+"
+" Plug 'iamcco/markdown-preview.nvim'
+let g:mkdp_open_to_the_world = 1
 " }}}

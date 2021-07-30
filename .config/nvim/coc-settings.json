@@ -1,6 +1,5 @@
 {
   "coc.preferences.enableMarkdown": true,
-  "coc.preferences.previewAutoClose": false,
   "coc.preferences.jumpCommand": "split",
   "coc.preferences.currentFunctionSymbolAutoUpdate": true,
   "git.addedSign.hlGroup": "GitGutterAdd",
