@@ -86,7 +86,7 @@ Plug 'tyru/open-browser.vim'
 Plug 'tyru/operator-camelize.vim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}  " We recommend updating the parsers on update
 Plug 'kyoh86/vim-go-coverage'
-
+Plug 'mzlogin/vim-markdown-toc'
 
 call plug#end()
 " }}}
@@ -359,4 +359,11 @@ EOF
 "
 " Plug 'iamcco/markdown-preview.nvim'
 let g:mkdp_open_to_the_world = 1
+let g:mkdp_preview_options = {
+      \ 'uml': {
+      \  'server': 'http://plantuml.server.internal:8989'
+      \ },
+    \ }
 " }}}
+
+

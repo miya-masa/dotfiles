@@ -9,7 +9,7 @@
   "git.changeRemovedSign.hlGroup": "GitGutterChangeDelete",
   "explorer.icon.enableNerdfont": true,
   "explorer.file.showHiddenFiles": true,
-  "explorer.file.autoReveal": true,
+  "explorer.file.reveal.auto": true,
   "snippets.ultisnips.directories": [
     "UltiSnips",
     "gosnippets/UltiSnips"

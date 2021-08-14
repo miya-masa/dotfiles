@@ -209,3 +209,6 @@ fi
 [[ ! -f ~/.cargo/env ]] || source ~/.cargo/env
 
 export PATH="$HOME/.poetry/bin:$PATH"
+
+export PATH="$HOME/.rbenv/bin:$PATH"
+[[ ! -f ~/.rbenv/rbenv ]] || eval "$(rbenv init - zsh)"
