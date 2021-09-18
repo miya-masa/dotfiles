@@ -7,7 +7,6 @@ tap "universal-ctags/universal-ctags"
 tap "z80oolong/tmux"
 tap "zaquestion/tap"
 brew "bash-snippets"
-brew "python", link: false
 brew "cairo"
 brew "certbot"
 brew "cmake"
