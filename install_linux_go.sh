@@ -44,7 +44,7 @@ HEREDOC
 # Program Functions
 ###############################################################################
 
-GOVERSION=1.16
+GOVERSION=1.17
 
 _install() {
   sudo rm -rf /usr/local/go

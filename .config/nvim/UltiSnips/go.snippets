@@ -115,6 +115,13 @@ snippet mockgen "generate mock"
 ${0:${VISUAL}}
 endsnippet
 
+
+snippet mocklygen "generate mock"
+//go:generate mockery --name=${1:IF} --output $\{GOPACKAGE\}mock --outpkg $\{GOPACKAGE\}mock
+${0:${VISUAL}}
+endsnippet
+
+
 snippet gomock "gomock"
 ctrl := gomock.NewController(t)
 defer ctrl.Finish()

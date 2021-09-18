@@ -91,7 +91,7 @@ Plug 'mzlogin/vim-markdown-toc'
 call plug#end()
 " }}}
 "  neoclide/coc.nvim {{{
-let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-python', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh', 'coc-explorer']
+let g:coc_global_extensions = ['coc-dictionary', 'coc-emmet', 'coc-git', 'coc-go', 'coc-java', 'coc-json', 'coc-lists', 'coc-snippets', 'coc-sql', 'coc-word', 'coc-yaml', 'coc-sh', 'coc-explorer', 'coc-pyright']
 
 " }}}
 " Plugin UltiSnips {{{
@@ -361,9 +361,8 @@ EOF
 let g:mkdp_open_to_the_world = 1
 let g:mkdp_preview_options = {
       \ 'uml': {
-      \  'server': 'http://plantuml.server.internal:8989'
+      \  'server': 'http://plantuml-server.internal:8989'
       \ },
     \ }
 " }}}
-
-
+"

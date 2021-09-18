@@ -14,7 +14,11 @@
     "UltiSnips",
     "gosnippets/UltiSnips"
   ],
-  "python.jediEnabled": false,
+  "python.venvPath": "./.env",
+  "python.pythonPath": "./.env/bin/python3",
+  "pyright.organizeimports.provider": "isort",
+  "python.formatting.provider": "autopep8",
+  "python.formatting.autopep8Path": "~/.local/bin/autopep8",
   "go.goplsOptions": {
     "buildFlags": [
       "-tags=integration"

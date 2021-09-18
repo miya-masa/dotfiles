@@ -13,3 +13,9 @@ colors
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 [ -f ~/.gvm/scripts/gvm ] && source ~/.gvm/scripts/gvm && gvm use master
 export PATH="/usr/local/opt/mysql-client/bin:$PATH"
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+if [[ -x "`which pyenv`" ]]; then
+  export PATH="$(pyenv root)/shims:$PATH"
+  eval "$(pyenv init -)"
+fi

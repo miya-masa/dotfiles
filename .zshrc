@@ -212,3 +212,7 @@ export PATH="$HOME/.poetry/bin:$PATH"
 
 export PATH="$HOME/.rbenv/bin:$PATH"
 [[ ! -f ~/.rbenv/rbenv ]] || eval "$(rbenv init - zsh)"
+
+export PATH="$HOME/.local/bin:$PATH"
+
+eval "$(pyenv init -)"
