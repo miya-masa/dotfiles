@@ -132,10 +132,20 @@ augroup go
   " autocmd FileType go nnoremap <Leader>gc <Plug>(go-coverage-toggle)
   " :GoTest
   " :GoTestFunc
-  autocmd FileType go nnoremap <Leader>gf :TestNearest<CR>
-  autocmd FileType go nnoremap <Leader>ggf :TestNearest -tags integration<CR>
-  autocmd FileType go nnoremap <leader>gt :TestFile<CR>
-  autocmd FileType go nnoremap <Leader>ggt :TestFile -tags integration<CR>
+  autocmd FileType go nnoremap ti<C-n> :cd %:p:h<crB:pwd<cr>:TestNearest -tags integration<CR>
+  autocmd FileType go nnoremap ti<C-f> :cd %:p:h<cr>:pwd<cr>:TestFile -tags integration<CR>
+  function! DebugNearest()
+    let g:test#go#runner = 'delve'
+    TestNearest
+    unlet g:test#go#runner
+  endfunction
+  autocmd FileType go nmap <silent> t<C-d> :cd %:p:h<crB:pwd<cr>:call DebugNearest()<CR>
+  function! DebugNearestIntegration()
+    let g:test#go#runner = 'delve'
+    TestNearest -tags integration
+    unlet g:test#go#runner
+  endfunction
+  autocmd FileType go nmap <silent> ti<C-d> :cd %:p:h<crB:pwd<cr>:call DebugNearestIntegration()<CR>
   autocmd FileType go nmap <leader>ca  <Plug>(coc-codeaction)
 
 " GoKeyword
@@ -188,10 +198,6 @@ endif
 augroup rust
   autocmd!
 
-  autocmd FileType rust nnoremap <Leader>gf :TestNearest<CR>
-  autocmd FileType rust nnoremap <Leader>ggf :TestNearest<CR>
-  autocmd FileType rust nnoremap <leader>gt :TestFile<CR>
-  autocmd FileType rust nnoremap <Leader>ggt :TestFile<CR>
   autocmd FileType rust nmap <leader>ca  <Plug>(coc-codeaction)
 
 " GoKeyword

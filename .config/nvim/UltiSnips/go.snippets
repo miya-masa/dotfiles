@@ -234,7 +234,7 @@ endsnippet
 
 
 snippet ffm "mark logging"
-fmt.Printf("=========%s=========\n", "${1:Hello}")
+fmt.Printf("DEBUG =========%s=========\n", "${1:Hello}")
 ${0:${VISUAL}}
 endsnippet
 
@@ -397,17 +397,17 @@ endsnippet
 
 # Fmt Printf debug
 snippet ff "fmt.Printf(...)"
-fmt.Printf("$1 = %+v\n", ${1:${VISUAL}})
+fmt.Printf("DEBUG $1 = %+v\n", ${1:${VISUAL}})
 endsnippet
 
 # Fmt Printf debug with hash
 snippet ffh "fmt.Printf(#...) hash"
-fmt.Printf("$1 = %#v\n", ${1:${VISUAL}})
+fmt.Printf("DEBUG $1 = %#v\n", ${1:${VISUAL}})
 endsnippet
 
 # Fmt Println debug
 snippet fn "fmt.Println(...)"
-fmt.Println("${1:${VISUAL}}")
+fmt.Println("DEBUG ${1:${VISUAL}}")
 endsnippet
 
 # select
@@ -522,3 +522,60 @@ endsnippet
 snippet logc "info logging"
 logger.C(ctx).Info(${1:"message"})${0:${VISUAL}}
 endsnippet
+
+snippet dateex "DataTimeExample"
+2000-01-01T00:00:00Z
+endsnippet
+
+snippet dateexstr "DataTimeExample"
+"2000-01-01T00:00:00Z"
+endsnippet
+
+snippet dateexgo "DataTimeExample as go time"
+time.Date(2000, 1, 1, 0, 0, 0, 0, time.UTC)
+endsnippet
+
+snippet freeport "get free port"
+func GetFreePortT(t *testing.T) (int) {
+	t.Helper()
+	port, err := GetFreePort()
+	if err != nil {
+		t.Fatal(err)
+	}
+	return port
+}
+func GetFreePort() (int, error) {
+	addr, err := net.ResolveTCPAddr("tcp", "localhost:0")
+	if err != nil {
+		return 0, err
+	}
+
+	l, err := net.ListenTCP("tcp", addr)
+	if err != nil {
+		return 0, err
+	}
+	defer l.Close()
+	return l.Addr().(*net.TCPAddr).Port, nil
+}
+${0:${VISUAL}}
+endsnippet
+
+
+snippet setnow "Set Now Fixture"
+func SetNow(t *testing.T, fix time.Time) {
+	org := timeNow
+	timeNow = func() time.Time { return fix }
+	t.Cleanup(func() {
+		timeNow = org
+	})
+}
+${0:${VISUAL}}
+endsnippet
+
+snippet testm "Test Main"
+func TestMain(m *testing.M) {
+	${0:${VISUAL}}
+	os.Exit(m.Run())
+}
+endsnippet
+

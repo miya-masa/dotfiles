@@ -13,19 +13,14 @@ endif
 " }}}
 " VimPlug Start {{{
 call plug#begin('~/.vim/plugged')
-if !has('nvim')
-  Plug 'roxma/vim-hug-neovim-rpc'
-endif
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'Shougo/vinarise.vim'
 Plug 'SirVer/ultisnips'
 Plug 'VincentCordobes/vim-translate'
 Plug 'airblade/vim-rooter'
 Plug 'aklt/plantuml-syntax'
-Plug 'antoinemadec/coc-fzf'
 Plug 'bkad/CamelCaseMotion'
 Plug 'bronson/vim-trailing-whitespace'
-Plug 'cespare/vim-toml'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'cocopon/lightline-hybrid.vim'
 Plug 'dhruvasagar/vim-table-mode'
@@ -33,7 +28,6 @@ Plug 'diepm/vim-rest-console'
 Plug 'easymotion/vim-easymotion'
 Plug 'edkolev/tmuxline.vim'
 Plug 'flazz/vim-colorschemes'
-Plug 'google/yapf', { 'rtp': 'plugins/vim', 'for': 'python' }
 Plug 'honza/vim-snippets'
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }}
 Plug 'itchyny/lightline.vim'
@@ -309,13 +303,6 @@ let g:projectionist_heuristics = {
 " Plug 'Plug 'tpope/vim-dispatch'' {{{
 let g:dispatch_compilers = {'go test': 'gotest'}
 " }}}
-" Plug 'antoinemadec/coc-fzf' {{{
-nnoremap <silent> <leader><space>c  :<C-u>CocFzfList commands<CR>
-nnoremap <silent> <leader><space>e  :<C-u>CocFzfList extensions<CR>
-nnoremap <silent> <leader><space>l  :<C-u>CocFzfList location<CR>
-nnoremap <silent> <leader><space>o  :<C-u>CocFzfList outline<CR>
-nnoremap <silent> <leader><space>s  :<C-u>CocFzfList symbols<CR>
-" }}}
 " vim-ghost {{{
 function! s:SetupGhostBuffer()
   set ft=markdown
@@ -359,6 +346,9 @@ EOF
 "
 " Plug 'iamcco/markdown-preview.nvim'
 let g:mkdp_open_to_the_world = 1
+let g:mkdp_port = '39999'
+let g:mkdp_open_ip = 'plantuml-server.internal'
+let g:mkdp_echo_preview_url = 1
 let g:mkdp_preview_options = {
       \ 'uml': {
       \  'server': 'http://plantuml-server.internal:8989'
