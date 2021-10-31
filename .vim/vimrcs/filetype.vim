@@ -132,14 +132,14 @@ augroup go
   " autocmd FileType go nnoremap <Leader>gc <Plug>(go-coverage-toggle)
   " :GoTest
   " :GoTestFunc
-  autocmd FileType go nnoremap ti<C-n> :cd %:p:h<crB:pwd<cr>:TestNearest -tags integration<CR>
-  autocmd FileType go nnoremap ti<C-f> :cd %:p:h<cr>:pwd<cr>:TestFile -tags integration<CR>
+  autocmd FileType go nnoremap ti<C-n> :cd %:p:h<cr>:TestNearest -tags integration -test.timeout=30s<CR>
+  autocmd FileType go nnoremap ti<C-f> :cd %:p:h<cr>:TestFile -tags integration -test.timeout=5m<CR>
   function! DebugNearest()
     let g:test#go#runner = 'delve'
     TestNearest
     unlet g:test#go#runner
   endfunction
-  autocmd FileType go nmap <silent> t<C-d> :cd %:p:h<crB:pwd<cr>:call DebugNearest()<CR>
+  autocmd FileType go nmap <silent> t<C-d> :cd %:p:h<cr>:call DebugNearest()<CR>
   function! DebugNearestIntegration()
     let g:test#go#runner = 'delve'
     TestNearest -tags integration

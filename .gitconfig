@@ -37,3 +37,7 @@
 	useConfigOnly = true
 [init]
 	defaultBranch = main
+[merge]
+	tool = nvimdiff
+[mergetool]
+	keepBackup = false
