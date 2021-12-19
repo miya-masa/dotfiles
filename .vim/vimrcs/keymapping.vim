@@ -19,17 +19,17 @@ nnoremap <Leader><C-T> :Tags<CR>
 nnoremap <Leader>w :w!<CR>
 nnoremap <Leader>tsl V:TranslateVisual<CR>
 nnoremap <Leader>tsr V:TranslateReplace<CR>
-" nnoremap - :NERDTreeToggle<CR>
-nnoremap - :CocCommand explorer<CR>
-" nnoremap <Leader>y :call CocAction('runCommand', 'explorer.doAction', 'closest', ['reveal:0'], [['relative', 0, 'file']])<CR>
-" nnoremap <Leader>y :NERDTreeFind<CR>
-nmap <Leader>gx <Plug>(openbrowser-smart-search)
+nnoremap - :NvimTreeToggle<CR>
+nnoremap <Leader>y :NvimTreeFindFile<CR>
+nnoremap <silent> <Leader>sj :SplitjoinJoin<CR>
+nnoremap <silent> <Leader>ss :SplitjoinSplit<CR>
 " these "Ctrl mappings" work well when Caps Lock is mapped to Ctrl
-nmap <silent> t<C-n> :cd %:p:h<cr>:TestNearest<CR>
-nmap <silent> t<C-f> :cd %:p:h<cr>:TestFile<CR>
-nmap <silent> t<C-s> :cd %:p:h<cr>:TestSuite<CR>
-nmap <silent> t<C-l> :cd %:p:h<cr>:TestLast<CR>
-nmap <silent> t<C-g> :cd %:p:h<cr>:TestVisit<CR>
+nnoremap <silent> t<C-n> :cd %:p:h<cr>:TestNearest<CR>
+nnoremap <silent> t<C-f> :cd %:p:h<cr>:TestFile<CR>
+nnoremap <silent> t<C-s> :cd %:p:h<cr>:TestSuite<CR>
+nnoremap <silent> t<C-l> :cd %:p:h<cr>:TestLast<CR>
+nnoremap <silent> t<C-g> :cd %:p:h<cr>:TestVisit<CR>
+nmap <C-q> <Plug>(quickrun)<CR>
 " }}}
 
 " Terminal Mode {{{

@@ -2,73 +2,83 @@ extends sh
 
 snippet shtmpl "sh template"
 #!/usr/bin/env bash
-#
-# Usage:
-#   script.sh
-#
-# Depends on:
-#  list
-#  of
-#  programs
-#  expected
-#  in
-#  environment
-#
 
 set -o nounset
 set -o errexit
-trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+trap 'echo "Aborting due to errexit on line \$LINENO. Exit code: \$?" >&2' ERR
 set -o errtrace
 set -o pipefail
-IFS=$'\n\t'
+IFS=\$'\n\t'
 
-# $_ME
-#
-# Set to the program's basename.
-_ME=$(basename "${0}")
+endsnippet
 
-###############################################################################
-# Help
-###############################################################################
+snippet sht "sh template"
+#!/usr/bin/env bash
 
-# _print_help()
-#
-# Usage:
-#   _print_help
-#
-# Print the program help information.
-_print_help() {
-  cat <<HEREDOC
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line \$LINENO. Exit code: \$?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=\$'\n\t'
 
-Usage:
-  ${_ME} [<arguments>]
-  ${_ME} -h | --help
+__ME=\$(basename \$0)
+__ScriptVersion="$1"
 
-Options:
-  -h --help  Show this screen.
-HEREDOC
+#===  FUNCTION  ================================================================
+#         NAME:  usage
+#  DESCRIPTION:  Display usage information.
+#===============================================================================
+function usage ()
+{
+  echo "Usage :  \${__ME} [options] [--]
+    Prerequisite
+      - $2
+
+    Options:
+    -h|help       Display this message
+    -v|version    Display script version"
+
 }
 
-###############################################################################
-# Program Functions
-###############################################################################
-
-_sample() {
-  printf "Perform a sample operation.\\n"
+#===  FUNCTION  ================================================================
+#         NAME:  _main
+#===============================================================================
+function _main() {
+  echo "Hello Bash"
 }
 
-###############################################################################
-# Main
-###############################################################################
+#-----------------------------------------------------------------------
+#  Handle command line arguments
+#-----------------------------------------------------------------------
 
-_main() {
-  if [[ "${1:-}" =~ ^-h|--help$  ]]
-  then
-    _print_help
-  else
-    _simple "$@"
-  fi
+while getopts ":hv" opt
+do
+  case \$opt in
+
+  h|help     )  usage; exit 0   ;;
+
+  v|version  )  echo "\${__ME} -- Version \$__ScriptVersion"; exit 0   ;;
+
+  * )  echo -e "\n  Option does not exist : \$OPTARG\n"
+      usage; exit 1   ;;
+
+  esac    # --- end of case ---
+done
+shift \$((\$OPTIND-1))
+_main
+endsnippet
+
+
+snippet func "sh function"
+#===  FUNCTION  ================================================================
+#         NAME: ${1:function_name}
+#  DESCRIPTION: ${2:description}
+#    ARGUMENTS: \$1 ${3:description}
+#               \$2 ${4:description}
+#===============================================================================
+function $1() {
+  ${0:VISUAL}
 }
 
-_main "$@"
 endsnippet

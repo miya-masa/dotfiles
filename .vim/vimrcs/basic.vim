@@ -24,7 +24,6 @@ let g:mapleader = ","
 
 " Preview substitute
 set inccommand=split
-
 set ambiwidth=single
 
 set list
@@ -139,11 +138,11 @@ set softtabstop=2
 set tabstop=4
 
 " Linebreak on 500 characters
-set lbr
+set linebreak
 set tw=500
 
-set ai "Auto indent
-set si "Smart indent
+set autoindent "Auto indent
+set smartindent "Smart indent
 set wrap "Wrap lines
 " }}}
 " => Visual mode related {{{
@@ -171,21 +170,10 @@ map <leader>bd :Bclose<cr>:tabclose<cr>gT
 " Close all the buffers
 map <leader>ba :bufdo bd<cr>
 
-" Useful mappings for managing tabs
-map <leader>tn :tabnew<cr>
-map <leader>to :tabonly<cr>
-map <leader>tc :tabclose<cr>
-map <leader>tm :tabmove
-
 " Let 'tl' toggle between this and the last accessed tab
 let g:lasttab = 1
 nmap <Leader>tl :exe "tabn ".g:lasttab<CR>
 au TabLeave * let g:lasttab = tabpagenr()
-
-
-" Opens a new tab with the current buffer's path
-" Super useful when editing files in the same directory
-map <leader>te :tabedit <c-r>=expand("%:p:h")<cr>/
 
 " Switch CWD to the directory of the open buffer
 map <leader>cd :cd %:p:h<cr>:pwd<cr>
@@ -202,12 +190,10 @@ endtry
 " => Status line {{{
 " Always show the status line
 set laststatus=2
-
 " }}}
 " => Editing mappings {{{
 " Remap VIM 0 to first non-blank character
 map 0 ^
-
 " }}}
 " => Spell checking {{{
 " Pressing ,ss will toggle and untoggle spell checking
@@ -278,12 +264,6 @@ command! -nargs=1 ToHRegA let @a=printf("%0x", <args>)
 command! -nargs=1 ToDRegA let @a=printf("%0d", <args>)
 command! -nargs=1 ToBRegA let @a=printf("%0b", <args>)
 command! Si :call SelfImport()
-
-function! s:insert_sink(line)
-  execute 'normal! o"'. a:line. '"'
-endfunction
-command! Gopkgs :call fzf#run(fzf#wrap({'source': 'gopkgs', 'sink': funcref('s:insert_sink')}))
-
 
 function! SelfImport()
   let bufPath = expand("%:p")
