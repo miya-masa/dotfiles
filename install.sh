@@ -42,6 +42,35 @@ function initialize() {
   if ! has git; then
     sudo apt install -y git
   fi
+  passphrase=""
+
+  SSH_RSA=~/.ssh.id_rsa
+  if [ -s ${SSH_RSA} ]; then
+    if [ ${passphrase} == "" ]; then
+      printf "ssh key passphrase: "
+      read -s passphrase
+    fi
+    ssh-keygen -P ${passphrase} -f ${SSH_RSA}
+  fi
+
+  SSH_ECDSA=~/.ssh.id_ecdsa
+  if [ -s ${SSH_ECDSA} ]; then
+    if [ ${passphrase} == "" ]; then
+      printf "ssh key passphrase: "
+      read -s passphrase
+    fi
+    ssh-keygen -t ecdsa -b 384 -P ${passphrase} -f ${SSH_ECDSA}
+  fi
+
+  SSH_ED25519=~/.ssh/id_ed25519
+  if [ -s ${SSH_ED25519} ]; then
+    if [ ${passphrase} == "" ]; then
+      printf "ssh key passphrase: "
+      read -s passphrase
+    fi
+    ssh-keygen -t ed25519 -P ${passphrase} -f ${SSH_ED25519}
+  fi
+
   git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
   cd ${DOTFILES_DIRECTORY}
   git remote set-url origin git@github.com:miya-masa/dotfiles.git
@@ -61,6 +90,8 @@ function _initialize_linux() {
     curl \
     build-essential \
     dbus-user-session \
+    fcitx \
+    fcitx-mozc \
     gawk \
     gcc make \
     gnome-tweak-tool \
