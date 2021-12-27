@@ -131,7 +131,12 @@ function _initialize_linux() {
   sudo chown $USER:$USER  -R /usr/local/go
   rm go${GOVERSION}.linux-amd64.tar.gz
 
-  curl https://get.docker.com | sh
+  if ! has docker ; then
+    curl -fsSL https://get.docker.com | sh
+  fi
+  curl -fsSL https://get.docker.com/rootless | sh
+
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
   deploy
 
@@ -153,6 +158,8 @@ function password() {
 
 function deploy() {
   mkdir -p ${HOME}/.tmux
+  mkdir -p ${HOME}/.vim
+  mkdir -p ${HOME}/.config
   ln -fs ${PWD}/.tmux/tmuxline.conf ${HOME}/.tmux/tmuxline.conf
   ln -fs ${PWD}/.tmux.conf ${HOME}/.tmux.conf
   ln -fs ${PWD}/.tmux.conf.local ${HOME}/.tmux.conf.local
@@ -162,7 +169,7 @@ function deploy() {
   ln -fs ${PWD}/.p10k.zsh ${HOME}/.p10k.zsh
   ln -fs ${PWD}/.zprofile ${HOME}/.zprofile
   ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
-  ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim/vimrcs
+  ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim
   ln -fs ${PWD}/.config/nvim ${HOME}/.config
   ln -fs ${PWD}/.config/alacritty ${HOME}/.config
 }

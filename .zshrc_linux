@@ -9,5 +9,4 @@ eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
 [[ -f $HOME/.keychain/${HOST}-sh ]] && \
 	source $HOME/.keychain/${HOST}-sh
-[[ -s ./usr/share/autojump/autojump.zsh ]] && ./usr/share/autojump/autojump.zsh
 autoload -U compinit && compinit -u

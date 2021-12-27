@@ -16,6 +16,33 @@ export PAGER=less
 export EDITOR=nvim
 export TERM=screen-256color
 
+export GOPATH="$HOME/go"
+export PATH=$GOPATH/bin:$PATH:/usr/local/go/bin
+export XDG_CONFIG_HOME=$HOME/.config
+export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
+export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
+export PATH=${PATH}:${HOME}/bin
+export TERM="xterm-256color"
+[ -f ~/.zprofile.local ] && source ~/.zprofile.local
+[ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+[ -f ~/.gvm/scripts/gvm ] && source ~/.gvm/scripts/gvm && gvm use master
+export PATH="/usr/local/opt/mysql-client/bin:$PATH"
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.poetry/bin:$PATH"
+export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="/usr/local/opt/gettext/bin:$PATH"
+export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
+export NVM_DIR="$HOME/.nvm"
+
+if [[ -x "`which pyenv`" ]]; then
+  export PATH="$(pyenv root)/shims:$PATH"
+  eval "$(pyenv init -)"
+fi
+[[ -s /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
+
+
 ###
 ### history
 ###
@@ -70,10 +97,9 @@ bindkey "^p" reverse-menu-complete
 bindkey "^n" menu-complete
 bindkey '^e' anyframe-widget-checkout-git-branch
 bindkey '^g' anyframe-widget-cd-ghq-repository
-bindkey '^b' anyframe-widget-cdr
 bindkey '^x^i' anyframe-widget-insert-git-branch
 bindkey '^x^f' anyframe-widget-insert-filename
-bindkey -v
+bindkey '^r' anyframe-widget-execute-history
 
 zstyle ':completion:*:default' menu select=1
 zstyle ":anyframe:selector:" use fzf
@@ -209,7 +235,6 @@ fi
 [[ ! -f ~/.rbenv/rbenv ]] || eval "$(rbenv init - zsh)"
 ### End of Zinit's installer chunk
 
-export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
