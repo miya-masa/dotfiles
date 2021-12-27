@@ -24,10 +24,11 @@ HISTSIZE=500000
 SAVEHIST=500000
 
 # Check if zinit is installed
-if [[ ! -d ~/.zinit ]]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+if [[ ! -d ${ZINIT_HOME} ]]; then
+  sh -c "$(curl -fsSL https://git.io/zinit-install)"
 fi
-source ~/.zinit/bin/zinit.zsh
+source "${ZINIT_HOME}/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 autoload -Uz compinit
@@ -48,13 +49,13 @@ zinit snippet OMZT::gnzh
 # Load normal GitHub plugin with theme depending on OMZ Git library
 zinit light "dracula/zsh"
 
-zinit wait lucid light-mode for \
-  atinit"zicompinit; zicdreplay" \
-      zdharma/fast-syntax-highlighting \
-  atload"_zsh_autosuggest_start" \
-      zsh-users/zsh-autosuggestions \
-  blockf atpull'zinit creinstall -q .' \
-      zsh-users/zsh-completions
+zinit wait lucid for \
+ atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
+    zdharma-continuum/fast-syntax-highlighting \
+ blockf \
+    zsh-users/zsh-completions \
+ atload"!_zsh_autosuggest_start" \
+    zsh-users/zsh-autosuggestions
 
 zinit ice depth=1; zinit light romkatv/powerlevel10k
 
@@ -214,5 +215,4 @@ export PATH="$HOME/.rbenv/bin:$PATH"
 [[ ! -f ~/.rbenv/rbenv ]] || eval "$(rbenv init - zsh)"
 
 export PATH="$HOME/.local/bin:$PATH"
-
-eval "$(pyenv init -)"
+### End of Zinit's installer chunk
