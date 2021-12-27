@@ -118,7 +118,6 @@ function _initialize_linux() {
   sudo rm -rf ctags
   if ! has brew ; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval $(~/.linuxbrew/bin/brew shellenv)
     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
   fi
   brew bundle --file=./Brewfile_linux
