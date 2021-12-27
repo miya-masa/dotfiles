@@ -92,6 +92,7 @@ function _initialize_linux() {
     uuid-dev \
     xsel \
     zlib1g-dev \
+    bluez* \
     zsh
 
   PYENV_ROOT=~/.pyenv
