@@ -163,6 +163,9 @@ function _initialize_linux() {
   sudo chown $USER:$USER  -R /usr/local/go
   rm go${GOVERSION}.linux-amd64.tar.gz
 
+  # goget install
+  /usr/local/go/bin/go install github.com/nametake/golangci-lint-langserver@latest
+
   if ! has docker ; then
     curl -fsSL https://get.docker.com | sh
   fi
