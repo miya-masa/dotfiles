@@ -136,20 +136,28 @@ function _initialize_linux() {
   fi
   curl -fsSL https://get.docker.com/rootless | sh
 
-  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  if [ ! -d ~/.tmux/plugins/tpm ] {
+    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+  }
 
-  git clone https://github.com/ryanoasis/nerd-fonts.git --depth 1 /tmp/nerd-fonts
-  cd /tmp/nerd-fonts
-  ./install.sh IBMPlexMono
+  if [ ! -d ~/nerd-fonts ] {
+    git clone https://github.com/ryanoasis/nerd-fonts.git --depth 1 ~/nerd-fonts
+    cd ~/nerd-fonts
+    ./install.sh IBMPlexMono
+  }
 
-  echo "Install albert"
-  sudo rpm --import "https://build.opensuse.org/projects/home:manuelschneid3r/public_key"
-  curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
-  UBUNTU_VERSION=20.04
-  echo "deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_${UBUNTU_VERSION}/ /" | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
-  sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_${UBUNTU_VERSION}/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
-  sudo apt update -y
-  sudo apt install -y albert
+
+  if ! has albert {
+    echo "Install albert"
+    sudo rpm --import "https://build.opensuse.org/projects/home:manuelschneid3r/public_key"
+    curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
+    UBUNTU_VERSION=20.04
+    echo "deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_${UBUNTU_VERSION}/ /" | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
+    sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_${UBUNTU_VERSION}/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
+    sudo apt update -y
+    sudo apt install -y albert
+  }
+
 
   deploy
 
