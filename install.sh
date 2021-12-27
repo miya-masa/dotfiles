@@ -165,7 +165,7 @@ function _initialize_linux() {
   passphrase=""
   SSH_RSA=~/.ssh/id_rsa
   if [ ! -s ${SSH_RSA} ]; then
-    if [ ${passphrase} = "" ]; then
+    if [ "${passphrase}" = "" ]; then
       printf "ssh key passphrase: "
       read -s passphrase
     fi
@@ -174,7 +174,7 @@ function _initialize_linux() {
 
   SSH_ECDSA=~/.ssh/id_ecdsa
   if [ ! -s ${SSH_ECDSA} ]; then
-    if [ ${passphrase} = "" ]; then
+    if [ "${passphrase}" = "" ]; then
       printf "ssh key passphrase: "
       read -s passphrase
     fi
@@ -183,7 +183,7 @@ function _initialize_linux() {
 
   SSH_ED25519=~/.ssh/id_ed25519
   if [ ! -s ${SSH_ED25519} ]; then
-    if [ ${passphrase} = "" ]; then
+    if [ "${passphrase}" = "" ]; then
       printf "ssh key passphrase: "
       read -s passphrase
     fi
