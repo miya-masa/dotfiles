@@ -92,8 +92,8 @@ function _initialize_linux() {
   fi
   PYENV_SHIMS=${PYENV_ROOT}/shims
   PYTHON_VERSION=3.10.1
-  pyenv install -f ${PYTHON_VERSION}
-  pyenv global ${PYTHON_VERSION}
+  ${PYENV_ROOT}/bin/pyenv install -f ${PYTHON_VERSION}
+  ${PYENV_ROOT}/bin/pyenv global ${PYTHON_VERSION}
   ${PYENV_SHIMS}/python -V
   ${PYENV_SHIMS}/python -m pip install --upgrade pip
   ${PYENV_SHIMS}/pip install pynvim
@@ -126,6 +126,8 @@ function _initialize_linux() {
   sudo tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz
   sudo chown $USER:$USER  -R /usr/local/go
   rm go${GOVERSION}.linux-amd64.tar.gz
+
+  curl https://get.docker.com | sh
 
   deploy
 
