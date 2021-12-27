@@ -66,3 +66,12 @@ secring.*
 ### custom
 /**/UltiSnips_local/*
 !/**/UltiSnips_local/.gitkeep
+
+# Created by https://www.toptal.com/developers/gitignore/api/homebrew
+# Edit at https://www.toptal.com/developers/gitignore?templates=homebrew
+
+### Homebrew ###
+Brewfile.lock.json
+Brewfile_linux.lock.json
+
+# End of https://www.toptal.com/developers/gitignore/api/homebrew

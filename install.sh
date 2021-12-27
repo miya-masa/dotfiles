@@ -34,19 +34,18 @@ function has() {
 }
 
 function initialize() {
-  if [[ -d ${DOTFILES_DIRECTORY} ]]; then
-    echo "already exist ${DOTFILES_DIRECTORY}"
-    exit 1
-  fi
   password
   echo ${password} | sudo -S apt update -y
-  if ! has git; then
-    sudo apt install -y git
-  fi
 
-  git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
+  if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
+    if ! has git; then
+      sudo apt install -y git
+    fi
+    git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
+    cd ${DOTFILES_DIRECTORY}
+    git remote set-url origin git@github.com:miya-masa/dotfiles.git
+  fi
   cd ${DOTFILES_DIRECTORY}
-  git remote set-url origin git@github.com:miya-masa/dotfiles.git
   if [[ ${UNAME} == "Linux" ]]; then
     _initialize_linux
   else
@@ -107,10 +106,12 @@ function _initialize_linux() {
   ${PYENV_SHIMS}/python -V
   ${PYENV_SHIMS}/python -m pip install --upgrade pip
   ${PYENV_SHIMS}/pip install pynvim
+
+  echo "Install NVM"
   NVM_VERSION=v0.39.1
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash
   export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash
+  [ -s "${NVM_DIR}/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
   NODE_VERSION=v16.13.1
   nvm install ${NODE_VERSION}
   node -v
