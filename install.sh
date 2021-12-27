@@ -86,8 +86,8 @@ function _initialize_linux() {
     zlib1g-dev \
     zsh
 
-  ${PYENV_ROOT}=~/.pyenv
-  if [[ ! -d ~/.pyenv ]] ; then
+  PYENV_ROOT=~/.pyenv
+  if [[ ! -d ${PYENV_ROOT} ]] ; then
     curl https://pyenv.run | bash
   fi
   PYENV_SHIMS=${PYENV_ROOT}/shims
