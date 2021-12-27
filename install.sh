@@ -145,6 +145,7 @@ function _initialize_linux() {
   fi
   if ! has albert ; then
     echo "Install albert"
+
     sudo rpm --import "https://build.opensuse.org/projects/home:manuelschneid3r/public_key"
     curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
     UBUNTU_VERSION=20.04
