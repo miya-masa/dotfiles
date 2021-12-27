@@ -93,12 +93,13 @@ function _initialize_linux() {
   PYENV_SHIMS=${PYENV_ROOT}/shims
   PYTHON_VERSION=3.10.1
 
-  ${PYENV_ROOT}/bin/pyenv install -f ${PYTHON_VERSION}
+  ${PYENV_ROOT}/bin/pyenv install --skip-existing ${PYTHON_VERSION}
   ${PYENV_ROOT}/bin/pyenv global ${PYTHON_VERSION}
   ${PYENV_SHIMS}/python -V
   ${PYENV_SHIMS}/python -m pip install --upgrade pip
   ${PYENV_SHIMS}/pip install pynvim
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+  NVM_VERSION=v0.39.1
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash
   export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   NODE_VERSION=v16.13.1
