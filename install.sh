@@ -225,6 +225,7 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.vim/vimrcs ${HOME}/.vim
   ln -fs ${DOTFILES_DIRECTORY}/.config/nvim ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/alacritty ${HOME}/.config
+  ln -fs ${DOTFILES_DIRECTORY}/.fzf.zsh ${HOME}/.fzf.zsh
 }
 
 #-----------------------------------------------------------------------
