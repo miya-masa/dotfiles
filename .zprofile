@@ -23,3 +23,4 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="/usr/local/opt/gettext/bin:$PATH"
+export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock

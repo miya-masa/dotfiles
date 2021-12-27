@@ -59,6 +59,7 @@ function _initialize_linux() {
     asciidoc \
     curl \
     build-essential \
+    dbus-user-session \
     gawk \
     gcc make \
     gnome-tweak-tool \
@@ -82,6 +83,7 @@ function _initialize_linux() {
     pkg-config autoconf automake \
     ripgrep \
     tk-dev \
+    uidmap \
     uuid-dev \
     xsel \
     zlib1g-dev \
@@ -134,7 +136,7 @@ function _initialize_linux() {
   deploy
 
   chsh -s $(which zsh)
-  echo "Successful!! Restart your terminal."
+  echo "Successful!! Restart your machine."
 }
 
 
@@ -160,9 +162,9 @@ function deploy() {
   ln -fs ${PWD}/.p10k.zsh ${HOME}/.p10k.zsh
   ln -fs ${PWD}/.zprofile ${HOME}/.zprofile
   ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
-  ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim
-  ln -Fs ${PWD}/.config/nvim ${HOME}/.config
-  ln -Fs ${PWD}/.config/alacritty ${HOME}/.config
+  ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim/vimrcs
+  ln -fs ${PWD}/.config/nvim ${HOME}/.config
+  ln -fs ${PWD}/.config/alacritty ${HOME}/.config
 }
 
 #-----------------------------------------------------------------------
