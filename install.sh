@@ -10,6 +10,7 @@ IFS=$'\n\t'
 __ScriptVersion="v0.1.0"
 UNAME=$(uname)
 DOTFILES_DIRECTORY=${DOTFILES_DIRECTORY:-~/dotfiles}
+DOTFILES_BRANCH=${DOTFILES_BRANCH:-master}
 
 #===  FUNCTION  ================================================================
 #         NAME:  usage
@@ -41,7 +42,7 @@ function initialize() {
   if ! has git; then
     sudo apt install -y git
   fi
-  git clone http://github.com/miya-masa/dotfiles.git ${DOTFILES_DIRECTORY}
+  git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
   cd ${DOTFILES_DIRECTORY}
   if [[ ${UNAME} == "Linux" ]]; then
     _initialize_linux
