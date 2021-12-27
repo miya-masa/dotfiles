@@ -135,19 +135,15 @@ function _initialize_linux() {
     curl -fsSL https://get.docker.com | sh
   fi
   curl -fsSL https://get.docker.com/rootless | sh
-
-  if [ ! -d ~/.tmux/plugins/tpm ] {
+  if [ ! -d ~/.tmux/plugins/tpm ] ; then
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-  }
-
-  if [ ! -d ~/nerd-fonts ] {
+  fi 
+  if [ ! -d ~/nerd-fonts ] ; then
     git clone https://github.com/ryanoasis/nerd-fonts.git --depth 1 ~/nerd-fonts
     cd ~/nerd-fonts
     ./install.sh IBMPlexMono
-  }
-
-
-  if ! has albert {
+  fi
+  if ! has albert ; then
     echo "Install albert"
     sudo rpm --import "https://build.opensuse.org/projects/home:manuelschneid3r/public_key"
     curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
@@ -156,8 +152,7 @@ function _initialize_linux() {
     sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_${UBUNTU_VERSION}/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
     sudo apt update -y
     sudo apt install -y albert
-  }
-
+  fi 
 
   deploy
 
