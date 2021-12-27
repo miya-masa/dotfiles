@@ -5,7 +5,7 @@ complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/vault/1.3.2/bin/vault v
 eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
 [[ -f $(which keychain 2> /dev/null) ]] && \
-	keychain --nogui --quiet ~/.ssh/id_ecdsa ~/.ssh/id_rsa ~/.ssh/miyauchi_key
+	keychain --nogui --quiet ~/.ssh/id_ecdsa ~/.ssh/id_rsa ~/.ssh/id_ed25519
 
 [[ -f $HOME/.keychain/${HOST}-sh ]] && \
 	source $HOME/.keychain/${HOST}-sh
