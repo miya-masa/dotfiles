@@ -37,7 +37,6 @@ brew "plantuml"
 brew "protobuf"
 brew "ranger", link: false
 brew "rbenv"
-brew "rename"
 brew "the_silver_searcher"
 brew "tig"
 brew "tmux-mem-cpu-load"

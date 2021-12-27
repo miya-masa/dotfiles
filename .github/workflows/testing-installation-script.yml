@@ -1,0 +1,16 @@
+name: Testing Installation script
+on:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 17 * * *'
+jobs:
+  test-installing-script:
+    runs-on: ubuntu-latest
+    env:
+      SSH_PASSPHRASE: super-secret
+    steps:
+      - run: sudo apt install -y curl
+      - run: DOTFILES_BRANCH=${GITHUB_REF_NAME} /bin/bash <(curl -L https://raw.github.com/miya-masa/dotfiles/${GITHUB_REF_NAME}/install.sh)
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+
