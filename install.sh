@@ -177,18 +177,18 @@ function deploy() {
   mkdir -p ${HOME}/.tmux
   mkdir -p ${HOME}/.vim
   mkdir -p ${HOME}/.config
-  ln -fs ${PWD}/.tmux/tmuxline.conf ${HOME}/.tmux/tmuxline.conf
-  ln -fs ${PWD}/.tmux.conf ${HOME}/.tmux.conf
-  ln -fs ${PWD}/.tmux.conf.local ${HOME}/.tmux.conf.local
-  ln -fs ${PWD}/.zshrc ${HOME}/.zshrc
-  ln -fs ${PWD}/.zshrc_linux ${HOME}/.zshrc_linux
-  ln -fs ${PWD}/.zshrc_darwin ${HOME}/.zshrc_darwin
-  ln -fs ${PWD}/.p10k.zsh ${HOME}/.p10k.zsh
-  ln -fs ${PWD}/.zprofile ${HOME}/.zprofile
-  ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
-  ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim
-  ln -fs ${PWD}/.config/nvim ${HOME}/.config
-  ln -fs ${PWD}/.config/alacritty ${HOME}/.config
+  ln -fs ${DOTFILES_DIRECTORY}/.tmux/tmuxline.conf ${HOME}/.tmux/tmuxline.conf
+  ln -fs ${DOTFILES_DIRECTORY}/.tmux.conf ${HOME}/.tmux.conf
+  ln -fs ${DOTFILES_DIRECTORY}/.tmux.conf.local ${HOME}/.tmux.conf.local
+  ln -fs ${DOTFILES_DIRECTORY}/.zshrc ${HOME}/.zshrc
+  ln -fs ${DOTFILES_DIRECTORY}/.zshrc_linux ${HOME}/.zshrc_linux
+  ln -fs ${DOTFILES_DIRECTORY}/.zshrc_darwin ${HOME}/.zshrc_darwin
+  ln -fs ${DOTFILES_DIRECTORY}/.p10k.zsh ${HOME}/.p10k.zsh
+  ln -fs ${DOTFILES_DIRECTORY}/.zprofile ${HOME}/.zprofile
+  ln -fs ${DOTFILES_DIRECTORY}/.gitconfig ${HOME}/.gitconfig
+  ln -fs ${DOTFILES_DIRECTORY}/.vim/vimrcs ${HOME}/.vim
+  ln -fs ${DOTFILES_DIRECTORY}/.config/nvim ${HOME}/.config
+  ln -fs ${DOTFILES_DIRECTORY}/.config/alacritty ${HOME}/.config
 }
 
 #-----------------------------------------------------------------------
