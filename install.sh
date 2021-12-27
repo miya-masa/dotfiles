@@ -39,7 +39,7 @@ function initialize() {
   password
   echo ${password} | sudo -S apt update -y
   if ! has git; then
-    echo ${password} | sudo -S apt install -y git
+    echo ${password} | sudo apt install -y git
   fi
   git clone http://github.com/miya-masa/dotfiles.git ${DOTFILES_DIRECTORY}
   cd ${DOTFILES_DIRECTORY}
