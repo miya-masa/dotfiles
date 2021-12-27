@@ -12,6 +12,7 @@ UNAME=$(uname)
 DOTFILES_DIRECTORY=${DOTFILES_DIRECTORY:-~/dotfiles}
 DOTFILES_BRANCH=${DOTFILES_BRANCH:-master}
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
+SSH_PASSPHRASE=${SSH_PASSPHRASE:-""}
 
 #===  FUNCTION  ================================================================
 #         NAME:  usage
@@ -34,8 +35,7 @@ function has() {
 }
 
 function initialize() {
-  password
-  echo ${password} | sudo -S apt update -y
+  sudo apt update -y
 
   if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
     if ! has git; then
@@ -43,7 +43,6 @@ function initialize() {
     fi
     git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
     cd ${DOTFILES_DIRECTORY}
-    git remote set-url origin git@github.com:miya-masa/dotfiles.git
   fi
   cd ${DOTFILES_DIRECTORY}
   if [[ ${UNAME} == "Linux" ]]; then
@@ -51,152 +50,48 @@ function initialize() {
   else
     _initialize_mac
   fi
+  git remote set-url origin git@github.com:miya-masa/dotfiles.git
+  echo "Successful!! Restart your machine."
 }
 
 function _initialize_linux() {
-  sudo apt update
-  sudo add-apt-repository universe
-  sudo apt install -y \
-    autojump \
-    asciidoc \
-    curl \
-    build-essential \
-    dbus-user-session \
-    fcitx \
-    fcitx-mozc \
-    gawk \
-    gcc make \
-    gnome-tweak-tool \
-    gtk2-engines-murrine gtk2-engines-pixbuf \
-    keychain \
-    libbz2-dev \
-    libdb-dev \
-    libffi-dev \
-    libgdbm-dev \
-    libjansson-dev \
-    liblzma-dev \
-    libncursesw5-dev \
-    libreadline-dev \
-    libseccomp-dev \
-    libsqlite3-dev \
-    libssl-dev \
-    libxml2-dev \
-    libyaml-dev \
-    mycli \
-    pgcli \
-    pkg-config autoconf automake \
-    ripgrep \
-    tk-dev \
-    uidmap \
-    uuid-dev \
-    xsel \
-    zlib1g-dev \
-    bluez* \
-    zsh
+  for i in "${DOTFILES_DIRECTORY}"/etc/install.d/*.sh ; do
+    echo "Installing: "`basename ${i}`
+    source "${i}"
+  done
 
-  PYENV_ROOT=~/.pyenv
-  if [ ! -d ${PYENV_ROOT} ]; then
-    curl https://pyenv.run | bash
-  fi
-  PYENV_SHIMS=${PYENV_ROOT}/shims
-  PYTHON_VERSION=3.10.1
-
-  ${PYENV_ROOT}/bin/pyenv install --skip-existing ${PYTHON_VERSION}
-  ${PYENV_ROOT}/bin/pyenv global ${PYTHON_VERSION}
-  ${PYENV_SHIMS}/python -V
-  ${PYENV_SHIMS}/python -m pip install --upgrade pip
-  ${PYENV_SHIMS}/pip install pynvim
-
-  echo "Install NVM"
-  NVM_VERSION=v0.39.1
-  export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/${NVM_VERSION}/install.sh | bash
-  [ -s "${NVM_DIR}/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-  NODE_VERSION=v16.13.1
-  nvm install ${NODE_VERSION}
-  node -v
-  npm install -g neovim
-  rm -rf ctags
-  git clone https://github.com/universal-ctags/ctags.git
-  cd ctags
-  sudo ./autogen.sh
-  sudo ./configure
-  sudo make
-  sudo make install
-  cd ../
-  sudo rm -rf ctags
-  if ! has brew ; then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-  fi
-  brew bundle --file=./Brewfile_linux
-
-  GOVERSION=1.17
-  sudo rm -rf /usr/local/go
-  curl -L -O https://golang.org/dl/go${GOVERSION}.linux-amd64.tar.gz
-  sudo tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz
-  sudo chown $USER:$USER  -R /usr/local/go
-  rm go${GOVERSION}.linux-amd64.tar.gz
-
-  # goget install
-  /usr/local/go/bin/go install github.com/nametake/golangci-lint-langserver@latest
-
-  if ! has docker ; then
-    curl -fsSL https://get.docker.com | sh
-  fi
-  curl -fsSL https://get.docker.com/rootless | sh
-  if [ ! -d ~/.tmux/plugins/tpm ] ; then
-    git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-  fi
-  if [ ! -d ~/nerd-fonts ] ; then
-    git clone https://github.com/ryanoasis/nerd-fonts.git --depth 1 ~/nerd-fonts
-    cd ~/nerd-fonts
-    ./install.sh IBMPlexMono
-  fi
-  if ! has albert ; then
-    echo "Install albert"
-
-    sudo rpm --import "https://build.opensuse.org/projects/home:manuelschneid3r/public_key"
-    curl https://build.opensuse.org/projects/home:manuelschneid3r/public_key | sudo apt-key add -
-    UBUNTU_VERSION=20.04
-    echo "deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_${UBUNTU_VERSION}/ /" | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
-    sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_${UBUNTU_VERSION}/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
-    sudo apt update -y
-    sudo apt install -y albert
-  fi
-
-  passphrase=""
   SSH_RSA=~/.ssh/id_rsa
   if [ ! -s ${SSH_RSA} ]; then
-    if [ "${passphrase}" = "" ]; then
+    if [ "${SSH_PASSPHRASE}" = "" ]; then
       printf "ssh key passphrase: "
-      read -s passphrase
+      read -s SSH_PASSPHRASE
     fi
-    ssh-keygen -P ${passphrase} -f ${SSH_RSA}
+    ssh-keygen -P ${SSH_PASSPHRASE} -f ${SSH_RSA}
   fi
 
   SSH_ECDSA=~/.ssh/id_ecdsa
   if [ ! -s ${SSH_ECDSA} ]; then
-    if [ "${passphrase}" = "" ]; then
+    if [ "${SSH_PASSPHRASE}" = "" ]; then
       printf "ssh key passphrase: "
-      read -s passphrase
+      read -s SSH_PASSPHRASE
     fi
-    ssh-keygen -t ecdsa -b 384 -P ${passphrase} -f ${SSH_ECDSA}
+    ssh-keygen -t ecdsa -b 384 -P ${SSH_PASSPHRASE} -f ${SSH_ECDSA}
   fi
 
   SSH_ED25519=~/.ssh/id_ed25519
   if [ ! -s ${SSH_ED25519} ]; then
-    if [ "${passphrase}" = "" ]; then
+    if [ "${SSH_PASSPHRASE}" = "" ]; then
       printf "ssh key passphrase: "
-      read -s passphrase
+      read -s SSH_PASSPHRASE
     fi
-    ssh-keygen -t ed25519 -P ${passphrase} -f ${SSH_ED25519}
+    ssh-keygen -t ed25519 -P ${SSH_PASSPHRASE} -f ${SSH_ED25519}
   fi
 
   deploy
 
-  chsh -s $(which zsh)
-  echo "Successful!! Restart your machine."
+  if [[ ${CI} != "true" ]]; then
+    chsh -s $(which zsh)
+  fi
 }
 
 

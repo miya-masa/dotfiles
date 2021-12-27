@@ -33,7 +33,7 @@ export PATH="$HOME/.poetry/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
-export NVM_DIR="$HOME/.nvm"
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 
 if [[ -x "`which pyenv`" ]]; then
   export PATH="$(pyenv root)/shims:$PATH"
