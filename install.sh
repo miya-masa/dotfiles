@@ -92,6 +92,7 @@ function _initialize_linux() {
   fi
   PYENV_SHIMS=${PYENV_ROOT}/shims
   PYTHON_VERSION=3.10.1
+
   ${PYENV_ROOT}/bin/pyenv install -f ${PYTHON_VERSION}
   ${PYENV_ROOT}/bin/pyenv global ${PYTHON_VERSION}
   ${PYENV_SHIMS}/python -V
