@@ -88,13 +88,13 @@ function _initialize_linux() {
   if ! has pyenv ; then
     curl https://pyenv.run | bash
   fi
-  PYENV_SHIMS=$(pyenv root)/shims
+  ${PYENV_ROOT}=~/.pyenv
+  PYENV_SHIMS=${PYENV_ROOT}/shims
   PYTHON_VERSION=3.10.1
   pyenv install -f ${PYTHON_VERSION}
   pyenv global ${PYTHON_VERSION}
   ${PYENV_SHIMS}/python -V
   ${PYENV_SHIMS}/python -m pip install --upgrade pip
-  ${PYENV_SHIMS}/python 
   ${PYENV_SHIMS}/pip install pynvim
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
   export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
