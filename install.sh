@@ -139,6 +139,7 @@ function _initialize_mac() {
 
 
 function password() {
+    password=""
     printf "sudo password: "
     read -s password
 }
