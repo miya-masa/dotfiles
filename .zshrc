@@ -16,6 +16,33 @@ export PAGER=less
 export EDITOR=nvim
 export TERM=screen-256color
 
+export GOPATH="$HOME/go"
+export PATH=$GOPATH/bin:$PATH:/usr/local/go/bin
+export XDG_CONFIG_HOME=$HOME/.config
+export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
+export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
+export PATH=${PATH}:${HOME}/bin
+export TERM="xterm-256color"
+[ -f ~/.zprofile.local ] && source ~/.zprofile.local
+[ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+[ -f ~/.gvm/scripts/gvm ] && source ~/.gvm/scripts/gvm && gvm use master
+export PATH="/usr/local/opt/mysql-client/bin:$PATH"
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.poetry/bin:$PATH"
+export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="/usr/local/opt/gettext/bin:$PATH"
+export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
+export NVM_DIR="$HOME/.nvm"
+
+if [[ -x "`which pyenv`" ]]; then
+  export PATH="$(pyenv root)/shims:$PATH"
+  eval "$(pyenv init -)"
+fi
+[[ -s /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
+
+
 ###
 ### history
 ###
@@ -24,10 +51,11 @@ HISTSIZE=500000
 SAVEHIST=500000
 
 # Check if zinit is installed
-if [[ ! -d ~/.zinit ]]; then
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/zdharma/zinit/master/doc/install.sh)"
+ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
+if [[ ! -d ${ZINIT_HOME} ]]; then
+  sh -c "$(curl -fsSL https://git.io/zinit-install)"
 fi
-source ~/.zinit/bin/zinit.zsh
+source "${ZINIT_HOME}/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 autoload -Uz compinit
@@ -48,13 +76,13 @@ zinit snippet OMZT::gnzh
 # Load normal GitHub plugin with theme depending on OMZ Git library
 zinit light "dracula/zsh"
 
-zinit wait lucid light-mode for \
-  atinit"zicompinit; zicdreplay" \
-      zdharma/fast-syntax-highlighting \
-  atload"_zsh_autosuggest_start" \
-      zsh-users/zsh-autosuggestions \
-  blockf atpull'zinit creinstall -q .' \
-      zsh-users/zsh-completions
+zinit wait lucid for \
+ atinit"ZINIT[COMPINIT_OPTS]=-C; zicompinit; zicdreplay" \
+    zdharma-continuum/fast-syntax-highlighting \
+ blockf \
+    zsh-users/zsh-completions \
+ atload"!_zsh_autosuggest_start" \
+    zsh-users/zsh-autosuggestions
 
 zinit ice depth=1; zinit light romkatv/powerlevel10k
 
@@ -69,10 +97,9 @@ bindkey "^p" reverse-menu-complete
 bindkey "^n" menu-complete
 bindkey '^e' anyframe-widget-checkout-git-branch
 bindkey '^g' anyframe-widget-cd-ghq-repository
-bindkey '^b' anyframe-widget-cdr
 bindkey '^x^i' anyframe-widget-insert-git-branch
 bindkey '^x^f' anyframe-widget-insert-filename
-bindkey -v
+bindkey '^r' anyframe-widget-execute-history
 
 zstyle ':completion:*:default' menu select=1
 zstyle ":anyframe:selector:" use fzf
@@ -188,9 +215,6 @@ function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-export PATH="/home/linuxbrew/.linuxbrew/opt/node@10/bin:$PATH"
-
-export PATH="/usr/local/opt/gettext/bin:$PATH"
 ### End of Zinit's installer chunk
 #
 #
@@ -208,11 +232,18 @@ fi
 
 [[ ! -f ~/.cargo/env ]] || source ~/.cargo/env
 
-export PATH="$HOME/.poetry/bin:$PATH"
-
-export PATH="$HOME/.rbenv/bin:$PATH"
 [[ ! -f ~/.rbenv/rbenv ]] || eval "$(rbenv init - zsh)"
+### End of Zinit's installer chunk
 
-export PATH="$HOME/.local/bin:$PATH"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-eval "$(pyenv init -)"
+# Load a few important annexes, without Turbo
+# (this is currently required for annexes)
+zinit light-mode for \
+    zdharma-continuum/zinit-annex-as-monitor \
+    zdharma-continuum/zinit-annex-bin-gem-node \
+    zdharma-continuum/zinit-annex-patch-dl \
+    zdharma-continuum/zinit-annex-rust
+
+### End of Zinit's installer chunk

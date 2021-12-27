@@ -110,6 +110,21 @@ func Test$1(t *testing.T) {
 }
 endsnippet
 
+
+snippet tt "tt snip"
+tests := []struct {
+	name string
+}{
+	// TODO
+}
+
+for _, tt := range tests {
+	t.Run(tt.name, func(t *testing.T) {
+		${0:${VISUAL}}
+	})
+}
+endsnippet
+
 snippet mockgen "generate mock"
 //go:generate mockgen -destination ./$\{GOPACKAGE\}mock/$\{GOFILE\} -package $\{GOPACKAGE\}mock -source ./$\{GOFILE\}
 ${0:${VISUAL}}

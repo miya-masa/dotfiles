@@ -41,3 +41,7 @@
 	tool = nvimdiff
 [mergetool]
 	keepBackup = false
+[alias]
+	ignore = "!curl -L -s https://www.gitignore.io/api/$@"
+[fetch]
+	prune = true

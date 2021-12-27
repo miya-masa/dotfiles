@@ -9,10 +9,4 @@ eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 
 [[ -f $HOME/.keychain/${HOST}-sh ]] && \
 	source $HOME/.keychain/${HOST}-sh
-
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-[[ -s ~/.autojump/etc/profile.d/autojump.sh ]] && source ~/.autojump/etc/profile.d/autojump.sh
-
 autoload -U compinit && compinit -u

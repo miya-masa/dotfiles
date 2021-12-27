@@ -48,27 +48,41 @@ _install() {
   sudo apt update
   sudo add-apt-repository universe
   sudo apt install -y curl
-  sudo apt install -y autojump \
-    mycli \
-    pgcli \
+  sudo apt install -y \
+    autojump \
     asciidoc \
-    ripgrep \
+    build-essential \
     gawk \
+    gcc make \
     gnome-tweak-tool \
     gtk2-engines-murrine gtk2-engines-pixbuf \
+    keychain \
+    libbz2-dev \
+    libdb-dev \
+    libffi-dev \
+    libgdbm-dev \
+    libjansson-dev \
+    liblzma-dev \
+    libncursesw5-dev \
+    libreadline-dev \
+    libseccomp-dev \
+    libsqlite3-dev \
+    libssl-dev \
+    libxml2-dev
+    libyaml-dev \
+    mycli \
     nodejs \
     npm \
-    gcc make \
+    pgcli \
     pkg-config autoconf automake \
-    python3 \
-    python3-pip \
-    python3-docutils \
-    libseccomp-dev \
-    libjansson-dev \
-    libyaml-dev \
+    ripgrep \
+    tk-dev
+    uuid-dev \
     xsel \
-    keychain \
-    libxml2-dev
+    zlib1g-dev \
+    zsh
+  curl https://pyenv.run | bash
+  source ~/.zshrc
   sudo pip3 install pynvim
   sudo npm install -g neovim
   rm -rf ctags
@@ -81,7 +95,7 @@ _install() {
   cd ../
   sudo rm -rf ctags
   if !(type "brew" > /dev/null 2>&1); then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
     test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
     test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
