@@ -5,7 +5,7 @@
 ### install and deploy
 
 ```
-/bin/bash -c <(curl -L https://raw.github.com/miya-masa/dotfiles/master/install.sh)
+/bin/bash <(curl -L https://raw.github.com/miya-masa/dotfiles/master/install.sh)
 ```
  
 
