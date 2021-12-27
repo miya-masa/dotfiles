@@ -44,6 +44,7 @@ function initialize() {
   fi
   git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
   cd ${DOTFILES_DIRECTORY}
+  git remote set-url origin git@github.com:miya-masa/dotfiles.git
   if [[ ${UNAME} == "Linux" ]]; then
     _initialize_linux
   else
@@ -137,7 +138,7 @@ function _initialize_linux() {
   curl -fsSL https://get.docker.com/rootless | sh
   if [ ! -d ~/.tmux/plugins/tpm ] ; then
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-  fi 
+  fi
   if [ ! -d ~/nerd-fonts ] ; then
     git clone https://github.com/ryanoasis/nerd-fonts.git --depth 1 ~/nerd-fonts
     cd ~/nerd-fonts
@@ -153,7 +154,7 @@ function _initialize_linux() {
     sudo wget -nv https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_${UBUNTU_VERSION}/Release.key -O "/etc/apt/trusted.gpg.d/home:manuelschneid3r.asc"
     sudo apt update -y
     sudo apt install -y albert
-  fi 
+  fi
 
   deploy
 
