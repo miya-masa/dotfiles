@@ -19,3 +19,7 @@ if [[ -x "`which pyenv`" ]]; then
   export PATH="$(pyenv root)/shims:$PATH"
   eval "$(pyenv init -)"
 fi
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.poetry/bin:$PATH"
+export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="/usr/local/opt/gettext/bin:$PATH"

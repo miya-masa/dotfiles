@@ -118,8 +118,18 @@ function _initialize_linux() {
     eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
   fi
   brew bundle --file=./Brewfile_linux
-  curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-  echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+
+  GOVERSION=1.17
+  sudo rm -rf /usr/local/go
+  curl -L -O https://golang.org/dl/go${GOVERSION}.linux-amd64.tar.gz
+  sudo tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz
+  sudo chown $USER:$USER  -R /usr/local/go
+  rm go${GOVERSION}.linux-amd64.tar.gz
+
+  deploy
+
+  chsh -s $(which zsh)
+  echo "Successful!! Restart your terminal."
 }
 
 
@@ -134,7 +144,19 @@ function password() {
 }
 
 function deploy() {
-  echo deploy
+  mkdir -p ${HOME}/.tmux
+  ln -fs ${PWD}/.tmux/tmuxline.conf ${HOME}/.tmux/tmuxline.conf
+  ln -fs ${PWD}/.tmux.conf ${HOME}/.tmux.conf
+  ln -fs ${PWD}/.tmux.conf.local ${HOME}/.tmux.conf.local
+  ln -fs ${PWD}/.zshrc ${HOME}/.zshrc
+  ln -fs ${PWD}/.zshrc_linux ${HOME}/.zshrc_linux
+  ln -fs ${PWD}/.zshrc_darwin ${HOME}/.zshrc_darwin
+  ln -fs ${PWD}/.p10k.zsh ${HOME}/.p10k.zsh
+  ln -fs ${PWD}/.zprofile ${HOME}/.zprofile
+  ln -fs ${PWD}/.gitconfig ${HOME}/.gitconfig
+  ln -fs ${PWD}/.vim/vimrcs ${HOME}/.vim
+  ln -Fs ${PWD}/.config/nvim ${HOME}/.config
+  ln -Fs ${PWD}/.config/alacritty ${HOME}/.config
 }
 
 #-----------------------------------------------------------------------
