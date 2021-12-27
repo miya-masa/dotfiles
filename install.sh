@@ -37,10 +37,10 @@ function initialize() {
     exit 1
   fi
   password
-  if ! has git; then
-    echo ${password} | sudo -Ssudo apt install git
-  fi
   echo ${password} | sudo -S apt-get update
+  if ! has git; then
+    echo ${password} | sudo -S apt install git
+  fi
   git clone http://github.com/miya-masa/dotfiles.git ${DOTFILES_DIRECTORY}
   cd ${DOTFILES_DIRECTORY}
   if [[ ${UNAME} == "Linux" ]]; then
