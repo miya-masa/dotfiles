@@ -85,10 +85,11 @@ function _initialize_linux() {
     xsel \
     zlib1g-dev \
     zsh
-  if ! has pyenv ; then
+
+  ${PYENV_ROOT}=~/.pyenv
+  if [[ ! -d ~/.pyenv ]] ; then
     curl https://pyenv.run | bash
   fi
-  ${PYENV_ROOT}=~/.pyenv
   PYENV_SHIMS=${PYENV_ROOT}/shims
   PYTHON_VERSION=3.10.1
   pyenv install -f ${PYTHON_VERSION}
