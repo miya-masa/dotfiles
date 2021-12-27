@@ -44,7 +44,7 @@ function initialize() {
   fi
 
   passphrase=""
-  SSH_RSA=~/.ssh.id_rsa
+  SSH_RSA=~/.ssh/id_rsa
   if [ ! -s ${SSH_RSA} ]; then
     if [ ${passphrase} == "" ]; then
       printf "ssh key passphrase: "
@@ -53,7 +53,7 @@ function initialize() {
     ssh-keygen -P ${passphrase} -f ${SSH_RSA}
   fi
 
-  SSH_ECDSA=~/.ssh.id_ecdsa
+  SSH_ECDSA=~/.ssh/id_ecdsa
   if [ ! -s ${SSH_ECDSA} ]; then
     if [ ${passphrase} == "" ]; then
       printf "ssh key passphrase: "
