@@ -138,10 +138,6 @@ function _initialize_mac() {
   fi
 
   deploy
-
-  if [[ ${CI:-} != "true" ]]; then
-    chsh -s $(which zsh)
-  fi
 }
 
 
