@@ -89,7 +89,7 @@ function _initialize_linux() {
 
   deploy
 
-  if [[ ${CI} != "true" ]]; then
+  if [[ ${CI:-} != "true" ]]; then
     chsh -s $(which zsh)
   fi
 }
