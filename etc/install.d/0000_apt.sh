@@ -38,6 +38,7 @@ sudo apt install -y \
   libyaml-dev \
   mycli \
   pgcli \
+  openssh-server \
   pkg-config autoconf automake \
   rename \
   ripgrep \
