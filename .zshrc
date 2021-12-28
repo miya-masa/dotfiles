@@ -21,9 +21,9 @@ export PATH=$GOPATH/bin:$PATH:/usr/local/go/bin
 export XDG_CONFIG_HOME=$HOME/.config
 export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
 export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
+[ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 export PATH=${PATH}:${HOME}/bin
 [ -f ~/.zprofile.local ] && source ~/.zprofile.local
-[ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 [ -f ~/.gvm/scripts/gvm ] && source ~/.gvm/scripts/gvm && gvm use master
 export PATH="/usr/local/opt/mysql-client/bin:$PATH"
 export PYENV_ROOT="$HOME/.pyenv"
