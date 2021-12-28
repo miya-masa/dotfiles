@@ -11,7 +11,7 @@ __ScriptVersion="v0.1.0"
 UNAME=$(uname)
 DOTFILES_DIRECTORY=${DOTFILES_DIRECTORY:-~/dotfiles}
 DOTFILES_BRANCH=${DOTFILES_BRANCH:-master}
-XDG_CONFIG_HOME=${XDG_CONFIG_HOME}
+XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 SSH_PASSPHRASE=${SSH_PASSPHRASE:-""}
 
 #===  FUNCTION  ================================================================
