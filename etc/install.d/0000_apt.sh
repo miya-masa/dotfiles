@@ -46,6 +46,7 @@ sudo apt install -y \
   uidmap \
   uuid-dev \
   xsel \
+  rpm \
   zlib1g-dev \
   zsh
 
