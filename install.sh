@@ -35,17 +35,16 @@ function has() {
 }
 
 function initialize() {
-  sudo apt update -y
-
-  if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
-    if ! has git; then
-      sudo apt install -y git
-    fi
-    git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
-    cd ${DOTFILES_DIRECTORY}
-  fi
-  cd ${DOTFILES_DIRECTORY}
   if [[ ${UNAME} == "Linux" ]]; then
+     sudo apt update -y
+     if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
+       if ! has git; then
+         sudo apt install -y git
+       fi
+       git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
+       cd ${DOTFILES_DIRECTORY}
+     fi
+     cd ${DOTFILES_DIRECTORY}
     _initialize_linux
   else
     _initialize_mac
@@ -96,7 +95,53 @@ function _initialize_linux() {
 
 
 function _initialize_mac() {
-  echo TODO
+  softwareupdate --all --install
+  if ! has brew; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  fi
+  brew install git
+  if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
+    git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
+    cd ${DOTFILES_DIRECTORY}
+  fi
+  cd ${DOTFILES_DIRECTORY}
+  brew bundle --file=./Brewfile
+  nodebrew install-binary stable
+  nodebrew use stable
+
+  # TODO standardlization
+  SSH_RSA=~/.ssh/id_rsa
+  if [ ! -s ${SSH_RSA} ]; then
+    if [ "${SSH_PASSPHRASE}" = "" ]; then
+      printf "ssh key passphrase: "
+      read -s SSH_PASSPHRASE
+    fi
+    ssh-keygen -P ${SSH_PASSPHRASE} -f ${SSH_RSA}
+  fi
+
+  SSH_ECDSA=~/.ssh/id_ecdsa
+  if [ ! -s ${SSH_ECDSA} ]; then
+    if [ "${SSH_PASSPHRASE}" = "" ]; then
+      printf "ssh key passphrase: "
+      read -s SSH_PASSPHRASE
+    fi
+    ssh-keygen -t ecdsa -b 384 -P ${SSH_PASSPHRASE} -f ${SSH_ECDSA}
+  fi
+
+  SSH_ED25519=~/.ssh/id_ed25519
+  if [ ! -s ${SSH_ED25519} ]; then
+    if [ "${SSH_PASSPHRASE}" = "" ]; then
+      printf "ssh key passphrase: "
+      read -s SSH_PASSPHRASE
+    fi
+    ssh-keygen -t ed25519 -P ${SSH_PASSPHRASE} -f ${SSH_ED25519}
+  fi
+
+  deploy
+
+  if [[ ${CI:-} != "true" ]]; then
+    chsh -s $(which zsh)
+  fi
 }
 
 
