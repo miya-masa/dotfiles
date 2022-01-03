@@ -11,4 +11,4 @@ bind generic U      ?git pull %(remote)
 bind generic P      ?git push -u %(remote) %(repo:head)
 
 bind main    R !git rebase -i %(commit)
-bind diff    R !git rebase -i %(commit)
+bind main    c !git cherry-pick -m 1 %(commit)
