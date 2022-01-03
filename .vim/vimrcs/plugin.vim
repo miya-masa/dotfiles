@@ -81,6 +81,7 @@ Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-calc'
+Plug 'hrsh7th/cmp-emoji'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 Plug 'uga-rosa/cmp-dictionary'
@@ -217,6 +218,7 @@ end
       { name = 'path' },
       { name = 'calc' },
       { name = 'dictionary', keyword_length = 2 },
+      { name = 'emoji' },
       })
   })
 

@@ -1,1 +1,14 @@
-bind status P !git push origin
+bind generic g      move-first-line
+bind generic E      view-grep
+
+bind generic G      move-last-line
+bind main    G      move-last-line
+
+bind generic F      ?git fetch %(remote)
+bind main    F      ?git fetch %(remote)
+bind generic U      ?git pull %(remote)
+
+bind generic P      ?git push -u %(remote) %(repo:head)
+
+bind main    R !git rebase -i %(commit)
+bind diff    R !git rebase -i %(commit)
