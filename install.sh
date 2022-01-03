@@ -123,6 +123,7 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.config/nvim ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/alacritty ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.fzf.zsh ${HOME}/.fzf.zsh
+  ln -fs ${DOTFILES_DIRECTORY}/.tigrc ${HOME}/.tigrc
 }
 
 #-----------------------------------------------------------------------
