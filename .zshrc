@@ -141,11 +141,6 @@ tm() {
   session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
 }
 
-if [[ -x "`which lab`" ]]; then
-  fpath=(~/.config/lab/_lab $fpath)
-  fpath=(~/.config/lab $fpath)
-fi
-
 # fbr - checkout git branch (including remote branches)
 fbr() {
   local branches branch
