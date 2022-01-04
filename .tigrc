@@ -1,3 +1,6 @@
+set main-view = id date author:email-user commit-title:graph=yes,refs=yes
+set refresh-mode = auto
+
 bind generic g      move-first-line
 bind generic E      view-grep
 
@@ -12,3 +15,6 @@ bind generic P      ?git push -u %(remote) %(repo:head)
 
 bind main    R !git rebase -i %(commit)
 bind main    c !git cherry-pick -m 1 %(commit)
+
+bind status   - status-update
+bind status   X status-revert
