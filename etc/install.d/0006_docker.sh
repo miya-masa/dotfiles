@@ -11,5 +11,3 @@ if ! has docker ; then
   curl -fsSL https://get.docker.com | sh
   curl -fsSL https://get.docker.com/rootless | sh
 fi
-
-sudo gpasswd -a masayuki docker
