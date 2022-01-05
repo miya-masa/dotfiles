@@ -95,7 +95,6 @@ anyframe-init
 anyframe-widget-checkout-git-remote-branch() {
   anyframe-source-git-branch -n -r | grep -v HEAD | anyframe-selector-auto | awk '{print $1}' | sed "s/origin\///" | anyframe-action-execute git checkout
 }
-
 zle -N anyframe-widget-checkout-git-remote-branch
 
 bindkey "^p" reverse-menu-complete
