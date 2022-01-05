@@ -92,9 +92,16 @@ fpath=($HOME/.zsh/anyframe(N-/) $fpath)
 autoload -Uz anyframe-init
 anyframe-init
 
+anyframe-widget-checkout-git-remote-branch() {
+  anyframe-source-git-branch -n -r | grep -v HEAD | anyframe-selector-auto | awk '{print $1}' | sed "s/origin\///" | anyframe-action-execute git checkout
+}
+
+zle -N anyframe-widget-checkout-git-remote-branch
+
 bindkey "^p" reverse-menu-complete
 bindkey "^n" menu-complete
-bindkey '^e' anyframe-widget-checkout-git-branch
+bindkey '^e^e' anyframe-widget-checkout-git-branch
+bindkey '^e^r' anyframe-widget-checkout-git-remote-branch
 bindkey '^g' anyframe-widget-cd-ghq-repository
 bindkey '^x^i' anyframe-widget-insert-git-branch
 bindkey '^x^f' anyframe-widget-insert-filename
