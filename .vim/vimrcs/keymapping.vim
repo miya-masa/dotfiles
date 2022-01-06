@@ -30,6 +30,13 @@ nnoremap <silent> t<C-s> :cd %:p:h<cr>:TestSuite<CR>
 nnoremap <silent> t<C-l> :cd %:p:h<cr>:TestLast<CR>
 nnoremap <silent> t<C-g> :cd %:p:h<cr>:TestVisit<CR>
 nmap <C-q> <Plug>(quickrun)<CR>
+nnoremap gp<Space> :G push 
+nnoremap gp<CR> :G push<CR>
+nnoremap gpf<CR> :G push -f<CR>
+nnoremap gca<CR> :G commit --amend<CR>
+nnoremap gc<Space> :G commit 
+
+
 " }}}
 
 " Terminal Mode {{{
