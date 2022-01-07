@@ -25,7 +25,7 @@ Plug 'easymotion/vim-easymotion'
 Plug 'edkolev/tmuxline.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'honza/vim-snippets'
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }}
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 " Plug 'itchyny/lightline.vim'
 " Plug 'itchyny/vim-gitbranch'
 Plug 'windwp/nvim-autopairs'
@@ -562,7 +562,6 @@ command! -bang -nargs=* Rg
 " Plug 'iamcco/markdown-preview.nvim'
 let g:mkdp_open_to_the_world = 1
 let g:mkdp_port = '39999'
-let g:mkdp_open_ip = 'plantuml-server.internal'
 let g:mkdp_echo_preview_url = 1
 let g:mkdp_preview_options = {
       \ 'uml': {
