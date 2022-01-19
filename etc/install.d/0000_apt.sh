@@ -36,6 +36,7 @@ sudo apt install -y \
   libssl-dev \
   libxml2-dev \
   libyaml-dev \
+  libpq-dev \
   openssh-server \
   pkg-config autoconf automake \
   rename \
