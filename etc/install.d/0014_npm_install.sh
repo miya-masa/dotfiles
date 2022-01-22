@@ -9,3 +9,4 @@ IFS=$'\n\t'
 
 npm i -g @redocly/openapi-cli@latest
 npm i -g redoc-cli
+npm i -g prettier

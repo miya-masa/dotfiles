@@ -93,6 +93,10 @@ Plug 'mattn/vim-goaddtags'
 Plug 'buoto/gotests-vim'
 Plug 'rhysd/vim-clang-format'
 Plug 'mustache/vim-mustache-handlebars'
+Plug 'iberianpig/tig-explorer.vim'
+Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'nvim-lua/plenary.nvim'
+
 
 call plug#end()
 set completeopt=menu,menuone,noselect
@@ -104,6 +108,21 @@ for type, icon in pairs(signs) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
+EOF
+
+
+lua << EOF
+local null_ls = require("null-ls")
+
+-- register any number of sources simultaneously
+local sources = {
+    null_ls.builtins.formatting.prettier,
+    null_ls.builtins.formatting.stylua,
+    null_ls.builtins.diagnostics.write_good,
+    null_ls.builtins.diagnostics.eslint,
+}
+
+null_ls.setup({ sources = sources })
 EOF
 
 
@@ -144,14 +163,13 @@ local list = {
   { key = "?",                            cb = tree_cb("toggle_help") },
 }
 
-require('nvim-tree').setup{
-
+require'nvim-tree'.setup {
   view = {
     mappings = {
-      custom_only = true,
+      custom_only = false,
       list = list
-      }
-  }
+    },
+  },
 }
 
 local nvim_lsp = require('lspconfig')
@@ -161,6 +179,7 @@ local nvim_lsp = require('lspconfig')
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+  client.resolved_capabilities.document_formatting = false
 
   -- Enable completion triggered by <c-x><c-o>
   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
