@@ -97,6 +97,15 @@ anyframe-widget-checkout-git-remote-branch() {
 }
 zle -N anyframe-widget-checkout-git-remote-branch
 
+if [[ -x "`which glab`" ]] ; then
+  anyframe-widget-insert-issue-branch-name() {
+  issueNumber=$(glab ls | tail -n +3 | anyframe-selector-auto | awk '{print $1}')
+    echo "feature/${issueNumber}"_ | anyframe-action-insert
+  }
+  zle -N anyframe-widget-insert-issue-branch-name
+  bindkey '^x^b' anyframe-widget-insert-issue-branch-name
+fi
+
 bindkey "^p" reverse-menu-complete
 bindkey "^n" menu-complete
 bindkey '^e^e' anyframe-widget-checkout-git-branch
