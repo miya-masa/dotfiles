@@ -11,7 +11,7 @@ nnoremap Y y$
 nnoremap <Leader><S-\> :vertical<CR>
 nnoremap <Leader>- :split<CR>
 nnoremap <Leader><C-B> :Rooter<CR>:Buffer<CR>
-nnoremap <Leader><C-R> :Rooter<CR>:Rg<CR>
+nnoremap <Leader><C-R> :Rooter<CR>:Rg
 nnoremap <Leader><C-G> :GFiles<CR>
 nnoremap <Leader><C-F> :Files<CR>
 nnoremap <leader><C-L> :Line<CR>

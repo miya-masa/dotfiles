@@ -138,6 +138,7 @@ alias dps='docker ps'
 alias dim='docker images'
 alias drm='docker rm $(docker ps -aqf "status=exited") 2> /dev/null'
 alias drmi='docker rmi $(docker images -aqf "dangling=true") 2> /dev/null'
+alias dkill='docker container ls -q | xargs docker kill'
 alias dc='docker-compose'
 tmn() {
   if type "autojump" > /dev/null 2>&1; then
