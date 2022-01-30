@@ -11,7 +11,8 @@ nnoremap Y y$
 nnoremap <Leader><S-\> :vertical<CR>
 nnoremap <Leader>- :split<CR>
 nnoremap <Leader><C-B> :Rooter<CR>:Buffer<CR>
-nnoremap <Leader><C-R> :Rooter<CR>:Rg
+" Do not remove the trailing blank
+nnoremap <Leader><C-R> :Rooter<CR>:Rg 
 nnoremap <Leader><C-G> :GFiles<CR>
 nnoremap <Leader><C-F> :Files<CR>
 nnoremap <leader><C-L> :Line<CR>
@@ -30,10 +31,12 @@ nnoremap <silent> t<C-s> :cd %:p:h<cr>:TestSuite<CR>
 nnoremap <silent> t<C-l> :cd %:p:h<cr>:TestLast<CR>
 nnoremap <silent> t<C-g> :cd %:p:h<cr>:TestVisit<CR>
 nmap <C-q> <Plug>(quickrun)<CR>
+" Do not remove the trailing blank
 nnoremap gp<Space> :G push 
 nnoremap gp<CR> :G push<CR>
 nnoremap gpf<CR> :G push -f<CR>
 nnoremap gca<CR> :G commit --amend<CR>
+" Do not remove the trailing blank
 nnoremap gc<Space> :G commit 
 
 
