@@ -9,6 +9,7 @@ endif
 call plug#begin('~/.vim/plugged')
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'sainnhe/gruvbox-material'
+Plug 'rebelot/kanagawa.nvim'
 Plug 'Shougo/vinarise.vim'
 Plug 'SirVer/ultisnips'
 Plug 'VincentCordobes/vim-translate'
@@ -395,7 +396,8 @@ let g:vim_json_syntax_conceal = 0
 lua << END
 require'lualine'.setup {
   options = {
-    theme = 'gruvbox-material'
+    -- theme = 'gruvbox-material'
+    theme = 'kanagawa'
   }
 }
 END

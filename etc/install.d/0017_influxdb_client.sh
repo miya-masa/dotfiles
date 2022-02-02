@@ -14,5 +14,5 @@ if [[ ! -e /usr/local/bin/influx ]]; then
   tar -xzf influxdb2-client-${INFLUX_CLI_VERSION}-linux-amd64.tar.gz
   sudo mv influxdb2-client-${INFLUX_CLI_VERSION}-linux-amd64/influx /usr/local/bin/
   rm -f influxdb2-client-${INFLUX_CLI_VERSION}-linux-amd64.tar.gz
-  rm -f influxdb2-client-${INFLUX_CLI_VERSION}-linux-amd64
+  rm -rf influxdb2-client-${INFLUX_CLI_VERSION}-linux-amd64
 fi

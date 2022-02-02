@@ -40,4 +40,7 @@ set background=dark
 " Available values: 'hard', 'medium'(default), 'soft'
 let g:gruvbox_material_background = 'medium'
 let g:gruvbox_material_enable_italic = 1
-colorscheme gruvbox-material
+
+" colorscheme gruvbox-material
+
+colorscheme kanagawa
