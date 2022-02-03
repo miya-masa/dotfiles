@@ -19,7 +19,6 @@ Plug 'bkad/CamelCaseMotion'
 Plug 'bronson/vim-trailing-whitespace'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'rhysd/vim-go-impl'
-" Plug 'cocopon/lightline-hybrid.vim'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'diepm/vim-rest-console'
 Plug 'easymotion/vim-easymotion'
@@ -27,8 +26,6 @@ Plug 'edkolev/tmuxline.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'honza/vim-snippets'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
-" Plug 'itchyny/lightline.vim'
-" Plug 'itchyny/vim-gitbranch'
 Plug 'windwp/nvim-autopairs'
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
@@ -37,7 +34,6 @@ Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
 Plug 'kana/vim-operator-replace'
 Plug 'kana/vim-operator-user'
-" Plug 'majutsushi/tagbar'
 Plug 'liuchengxu/vista.vim'
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'mhinz/vim-startify'
@@ -118,9 +114,7 @@ local null_ls = require("null-ls")
 -- register any number of sources simultaneously
 local sources = {
     null_ls.builtins.formatting.prettier,
-    null_ls.builtins.formatting.stylua,
     null_ls.builtins.diagnostics.write_good,
-    null_ls.builtins.diagnostics.eslint,
 }
 
 null_ls.setup({ sources = sources })
@@ -175,6 +169,12 @@ require'nvim-tree'.setup {
 
 local nvim_lsp = require('lspconfig')
 
+local opts = { noremap=true, silent=true }
+vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+vim.api.nvim_set_keymap('n', '[g', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+vim.api.nvim_set_keymap('n', ']g', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
+
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
@@ -183,29 +183,24 @@ local on_attach = function(client, bufnr)
   client.resolved_capabilities.document_formatting = false
 
   -- Enable completion triggered by <c-x><c-o>
-  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+  vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   -- Mappings.
-  local opts = { noremap=true, silent=true }
-
   -- See `:help vim.lsp.*` for documentation on any of the below functions
-  buf_set_keymap('n', '<Leader>gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  buf_set_keymap('n', '<Leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  buf_set_keymap('n', '<Leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', '<Leader><C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  buf_set_keymap('n', '<Leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<Leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_set_keymap('n', '<Leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.show_line_diagnostics()<CR>', opts)
-  buf_set_keymap('n', '[g', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
-  buf_set_keymap('n', ']g', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
-  buf_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.set_loclist()<CR>', opts)
-  buf_set_keymap('n', '<Leader><C-f>', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-f>', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+
 end
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
@@ -286,9 +281,7 @@ lsp_installer.on_server_ready(function(server)
           gopls = {
             buildFlags = {"-tags=integration"},
             usePlaceholders = true,
-            completeUnimported = true,
             gofumpt = true,
-            experimentalPostfixCompletions = true
           }
         }
     end
@@ -299,7 +292,6 @@ lsp_installer.on_server_ready(function(server)
     -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/ADVANCED_README.md
     server:setup(opts)
 end)
-require'lspconfig'.golangci_lint_ls.setup{}
 EOF
 
 lua <<EOF
@@ -316,7 +308,7 @@ require'nvim-treesitter.configs'.setup {
         ["af"] = "@function.outer",
         ["if"] = "@function.inner",
         ["ac"] = "@class.outer",
-        ["ic"] = "@class.inner"
+        ["ic"] = "@class.inner",
       },
     },
   },
@@ -349,50 +341,12 @@ let g:vrc_trigger = '<Leader><C-o>'
 " }}}
 " CamelCaseMotion {{{
 let g:camelcasemotion_key = ','
-" script_31337_path_and_na[m]e_without_extension_11
-" }}}
-" vim-go {{{
-" let g:go_gopls_enabled = 0
-" let g:go_fmt_command = "goimports"
-" let g:go_fmt_autosave = 0
-" let g:go_mod_fmt_autosave = 0
-" let g:go_autodetect_gopath = 0
-" let g:go_list_type = "quickfix"
-" let g:go_doc_keywordprg_enabled = 0
-" let g:go_def_mapping_enabled = 0
-" let g:go_template_autocreate = 0
-" let g:go_echo_go_info = 0
-" let g:go_echo_command_info = 1
-
-" " highlight
-" let g:go_highlight_types = 0
-" let g:go_highlight_fields = 0
-" let g:go_highlight_functions = 0
-" let g:go_highlight_methods = 0
-" let g:go_highlight_extra_types = 0
-" let g:go_highlight_generate_tags = 0
-" let g:go_auto_sameids = 0
-
-" let g:go_test_timeout = "100s"
-" let g:go_metalinter_deadline = "30s"
-" let g:go_def_mode = 'godef'
-" let g:go_term_mode = 'vsplit'
-
-" }}}
 " EmmetPlugin {{{
 let g:user_emmet_leader_key='<C-t>'
 " }}}
 " vim-json {{{
 let g:vim_json_syntax_conceal = 0
 " }}}
-" IndentGuide {{{
-" let g:indent_guides_enable_on_vim_startup = 1
-" let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx']
-" let g:indent_guides_start_level = 1
-" let g:indent_guides_guide_size = 1
-" let g:indent_guides_default_mapping = 0
-" }}}
-" lightline {{{
 lua << END
 require'lualine'.setup {
   options = {
@@ -402,45 +356,6 @@ require'lualine'.setup {
 }
 END
 "
-" let g:lightline = {
-"       \   'colorscheme': 'gruvbox',
-"       \   'active': {
-"       \     'left': [[ 'mode', 'paste' ],
-"       \               [ 'gitbranch', 'readonly', 'absolutepath', 'modified' ]],
-"       \     'right': [[ 'lineinfo' ],
-"       \                [ 'percent' ],
-"       \                [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ]]
-"       \   },
-"       \   'component': {
-"       \     'mode': '%{lightline#mode()}',
-"       \     'absolutepath': '%F',
-"       \     'relativepath': '%f',
-"       \     'filename': '%t',
-"       \     'modified': '%M',
-"       \     'bufnum': '%n',
-"       \     'paste': '%{&paste?"PASTE":""}',
-"       \     'readonly': '%R',
-"       \     'charvalue': '%b',
-"       \     'charvaluehex': '%B',
-"       \     'fileencoding': '%{&fenc!=#""?&fenc:&enc}',
-"       \     'fileformat': '%{&ff}',
-"       \     'filetype': '%{&ft!=#""?&ft:"no ft"}',
-"       \     'percent': '%3p%%',
-"       \     'percentwin': '%P',
-"       \     'spell': '%{&spell?&spelllang:""}',
-"       \     'lineinfo': '%3l:%-2v',
-"       \     'line': '%l',
-"       \     'column': '%c',
-"       \     'close': '%999X X ',
-"       \     'winnr': '%{winnr()}'
-"       \   },
-"       \   'component_function': {
-"       \       'gitbranch': 'gitbranch#name'
-"       \   }
-"       \ }
-
-" }}}
-" tmux-navigator {{{
 " }}}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 1
@@ -512,11 +427,6 @@ let g:translate#default_languages = {
 " }}}
 " {{{ sjl/gundo
 let g:gundo_prefer_python3=1
-" }}}
-" {{{ Plug 'scrooloose/nerdtree'
-let NERDTreeShowHidden=1
-let g:NERDTreeMapJumpPrevSibling=""
-let g:NERDTreeMapJumpNextSibling=""
 " }}}
 " {{{ Plug 'janko/vim-test'
 let test#strategy = "dispatch"
