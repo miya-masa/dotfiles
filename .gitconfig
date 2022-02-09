@@ -46,5 +46,6 @@
 	st = "status"
 	sw = "switch"
 	swc = "switch -c"
+	co = "checkout"
 [fetch]
 	prune = true

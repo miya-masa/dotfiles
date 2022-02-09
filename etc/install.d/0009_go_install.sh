@@ -12,3 +12,4 @@ go install golang.org/x/tools/cmd/goimports@latest
 go install github.com/mattn/memo@latest
 go install github.com/google/gops@latest
 go install github.com/cweill/gotests/gotests@latest
+go install github.com/ankitpokhrel/jira-cli/cmd/jira@latest

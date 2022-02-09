@@ -1,3 +1,10 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 #  _ __ ___ (_)_   _  __ _       _ __ ___   __ _ ___  __ _( )___
 # | '_ ` _ \| | | | |/ _` |_____| '_ ` _ \ / _` / __|/ _` |// __|
 # | | | | | | | |_| | (_| |_____| | | | | | (_| \__ \ (_| | \__ \
@@ -228,16 +235,16 @@ function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 ### End of Zinit's installer chunk
 #
 #
+
+if [[ -x "`which jira`" ]]; then
+  jira completion zsh > "${fpath[1]}/_jira"
+fi
 if [[ -x "`which kubectl`" ]]; then
   source <(kubectl completion zsh)
 fi
 
 if [[ -x "`which minikube`" ]]; then
   source <(minikube completion zsh)
-fi
-
-if [[ -x "`which jira`" ]]; then
-  eval "$(jira --completion-script-bash)"
 fi
 
 [[ ! -f ~/.cargo/env ]] || source ~/.cargo/env
