@@ -47,5 +47,6 @@ sudo apt install -y \
   xsel \
   rpm \
   zlib1g-dev \
+  python3-docutils \
   zsh
 

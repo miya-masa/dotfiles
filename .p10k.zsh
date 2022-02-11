@@ -49,7 +49,7 @@
   # Left prompt segments.
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
     # =========================[ Line #1 ]=========================
-    context                   # user@host
+    # context                   # user@host
     dir                       # current directory
     vcs                       # git status
     command_execution_time    # previous command duration
@@ -64,7 +64,7 @@
     # =========================[ Line #1 ]=========================
     # command_execution_time  # previous command duration
     # virtualenv              # python virtual environment
-    # context                 # user@host
+    context                   # user@host
     time                      # current time
     # =========================[ Line #2 ]=========================
     newline                   # \n

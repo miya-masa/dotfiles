@@ -93,6 +93,7 @@ Plug 'mustache/vim-mustache-handlebars'
 Plug 'iberianpig/tig-explorer.vim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'nvim-lua/plenary.nvim'
+Plug 'liuchengxu/vista.vim'
 
 
 call plug#end()
@@ -402,6 +403,12 @@ let g:notes_directories = ['~/work/Notes']
 let g:notes_suffix = '.md'
 " }}}
 " QuickRun {{{
+let g:quickrun_config = {
+\}
+augroup rust_quickrun
+  au!
+  autocmd BufNewFile,BufRead *.rs let g:quickrun_config.rust = {'exec' : 'cargo run'}
+augroup END
 " }}}
 " mhinz/vim-startify {{{
 " startify
@@ -521,4 +528,3 @@ let g:mkdp_preview_options = {
       \ },
     \ }
 " }}}
-"
