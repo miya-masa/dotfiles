@@ -377,6 +377,9 @@ require'lualine'.setup {
   }
 }
 END
+function! NearestMethodOrFunction() abort
+  return get(b:, 'vista_nearest_method_or_function', '')
+endfunction
 "
 " }}}
 " tmuxline {{{
