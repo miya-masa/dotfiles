@@ -94,6 +94,7 @@ Plug 'iberianpig/tig-explorer.vim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'liuchengxu/vista.vim'
+Plug 'vim-scripts/dbext.vim'
 
 
 call plug#end()
@@ -181,7 +182,7 @@ vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<C
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-  client.resolved_capabilities.document_formatting = false
+  -- client.resolved_capabilities.document_formatting = false
 
   -- Enable completion triggered by <c-x><c-o>
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
@@ -283,6 +284,34 @@ lsp_installer.on_server_ready(function(server)
             buildFlags = {"-tags=integration"},
             usePlaceholders = true,
             gofumpt = true,
+          }
+        }
+    end
+    if server.name == "pylsp" then
+        opts.settings = {
+          pylsp = {
+            configurationSources = {"flake8", "mypy", "isort", "black"},
+            flake8 = {
+              enabled = true
+            },
+            mccabe = {
+              enabled = false
+            },
+            pycodestyle = {
+              enabled = false
+            },
+            pyflakes = {
+              enabled = false
+            },
+            pylsp_mypy = {
+              enabled = true
+            },
+            isort = {
+              enabled = true
+            },
+            black = {
+              enabled = true
+            }
           }
         }
     end
@@ -466,6 +495,7 @@ let test#go#gotest#options = {
   \ 'file':    '-count=1 -timeout=30s',
   \ 'suite':   '-count=1 -timeout=2m',
 \}
+let test#python#runner = 'pytest'
 " }}}
 "  Plug 'kana/vim-operator-replace' {{{
 nmap ! <Plug>(operator-replace)
@@ -504,8 +534,7 @@ let g:rooter_manual_only = 1
 " Plug 'tpope/vim-markdown' {{{
 let g:markdown_fenced_languages = ['plantuml', 'go', 'java', 'bash=sh']
 " }}}
-" Plug 'Yggdroot/indentLine' {{{
-" let g:indentLine_fileTypeExclude = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx', 'go']
+" Plug 'indent' {{{
 
 lua << EOF
 require("indent_blankline").setup {
@@ -513,7 +542,14 @@ require("indent_blankline").setup {
     filetype_exclude = {"help", "startify", "dirvish", "no ft", "fzf", 'NvimTree', 'markdown'}
 }
 EOF
+
 " }}}
+" Plug 'indent' {{{
+if filereadable(expand('~/.dbext_profile'))
+    source ~/.dbext_profile
+endif
+" }}}
+
 command! -bang -nargs=* Rg
   \ call fzf#vim#grep(
   \   'rg --column --line-number --no-heading --color=always --hidden --iglob ''!.git'' --smart-case -- '.shellescape(<q-args>), 1,
@@ -531,3 +567,5 @@ let g:mkdp_preview_options = {
       \ },
     \ }
 " }}}
+
+let g:python3_host_prog = $HOME . '/.pyenv/shims/python'

@@ -168,6 +168,9 @@ function deploy() {
   if [ ! -e ~/.ssh/config ]; then
     cp ${DOTFILES_DIRECTORY}/.ssh/config.sample ${HOME}/.ssh/config
   fi
+  if [[ -e ./.dbext_profile ]]; then
+    ln -fs ${DOTFILES_DIRECTORY}/.dbext_profile ${HOME}/.dbext_profile
+  fi
 }
 
 #-----------------------------------------------------------------------

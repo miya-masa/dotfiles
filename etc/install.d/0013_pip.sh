@@ -9,4 +9,12 @@ IFS=$'\n\t'
 
 pip install \
   pgcli \
-  mycli
+  mycli \
+  black \
+  isort \
+  flake8 \
+  mypy \
+  pyls-flake8 \
+  pylsp-mypy \
+  pyls-isort \
+  python-lsp-black
