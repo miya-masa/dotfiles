@@ -117,6 +117,7 @@ local null_ls = require("null-ls")
 local sources = {
     null_ls.builtins.formatting.prettier,
     null_ls.builtins.diagnostics.write_good,
+    null_ls.builtins.formatting.black,
 }
 
 null_ls.setup({ sources = sources })
@@ -125,43 +126,48 @@ EOF
 
 lua << EOF
 require('nvim-autopairs').setup{}
-local tree_cb = require'nvim-tree.config'.nvim_tree_callback
 -- default mappings
 local list = {
-  { key = {"<CR>", "o", "<2-LeftMouse>"}, cb = tree_cb("edit") },
-  { key = {"<2-RightMouse>", "<C-]>"},    cb = tree_cb("cd") },
-  { key = "<C-v>",                        cb = tree_cb("vsplit") },
-  { key = "<C-x>",                        cb = tree_cb("split") },
-  { key = "<C-t>",                        cb = tree_cb("tabnew") },
-  { key = "<",                            cb = tree_cb("prev_sibling") },
-  { key = ">",                            cb = tree_cb("next_sibling") },
-  { key = "P",                            cb = tree_cb("parent_node") },
-  { key = "<S-CR>",                       cb = tree_cb("close_node") },
-  { key = "<Tab>",                        cb = tree_cb("preview") },
-  { key = "K",                            cb = tree_cb("first_sibling") },
-  { key = "J",                            cb = tree_cb("last_sibling") },
-  { key = "I",                            cb = tree_cb("toggle_ignored") },
-  { key = "H",                            cb = tree_cb("toggle_dotfiles") },
-  { key = "R",                            cb = tree_cb("refresh") },
-  { key = "a",                            cb = tree_cb("create") },
-  { key = "d",                            cb = tree_cb("remove") },
-  { key = "r",                            cb = tree_cb("rename") },
-  { key = "<C-r>",                        cb = tree_cb("full_rename") },
-  { key = "x",                            cb = tree_cb("cut") },
-  { key = "yy",                           cb = tree_cb("copy") },
-  { key = "p",                            cb = tree_cb("paste") },
-  { key = "cp",                           cb = tree_cb("copy_name") },
-  { key = "Y",                            cb = tree_cb("copy_path") },
-  { key = "gy",                           cb = tree_cb("copy_absolute_path") },
-  { key = "[c",                           cb = tree_cb("prev_git_item") },
-  { key = "]c",                           cb = tree_cb("next_git_item") },
-  { key = "<BS>",                         cb = tree_cb("dir_up") },
-  { key = "q",                            cb = tree_cb("close") },
-  { key = "?",                            cb = tree_cb("toggle_help") },
+  { key = {"<CR>", "o", "<2-LeftMouse>"}, action = "edit" },
+  { key = "<C-e>",                        action = "" },
+  { key = {"O"},                          action = "edit_no_picker" },
+  { key = {"<2-RightMouse>", "<C-]>"},    action = "cd" },
+  { key = "<C-v>",                        action = "vsplit" },
+  { key = "<C-x>",                        action = "split" },
+  { key = "<C-t>",                        action = "tabnew" },
+  { key = "<",                            action = "prev_sibling" },
+  { key = ">",                            action = "next_sibling" },
+  { key = "P",                            action = "parent_node" },
+  { key = "<BS>",                         action = "close_node" },
+  { key = "<Tab>",                        action = "preview" },
+  { key = "K",                            action = "first_sibling" },
+  { key = "J",                            action = "last_sibling" },
+  { key = "I",                            action = "toggle_ignored" },
+  { key = "H",                            action = "toggle_dotfiles" },
+  { key = "R",                            action = "refresh" },
+  { key = "a",                            action = "create" },
+  { key = "d",                            action = "remove" },
+  { key = "D",                            action = "trash" },
+  { key = "r",                            action = "rename" },
+  { key = "<C-r>",                        action = "full_rename" },
+  { key = "x",                            action = "cut" },
+  { key = "c",                            action = "copy" },
+  { key = "p",                            action = "paste" },
+  { key = "y",                            action = "copy_name" },
+  { key = "Y",                            action = "copy_path" },
+  { key = "gy",                           action = "copy_absolute_path" },
+  { key = "[c",                           action = "prev_git_item" },
+  { key = "]c",                           action = "next_git_item" },
+  { key = "-",                            action = "dir_up" },
+  { key = "s",                            action = "system_open" },
+  { key = "q",                            action = "close" },
+  { key = "g?",                           action = "toggle_help" },
+  { key = 'W',                            action = "collapse_all" },
+  { key = "S",                            action = "search_node" }
 }
-
 require'nvim-tree'.setup {
   view = {
+    width = '20%',
     mappings = {
       custom_only = false,
       list = list
@@ -179,10 +185,41 @@ vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<C
 
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
+
+local on_attacher = function(enable_format)
+  local on_attach = function(client, bufner)
+    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+    client.resolved_capabilities.document_formatting = enable_format
+    client.resolved_capabilities.document_range_formatting = enable_format
+
+    -- Enable completion triggered by <c-x><c-o>
+    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+
+    -- Mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-f>', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  end
+  return on_attach
+end
+
 local on_attach = function(client, bufnr)
   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-  -- client.resolved_capabilities.document_formatting = false
+  client.resolved_capabilities.document_formatting = false
+  client.resolved_capabilities.document_range_formatting = false
 
   -- Enable completion triggered by <c-x><c-o>
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
@@ -287,35 +324,15 @@ lsp_installer.on_server_ready(function(server)
           }
         }
     end
-    if server.name == "pylsp" then
-        opts.settings = {
-          pylsp = {
-            configurationSources = {"flake8", "mypy", "isort", "black"},
-            flake8 = {
-              enabled = true
-            },
-            mccabe = {
-              enabled = false
-            },
-            pycodestyle = {
-              enabled = false
-            },
-            pyflakes = {
-              enabled = false
-            },
-            pylsp_mypy = {
-              enabled = true
-            },
-            isort = {
-              enabled = true
-            },
-            black = {
-              enabled = true
-            }
-          }
-        }
+    if server.name == "tsserver"
+      or server.name == "pyright"
+      or server.name == "golangci_lint_ls"
+      or server.name == "yamlls"
+    then
+      opts.on_attach = on_attacher(false)
+    else
+      opts.on_attach = on_attacher(true)
     end
-    opts.on_attach = on_attach
     opts.capabilities = capabilities
 
     -- This setup() function is exactly the same as lspconfig's setup function.

@@ -48,5 +48,6 @@ sudo apt install -y \
   rpm \
   zlib1g-dev \
   python3-docutils \
+  libnss3-tools \
   zsh
 

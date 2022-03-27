@@ -21,3 +21,11 @@ endsnippet
 snippet createfk "Create Foreign Key"
 ALTER TABLE "${1:table}" ADD FOREIGN KEY("${2:column}") REFERENCES "${3:ref_table}"("${4:ref_column}") ON DELETE CASCADE;
 endsnippet
+
+snippet addcolumn "Add Column"
+ALTER TABLE "${1:table}" ADD COLUMN ${2:column} ${3:type};
+endsnippet
+
+snippet dropcolumn "Drop Column"
+ALTER TABLE "${1:table}" DROP COLUMN ${2:column};
+endsnippet
