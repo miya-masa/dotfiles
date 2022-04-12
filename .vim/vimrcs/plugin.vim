@@ -163,7 +163,10 @@ local list = {
   { key = "q",                            action = "close" },
   { key = "g?",                           action = "toggle_help" },
   { key = 'W',                            action = "collapse_all" },
-  { key = "S",                            action = "search_node" }
+  { key = "S",                            action = "search_node" },
+  { key = ".",                            action = "run_file_command" },
+  { key = "<C-k>",                        action = "" },
+  { key = "U",                            action = "toggle_custom" },
 }
 require'nvim-tree'.setup {
   view = {
@@ -216,30 +219,7 @@ local on_attacher = function(enable_format)
 end
 
 local on_attach = function(client, bufnr)
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-  client.resolved_capabilities.document_formatting = false
-  client.resolved_capabilities.document_range_formatting = false
-
-  -- Enable completion triggered by <c-x><c-o>
-  vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-  -- Mappings.
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-f>', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
-
+ on_attacher(false)(client, bufnr)
 end
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
@@ -574,7 +554,7 @@ command! -bang -nargs=* Rg
 
 " }}}
 "
-" Plug 'iamcco/markdown-preview.nvim'
+" Plug 'iamcco/markdown-preview.nvim'{{{
 let g:mkdp_open_to_the_world = 1
 let g:mkdp_port = '39999'
 let g:mkdp_echo_preview_url = 1
@@ -584,5 +564,10 @@ let g:mkdp_preview_options = {
       \ },
     \ }
 " }}}
-
 let g:python3_host_prog = $HOME . '/.pyenv/shims/python'
+
+" {{{ vim-easymotion
+nmap <Leader><Leader>s <Plug>(easymotion-overwin-f2)
+xmap <Leader><Leader>s <Plug>(easymotion-bd-f2)
+omap <Leader><Leader>s <Plug>(easymotion-bd-f2)
+" }}}
