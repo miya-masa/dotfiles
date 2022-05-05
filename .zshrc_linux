@@ -9,4 +9,3 @@ complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/vault/1.3.2/bin/vault v
 [[ -f $HOME/.keychain/${HOST}-sh ]] && \
 	source $HOME/.keychain/${HOST}-sh
 autoload -U compinit && compinit -u
-xeyes & ; kill $!

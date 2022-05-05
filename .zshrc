@@ -110,8 +110,12 @@ if [[ -x "`which glab`" ]] ; then
   bindkey '^x^b' anyframe-widget-insert-issue-branch-name
 fi
 
-bindkey "^p" reverse-menu-complete
-bindkey "^n" menu-complete
+anyframe-widget-git-log() {
+  git log --oneline | anyframe-selector-auto |  awk '{print $1}' | anyframe-action-insert
+}
+zle -N anyframe-widget-git-log
+
+bindkey '^x^l' anyframe-widget-git-log
 bindkey '^e^e' anyframe-widget-checkout-git-branch
 bindkey '^e^r' anyframe-widget-checkout-git-remote-branch
 bindkey '^g' anyframe-widget-cd-ghq-repository
@@ -143,7 +147,7 @@ alias dim='docker images'
 alias drm='docker rm $(docker ps -aqf "status=exited") 2> /dev/null'
 alias drmi='docker rmi $(docker images -aqf "dangling=true") 2> /dev/null'
 alias dkill='docker container ls -q | xargs docker kill'
-alias dc='docker-compose'
+alias dc='docker compose'
 tmn() {
   if type "autojump" > /dev/null 2>&1; then
     j $1

@@ -11,7 +11,7 @@ Plug 'AndrewRadev/splitjoin.vim'
 Plug 'sainnhe/gruvbox-material'
 Plug 'rebelot/kanagawa.nvim'
 Plug 'Shougo/vinarise.vim'
-Plug 'SirVer/ultisnips'
+" Plug 'SirVer/ultisnips'
 Plug 'VincentCordobes/vim-translate'
 Plug 'airblade/vim-rooter'
 Plug 'aklt/plantuml-syntax'
@@ -80,7 +80,7 @@ Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-calc'
 Plug 'hrsh7th/cmp-emoji'
 Plug 'hrsh7th/nvim-cmp'
-Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+" Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 Plug 'uga-rosa/cmp-dictionary'
 " requires
 Plug 'kyazdani42/nvim-web-devicons' " for file icons
@@ -95,6 +95,11 @@ Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'nvim-lua/plenary.nvim'
 Plug 'liuchengxu/vista.vim'
 Plug 'vim-scripts/dbext.vim'
+Plug 'hrsh7th/cmp-vsnip'
+Plug 'hrsh7th/vim-vsnip'
+Plug 'hrsh7th/vim-vsnip-integ'
+Plug 'rafamadriz/friendly-snippets'
+
 
 
 call plug#end()
@@ -190,9 +195,7 @@ vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<C
 -- after the language server attaches to the current buffer
 
 local on_attacher = function(enable_format)
-  local on_attach = function(client, bufner)
-    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+  local on_attach = function(client, bufnr)
     client.resolved_capabilities.document_formatting = enable_format
     client.resolved_capabilities.document_range_formatting = enable_format
 
@@ -218,10 +221,6 @@ local on_attacher = function(enable_format)
   return on_attach
 end
 
-local on_attach = function(client, bufnr)
- on_attacher(false)(client, bufnr)
-end
-
 -- Use a loop to conveniently call 'setup' on multiple servers and
 -- map buffer local keybindings when the language server attaches
   -- Setup nvim-cmp.
@@ -231,23 +230,56 @@ end
     snippet = {
       -- REQUIRED - you must specify a snippet engine
       expand = function(args)
-        -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
         -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-        vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
         -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
       end,
     },
     mapping = {
-    ['<C-e>'] = cmp.mapping({
-      i = cmp.mapping.abort(),
-      c = cmp.mapping.close(),
-    }),
-    ['<C-y>'] = cmp.mapping.confirm({ select = true }), -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+      ['<C-e>'] = cmp.mapping({
+        i = cmp.mapping.abort(),
+        c = cmp.mapping.close(),
+      }),
+      ['<C-y>'] = cmp.mapping.confirm({ select = true }), -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
+      ['<CR>'] = cmp.mapping.confirm({ select = true }),
+      ['<C-n>'] = cmp.mapping({
+          c = function()
+              if cmp.visible() then
+                  cmp.select_next_item()
+              else
+                  vim.api.nvim_feedkeys(t('<Down>'), 'n', true)
+              end
+          end,
+          i = function(fallback)
+              if cmp.visible() then
+                  cmp.select_next_item()
+              else
+                  fallback()
+              end
+          end
+      }),
+      ['<C-p>'] = cmp.mapping({
+          c = function()
+              if cmp.visible() then
+                  cmp.select_prev_item()
+              else
+                  vim.api.nvim_feedkeys(t('<Up>'), 'n', true)
+              end
+          end,
+          i = function(fallback)
+              if cmp.visible() then
+                  cmp.select_prev_item()
+              else
+                  fallback()
+              end
+          end
+      }),
     },
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
-      { name = 'ultisnips'}, -- For ultisnips users.
+      -- { name = 'ultisnips'}, -- For ultisnips users.
+      { name = 'vsnip'},
       { name = 'buffer' },
       { name = 'path' },
       { name = 'calc' },
@@ -344,8 +376,8 @@ EOF
 
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  -- One of "all", "maintained" (parsers with maintainers), or a list of languages
-  ensure_installed = "maintained",
+  -- One of "all" (parsers with maintainers), or a list of languages
+  ensure_installed = "all",
 
   -- Install languages synchronously (only applied to `ensure_installed`)
   sync_install = false,
@@ -570,4 +602,33 @@ let g:python3_host_prog = $HOME . '/.pyenv/shims/python'
 nmap <Leader><Leader>s <Plug>(easymotion-overwin-f2)
 xmap <Leader><Leader>s <Plug>(easymotion-bd-f2)
 omap <Leader><Leader>s <Plug>(easymotion-bd-f2)
+" }}}
+" 
+" NOTE: You can use other key to expand snippet.
+" {{{ vsnip
+" Expand
+imap <expr> <C-y>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-y>'
+smap <expr> <C-y>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-y>'
+
+" Expand or jump
+imap <expr> <C-j>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-j>'
+smap <expr> <C-j>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-j>'
+
+" Jump forward or backward
+imap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+smap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+imap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+smap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+
+" Select or cut text to use as $TM_SELECTED_TEXT in the next snippet.
+" See https://github.com/hrsh7th/vim-vsnip/pull/50
+nmap        s   <Plug>(vsnip-select-text)
+xmap        s   <Plug>(vsnip-select-text)
+nmap        S   <Plug>(vsnip-cut-text)
+xmap        S   <Plug>(vsnip-cut-text)
+
+" If you want to use snippet for multiple filetypes, you can `g:vsnip_filetypes` for it.
+let g:vsnip_filetypes = {}
+let g:vsnip_filetypes.javascriptreact = ['javascript']
+let g:vsnip_filetypes.typescriptreact = ['typescript']
 " }}}
