@@ -99,8 +99,9 @@ Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
 Plug 'hrsh7th/vim-vsnip-integ'
 Plug 'rafamadriz/friendly-snippets'
-
-
+Plug 'petobens/poet-v'
+Plug 'jsborjesson/vim-uppercase-sql'
+Plug 'jjo/vim-cue'
 
 call plug#end()
 set completeopt=menu,menuone,noselect
@@ -123,6 +124,10 @@ local sources = {
     null_ls.builtins.formatting.prettier,
     null_ls.builtins.diagnostics.write_good,
     null_ls.builtins.formatting.black,
+    null_ls.builtins.code_actions.refactoring,
+    null_ls.builtins.diagnostics.golangci_lint,
+    null_ls.builtins.diagnostics.hadolint,
+    null_ls.builtins.diagnostics.markdownlint,
 }
 
 null_ls.setup({ sources = sources })
@@ -356,6 +361,26 @@ EOF
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
   textobjects = {
+    move = {
+      enable = true,
+      set_jumps = true, -- whether to set jumps in the jumplist
+      goto_next_start = {
+        ["]m"] = "@function.outer",
+        ["]]"] = "@class.outer",
+      },
+      goto_next_end = {
+        ["]M"] = "@function.outer",
+        ["]["] = "@class.outer",
+      },
+      goto_previous_start = {
+        ["[m"] = "@function.outer",
+        ["[["] = "@class.outer",
+      },
+      goto_previous_end = {
+        ["[M"] = "@function.outer",
+        ["[]"] = "@class.outer",
+      },
+    },
     select = {
       enable = true,
 

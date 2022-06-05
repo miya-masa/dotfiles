@@ -11,3 +11,4 @@ npm i -g @redocly/openapi-cli@latest
 npm i -g redoc-cli
 npm i -g prettier
 npm i -g write-good
+npm i -g markdownlint-cli

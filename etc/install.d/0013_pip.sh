@@ -18,3 +18,4 @@ pip install \
   pylsp-mypy \
   pyls-isort \
   python-lsp-black
+pip install --user pipenv

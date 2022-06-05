@@ -49,3 +49,5 @@
 	co = "checkout"
 [fetch]
 	prune = true
+[rebase]
+	autosquash = true

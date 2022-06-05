@@ -115,12 +115,12 @@ anyframe-widget-git-log() {
 }
 zle -N anyframe-widget-git-log
 
-bindkey '^x^l' anyframe-widget-git-log
 bindkey '^e^e' anyframe-widget-checkout-git-branch
 bindkey '^e^r' anyframe-widget-checkout-git-remote-branch
 bindkey '^g' anyframe-widget-cd-ghq-repository
 bindkey '^x^i' anyframe-widget-insert-git-branch
-bindkey '^x^f' anyframe-widget-insert-filename
+bindkey '^f' anyframe-widget-insert-filename
+bindkey '^xl' anyframe-widget-git-log
 bindkey '^r' anyframe-widget-execute-history
 
 zstyle ':completion:*:default' menu select=1
@@ -263,4 +263,6 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
 
-### End of Zinit's installer chunk
+if [[ -x "`which op`" ]]; then
+  eval "$(op completion zsh)"; compdef _op op
+fi
