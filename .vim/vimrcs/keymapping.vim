@@ -10,13 +10,20 @@ nnoremap l <Right>zv
 nnoremap Y y$
 nnoremap <Leader><S-\> :vertical<CR>
 nnoremap <Leader>- :split<CR>
-nnoremap <Leader><C-B> :Rooter<CR>:Buffer<CR>
+" nnoremap <Leader><C-B> :Rooter<CR>:Buffer<CR>
+nnoremap <Leader><C-B> :Rooter<CR>:Telescope buffers<CR>
 " Do not remove the trailing blank
-nnoremap <Leader><C-R> :Rooter<CR>:Rg 
-nnoremap <Leader><C-G> :GFiles<CR>
-nnoremap <Leader><C-F> :Files<CR>
-nnoremap <leader><C-L> :Line<CR>
-nnoremap <Leader><C-T> :Tags<CR>
+" nnoremap <Leader><C-R> :Rooter<CR>:Rg
+nnoremap <Leader><C-R> :Telescope live_grep<CR>
+nnoremap <Leader><C-L> :Telescope grep_string<CR>
+" nnoremap <Leader><C-G> :GFiles<CR>
+nnoremap <Leader><C-G> :Telescope git_files<CR>
+nnoremap <Leader><C-Q> :Telescope quickfix<CR>
+" nnoremap <Leader><C-F> :Files<CR>
+" nnoremap <Leader><C-F> :Files<CR>
+" nnoremap <leader><C-L> :Line<CR>
+" nnoremap <leader><C-L> :Telescope <CR>
+" nnoremap <Leader><C-T> :Tags<CR>
 nnoremap <Leader>w :w!<CR>
 nnoremap <Leader>tsl V:TranslateVisual<CR>
 nnoremap <Leader>tsr V:TranslateReplace<CR>

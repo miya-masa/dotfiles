@@ -27,8 +27,10 @@ Plug 'flazz/vim-colorschemes'
 Plug 'honza/vim-snippets'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 Plug 'windwp/nvim-autopairs'
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
+" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+" Plug 'junegunn/fzf.vim'
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
@@ -82,6 +84,7 @@ Plug 'hrsh7th/cmp-emoji'
 Plug 'hrsh7th/nvim-cmp'
 " Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 Plug 'uga-rosa/cmp-dictionary'
+Plug 'petertriho/cmp-git'
 " requires
 Plug 'kyazdani42/nvim-web-devicons' " for file icons
 Plug 'kyazdani42/nvim-tree.lua'
@@ -102,6 +105,9 @@ Plug 'rafamadriz/friendly-snippets'
 Plug 'petobens/poet-v'
 Plug 'jsborjesson/vim-uppercase-sql'
 Plug 'jjo/vim-cue'
+Plug 'ray-x/lsp_signature.nvim'
+Plug 'puremourning/vimspector'
+
 
 call plug#end()
 set completeopt=menu,menuone,noselect
@@ -123,14 +129,21 @@ local null_ls = require("null-ls")
 local sources = {
     null_ls.builtins.formatting.prettier,
     null_ls.builtins.diagnostics.write_good,
-    null_ls.builtins.formatting.black,
     null_ls.builtins.code_actions.refactoring,
     null_ls.builtins.diagnostics.golangci_lint,
     null_ls.builtins.diagnostics.hadolint,
     null_ls.builtins.diagnostics.markdownlint,
+    null_ls.builtins.diagnostics.pyproject_flake8,
+    null_ls.builtins.formatting.isort,
+    null_ls.builtins.formatting.black,
 }
 
 null_ls.setup({ sources = sources })
+EOF
+
+lua <<EOF
+cfg = {}
+require "lsp_signature".setup(cfg)
 EOF
 
 
@@ -283,6 +296,7 @@ end
     },
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
+      { name = 'git' },
       -- { name = 'ultisnips'}, -- For ultisnips users.
       { name = 'vsnip'},
       { name = 'buffer' },
@@ -549,7 +563,6 @@ let test#go#gotest#options = {
   \ 'file':    '-count=1 -timeout=30s',
   \ 'suite':   '-count=1 -timeout=2m',
 \}
-let test#python#runner = 'pytest'
 " }}}
 "  Plug 'kana/vim-operator-replace' {{{
 nmap ! <Plug>(operator-replace)
@@ -560,7 +573,11 @@ let g:projectionist_heuristics = {
       \ "*.go": {
       \   "*_test.go": {"type": "test", "alternate": "{}.go"},
       \   "*.go": {"type": "source", "alternate": "{}_test.go"}
-      \ }}
+      \  },
+      \ "pyproject.toml": {
+      \   "*.py": {"type": "source", "alternate": "tests/{dirname}/test_{basename}.py"}
+      \  }
+      \ }
 " }}}
 " Plug 'Plug 'tpope/vim-dispatch'' {{{
 let g:dispatch_compilers = {'go test': 'gotest'}
@@ -657,3 +674,8 @@ let g:vsnip_filetypes = {}
 let g:vsnip_filetypes.javascriptreact = ['javascript']
 let g:vsnip_filetypes.typescriptreact = ['typescript']
 " }}}
+"
+"
+lua << EOF
+require('telescope').load_extension('fzf')
+EOF

@@ -7,8 +7,9 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-npm i -g @redocly/openapi-cli@latest
+npm i -g @redocly/cli@latest
 npm i -g redoc-cli
 npm i -g prettier
 npm i -g write-good
 npm i -g markdownlint-cli
+npm i -g md-to-pdf
