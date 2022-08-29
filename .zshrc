@@ -148,6 +148,7 @@ alias drm='docker rm $(docker ps -aqf "status=exited") 2> /dev/null'
 alias drmi='docker rmi $(docker images -aqf "dangling=true") 2> /dev/null'
 alias dkill='docker container ls -q | xargs docker kill'
 alias dc='docker compose'
+alias rand="head -n 10 /dev/urandom | base64 | head -n 1 | cut -c 1-32 | tr '/+' '_-'"
 tmn() {
   if type "autojump" > /dev/null 2>&1; then
     j $1

@@ -63,7 +63,7 @@ Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-obsession'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'vim-scripts/DrawIt'
-Plug 'vim-test/vim-test'
+" Plug 'vim-test/vim-test'
 Plug 'kamykn/spelunker.vim'
 Plug 'kamykn/popup-menu.nvim'
 Plug 'airblade/vim-gitgutter'
@@ -107,7 +107,12 @@ Plug 'jsborjesson/vim-uppercase-sql'
 Plug 'jjo/vim-cue'
 Plug 'ray-x/lsp_signature.nvim'
 Plug 'puremourning/vimspector'
-
+Plug 'antoinemadec/FixCursorHold.nvim'
+Plug 'nvim-neotest/neotest'
+Plug 'nvim-neotest/neotest-go'
+Plug 'nvim-neotest/neotest-python'
+Plug 'beauwilliams/focus.nvim'
+Plug 'AckslD/nvim-neoclip.lua'
 
 call plug#end()
 set completeopt=menu,menuone,noselect
@@ -121,6 +126,31 @@ for type, icon in pairs(signs) do
 end
 EOF
 
+" {{{ neotest
+lua << EOF
+require("neotest").setup({
+  adapters = {
+    require("neotest-python"),
+    require("neotest-go")({
+      experimental = {
+        test_table = true,
+      },
+      args = { "-count=1", "-timeout=60s" , "-tags=integration"}
+    })
+  },
+  floating = {
+    max_height = 0.9,
+    max_width = 0.9,
+  },
+})
+EOF
+" }}}
+
+" focus {{{ 
+lua << EOF
+require("focus").setup()
+EOF
+" }}}
 
 lua << EOF
 local null_ls = require("null-ls")
@@ -129,7 +159,6 @@ local null_ls = require("null-ls")
 local sources = {
     null_ls.builtins.formatting.prettier,
     null_ls.builtins.diagnostics.write_good,
-    null_ls.builtins.code_actions.refactoring,
     null_ls.builtins.diagnostics.golangci_lint,
     null_ls.builtins.diagnostics.hadolint,
     null_ls.builtins.diagnostics.markdownlint,
@@ -551,7 +580,7 @@ let g:translate#default_languages = {
       \ }
 " }}}
 " {{{ buoto/gotests-vim
-" let g:gotests_template_dir = $HOME . '/go/src/github.com/cweill/gotests/templates/testify'
+let g:gotests_template = "testify"
 " }}}
 " {{{ sjl/gundo
 let g:gundo_prefer_python3=1
@@ -645,7 +674,7 @@ nmap <Leader><Leader>s <Plug>(easymotion-overwin-f2)
 xmap <Leader><Leader>s <Plug>(easymotion-bd-f2)
 omap <Leader><Leader>s <Plug>(easymotion-bd-f2)
 " }}}
-" 
+"
 " NOTE: You can use other key to expand snippet.
 " {{{ vsnip
 " Expand
@@ -679,3 +708,12 @@ let g:vsnip_filetypes.typescriptreact = ['typescript']
 lua << EOF
 require('telescope').load_extension('fzf')
 EOF
+
+" neoclip {{{
+lua << EOF
+require('neoclip').setup()
+require('telescope').load_extension('neoclip')
+EOF
+" }}} focus
+
+

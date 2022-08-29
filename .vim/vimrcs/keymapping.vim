@@ -19,6 +19,7 @@ nnoremap <Leader><C-L> :Telescope grep_string<CR>
 " nnoremap <Leader><C-G> :GFiles<CR>
 nnoremap <Leader><C-G> :Telescope git_files<CR>
 nnoremap <Leader><C-Q> :Telescope quickfix<CR>
+nnoremap <Leader><C-Y> :Telescope neoclip<CR>
 " nnoremap <Leader><C-F> :Files<CR>
 " nnoremap <Leader><C-F> :Files<CR>
 " nnoremap <leader><C-L> :Line<CR>
@@ -32,9 +33,17 @@ nnoremap <Leader>y :NvimTreeFindFile<CR>
 nnoremap <silent> <Leader>sj :SplitjoinJoin<CR>
 nnoremap <silent> <Leader>ss :SplitjoinSplit<CR>
 " these "Ctrl mappings" work well when Caps Lock is mapped to Ctrl
-nnoremap <silent> t<C-n> :cd %:p:h<cr>:TestNearest<CR>
-nnoremap <silent> t<C-f> :cd %:p:h<cr>:TestFile<CR>
-nnoremap <silent> t<C-s> :cd %:p:h<cr>:TestSuite<CR>
+" nnoremap <silent> t<C-n> :cd %:p:h<cr>:TestNearest<CR>
+nnoremap <silent> t<C-n> :cd %:p:h<cr>:lua require("neotest").run.run({extra_args = {"-timeout 5s"}})<CR>
+nnoremap <silent> ti<C-n> :cd %:p:h<cr>:lua require("neotest").run.run({extra_args = {"-timeout 30s"}})<CR>
+nnoremap <silent> t<C-m> :cd %:p:h<cr>:lua require("neotest").run.stop()<CR>
+" nnoremap <silent> t<C-f> :cd %:p:h<cr>:TestFile<CR>
+nnoremap <silent> t<C-f> :cd %:p:h<cr>:lua require("neotest").run.run(vim.fn.expand("%"))<CR>
+nnoremap <silent> t<C-t> :cd %:p:h<cr>:lua require("neotest").summary.toggle()<CR>
+nnoremap <silent> t<C-o> :cd %:p:h<cr>:lua require("neotest").output.open({ enter = true })<CR>
+ nnoremap <silent>[n <cmd>lua require("neotest").jump.prev({ status = "failed" })<CR>
+ nnoremap <silent>]n <cmd>lua require("neotest").jump.next({ status = "failed" })<CR>
+
 nnoremap <silent> t<C-l> :cd %:p:h<cr>:TestLast<CR>
 nnoremap <silent> t<C-g> :cd %:p:h<cr>:TestVisit<CR>
 nmap <C-q> <Plug>(quickrun)<CR>
