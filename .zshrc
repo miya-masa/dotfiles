@@ -264,7 +264,10 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
 
+### End of Zinit's installer chunk
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+export PATH="${PATH}:${HOME}/.local/bin/"
 if [[ -x "`which op`" ]]; then
   eval "$(op completion zsh)"; compdef _op op
 fi
-
