@@ -9,8 +9,9 @@ endif
 call plug#begin('~/.vim/plugged')
 Plug 'AndrewRadev/splitjoin.vim'
 Plug 'sainnhe/gruvbox-material'
+Plug 'rebelot/kanagawa.nvim'
 Plug 'Shougo/vinarise.vim'
-Plug 'SirVer/ultisnips'
+" Plug 'SirVer/ultisnips'
 Plug 'VincentCordobes/vim-translate'
 Plug 'airblade/vim-rooter'
 Plug 'aklt/plantuml-syntax'
@@ -18,7 +19,6 @@ Plug 'bkad/CamelCaseMotion'
 Plug 'bronson/vim-trailing-whitespace'
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'rhysd/vim-go-impl'
-" Plug 'cocopon/lightline-hybrid.vim'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'diepm/vim-rest-console'
 Plug 'easymotion/vim-easymotion'
@@ -26,17 +26,16 @@ Plug 'edkolev/tmuxline.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'honza/vim-snippets'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
-" Plug 'itchyny/lightline.vim'
-" Plug 'itchyny/vim-gitbranch'
 Plug 'windwp/nvim-autopairs'
-Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-Plug 'junegunn/fzf.vim'
+" Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+" Plug 'junegunn/fzf.vim'
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
 Plug 'kana/vim-operator-replace'
 Plug 'kana/vim-operator-user'
-" Plug 'majutsushi/tagbar'
 Plug 'liuchengxu/vista.vim'
 Plug 'maxmellon/vim-jsx-pretty'
 Plug 'mhinz/vim-startify'
@@ -64,7 +63,7 @@ Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-obsession'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'vim-scripts/DrawIt'
-Plug 'vim-test/vim-test'
+" Plug 'vim-test/vim-test'
 Plug 'kamykn/spelunker.vim'
 Plug 'kamykn/popup-menu.nvim'
 Plug 'airblade/vim-gitgutter'
@@ -83,8 +82,9 @@ Plug 'hrsh7th/cmp-cmdline'
 Plug 'hrsh7th/cmp-calc'
 Plug 'hrsh7th/cmp-emoji'
 Plug 'hrsh7th/nvim-cmp'
-Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+" Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 Plug 'uga-rosa/cmp-dictionary'
+Plug 'petertriho/cmp-git'
 " requires
 Plug 'kyazdani42/nvim-web-devicons' " for file icons
 Plug 'kyazdani42/nvim-tree.lua'
@@ -93,6 +93,26 @@ Plug 'mattn/vim-goaddtags'
 Plug 'buoto/gotests-vim'
 Plug 'rhysd/vim-clang-format'
 Plug 'mustache/vim-mustache-handlebars'
+Plug 'iberianpig/tig-explorer.vim'
+Plug 'jose-elias-alvarez/null-ls.nvim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'liuchengxu/vista.vim'
+Plug 'vim-scripts/dbext.vim'
+Plug 'hrsh7th/cmp-vsnip'
+Plug 'hrsh7th/vim-vsnip'
+Plug 'hrsh7th/vim-vsnip-integ'
+Plug 'rafamadriz/friendly-snippets'
+Plug 'petobens/poet-v'
+Plug 'jsborjesson/vim-uppercase-sql'
+Plug 'jjo/vim-cue'
+Plug 'ray-x/lsp_signature.nvim'
+Plug 'puremourning/vimspector'
+Plug 'antoinemadec/FixCursorHold.nvim'
+Plug 'nvim-neotest/neotest'
+Plug 'nvim-neotest/neotest-go'
+Plug 'nvim-neotest/neotest-python'
+Plug 'beauwilliams/focus.nvim'
+Plug 'AckslD/nvim-neoclip.lua'
 
 call plug#end()
 set completeopt=menu,menuone,noselect
@@ -106,86 +126,146 @@ for type, icon in pairs(signs) do
 end
 EOF
 
+" {{{ neotest
+lua << EOF
+require("neotest").setup({
+  adapters = {
+    require("neotest-python"),
+    require("neotest-go")({
+      experimental = {
+        test_table = true,
+      },
+      args = { "-count=1", "-timeout=60s" , "-tags=integration"}
+    })
+  },
+  floating = {
+    max_height = 0.9,
+    max_width = 0.9,
+  },
+})
+EOF
+" }}}
+
+" focus {{{ 
+lua << EOF
+require("focus").setup()
+EOF
+" }}}
+
+lua << EOF
+local null_ls = require("null-ls")
+
+-- register any number of sources simultaneously
+local sources = {
+    null_ls.builtins.formatting.prettier,
+    null_ls.builtins.diagnostics.write_good,
+    null_ls.builtins.diagnostics.golangci_lint,
+    null_ls.builtins.diagnostics.hadolint,
+    null_ls.builtins.diagnostics.markdownlint,
+    null_ls.builtins.diagnostics.pyproject_flake8,
+    null_ls.builtins.formatting.isort,
+    null_ls.builtins.formatting.black,
+}
+
+null_ls.setup({ sources = sources })
+EOF
+
+lua <<EOF
+cfg = {}
+require "lsp_signature".setup(cfg)
+EOF
+
 
 lua << EOF
 require('nvim-autopairs').setup{}
-local tree_cb = require'nvim-tree.config'.nvim_tree_callback
 -- default mappings
 local list = {
-  { key = {"<CR>", "o", "<2-LeftMouse>"}, cb = tree_cb("edit") },
-  { key = {"<2-RightMouse>", "<C-]>"},    cb = tree_cb("cd") },
-  { key = "<C-v>",                        cb = tree_cb("vsplit") },
-  { key = "<C-x>",                        cb = tree_cb("split") },
-  { key = "<C-t>",                        cb = tree_cb("tabnew") },
-  { key = "<",                            cb = tree_cb("prev_sibling") },
-  { key = ">",                            cb = tree_cb("next_sibling") },
-  { key = "P",                            cb = tree_cb("parent_node") },
-  { key = "<S-CR>",                       cb = tree_cb("close_node") },
-  { key = "<Tab>",                        cb = tree_cb("preview") },
-  { key = "K",                            cb = tree_cb("first_sibling") },
-  { key = "J",                            cb = tree_cb("last_sibling") },
-  { key = "I",                            cb = tree_cb("toggle_ignored") },
-  { key = "H",                            cb = tree_cb("toggle_dotfiles") },
-  { key = "R",                            cb = tree_cb("refresh") },
-  { key = "a",                            cb = tree_cb("create") },
-  { key = "d",                            cb = tree_cb("remove") },
-  { key = "r",                            cb = tree_cb("rename") },
-  { key = "<C-r>",                        cb = tree_cb("full_rename") },
-  { key = "x",                            cb = tree_cb("cut") },
-  { key = "yy",                           cb = tree_cb("copy") },
-  { key = "p",                            cb = tree_cb("paste") },
-  { key = "cp",                           cb = tree_cb("copy_name") },
-  { key = "Y",                            cb = tree_cb("copy_path") },
-  { key = "gy",                           cb = tree_cb("copy_absolute_path") },
-  { key = "[c",                           cb = tree_cb("prev_git_item") },
-  { key = "]c",                           cb = tree_cb("next_git_item") },
-  { key = "<BS>",                         cb = tree_cb("dir_up") },
-  { key = "q",                            cb = tree_cb("close") },
-  { key = "?",                            cb = tree_cb("toggle_help") },
+  { key = {"<CR>", "o", "<2-LeftMouse>"}, action = "edit" },
+  { key = "<C-e>",                        action = "" },
+  { key = {"O"},                          action = "edit_no_picker" },
+  { key = {"<2-RightMouse>", "<C-]>"},    action = "cd" },
+  { key = "<C-v>",                        action = "vsplit" },
+  { key = "<C-x>",                        action = "split" },
+  { key = "<C-t>",                        action = "tabnew" },
+  { key = "<",                            action = "prev_sibling" },
+  { key = ">",                            action = "next_sibling" },
+  { key = "P",                            action = "parent_node" },
+  { key = "<BS>",                         action = "close_node" },
+  { key = "<Tab>",                        action = "preview" },
+  { key = "K",                            action = "first_sibling" },
+  { key = "J",                            action = "last_sibling" },
+  { key = "I",                            action = "toggle_ignored" },
+  { key = "H",                            action = "toggle_dotfiles" },
+  { key = "R",                            action = "refresh" },
+  { key = "a",                            action = "create" },
+  { key = "d",                            action = "remove" },
+  { key = "D",                            action = "trash" },
+  { key = "r",                            action = "rename" },
+  { key = "<C-r>",                        action = "full_rename" },
+  { key = "x",                            action = "cut" },
+  { key = "c",                            action = "copy" },
+  { key = "p",                            action = "paste" },
+  { key = "y",                            action = "copy_name" },
+  { key = "Y",                            action = "copy_path" },
+  { key = "gy",                           action = "copy_absolute_path" },
+  { key = "[c",                           action = "prev_git_item" },
+  { key = "]c",                           action = "next_git_item" },
+  { key = "-",                            action = "dir_up" },
+  { key = "s",                            action = "system_open" },
+  { key = "q",                            action = "close" },
+  { key = "g?",                           action = "toggle_help" },
+  { key = 'W',                            action = "collapse_all" },
+  { key = "S",                            action = "search_node" },
+  { key = ".",                            action = "run_file_command" },
+  { key = "<C-k>",                        action = "" },
+  { key = "U",                            action = "toggle_custom" },
 }
-
-require('nvim-tree').setup{
-
+require'nvim-tree'.setup {
   view = {
+    width = '20%',
     mappings = {
-      custom_only = true,
+      custom_only = false,
       list = list
-      }
-  }
+    },
+  },
 }
 
 local nvim_lsp = require('lspconfig')
 
+local opts = { noremap=true, silent=true }
+vim.api.nvim_set_keymap('n', '<space>e', '<cmd>lua vim.diagnostic.open_float()<CR>', opts)
+vim.api.nvim_set_keymap('n', '[g', '<cmd>lua vim.diagnostic.goto_prev()<CR>', opts)
+vim.api.nvim_set_keymap('n', ']g', '<cmd>lua vim.diagnostic.goto_next()<CR>', opts)
+vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
+
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
-local on_attach = function(client, bufnr)
-  local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-  local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
 
-  -- Enable completion triggered by <c-x><c-o>
-  buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+local on_attacher = function(enable_format)
+  local on_attach = function(client, bufnr)
+    client.resolved_capabilities.document_formatting = enable_format
+    client.resolved_capabilities.document_range_formatting = enable_format
 
-  -- Mappings.
-  local opts = { noremap=true, silent=true }
+    -- Enable completion triggered by <c-x><c-o>
+    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
-  -- See `:help vim.lsp.*` for documentation on any of the below functions
-  buf_set_keymap('n', '<Leader>gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-  buf_set_keymap('n', '<Leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
-  buf_set_keymap('n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
-  buf_set_keymap('n', '<Leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-  buf_set_keymap('n', '<Leader><C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-  buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-  buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  buf_set_keymap('n', '<Leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-  buf_set_keymap('n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-  buf_set_keymap('n', '<Leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-  buf_set_keymap('n', '<Leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-  buf_set_keymap('n', '<space>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-  buf_set_keymap('n', '[g', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-  buf_set_keymap('n', ']g', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-  buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-  buf_set_keymap('n', '<Leader><C-f>', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+    -- Mappings.
+    -- See `:help vim.lsp.*` for documentation on any of the below functions
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-f>', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+  end
+  return on_attach
 end
 
 -- Use a loop to conveniently call 'setup' on multiple servers and
@@ -197,23 +277,57 @@ end
     snippet = {
       -- REQUIRED - you must specify a snippet engine
       expand = function(args)
-        -- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+        vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
         -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
-        vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+        -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
         -- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
       end,
     },
     mapping = {
-    ['<C-e>'] = cmp.mapping({
-      i = cmp.mapping.abort(),
-      c = cmp.mapping.close(),
-    }),
-    ['<C-y>'] = cmp.mapping.confirm({ select = true }), -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+      ['<C-e>'] = cmp.mapping({
+        i = cmp.mapping.abort(),
+        c = cmp.mapping.close(),
+      }),
+      ['<C-y>'] = cmp.mapping.confirm({ select = true }), -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
+      ['<CR>'] = cmp.mapping.confirm({ select = true }),
+      ['<C-n>'] = cmp.mapping({
+          c = function()
+              if cmp.visible() then
+                  cmp.select_next_item()
+              else
+                  vim.api.nvim_feedkeys(t('<Down>'), 'n', true)
+              end
+          end,
+          i = function(fallback)
+              if cmp.visible() then
+                  cmp.select_next_item()
+              else
+                  fallback()
+              end
+          end
+      }),
+      ['<C-p>'] = cmp.mapping({
+          c = function()
+              if cmp.visible() then
+                  cmp.select_prev_item()
+              else
+                  vim.api.nvim_feedkeys(t('<Up>'), 'n', true)
+              end
+          end,
+          i = function(fallback)
+              if cmp.visible() then
+                  cmp.select_prev_item()
+              else
+                  fallback()
+              end
+          end
+      }),
     },
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
-      { name = 'ultisnips'}, -- For ultisnips users.
+      { name = 'git' },
+      -- { name = 'ultisnips'}, -- For ultisnips users.
+      { name = 'vsnip'},
       { name = 'buffer' },
       { name = 'path' },
       { name = 'calc' },
@@ -266,25 +380,50 @@ lsp_installer.on_server_ready(function(server)
           gopls = {
             buildFlags = {"-tags=integration"},
             usePlaceholders = true,
-            completeUnimported = true,
             gofumpt = true,
-            experimentalPostfixCompletions = true
           }
         }
     end
-    opts.on_attach = on_attach
+    if server.name == "tsserver"
+      or server.name == "pyright"
+      or server.name == "golangci_lint_ls"
+      or server.name == "yamlls"
+    then
+      opts.on_attach = on_attacher(false)
+    else
+      opts.on_attach = on_attacher(true)
+    end
     opts.capabilities = capabilities
 
     -- This setup() function is exactly the same as lspconfig's setup function.
     -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/ADVANCED_README.md
     server:setup(opts)
 end)
-require'lspconfig'.golangci_lint_ls.setup{}
 EOF
 
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
   textobjects = {
+    move = {
+      enable = true,
+      set_jumps = true, -- whether to set jumps in the jumplist
+      goto_next_start = {
+        ["]m"] = "@function.outer",
+        ["]]"] = "@class.outer",
+      },
+      goto_next_end = {
+        ["]M"] = "@function.outer",
+        ["]["] = "@class.outer",
+      },
+      goto_previous_start = {
+        ["[m"] = "@function.outer",
+        ["[["] = "@class.outer",
+      },
+      goto_previous_end = {
+        ["[M"] = "@function.outer",
+        ["[]"] = "@class.outer",
+      },
+    },
     select = {
       enable = true,
 
@@ -296,9 +435,30 @@ require'nvim-treesitter.configs'.setup {
         ["af"] = "@function.outer",
         ["if"] = "@function.inner",
         ["ac"] = "@class.outer",
-        ["ic"] = "@class.inner"
+        ["ic"] = "@class.inner",
       },
     },
+  },
+}
+EOF
+
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  -- One of "all" (parsers with maintainers), or a list of languages
+  ensure_installed = "all",
+
+  -- Install languages synchronously (only applied to `ensure_installed`)
+  sync_install = false,
+
+  highlight = {
+    -- `false` will disable the whole extension
+    enable = true,
+
+    -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+    -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+    -- Using this option may slow down your editor, and you may see some duplicate highlights.
+    -- Instead of true it can also be a list of languages
+    additional_vim_regex_highlighting = false,
   },
 }
 EOF
@@ -329,97 +489,24 @@ let g:vrc_trigger = '<Leader><C-o>'
 " }}}
 " CamelCaseMotion {{{
 let g:camelcasemotion_key = ','
-" script_31337_path_and_na[m]e_without_extension_11
-" }}}
-" vim-go {{{
-" let g:go_gopls_enabled = 0
-" let g:go_fmt_command = "goimports"
-" let g:go_fmt_autosave = 0
-" let g:go_mod_fmt_autosave = 0
-" let g:go_autodetect_gopath = 0
-" let g:go_list_type = "quickfix"
-" let g:go_doc_keywordprg_enabled = 0
-" let g:go_def_mapping_enabled = 0
-" let g:go_template_autocreate = 0
-" let g:go_echo_go_info = 0
-" let g:go_echo_command_info = 1
-
-" " highlight
-" let g:go_highlight_types = 0
-" let g:go_highlight_fields = 0
-" let g:go_highlight_functions = 0
-" let g:go_highlight_methods = 0
-" let g:go_highlight_extra_types = 0
-" let g:go_highlight_generate_tags = 0
-" let g:go_auto_sameids = 0
-
-" let g:go_test_timeout = "100s"
-" let g:go_metalinter_deadline = "30s"
-" let g:go_def_mode = 'godef'
-" let g:go_term_mode = 'vsplit'
-
-" }}}
 " EmmetPlugin {{{
 let g:user_emmet_leader_key='<C-t>'
 " }}}
 " vim-json {{{
 let g:vim_json_syntax_conceal = 0
 " }}}
-" IndentGuide {{{
-" let g:indent_guides_enable_on_vim_startup = 1
-" let g:indent_guides_exclude_filetypes = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx']
-" let g:indent_guides_start_level = 1
-" let g:indent_guides_guide_size = 1
-" let g:indent_guides_default_mapping = 0
-" }}}
-" lightline {{{
 lua << END
 require'lualine'.setup {
   options = {
-    theme = 'gruvbox-material'
+    -- theme = 'gruvbox-material'
+    theme = 'kanagawa'
   }
 }
 END
+function! NearestMethodOrFunction() abort
+  return get(b:, 'vista_nearest_method_or_function', '')
+endfunction
 "
-" let g:lightline = {
-"       \   'colorscheme': 'gruvbox',
-"       \   'active': {
-"       \     'left': [[ 'mode', 'paste' ],
-"       \               [ 'gitbranch', 'readonly', 'absolutepath', 'modified' ]],
-"       \     'right': [[ 'lineinfo' ],
-"       \                [ 'percent' ],
-"       \                [ 'fileformat', 'fileencoding', 'filetype', 'charvaluehex' ]]
-"       \   },
-"       \   'component': {
-"       \     'mode': '%{lightline#mode()}',
-"       \     'absolutepath': '%F',
-"       \     'relativepath': '%f',
-"       \     'filename': '%t',
-"       \     'modified': '%M',
-"       \     'bufnum': '%n',
-"       \     'paste': '%{&paste?"PASTE":""}',
-"       \     'readonly': '%R',
-"       \     'charvalue': '%b',
-"       \     'charvaluehex': '%B',
-"       \     'fileencoding': '%{&fenc!=#""?&fenc:&enc}',
-"       \     'fileformat': '%{&ff}',
-"       \     'filetype': '%{&ft!=#""?&ft:"no ft"}',
-"       \     'percent': '%3p%%',
-"       \     'percentwin': '%P',
-"       \     'spell': '%{&spell?&spelllang:""}',
-"       \     'lineinfo': '%3l:%-2v',
-"       \     'line': '%l',
-"       \     'column': '%c',
-"       \     'close': '%999X X ',
-"       \     'winnr': '%{winnr()}'
-"       \   },
-"       \   'component_function': {
-"       \       'gitbranch': 'gitbranch#name'
-"       \   }
-"       \ }
-
-" }}}
-" tmux-navigator {{{
 " }}}
 " tmuxline {{{
 let g:tmuxline_powerline_separators = 1
@@ -445,6 +532,12 @@ let g:notes_directories = ['~/work/Notes']
 let g:notes_suffix = '.md'
 " }}}
 " QuickRun {{{
+let g:quickrun_config = {
+\}
+augroup rust_quickrun
+  au!
+  autocmd BufNewFile,BufRead *.rs let g:quickrun_config.rust = {'exec' : 'cargo run'}
+augroup END
 " }}}
 " mhinz/vim-startify {{{
 " startify
@@ -487,15 +580,10 @@ let g:translate#default_languages = {
       \ }
 " }}}
 " {{{ buoto/gotests-vim
-" let g:gotests_template_dir = $HOME . '/go/src/github.com/cweill/gotests/templates/testify'
+let g:gotests_template = "testify"
 " }}}
 " {{{ sjl/gundo
 let g:gundo_prefer_python3=1
-" }}}
-" {{{ Plug 'scrooloose/nerdtree'
-let NERDTreeShowHidden=1
-let g:NERDTreeMapJumpPrevSibling=""
-let g:NERDTreeMapJumpNextSibling=""
 " }}}
 " {{{ Plug 'janko/vim-test'
 let test#strategy = "dispatch"
@@ -514,7 +602,11 @@ let g:projectionist_heuristics = {
       \ "*.go": {
       \   "*_test.go": {"type": "test", "alternate": "{}.go"},
       \   "*.go": {"type": "source", "alternate": "{}_test.go"}
-      \ }}
+      \  },
+      \ "pyproject.toml": {
+      \   "*.py": {"type": "source", "alternate": "tests/{dirname}/test_{basename}.py"}
+      \  }
+      \ }
 " }}}
 " Plug 'Plug 'tpope/vim-dispatch'' {{{
 let g:dispatch_compilers = {'go test': 'gotest'}
@@ -542,8 +634,7 @@ let g:rooter_manual_only = 1
 " Plug 'tpope/vim-markdown' {{{
 let g:markdown_fenced_languages = ['plantuml', 'go', 'java', 'bash=sh']
 " }}}
-" Plug 'Yggdroot/indentLine' {{{
-" let g:indentLine_fileTypeExclude = ['help', 'startify', 'dirvish', 'no ft', 'fzf', 'nerdtree', 'defx', 'go']
+" Plug 'indent' {{{
 
 lua << EOF
 require("indent_blankline").setup {
@@ -551,7 +642,14 @@ require("indent_blankline").setup {
     filetype_exclude = {"help", "startify", "dirvish", "no ft", "fzf", 'NvimTree', 'markdown'}
 }
 EOF
+
 " }}}
+" Plug 'indent' {{{
+if filereadable(expand('~/.dbext_profile'))
+    source ~/.dbext_profile
+endif
+" }}}
+
 command! -bang -nargs=* Rg
   \ call fzf#vim#grep(
   \   'rg --column --line-number --no-heading --color=always --hidden --iglob ''!.git'' --smart-case -- '.shellescape(<q-args>), 1,
@@ -559,7 +657,7 @@ command! -bang -nargs=* Rg
 
 " }}}
 "
-" Plug 'iamcco/markdown-preview.nvim'
+" Plug 'iamcco/markdown-preview.nvim'{{{
 let g:mkdp_open_to_the_world = 1
 let g:mkdp_port = '39999'
 let g:mkdp_echo_preview_url = 1
@@ -569,4 +667,53 @@ let g:mkdp_preview_options = {
       \ },
     \ }
 " }}}
+let g:python3_host_prog = $HOME . '/.pyenv/shims/python'
+
+" {{{ vim-easymotion
+nmap <Leader><Leader>s <Plug>(easymotion-overwin-f2)
+xmap <Leader><Leader>s <Plug>(easymotion-bd-f2)
+omap <Leader><Leader>s <Plug>(easymotion-bd-f2)
+" }}}
 "
+" NOTE: You can use other key to expand snippet.
+" {{{ vsnip
+" Expand
+imap <expr> <C-y>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-y>'
+smap <expr> <C-y>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-y>'
+
+" Expand or jump
+imap <expr> <C-j>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-j>'
+smap <expr> <C-j>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-j>'
+
+" Jump forward or backward
+imap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+smap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+imap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+smap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+
+" Select or cut text to use as $TM_SELECTED_TEXT in the next snippet.
+" See https://github.com/hrsh7th/vim-vsnip/pull/50
+nmap        s   <Plug>(vsnip-select-text)
+xmap        s   <Plug>(vsnip-select-text)
+nmap        S   <Plug>(vsnip-cut-text)
+xmap        S   <Plug>(vsnip-cut-text)
+
+" If you want to use snippet for multiple filetypes, you can `g:vsnip_filetypes` for it.
+let g:vsnip_filetypes = {}
+let g:vsnip_filetypes.javascriptreact = ['javascript']
+let g:vsnip_filetypes.typescriptreact = ['typescript']
+" }}}
+"
+"
+lua << EOF
+require('telescope').load_extension('fzf')
+EOF
+
+" neoclip {{{
+lua << EOF
+require('neoclip').setup()
+require('telescope').load_extension('neoclip')
+EOF
+" }}} focus
+
+

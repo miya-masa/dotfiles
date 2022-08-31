@@ -8,12 +8,6 @@ augroup go
 
   autocmd FileType go nnoremap ]] /^func<CR>:nohlsearch<CR>
   autocmd FileType go nnoremap [[ ?^func<CR>:nohlsearch<CR>
-  " :GoCoverageToggle
-  " autocmd FileType go nnoremap <Leader>gc <Plug>(go-coverage-toggle)
-  " :GoTest
-  " :GoTestFunc
-  autocmd FileType go nnoremap ti<C-n> :cd %:p:h<cr>:TestNearest -tags integration -test.timeout=30s<CR>
-  autocmd FileType go nnoremap ti<C-f> :cd %:p:h<cr>:TestFile -tags integration -test.timeout=5m<CR>
   function! DebugNearest()
     let g:test#go#runner = 'delve'
     TestNearest

@@ -47,5 +47,7 @@ sudo apt install -y \
   xsel \
   rpm \
   zlib1g-dev \
+  python3-docutils \
+  libnss3-tools \
   zsh
 

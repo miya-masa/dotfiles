@@ -1,3 +1,10 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 #  _ __ ___ (_)_   _  __ _       _ __ ___   __ _ ___  __ _( )___
 # | '_ ` _ \| | | | |/ _` |_____| '_ ` _ \ / _` / __|/ _` |// __|
 # | | | | | | | |_| | (_| |_____| | | | | | (_| \__ \ (_| | \__ \
@@ -17,16 +24,14 @@ export EDITOR=nvim
 export TERM=screen-256color
 
 export GOPATH="$HOME/go"
-export PATH=$GOPATH/bin:$PATH:/usr/local/go/bin
+export PYENV_ROOT="$HOME/.pyenv"
 export XDG_CONFIG_HOME=$HOME/.config
-export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
-export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
+export PATH=$GOPATH/bin:$PATH:/usr/local/go/bin
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 export PATH=${PATH}:${HOME}/bin
 [ -f ~/.zprofile.local ] && source ~/.zprofile.local
 [ -f ~/.gvm/scripts/gvm ] && source ~/.gvm/scripts/gvm && gvm use master
 export PATH="/usr/local/opt/mysql-client/bin:$PATH"
-export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$PATH"
@@ -34,7 +39,6 @@ export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="/usr/local/opt/gettext/bin:$PATH"
 export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-
 if [[ -x "`which pyenv`" ]]; then
   export PATH="$(pyenv root)/shims:$PATH"
   eval "$(pyenv init -)"
@@ -97,13 +101,26 @@ anyframe-widget-checkout-git-remote-branch() {
 }
 zle -N anyframe-widget-checkout-git-remote-branch
 
-bindkey "^p" reverse-menu-complete
-bindkey "^n" menu-complete
+if [[ -x "`which glab`" ]] ; then
+  anyframe-widget-insert-issue-branch-name() {
+  issueNumber=$(glab ls | tail -n +3 | anyframe-selector-auto | awk '{print $1}')
+    echo "feature/${issueNumber}"_ | anyframe-action-insert
+  }
+  zle -N anyframe-widget-insert-issue-branch-name
+  bindkey '^x^b' anyframe-widget-insert-issue-branch-name
+fi
+
+anyframe-widget-git-log() {
+  git log --oneline | anyframe-selector-auto |  awk '{print $1}' | anyframe-action-insert
+}
+zle -N anyframe-widget-git-log
+
 bindkey '^e^e' anyframe-widget-checkout-git-branch
 bindkey '^e^r' anyframe-widget-checkout-git-remote-branch
 bindkey '^g' anyframe-widget-cd-ghq-repository
 bindkey '^x^i' anyframe-widget-insert-git-branch
-bindkey '^x^f' anyframe-widget-insert-filename
+bindkey '^f' anyframe-widget-insert-filename
+bindkey '^xl' anyframe-widget-git-log
 bindkey '^r' anyframe-widget-execute-history
 
 zstyle ':completion:*:default' menu select=1
@@ -129,7 +146,9 @@ alias dps='docker ps'
 alias dim='docker images'
 alias drm='docker rm $(docker ps -aqf "status=exited") 2> /dev/null'
 alias drmi='docker rmi $(docker images -aqf "dangling=true") 2> /dev/null'
-alias dc='docker-compose'
+alias dkill='docker container ls -q | xargs docker kill'
+alias dc='docker compose'
+alias rand="head -n 10 /dev/urandom | base64 | head -n 1 | cut -c 1-32 | tr '/+' '_-'"
 tmn() {
   if type "autojump" > /dev/null 2>&1; then
     j $1
@@ -218,6 +237,10 @@ function gi() { curl -L -s https://www.gitignore.io/api/$@ ;}
 ### End of Zinit's installer chunk
 #
 #
+
+if [[ -x "`which jira`" ]]; then
+  jira completion zsh > "${fpath[1]}/_jira"
+fi
 if [[ -x "`which kubectl`" ]]; then
   source <(kubectl completion zsh)
 fi
@@ -226,12 +249,7 @@ if [[ -x "`which minikube`" ]]; then
   source <(minikube completion zsh)
 fi
 
-if [[ -x "`which jira`" ]]; then
-  eval "$(jira --completion-script-bash)"
-fi
-
 [[ ! -f ~/.cargo/env ]] || source ~/.cargo/env
-
 [[ ! -f ~/.rbenv/rbenv ]] || eval "$(rbenv init - zsh)"
 ### End of Zinit's installer chunk
 
@@ -250,3 +268,6 @@ zinit light-mode for \
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 export PATH="${PATH}:${HOME}/.local/bin/"
+if [[ -x "`which op`" ]]; then
+  eval "$(op completion zsh)"; compdef _op op
+fi

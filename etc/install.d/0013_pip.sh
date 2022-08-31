@@ -9,4 +9,21 @@ IFS=$'\n\t'
 
 pip install \
   pgcli \
-  mycli
+  mycli \
+  black \
+  isort \
+  flake8 \
+  mypy \
+  pyls-flake8 \
+  pylsp-mypy \
+  pyls-isort \
+  pyproject-flake8 \
+  ansible \
+  python-lsp-black \
+  jupyter \
+  jupyter_contrib_nbextensions
+pip install --upgrade autopep8
+pip install jupyter_nbextensions_configurator
+pip install --user pipenv
+jupyter contrib nbextension install --user
+jupyter nbextensions_configurator enable --user
