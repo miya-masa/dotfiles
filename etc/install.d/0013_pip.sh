@@ -20,6 +20,7 @@ pip install \
   pyproject-flake8 \
   ansible \
   python-lsp-black \
+  poetry \
   jupyter \
   jupyter_contrib_nbextensions
 pip install --upgrade autopep8
