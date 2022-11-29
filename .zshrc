@@ -17,8 +17,7 @@ fi
 # (_)___|___/_| |_|_|  \___|
 
 export LANG=ja_JP.UTF-8
-export LC_TIME=C
-export LC_MESSAGES=C
+export LC_ALL=ja_JP.UTF-8
 export PAGER=less
 export EDITOR=nvim
 export TERM=screen-256color
@@ -271,3 +270,12 @@ export PATH="${PATH}:${HOME}/.local/bin/"
 if [[ -x "`which op`" ]]; then
   eval "$(op completion zsh)"; compdef _op op
 fi
+#compdef toggl
+_toggl() {
+  eval $(env COMMANDLINE="${words[1,$CURRENT]}" _TOGGL_COMPLETE=complete-zsh  toggl)
+}
+if [[ "$(basename -- ${(%):-%x})" != "_toggl" ]]; then
+  compdef _toggl toggl
+fi
+
+complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.2.4/bin/terraform terraform

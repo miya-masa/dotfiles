@@ -28,7 +28,7 @@
 
 [core]
 	editor = nvim
-	hooksPath = ~/.config/git/hooks
+    # hooksPath = ~/.config/git/hooks
 [push]
 	default = current
 [pull]
@@ -51,3 +51,5 @@
 	prune = true
 [rebase]
 	autosquash = true
+[tag]
+	sort = version:refname

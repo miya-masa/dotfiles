@@ -6,8 +6,6 @@ augroup go
   " Show by default 4 spaces for a tab
   autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
 
-  autocmd FileType go nnoremap ]] /^func<CR>:nohlsearch<CR>
-  autocmd FileType go nnoremap [[ ?^func<CR>:nohlsearch<CR>
   function! DebugNearest()
     let g:test#go#runner = 'delve'
     TestNearest
@@ -23,6 +21,12 @@ augroup go
 
 " GoKeyword
   autocmd FileType go set iskeyword=a-z,A-Z,48-57,&,*
+
+
+    " nnoremap <silent> t<C-n> :cd %:p:h<cr>:TestNearest<CR>
+  autocmd FileType go nnoremap <silent> t<C-n> :cd %:p:h<cr>:lua require("neotest").run.run({extra_args = {"-timeout 5s"}})<CR>
+  autocmd FileType go nnoremap <silent> ti<C-n> :cd %:p:h<cr>:lua require("neotest").run.run({extra_args = {"-timeout 30s"}})<CR>
+  autocmd FileType go nnoremap <silent> t<C-m> :cd %:p:h<cr>:lua require("neotest").run.stop()<CR>
 augroup END
 " }}}
 " JSON {{{

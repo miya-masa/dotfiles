@@ -21,7 +21,9 @@ Plug 'christoomey/vim-tmux-navigator'
 Plug 'rhysd/vim-go-impl'
 Plug 'dhruvasagar/vim-table-mode'
 Plug 'diepm/vim-rest-console'
-Plug 'easymotion/vim-easymotion'
+" Plug 'easymotion/vim-easymotion'
+Plug 'ggandor/leap.nvim'
+Plug 'APZelos/blamer.nvim'
 Plug 'edkolev/tmuxline.vim'
 Plug 'flazz/vim-colorschemes'
 Plug 'honza/vim-snippets'
@@ -52,9 +54,12 @@ Plug 'thinca/vim-quickrun'
 Plug 'thinca/vim-zenspace'
 Plug 'tmux-plugins/vim-tmux-focus-events'
 Plug 'tpope/vim-abolish'
-Plug 'tpope/vim-commentary'
+" Plug 'tpope/vim-commentary'
+Plug 'terrortylor/nvim-comment'
 Plug 'tpope/vim-dispatch'
-Plug 'tpope/vim-fugitive'
+" Plug 'tpope/vim-fugitive'
+Plug 'TimUntersberger/neogit'
+Plug 'sindrets/diffview.nvim'
 Plug 'tpope/vim-markdown'
 Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-repeat'
@@ -63,7 +68,6 @@ Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-obsession'
 Plug 'vim-jp/vimdoc-ja'
 Plug 'vim-scripts/DrawIt'
-" Plug 'vim-test/vim-test'
 Plug 'kamykn/spelunker.vim'
 Plug 'kamykn/popup-menu.nvim'
 Plug 'airblade/vim-gitgutter'
@@ -113,6 +117,15 @@ Plug 'nvim-neotest/neotest-go'
 Plug 'nvim-neotest/neotest-python'
 Plug 'beauwilliams/focus.nvim'
 Plug 'AckslD/nvim-neoclip.lua'
+Plug 'onsails/lspkind.nvim'
+Plug 'deris/vim-rengbang'
+Plug 'rgroli/other.nvim'
+Plug 'akinsho/git-conflict.nvim'
+Plug 'sentriz/vim-print-debug'
+Plug 'renerocksai/telekasten.nvim'
+Plug 'renerocksai/calendar-vim'
+Plug 'mzlogin/vim-markdown-toc'
+
 
 call plug#end()
 set completeopt=menu,menuone,noselect
@@ -124,6 +137,18 @@ for type, icon in pairs(signs) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
+EOF
+
+lua << EOF
+require('nvim_comment').setup()
+EOF
+
+lua << EOF
+require('neogit').setup {
+  integrations = {
+    diffview = true
+  }
+}
 EOF
 
 " {{{ neotest
@@ -142,6 +167,17 @@ require("neotest").setup({
     max_height = 0.9,
     max_width = 0.9,
   },
+  icons = {
+    failed = "X",
+    final_child_indent = " ",
+    final_child_prefix = "╰",
+    non_collapsible = "─",
+    passed = "O",
+    running = "-",
+    running_animated = { "/", "|", "\\", "-", "/", "|", "\\", "-" },
+    skipped = "-",
+    unknown = "-"
+  },
 })
 EOF
 " }}}
@@ -158,7 +194,6 @@ local null_ls = require("null-ls")
 -- register any number of sources simultaneously
 local sources = {
     null_ls.builtins.formatting.prettier,
-    null_ls.builtins.diagnostics.write_good,
     null_ls.builtins.diagnostics.golangci_lint,
     null_ls.builtins.diagnostics.hadolint,
     null_ls.builtins.diagnostics.markdownlint,
@@ -243,8 +278,9 @@ vim.api.nvim_set_keymap('n', '<space>q', '<cmd>lua vim.diagnostic.setloclist()<C
 
 local on_attacher = function(enable_format)
   local on_attach = function(client, bufnr)
-    client.resolved_capabilities.document_formatting = enable_format
-    client.resolved_capabilities.document_range_formatting = enable_format
+
+    client.server_capabilities.document_formatting = enable_format
+    client.server_capabilities.document_range_formatting = enable_format
 
     -- Enable completion triggered by <c-x><c-o>
     vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
@@ -263,7 +299,7 @@ local on_attacher = function(enable_format)
     vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
     vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
     vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader>gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-f>', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', '<Leader><C-f>', '<cmd>lua vim.lsp.buf.format()<CR>', opts)
   end
   return on_attach
 end
@@ -367,7 +403,7 @@ require("cmp_dictionary").setup({
 })
 
 --  Setup lspconfig.
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local capabilities = require('cmp_nvim_lsp').default_capabilities(vim.lsp.protocol.make_client_capabilities())
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
 local lsp_installer = require("nvim-lsp-installer")
@@ -399,6 +435,23 @@ lsp_installer.on_server_ready(function(server)
     -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/ADVANCED_README.md
     server:setup(opts)
 end)
+
+local lspkind = require('lspkind')
+cmp.setup {
+  formatting = {
+    format = lspkind.cmp_format({
+      mode = 'symbol', -- show only symbol annotations
+      maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+
+      -- The function below will be called before any actual modifications from lspkind
+      -- so that you can provide more controls on popup customization. (See [#30](https://github.com/onsails/lspkind-nvim/pull/30))
+      before = function (entry, vim_item)
+        return vim_item
+      end
+    })
+  }
+}
+
 EOF
 
 lua <<EOF
@@ -608,9 +661,6 @@ let g:projectionist_heuristics = {
       \  }
       \ }
 " }}}
-" Plug 'Plug 'tpope/vim-dispatch'' {{{
-let g:dispatch_compilers = {'go test': 'gotest'}
-" }}}
 " vim-ghost {{{
 function! s:SetupGhostBuffer()
   set ft=markdown
@@ -621,12 +671,6 @@ augroup vim-ghost
     au User vim-ghost#connected call s:SetupGhostBuffer()
 augroup END
 
-" }}}
-"  Plug junegunn/fzf'' {{{
-command! -bang -nargs=* GGrep
-      \ call fzf#vim#grep(
-      \   'git grep --line-number '.shellescape(<q-args>), 0,
-      \   fzf#vim#with_preview({'dir': systemlist('git rev-parse --show-toplevel')[0]}), <bang>0)
 " }}}
 " Plug 'airblade/vim-rooter' {{{
 let g:rooter_manual_only = 1
@@ -669,12 +713,10 @@ let g:mkdp_preview_options = {
 " }}}
 let g:python3_host_prog = $HOME . '/.pyenv/shims/python'
 
-" {{{ vim-easymotion
-nmap <Leader><Leader>s <Plug>(easymotion-overwin-f2)
-xmap <Leader><Leader>s <Plug>(easymotion-bd-f2)
-omap <Leader><Leader>s <Plug>(easymotion-bd-f2)
+" {{{ leap
+lua require('leap').add_default_mappings()
 " }}}
-"
+
 " NOTE: You can use other key to expand snippet.
 " {{{ vsnip
 " Expand
@@ -693,10 +735,10 @@ smap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-T
 
 " Select or cut text to use as $TM_SELECTED_TEXT in the next snippet.
 " See https://github.com/hrsh7th/vim-vsnip/pull/50
-nmap        s   <Plug>(vsnip-select-text)
-xmap        s   <Plug>(vsnip-select-text)
-nmap        S   <Plug>(vsnip-cut-text)
-xmap        S   <Plug>(vsnip-cut-text)
+" nmap        s   <Plug>(vsnip-select-text)
+" xmap        s   <Plug>(vsnip-select-text)
+" nmap        S   <Plug>(vsnip-cut-text)
+" xmap        S   <Plug>(vsnip-cut-text)
 
 " If you want to use snippet for multiple filetypes, you can `g:vsnip_filetypes` for it.
 let g:vsnip_filetypes = {}
@@ -715,5 +757,159 @@ require('neoclip').setup()
 require('telescope').load_extension('neoclip')
 EOF
 " }}} focus
+
+"""
+lua << END
+local home = vim.fn.expand("~/zettelkasten")
+-- NOTE for Windows users:
+-- - don't use Windows
+-- - try WSL2 on Windows and pretend you're on Linux
+-- - if you **must** use Windows, use "/Users/myname/zettelkasten" instead of "~/zettelkasten"
+-- - NEVER use "C:\Users\myname" style paths
+-- - Using `vim.fn.expand("~/zettelkasten")` should work now but mileage will vary with anything outside of finding and opening files
+require('telekasten').setup({
+    home         = home,
+
+    -- if true, telekasten will be enabled when opening a note within the configured home
+    take_over_my_home = true,
+
+    -- auto-set telekasten filetype: if false, the telekasten filetype will not be used
+    --                               and thus the telekasten syntax will not be loaded either
+    auto_set_filetype = true,
+
+    -- dir names for special notes (absolute path or subdir name)
+    dailies      = home .. '/' .. 'daily',
+    weeklies     = home .. '/' .. 'weekly',
+    templates    = home .. '/' .. 'templates',
+
+    -- image (sub)dir for pasting
+    -- dir name (absolute path or subdir name)
+    -- or nil if pasted images shouldn't go into a special subdir
+    image_subdir = "img",
+
+    -- markdown file extension
+    extension    = ".md",
+
+    -- Generate note filenames. One of:
+    -- "title" (default) - Use title if supplied, uuid otherwise
+    -- "uuid" - Use uuid
+    -- "uuid-title" - Prefix title by uuid
+    -- "title-uuid" - Suffix title with uuid
+    new_note_filename = "title",
+    -- file uuid type ("rand" or input for os.date()")
+    uuid_type = "%Y%m%d%H%M",
+    -- UUID separator
+    uuid_sep = "-",
+
+    -- following a link to a non-existing note will create it
+    follow_creates_nonexisting = true,
+    dailies_create_nonexisting = true,
+    weeklies_create_nonexisting = true,
+
+    -- skip telescope prompt for goto_today and goto_thisweek
+    journal_auto_open = false,
+
+    -- template for new notes (new_note, follow_link)
+    -- set to `nil` or do not specify if you do not want a template
+    template_new_note = home .. '/' .. 'templates/new_note.md',
+
+    -- template for newly created daily notes (goto_today)
+    -- set to `nil` or do not specify if you do not want a template
+    template_new_daily = home .. '/' .. 'templates/daily.md',
+
+    -- template for newly created weekly notes (goto_thisweek)
+    -- set to `nil` or do not specify if you do not want a template
+    template_new_weekly= home .. '/' .. 'templates/weekly.md',
+
+    -- image link style
+    -- wiki:     ![[image name]]
+    -- markdown: ![](image_subdir/xxxxx.png)
+    image_link_style = "markdown",
+
+    -- default sort option: 'filename', 'modified'
+    sort = "filename",
+
+    -- integrate with calendar-vim
+    plug_into_calendar = true,
+    calendar_opts = {
+        -- calendar week display mode: 1 .. 'WK01', 2 .. 'WK 1', 3 .. 'KW01', 4 .. 'KW 1', 5 .. '1'
+        weeknm = 4,
+        -- use monday as first day of week: 1 .. true, 0 .. false
+        calendar_monday = 1,
+        -- calendar mark: where to put mark for marked days: 'left', 'right', 'left-fit'
+        calendar_mark = 'left-fit',
+    },
+
+    -- telescope actions behavior
+    close_after_yanking = false,
+    insert_after_inserting = true,
+
+    -- tag notation: '#tag', ':tag:', 'yaml-bare'
+    tag_notation = "#tag",
+
+    -- command palette theme: dropdown (window) or ivy (bottom panel)
+    command_palette_theme = "ivy",
+
+    -- tag list theme:
+    -- get_cursor: small tag list at cursor; ivy and dropdown like above
+    show_tags_theme = "ivy",
+
+    -- when linking to a note in subdir/, create a [[subdir/title]] link
+    -- instead of a [[title only]] link
+    subdirs_in_links = true,
+
+    -- template_handling
+    -- What to do when creating a new note via `new_note()` or `follow_link()`
+    -- to a non-existing note
+    -- - prefer_new_note: use `new_note` template
+    -- - smart: if day or week is detected in title, use daily / weekly templates (default)
+    -- - always_ask: always ask before creating a note
+    template_handling = "smart",
+
+    -- path handling:
+    --   this applies to:
+    --     - new_note()
+    --     - new_templated_note()
+    --     - follow_link() to non-existing note
+    --
+    --   it does NOT apply to:
+    --     - goto_today()
+    --     - goto_thisweek()
+    --
+    --   Valid options:
+    --     - smart: put daily-looking notes in daily, weekly-looking ones in weekly,
+    --              all other ones in home, except for notes/with/subdirs/in/title.
+    --              (default)
+    --
+    --     - prefer_home: put all notes in home except for goto_today(), goto_thisweek()
+    --                    except for notes with subdirs/in/title.
+    --
+    --     - same_as_current: put all new notes in the dir of the current note if
+    --                        present or else in home
+    --                        except for notes/with/subdirs/in/title.
+    new_note_location = "smart",
+
+    -- should all links be updated when a file is renamed
+    rename_update_links = true,
+
+    vaults = {
+        vault2 = {
+            -- alternate configuration for vault2 here. Missing values are defaulted to
+            -- default values from telekasten.
+            -- e.g.
+            -- home = "/home/user/vaults/personal",
+        },
+    },
+
+    -- how to preview media files
+    -- "telescope-media-files" if you have telescope-media-files.nvim installed
+    -- "catimg-previewer" if you have catimg installed
+    media_previewer = "telescope-media-files",
+
+    -- A customizable fallback handler for urls.
+    follow_url_fallback = nil,
+})
+END
+"""
 
 

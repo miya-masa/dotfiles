@@ -22,6 +22,7 @@ pip install \
   python-lsp-black \
   poetry \
   jupyter \
+  pre-commit \
   jupyter_contrib_nbextensions
 pip install --upgrade autopep8
 pip install jupyter_nbextensions_configurator
