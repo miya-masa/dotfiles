@@ -48,3 +48,6 @@ require'nvim-tree'.setup {
     },
   },
 }
+
+vim.keymap.set('n', '-', ':NvimTreeToggle<CR>')
+vim.keymap.set('n', '<Leader>y', ':NvimTreeFindFile<CR>')
