@@ -106,7 +106,6 @@ require('packer').startup(function(use)
   use 'jsborjesson/vim-uppercase-sql'
   use 'jjo/vim-cue'
   use 'ray-x/lsp_signature.nvim'
-  use 'antoinemadec/FixCursorHold.nvim'
   use 'nvim-neotest/neotest'
   use 'nvim-neotest/neotest-go'
   use 'nvim-neotest/neotest-python'
@@ -129,7 +128,15 @@ require('packer').startup(function(use)
   end
 end)
 
+require("plugins.cmp-dictionary")
+require("plugins.mason")
 require("plugins.neogit")
+require("plugins.neotest")
+require("plugins.nvim-cmp")
 require("plugins.nvim-comment")
 require("plugins.nvim-tree")
-require("plugins.mason")
+require("focus").setup()
+require "lsp_signature".setup({})
+require('nvim-autopairs').setup{}
+require("plugins.lspkind")
+require("plugins.nvim-treesitter")

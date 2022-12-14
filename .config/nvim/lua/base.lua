@@ -18,3 +18,12 @@ vim.o.autoindent = true
 vim.o.smartindent = true
 vim.o.wrap = true
 vim.o.laststatus = 2
+vim.o.completeopt="menu,menuone,noselect"
+
+
+local signs = { Error = "", Warn = "", Hint = "", Info = "" }
+
+for type, icon in pairs(signs) do
+  local hl = "DiagnosticSign" .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+end

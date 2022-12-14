@@ -24,7 +24,7 @@ local on_attach = function(client, bufnr)
   vim.keymap.set('n', '<Leader>gd', vim.lsp.buf.definition, bufopts)
   vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
   vim.keymap.set('n', '<Leader>gi', vim.lsp.buf.implementation, bufopts)
-  vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
+  vim.keymap.set('n', '<Leader><C-k>', vim.lsp.buf.signature_help, bufopts)
   vim.keymap.set('n', '<Leader>wa', vim.lsp.buf.add_workspace_folder, bufopts)
   vim.keymap.set('n', '<Leader>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
   vim.keymap.set('n', '<Leader>wl', function()
@@ -42,6 +42,10 @@ local lsp_flags = {
   debounce_text_changes = 150,
 }
 
+-- Set up lspconfig.
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+
 require("mason-lspconfig").setup_handlers({
    -- The first entry (without a key) will be the default handler
    -- and will be called for each installed server that doesn't have
@@ -49,13 +53,24 @@ require("mason-lspconfig").setup_handlers({
    function (server_name) -- default handler (optional)
        require("lspconfig")[server_name].setup {
         on_attach = on_attach,
+        capabilities = capabilities,
         flags = lsp_flags,
        }
    end,
    -- Next, you can provide targeted overrides for specific servers.
-   -- ["rust_analyzer"] = function ()
-   --     require("rust-tools").setup {}
-   -- end,
+   ["gopls"] = function ()
+      require("lspconfig").gopls.setup {
+        on_attach = on_attach,
+        capabilities = capabilities,
+        settings = {
+          gopls = {
+            buildFlags = {"-tags=integration"},
+            usePlaceholders = true,
+            gofumpt = true,
+          }
+        }
+      }
+   end,
    -- ["sumneko_lua"] = function ()
    --     lspconfig.sumneko_lua.setup {
    --         settings = {
