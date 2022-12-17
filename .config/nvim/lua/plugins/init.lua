@@ -34,6 +34,7 @@ require('packer').startup(function(use)
     requires = { {'nvim-lua/plenary.nvim'} }
   }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+  use {"smartpde/telescope-recent-files"}
   use "folke/zen-mode.nvim"
   use 'junegunn/vim-easy-align'
   use 'kana/vim-operator-replace'
@@ -152,3 +153,4 @@ require("indent_blankline").setup {
     filetype_exclude = {"help", "startify", "dirvish", "no ft", "fzf", 'NvimTree', 'markdown', 'dashboard'}
 }
 vim.g.extra_whitespace_ignored_filetypes = { "dashboard", "help", "NvimTree" }
+require("plugins.telescope")
