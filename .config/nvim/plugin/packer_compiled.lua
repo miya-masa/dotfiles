@@ -344,12 +344,6 @@ _G.packer_plugins = {
     path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/quickfix-reflector.vim",
     url = "https://github.com/stefandtw/quickfix-reflector.vim"
   },
-  ["rest.nvim"] = {
-    config = { "\27LJ\2\n1\0\0\3\0\2\0\0046\0\0\0'\2\1\0B\0\2\1K\0\1\0\22plugins.rest-nvim\frequire\0" },
-    loaded = true,
-    path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/rest.nvim",
-    url = "https://github.com/rest-nvim/rest.nvim"
-  },
   ["spelunker.vim"] = {
     loaded = true,
     path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/spelunker.vim",
@@ -379,6 +373,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/tig-explorer.vim",
     url = "https://github.com/iberianpig/tig-explorer.vim"
+  },
+  ["translate.nvim"] = {
+    loaded = true,
+    path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/translate.nvim",
+    url = "https://github.com/uga-rosa/translate.nvim"
   },
   ["vim-abolish"] = {
     loaded = true,
@@ -495,6 +494,11 @@ _G.packer_plugins = {
     path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/vim-repeat",
     url = "https://github.com/tpope/vim-repeat"
   },
+  ["vim-rest-console"] = {
+    loaded = true,
+    path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/vim-rest-console",
+    url = "https://github.com/diepm/vim-rest-console"
+  },
   ["vim-rooter"] = {
     loaded = true,
     path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/vim-rooter",
@@ -524,11 +528,6 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/vim-trailing-whitespace",
     url = "https://github.com/bronson/vim-trailing-whitespace"
-  },
-  ["vim-translate"] = {
-    loaded = true,
-    path = "/home/masayuki/.local/share/nvim/site/pack/packer/start/vim-translate",
-    url = "https://github.com/VincentCordobes/vim-translate"
   },
   ["vim-unimpaired"] = {
     loaded = true,
@@ -583,10 +582,6 @@ _G.packer_plugins = {
 }
 
 time([[Defining packer_plugins]], false)
--- Config for: rest.nvim
-time([[Config for rest.nvim]], true)
-try_loadstring("\27LJ\2\n1\0\0\3\0\2\0\0046\0\0\0'\2\1\0B\0\2\1K\0\1\0\22plugins.rest-nvim\frequire\0", "config", "rest.nvim")
-time([[Config for rest.nvim]], false)
 
 _G._packer.inside_compile = false
 if _G._packer.needs_bufread == true then

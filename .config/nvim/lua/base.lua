@@ -20,7 +20,6 @@ vim.o.wrap = true
 vim.o.laststatus = 2
 vim.o.completeopt="menu,menuone,noselect"
 
-
 local signs = { Error = "", Warn = "", Hint = "", Info = "" }
 
 for type, icon in pairs(signs) do

@@ -17,7 +17,7 @@ require('packer').startup(function(use)
   use 'sainnhe/gruvbox-material'
   use 'rebelot/kanagawa.nvim'
   use 'Shougo/vinarise.vim'
-  use 'VincentCordobes/vim-translate'
+  use 'uga-rosa/translate.nvim'
   use 'airblade/vim-rooter'
   use 'aklt/plantuml-syntax'
   use 'bkad/CamelCaseMotion'
@@ -38,7 +38,6 @@ require('packer').startup(function(use)
   use 'junegunn/vim-easy-align'
   use 'kana/vim-operator-replace'
   use 'kana/vim-operator-user'
-  use 'liuchengxu/vista.vim'
   use 'maxmellon/vim-jsx-pretty'
   use 'glepnir/dashboard-nvim'
   use 'lukas-reineke/indent-blankline.nvim'
@@ -140,3 +139,16 @@ require "lsp_signature".setup({})
 require('nvim-autopairs').setup{}
 require("plugins.lspkind")
 require("plugins.nvim-treesitter")
+require("plugins.rest-console")
+require'lualine'.setup {
+  options = {
+    theme = 'kanagawa'
+  }
+}
+require("plugins.translate")
+require("plugins.dashboard")
+require("indent_blankline").setup {
+    char = "|",
+    filetype_exclude = {"help", "startify", "dirvish", "no ft", "fzf", 'NvimTree', 'markdown', 'dashboard'}
+}
+vim.g.extra_whitespace_ignored_filetypes = { "dashboard", "help", "NvimTree" }

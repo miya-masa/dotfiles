@@ -24,3 +24,12 @@ require("neotest").setup({
     unknown = "-"
   },
 })
+
+vim.keymap.set('n','<silent>', 't<C-n> :lua require("neotest").run.run()<CR>')
+vim.keymap.set('n','<silent>', 'ti<C-n> :lua require("neotest").run.run()<CR>')
+vim.keymap.set('n','<silent>', 't<C-m> :lua require("neotest").run.stop()<CR>')
+vim.keymap.set('n','<silent>', 't<C-f> :cd %:p:h<cr>:lua require("neotest").run.run(vim.fn.expand("%"))<CR>')
+vim.keymap.set('n','<silent>', 't<C-t> :cd %:p:h<cr>:lua require("neotest").summary.toggle()<CR>')
+vim.keymap.set('n','<silent>', 't<C-o> :cd %:p:h<cr>:lua require("neotest").output.open({ enter = true })<CR>')
+vim.keymap.set('n','<silent>[n', '<cmd>lua require("neotest").jump.prev({ status = "failed" })<CR>')
+vim.keymap.set('n','<silent>]n', '<cmd>lua require("neotest").jump.next({ status = "failed" })<CR>')
