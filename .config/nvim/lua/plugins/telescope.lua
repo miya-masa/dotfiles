@@ -1,0 +1,12 @@
+require("telescope").load_extension("recent_files")
+require("telescope").load_extension("fzf")
+require('telescope').load_extension('neoclip')
+
+vim.keymap.set('n','<Leader><C-B>', ':Rooter<CR>:Telescope buffers<CR>')
+vim.keymap.set('n','<Leader><C-R>', ':Telescope live_grep<CR>')
+vim.keymap.set('n','<Leader><C-L>', ':Telescope grep_string<CR>')
+vim.keymap.set('n','<Leader><C-G>', ':Telescope git_files<CR>')
+vim.keymap.set('n','<Leader><C-Q>', ':Telescope quickfix<CR>')
+vim.keymap.set('n','<Leader>;', ':Telescope recent_files pick<CR>')
+vim.keymap.set('n','<Leader><C-Y>', ':Telescope neoclip<CR>')
+vim.keymap.set('n','<Leader><C-F>', ':Telescope find_files find_command=rg,--hidden,--files<CR>')
