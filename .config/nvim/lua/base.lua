@@ -11,6 +11,14 @@ vim.opt.list = true
 vim.opt.listchars = 'tab:^\\ ,trail:~'
 vim.opt.expandtab = true
 vim.opt.smarttab = true
+vim.opt.smartcase = true
+vim.opt.ignorecase = true
+vim.opt.incsearch = true
+vim.opt.magic = true
+vim.opt.lazyredraw = true
+vim.opt.errorbells = false
+vim.opt.visualbell = false
+vim.opt.hlsearch = true
 vim.opt.shiftwidth = 2
 vim.opt.softtabstop = 2
 vim.opt.tabstop = 4
@@ -27,6 +35,13 @@ vim.opt.backup = false
 vim.opt.display = 'lastline'
 vim.opt.scrolloff = 7
 vim.opt.number = true
+-- disable netrw at the very start of your init.lua (strongly advised)
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- set termguicolors to enable highlight groups
+vim.opt.termguicolors = true
+
 
 local signs = { Error = "", Warn = "", Hint = "", Info = "" }
 
