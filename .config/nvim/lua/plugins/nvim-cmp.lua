@@ -12,6 +12,7 @@ local feedkey = function(key, mode)
 end
 
 cmp.setup({
+  preselect = cmp.PreselectMode.None,
   snippet = {
     -- REQUIRED - you must specify a snippet engine
     expand = function(args)
@@ -58,17 +59,23 @@ cmp.setup({
     -- { name = 'ultisnips'}, -- For ultisnips users.
     { name = 'path' },
     { name = 'calc' },
-    { name = 'dictionary', keyword_length = 2 },
     { name = 'emoji' },
+    { name = 'dictionary', keyword_length = 2 },
   }, {
     { name = 'buffer' },
   })
 })
 
 -- Set configuration for specific filetype.
-cmp.setup.filetype('gitcommit', {
+cmp.setup.filetype({ 'gitcommit', 'NeogitCommitMessage' }, {
   sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'vsnip' },
+    { name = 'git' }, -- You can specify the `cmp_git` source if you were installed it.
     { name = 'cmp_git' }, -- You can specify the `cmp_git` source if you were installed it.
+    { name = 'path' },
+    { name = 'calc' },
+    { name = 'dictionary', keyword_length = 2 },
   }, {
     { name = 'buffer' },
   })
@@ -109,3 +116,5 @@ vim.g.vsnip_filetypes = {
   javascriptreact = { 'javascript' },
   typescriptreact = { 'typescript' }
 }
+
+require("cmp_git").setup()

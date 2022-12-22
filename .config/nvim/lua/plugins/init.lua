@@ -129,9 +129,13 @@ require('packer').startup(function(use)
       }
     end
   }
+  use { 'phaazon/hop.nvim', branch = 'v2' }
   use {
-    'phaazon/hop.nvim',
-    branch = 'v2', -- optional but strongly recommended
+    "nvim-telescope/telescope-frecency.nvim",
+    config = function()
+      require "telescope".load_extension("frecency")
+    end,
+    requires = { "kkharji/sqlite.lua" }
   }
   use { "ellisonleao/glow.nvim" }
 
