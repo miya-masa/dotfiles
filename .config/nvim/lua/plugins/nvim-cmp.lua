@@ -114,7 +114,8 @@ vim.keymap.set({ 'i', 's' }, '<S-Tab>',
 
 vim.g.vsnip_filetypes = {
   javascriptreact = { 'javascript' },
-  typescriptreact = { 'typescript' }
+  typescriptreact = { 'typescript' },
+  telekasten = { 'markdown' },
 }
 
 require("cmp_git").setup()

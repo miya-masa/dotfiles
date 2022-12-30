@@ -13,7 +13,6 @@ local packer_bootstrap = ensure_packer()
 
 require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
-  use 'AndrewRadev/splitjoin.vim'
   use 'sainnhe/gruvbox-material'
   use 'rebelot/kanagawa.nvim'
   use 'Shougo/vinarise.vim'
@@ -138,6 +137,13 @@ require('packer').startup(function(use)
     requires = { "kkharji/sqlite.lua" }
   }
   use { "ellisonleao/glow.nvim" }
+  use({
+    'Wansmer/treesj',
+    requires = { 'nvim-treesitter' },
+    config = function()
+      require('treesj').setup({ --[[ your config ]] })
+    end,
+  })
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
