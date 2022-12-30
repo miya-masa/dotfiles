@@ -28,10 +28,7 @@ require('packer').startup(function(use)
   use 'ggandor/leap.nvim'
   use 'APZelos/blamer.nvim'
   use 'windwp/nvim-autopairs'
-  use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.x',
-    requires = { { 'nvim-lua/plenary.nvim' } }
-  }
+  use { 'nvim-telescope/telescope.nvim', tag = '0.1.x' }
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use { "smartpde/telescope-recent-files" }
   use "folke/zen-mode.nvim"
@@ -54,7 +51,7 @@ require('packer').startup(function(use)
   use 'tpope/vim-abolish'
   use 'terrortylor/nvim-comment'
   use 'tpope/vim-dispatch'
-  use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
+  use { 'TimUntersberger/neogit', }
   use 'sindrets/diffview.nvim'
   use 'tpope/vim-markdown'
   use({ "iamcco/markdown-preview.nvim", run = "cd app && npm install",

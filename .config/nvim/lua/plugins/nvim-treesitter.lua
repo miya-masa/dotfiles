@@ -1,4 +1,4 @@
-require'nvim-treesitter.configs'.setup {
+require 'nvim-treesitter.configs'.setup {
   -- One of "all" (parsers with maintainers), or a list of languages
   ensure_installed = "all",
 

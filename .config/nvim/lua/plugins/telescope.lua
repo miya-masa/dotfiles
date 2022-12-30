@@ -24,6 +24,5 @@ vim.keymap.set('n', '<Leader><C-G>', ':Telescope git_files<CR>')
 vim.keymap.set('n', '<Leader><C-Q>', ':Telescope quickfix<CR>')
 vim.keymap.set('n', '<Leader>;', ':Telescope recent_files pick<CR>')
 vim.keymap.set('n', '<Leader><C-Y>', ':Telescope neoclip<CR>')
-vim.keymap.set('n', '<Leader><C-F>', ':lua require("telescope.builtin").find_files({hidden=true, find_command=rg)<CR>')
-
+vim.keymap.set('n', '<Leader><C-F>', ':lua require("telescope.builtin").find_files({hidden=true, find_command=rg})<CR>')
 vim.keymap.set('n', '<Leader>f', ':Telescope frecency<CR>')
