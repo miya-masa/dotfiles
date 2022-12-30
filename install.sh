@@ -165,6 +165,8 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.config/alacritty ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.fzf.zsh ${HOME}/.fzf.zsh
   ln -fs ${DOTFILES_DIRECTORY}/.tigrc ${HOME}/.tigrc
+  ln -fs ${DOTFILES_DIRECTORY}/.markdownlintrc ${HOME}/.markdownlintrc
+  ln -fs ${DOTFILES_DIRECTORY}/.local/bin/ide.sh ${HOME}/.local/bin/ide.sh
   if [ ! -e ~/.ssh/config ]; then
     cp ${DOTFILES_DIRECTORY}/.ssh/config.sample ${HOME}/.ssh/config
   fi

@@ -15,4 +15,5 @@ vim.keymap.set('', 'T',
   { remap = true })
 vim.keymap.set('', '<Leader><Leader>w', function() hop.hint_words() end)
 vim.keymap.set('', '<Leader><Leader>c', function() hop.hint_char1() end)
-vim.keymap.set('', '<Leader><Leader>l', function() hop.hint_line() end)
+vim.keymap.set('', '<Leader><Leader>d', function() hop.hint_char2() end)
+vim.keymap.set('', '<Leader><Leader>l', function() hop.hint_lines() end)

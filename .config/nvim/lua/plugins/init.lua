@@ -13,6 +13,8 @@ local packer_bootstrap = ensure_packer()
 
 require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
+  use 'folke/neodev.nvim'
+  use 'j-hui/fidget.nvim'
   use 'sainnhe/gruvbox-material'
   use 'rebelot/kanagawa.nvim'
   use 'Shougo/vinarise.vim'
@@ -28,10 +30,7 @@ require('packer').startup(function(use)
   use 'ggandor/leap.nvim'
   use 'APZelos/blamer.nvim'
   use 'windwp/nvim-autopairs'
-  use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.x',
-    requires = { { 'nvim-lua/plenary.nvim' } }
-  }
+  use { 'nvim-telescope/telescope.nvim', tag = '0.1.x' }
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use { "smartpde/telescope-recent-files" }
   use "folke/zen-mode.nvim"
@@ -54,7 +53,7 @@ require('packer').startup(function(use)
   use 'tpope/vim-abolish'
   use 'terrortylor/nvim-comment'
   use 'tpope/vim-dispatch'
-  use { 'TimUntersberger/neogit', requires = 'nvim-lua/plenary.nvim' }
+  use { 'TimUntersberger/neogit', }
   use 'sindrets/diffview.nvim'
   use 'tpope/vim-markdown'
   use({ "iamcco/markdown-preview.nvim", run = "cd app && npm install",
@@ -64,7 +63,7 @@ require('packer').startup(function(use)
   use 'vim-scripts/DrawIt'
   use 'kamykn/spelunker.vim'
   use 'kamykn/popup-menu.nvim'
-  use 'airblade/vim-gitgutter'
+  use 'lewis6991/gitsigns.nvim'
   use 'tyru/open-browser.vim'
   use 'tyru/operator-camelize.vim'
   use { 'nvim-treesitter/nvim-treesitter', run = ':TSUpdate' }
@@ -87,7 +86,6 @@ require('packer').startup(function(use)
   use 'kyazdani42/nvim-web-devicons'
   use 'kyazdani42/nvim-tree.lua'
   use 'mattn/vim-goimports'
-  use 'mattn/vim-goaddtags'
   use 'buoto/gotests-vim'
   use 'rhysd/vim-clang-format'
   use 'mustache/vim-mustache-handlebars'
@@ -111,9 +109,8 @@ require('packer').startup(function(use)
   use 'AckslD/nvim-neoclip.lua'
   use 'onsails/lspkind.nvim'
   use 'deris/vim-rengbang'
-  -- use 'tpope/vim-projectionist'
+  use 'mattn/vim-goaddtags'
   use 'rgroli/other.nvim'
-  use 'akinsho/git-conflict.nvim'
   use 'sentriz/vim-print-debug'
   use 'renerocksai/telekasten.nvim'
   use 'renerocksai/calendar-vim'
@@ -144,6 +141,9 @@ require('packer').startup(function(use)
       require('treesj').setup({ --[[ your config ]] })
     end,
   })
+  use { 'akinsho/git-conflict.nvim', tag = "*", config = function()
+    require('git-conflict').setup()
+  end }
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
@@ -184,3 +184,7 @@ require("plugins.markdown-preview")
 require("plugins.telekasten")
 require("plugins.hop")
 require("plugins.other-nvim")
+require('plugins.gitsign')
+require("neodev").setup({
+  library = { plugins = { "neotest" }, types = true },
+})

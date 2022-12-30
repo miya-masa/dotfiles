@@ -1,13 +1,13 @@
 # Setup fzf
 # ---------
-if [[ ! "$PATH" == */home/masayuki/.fzf/bin* ]]; then
-  export PATH="${PATH:+${PATH}:}/home/masayuki/.fzf/bin"
+if [[ ! "$PATH" == *$(brew --prefix)/opt/fzf/bin* ]]; then
+  PATH="${PATH:+${PATH}:}$(brew --prefix)/opt/fzf/bin"
 fi
 
 # Auto-completion
 # ---------------
-[[ $- == *i* ]] && source "/home/masayuki/.fzf/shell/completion.zsh" 2> /dev/null
+[[ $- == *i* ]] && source "$(brew --prefix)/opt/fzf/shell/completion.zsh" 2> /dev/null
 
 # Key bindings
 # ------------
-source "/home/masayuki/.fzf/shell/key-bindings.zsh"
+source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"

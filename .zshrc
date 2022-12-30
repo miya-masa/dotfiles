@@ -164,6 +164,10 @@ tmn() {
   fi
   tmux new-session -s $1 -n $1
 }
+alias ide="~/.local/bin/ide.sh"
+
+
+
 tm() {
   [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
   if [ $1 ]; then
