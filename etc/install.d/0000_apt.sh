@@ -49,5 +49,11 @@ sudo apt install -y \
   zlib1g-dev \
   python3-docutils \
   libnss3-tools \
-  zsh
+  zsh \
+  neofetch
+
+sudo cp .config/neofetch/banner.txt /etc/update-motd.d/
+if ! sudo grep -q "$HOME/.config/neofetch/config.conf" /etc/update-motd.d/00-header; then
+  sudo echo "$HOME/.config/neofetch/config.conf" | sudo tee -a /etc/update-motd.d/00-header
+fi
 

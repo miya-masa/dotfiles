@@ -22,7 +22,7 @@ require('packer').startup(function(use)
   use 'airblade/vim-rooter'
   use 'aklt/plantuml-syntax'
   use 'bkad/CamelCaseMotion'
-  use 'bronson/vim-trailing-whitespace'
+  -- use 'bronson/vim-trailing-whitespace'
   use 'christoomey/vim-tmux-navigator'
   use 'rhysd/vim-go-impl'
   use 'dhruvasagar/vim-table-mode'
@@ -38,9 +38,15 @@ require('packer').startup(function(use)
   use 'kana/vim-operator-replace'
   use 'kana/vim-operator-user'
   use 'maxmellon/vim-jsx-pretty'
-  use 'glepnir/dashboard-nvim'
+  use {
+    'glepnir/dashboard-nvim',
+    event = 'VimEnter',
+    config = function()
+      require("plugins.dashboard")
+    end,
+    requires = { 'nvim-tree/nvim-web-devicons' }
+  }
   use 'lukas-reineke/indent-blankline.nvim'
-  use { 'raghur/vim-ghost', run = ':GhostInstall' }
   use 'nvim-lualine/lualine.nvim'
   use 'mfussenegger/nvim-dap'
   use 'simeji/winresizer'
@@ -60,7 +66,6 @@ require('packer').startup(function(use)
     setup = function() vim.g.mkdp_filetypes = { "markdown" } end, ft = { "markdown" }, })
   use 'machakann/vim-sandwich'
   use 'vim-jp/vimdoc-ja'
-  use 'vim-scripts/DrawIt'
   use 'kamykn/spelunker.vim'
   use 'kamykn/popup-menu.nvim'
   use 'lewis6991/gitsigns.nvim'
@@ -144,6 +149,7 @@ require('packer').startup(function(use)
   use { 'akinsho/git-conflict.nvim', tag = "*", config = function()
     require('git-conflict').setup()
   end }
+  use "jbyuki/venn.nvim"
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
@@ -172,7 +178,6 @@ require 'lualine'.setup {
   }
 }
 require("plugins.translate")
-require("plugins.dashboard")
 require("indent_blankline").setup {
   char = "|",
   filetype_exclude = { "help", "startify", "dirvish", "no ft", "fzf", 'NvimTree', 'markdown', 'dashboard', 'glowpreview', }
@@ -188,3 +193,4 @@ require('plugins.gitsign')
 require("neodev").setup({
   library = { plugins = { "neotest" }, types = true },
 })
+require('plugins.venn')
