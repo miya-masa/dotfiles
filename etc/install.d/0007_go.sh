@@ -7,7 +7,7 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-GOVERSION=1.19
+GOVERSION=1.20
 
 sudo rm -rf /usr/local/go
 curl -L -O https://golang.org/dl/go${GOVERSION}.linux-amd64.tar.gz

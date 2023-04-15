@@ -55,6 +55,9 @@ fi
 export PATH="${PATH}:${HOME}/.local/bin/"
 export PATH="/home/linuxbrew/.linuxbrew/opt/glibc/bin:$PATH"
 export PATH="/home/linuxbrew/.linuxbrew/opt/glibc/sbin:$PATH"
+if [[ -e $HOME/.krew ]]; then
+  export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+fi
 
 [[ -s /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
 
@@ -165,8 +168,7 @@ tmn() {
   tmux new-session -s $1 -n $1
 }
 alias ide="~/.local/bin/ide.sh"
-
-
+alias tagsort="git tag | tr - \~ | sort -V | tr \~ -"
 
 tm() {
   [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
@@ -189,14 +191,14 @@ set -o no_beep
 set -o no_nomatch
 set -o prompt_subst
 # set -o transient_rprompt
-# set -o hist_ignore_dups
-# set -o hist_ignore_all_dups
-# set -o hist_reduce_blanks
+set -o hist_ignore_dups
+set -o hist_ignore_all_dups
+set -o hist_reduce_blanks
 # set -o hist_no_store
 # set -o hist_verify
-# set -o share_history
+set -o share_history
 # set -o extended_history
-# set -o append_history
+set -o append_history
 # set -o auto_pushd
 # set -o list_packed
 # set -o list_types
@@ -206,8 +208,8 @@ set -o prompt_subst
 # set -o rec_exact
 # set -o autoremoveslash
 # unset list_beep
-# set -o glob
-# set -o glob_complete
+set -o glob
+set -o glob_complete
 # set -o complete_in_word
 # set -o numeric_glob_sort
 # set -o mark_dirs

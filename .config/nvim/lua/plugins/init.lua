@@ -31,7 +31,8 @@ require('packer').startup(function(use)
   use 'APZelos/blamer.nvim'
   use 'windwp/nvim-autopairs'
   use { 'nvim-telescope/telescope.nvim', tag = '0.1.x' }
-  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+  use { 'nvim-telescope/telescope-fzf-native.nvim',
+    run = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
   use { "smartpde/telescope-recent-files" }
   use "folke/zen-mode.nvim"
   use 'junegunn/vim-easy-align'
@@ -150,6 +151,7 @@ require('packer').startup(function(use)
     require('git-conflict').setup()
   end }
   use "jbyuki/venn.nvim"
+  use { 'tzachar/cmp-tabnine', run = './install.sh', requires = 'hrsh7th/nvim-cmp' }
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
