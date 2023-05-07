@@ -8,8 +8,8 @@ set -o pipefail
 IFS=$'\n\t'
 
 
-curl -L https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.deb > nvim-linux64.deb
-sudo apt install -y ./nvim-linux64.deb
-rm nvim-linux64.deb
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+chmod u+x nvim.appimage
+sudo mv ./nvim.appimage /usr/bin/nvim
 npm install -g neovim
 pip install pynvim

@@ -1,6 +1,7 @@
 require("mason").setup()
 require("mason-lspconfig").setup({
-  ensure_installed = { "lua_ls", "rust_analyzer", "gopls", "jsonls", "dockerls", "bashls", "pyright", "yamlls" }
+  ensure_installed = { "lua_ls", "rust_analyzer", "gopls", "jsonls", "dockerls", "bashls", "pyright", "yamlls",
+    "docker_compose_language_service", "spectral", "sqlls" }
 })
 
 -- Mappings.

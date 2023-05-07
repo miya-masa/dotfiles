@@ -163,6 +163,7 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.vim/vimrcs ${HOME}/.vim
   ln -fs ${DOTFILES_DIRECTORY}/.config/nvim ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/neofetch ${HOME}/.config
+  ln -fs ${DOTFILES_DIRECTORY}/.config/yamllint ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.fzf.zsh ${HOME}/.fzf.zsh
   ln -fs ${DOTFILES_DIRECTORY}/.tigrc ${HOME}/.tigrc
   ln -fs ${DOTFILES_DIRECTORY}/.markdownlintrc ${HOME}/.markdownlintrc

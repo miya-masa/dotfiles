@@ -18,9 +18,10 @@ sudo apt install -y \
   dbus-user-session \
   fcitx \
   fcitx-mozc \
+  fuse \
   gawk \
   gcc make \
-  gnome-tweak-tool \
+  gnome-tweaks \
   gtk2-engines-murrine gtk2-engines-pixbuf \
   keychain \
   libbz2-dev \
@@ -50,7 +51,9 @@ sudo apt install -y \
   python3-docutils \
   libnss3-tools \
   zsh \
-  neofetch
+  neofetch \
+  mercurial \
+  snapd
 
 sudo cp .config/neofetch/banner.txt /etc/update-motd.d/
 if ! sudo grep -q "$HOME/.config/neofetch/config.conf" /etc/update-motd.d/00-header; then

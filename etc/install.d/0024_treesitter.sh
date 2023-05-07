@@ -7,5 +7,7 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-cargo install tree-sitter-cli
+mkdir ~/tree-sitters
+cd ~/tree-sitters
+git clone https://github.com/gleam-lang/tree-sitter-gleam.git
+tree-sitter parse

@@ -56,7 +56,6 @@ cmp.setup({
     { name = 'nvim_lsp' },
     { name = 'vsnip' },
     { name = 'git' },
-    { name = 'cmp_tabnine' },
     -- { name = 'ultisnips'}, -- For ultisnips users.
     { name = 'path' },
     { name = 'calc' },
