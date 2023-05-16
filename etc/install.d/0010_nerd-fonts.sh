@@ -14,6 +14,6 @@ git pull
 cd ~/nerd-fonts
 ./install.sh IBMPlexMono
 ./install.sh FiraCode
-./install.sh Fira
+./install.sh FiraMono
 ./install.sh Hack
-./install.sh Hasklug
+./install.sh Hasklig
