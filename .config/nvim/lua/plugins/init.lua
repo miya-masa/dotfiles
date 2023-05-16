@@ -31,7 +31,7 @@ require('packer').startup(function(use)
   use 'APZelos/blamer.nvim'
   use 'windwp/nvim-autopairs'
   use { 'nvim-telescope/telescope.nvim', tag = '0.1.x' }
-  use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
+  use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use { "smartpde/telescope-recent-files" }
   use "folke/zen-mode.nvim"
   use 'junegunn/vim-easy-align'
@@ -62,8 +62,12 @@ require('packer').startup(function(use)
   use { 'TimUntersberger/neogit', }
   use 'sindrets/diffview.nvim'
   use 'tpope/vim-markdown'
-  use({ "iamcco/markdown-preview.nvim", run = "cd app && npm install",
-    setup = function() vim.g.mkdp_filetypes = { "markdown" } end, ft = { "markdown" }, })
+  use({
+    "iamcco/markdown-preview.nvim",
+    run = "cd app && npm install",
+    setup = function() vim.g.mkdp_filetypes = { "markdown" } end,
+    ft = { "markdown" },
+  })
   use 'machakann/vim-sandwich'
   use 'vim-jp/vimdoc-ja'
   use 'kamykn/spelunker.vim'
@@ -78,6 +82,18 @@ require('packer').startup(function(use)
     "williamboman/mason.nvim",
     "williamboman/mason-lspconfig.nvim",
     "neovim/nvim-lspconfig",
+  }
+  -- Lua
+  use {
+    "folke/trouble.nvim",
+    requires = "nvim-tree/nvim-web-devicons",
+    config = function()
+      require("trouble").setup {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+      }
+    end
   }
   use 'hrsh7th/cmp-nvim-lsp'
   use 'hrsh7th/cmp-buffer'

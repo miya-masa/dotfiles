@@ -17,7 +17,7 @@ fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-# See https://github.com/romkatv/powerlevel10k#how-do-i-initialize-direnv-when-using-instant-prompt 
+# See https://github.com/romkatv/powerlevel10k#how-do-i-initialize-direnv-when-using-instant-prompt
 (( ${+commands[direnv]} )) && emulate zsh -c "$(direnv export zsh)"
 
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
@@ -123,6 +123,7 @@ zinit snippet https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/co
 ### zsh-syntax-highlighting
 zinit light "zsh-users/zsh-syntax-highlighting"
 
+
 ### reset bind key
 bindkey -d
 bindkey -v
@@ -161,6 +162,11 @@ alias dim='docker images'
 alias dkill='docker container ls -q | xargs docker kill'
 alias dc='docker compose'
 alias rand="head -n 10 /dev/urandom | base64 | head -n 1 | cut -c 1-32 | tr '/+' '_-'"
+
+pass() {
+  op item get --fields label=password $(op item list | fzf --height=25% | awk '{print $1}')
+}
+
 tmn() {
   if type "autojump" > /dev/null 2>&1; then
     j $1
