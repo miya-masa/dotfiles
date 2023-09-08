@@ -17,3 +17,4 @@ git pull
 ./install.sh FiraMono
 ./install.sh Hack
 ./install.sh Hasklig
+./install.sh SourceCodePro

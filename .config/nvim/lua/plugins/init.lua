@@ -27,7 +27,12 @@ require('packer').startup(function(use)
   use 'rhysd/vim-go-impl'
   use 'dhruvasagar/vim-table-mode'
   use 'diepm/vim-rest-console'
-  use 'ggandor/leap.nvim'
+  use {
+    "ggandor/leap.nvim",
+    config = function() require("leap").set_default_keymaps() end
+  }
+  use { 'stevearc/dressing.nvim' }
+  use 'rcarriga/nvim-notify'
   use 'APZelos/blamer.nvim'
   use 'windwp/nvim-autopairs'
   use { 'nvim-telescope/telescope.nvim', tag = '0.1.x' }
@@ -122,9 +127,51 @@ require('packer').startup(function(use)
   use 'jsborjesson/vim-uppercase-sql'
   use 'jjo/vim-cue'
   use 'ray-x/lsp_signature.nvim'
-  use 'nvim-neotest/neotest'
-  use 'nvim-neotest/neotest-go'
-  use 'nvim-neotest/neotest-python'
+  use({
+    "nvim-neotest/neotest",
+    requires = {
+      'nvim-neotest/neotest-python',
+      "nvim-neotest/neotest-go",
+      -- Your other test adapters here
+    },
+    config = function()
+      -- get neotest namespace (api call creates or returns namespace)
+      local neotest_ns = vim.api.nvim_create_namespace("neotest")
+      vim.diagnostic.config({
+        virtual_text = {
+          format = function(diagnostic)
+            local message =
+                diagnostic.message:gsub("\n", " "):gsub("\t", " "):gsub("%s+", " "):gsub("^%s+", "")
+            return message
+          end,
+        },
+      }, neotest_ns)
+      require("neotest").setup({
+        -- your neotest config here
+        adapters = {
+          require("neotest-go")({
+            args = { "-count=1", "-timeout=60s" }
+          }),
+          require("neotest-python"),
+        },
+        floating = {
+          max_height = 0.9,
+          max_width = 0.9,
+        },
+        icons = {
+          failed = "X",
+          final_child_indent = " ",
+          final_child_prefix = "╰",
+          non_collapsible = "─",
+          passed = "O",
+          running = "-",
+          running_animated = { "/", "|", "\\", "-", "/", "|", "\\", "-" },
+          skipped = "-",
+          unknown = "-"
+        },
+      })
+    end,
+  })
   use 'beauwilliams/focus.nvim'
   use 'AckslD/nvim-neoclip.lua'
   use 'onsails/lspkind.nvim'
@@ -165,6 +212,7 @@ require('packer').startup(function(use)
     require('git-conflict').setup()
   end }
   use "jbyuki/venn.nvim"
+  use "nvim-telescope/telescope-live-grep-args.nvim"
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
