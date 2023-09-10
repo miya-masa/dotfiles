@@ -53,7 +53,8 @@ sudo apt install -y \
   zsh \
   neofetch \
   mercurial \
-  snapd
+  snapd \
+  fd-find
 
 sudo cp .config/neofetch/banner.txt /etc/update-motd.d/
 if ! sudo grep -q "$HOME/.config/neofetch/config.conf" /etc/update-motd.d/00-header; then

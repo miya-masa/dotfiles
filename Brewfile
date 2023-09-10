@@ -1,5 +1,4 @@
 tap "bazelbuild/tap"
-tap "golangci/tap"
 tap "homebrew/bundle"
 tap "homebrew/cask"
 tap "homebrew/cask-fonts"

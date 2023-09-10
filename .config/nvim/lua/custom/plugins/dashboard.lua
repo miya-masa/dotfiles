@@ -1,42 +1,28 @@
-require('dashboard').setup {
-  theme = 'doom',
-  config = {
-    center = {
-      {
-        icon = '',
-        icon_hl = 'group',
-        desc = 'Telekasten goto_today',
-        desc_hl = 'group',
-        key = '<Leader> z T',
-        key_hl = 'group',
-        action = 'Telekasten goto_today',
+return {
+  'glepnir/dashboard-nvim',
+  event = 'VimEnter',
+  config = function()
+    require('dashboard').setup {
+      theme = 'hyper',
+      config = {
+        week_header = {
+          enable = true,
+        },
+        shortcut = {
+          { desc = '󰊳 Update', group = '@property', action = 'Lazy update', key = 'u' },
+          {
+            icon = ' ',
+            icon_hl = '@variable',
+            desc = 'Git Files',
+            group = 'Label',
+            action = 'Telescope git_files',
+            key = 'f',
+          },
+        },
       },
-      {
-        icon = '',
-        desc = 'Recently opened files',
-        action = 'Telescope recent_files pick',
-        key = '<Leader> <C-;>'
-      },
-      { icon = '',
-        desc = 'Find  File',
-        action = 'Telescope find_files find_command=rg,--hidden,--files',
-        key = '<Leader> <C-F>'
-      },
-      { icon = '',
-        desc = 'File Browser',
-        action = 'NvimTreeOpen',
-        key = '-'
-      },
-      { icon = '',
-        desc = 'Find  word',
-        action = 'Telescope live_grep',
-        key = '<Leader> <C-R>'
-      },
-    },
-    week_header = {
-      enable = true,
     }
-  }
+  end,
+  dependencies = { 'nvim-tree/nvim-web-devicons' }
 }
 -- db.custom_header = {
 --   '',
