@@ -4,7 +4,13 @@ return {
   'hrsh7th/cmp-cmdline',
   'hrsh7th/cmp-calc',
   'hrsh7th/cmp-emoji',
-  'petertriho/cmp-git',
+  {
+    'petertriho/cmp-git',
+    config = function()
+      require("cmp_git").setup()
+    end
+  },
+
   'mattn/vim-goimports',
   {
     'kana/vim-operator-replace',

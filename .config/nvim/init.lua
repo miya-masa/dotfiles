@@ -405,7 +405,8 @@ require('nvim-treesitter.configs').setup {
   sync_install = false,
   ignore_install = {},
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim',
+    "terraform" },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
   auto_install = false,
@@ -530,9 +531,14 @@ end
 local servers = {
   clangd = {},
   gopls = {
-    buildFlags = { "-tags=integration" },
-    gofumpt = true,
-    usePlaceholders = true,
+    gopls = {
+      experimentalPostfixCompletions = true,
+      buildFlags = { "-tags=integration" },
+      gofumpt = true,
+    },
+    init_options = {
+      usePlaceholders = true,
+    },
   },
   pyright = {},
   rust_analyzer = {},
@@ -541,6 +547,9 @@ local servers = {
   dockerls = {},
   bashls = {},
   html = { filetypes = { 'html', 'twig', 'hbs' } },
+  terraformls = {
+    filetypes = { "terraform", "tf" }
+  },
   lua_ls = {
     Lua = {
       runtime = {
@@ -586,6 +595,7 @@ mason_lspconfig.setup_handlers {
       on_attach = on_attach,
       settings = servers[server_name],
       filetypes = (servers[server_name] or {}).filetypes,
+      init_options = (servers[server_name] or {}).init_options,
     }
   end
 }
