@@ -7,12 +7,17 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-GOVERSION=1.20
+sudo apt-get install bison
+if [[ ! -f ${HOME}/.gvm/scripts/gvm ]]; then
+  bash < <(GVM_NO_UPDATE_PROFILE=true curl -s -S -L https://raw.githubusercontent.com/moovweb/gvm/master/binscripts/gvm-installer) || true
+  zsh -c "source ${HOME}/.gvm/scripts/gvm"
+fi
 
-sudo rm -rf /usr/local/go
-curl -L -O https://golang.org/dl/go${GOVERSION}.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz
-sudo chown $USER:$USER  -R /usr/local/go
-rm go${GOVERSION}.linux-amd64.tar.gz
-
-export PATH=/usr/local/go/bin:${PATH}
+gvm install go1.4 -B
+gvm use go1.4
+export GOROOT_BOOTSTRAP=$GOROOT
+gvm install go1.17.13
+gvm use go1.17.13
+export GOROOT_BOOTSTRAP=$GOROOT
+gvm install go1.20
+gvm use go1.20.7 --default

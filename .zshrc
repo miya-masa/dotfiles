@@ -17,8 +17,10 @@ fi
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-# See https://github.com/romkatv/powerlevel10k#how-do-i-initialize-direnv-when-using-instant-prompt 
+# See https://github.com/romkatv/powerlevel10k#how-do-i-initialize-direnv-when-using-instant-prompt
 (( ${+commands[direnv]} )) && emulate zsh -c "$(direnv export zsh)"
+
+[[ -s "${HOME}/.gvm/scripts/gvm" ]] && source "${HOME}/.gvm/scripts/gvm"
 
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
@@ -32,21 +34,17 @@ export PAGER=less
 export EDITOR=nvim
 export TERM=screen-256color
 
-export GOPATH="$HOME/go"
 export PYENV_ROOT="$HOME/.pyenv"
 export XDG_CONFIG_HOME=$HOME/.config
-export PATH=$GOPATH/bin:$PATH:/usr/local/go/bin
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 export PATH=${PATH}:${HOME}/bin
 [ -f ~/.zprofile.local ] && source ~/.zprofile.local
-[ -f ~/.gvm/scripts/gvm ] && source ~/.gvm/scripts/gvm && gvm use master
 export PATH="/usr/local/opt/mysql-client/bin:$PATH"
 export PATH="$PYENV_ROOT/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="/usr/local/opt/gettext/bin:$PATH"
-export DOCKER_HOST=unix:///run/user/$(id -u)/docker.sock
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 if [[ -x "`which pyenv`" ]]; then
   export PATH="$(pyenv root)/shims:$PATH"
@@ -123,6 +121,7 @@ zinit snippet https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/co
 ### zsh-syntax-highlighting
 zinit light "zsh-users/zsh-syntax-highlighting"
 
+
 ### reset bind key
 bindkey -d
 bindkey -v
@@ -161,6 +160,11 @@ alias dim='docker images'
 alias dkill='docker container ls -q | xargs docker kill'
 alias dc='docker compose'
 alias rand="head -n 10 /dev/urandom | base64 | head -n 1 | cut -c 1-32 | tr '/+' '_-'"
+
+pass() {
+  op item get --fields label=password $(op item list | fzf --height=25% | awk '{print $1}')
+}
+
 tmn() {
   if type "autojump" > /dev/null 2>&1; then
     j $1
@@ -258,3 +262,5 @@ fi
 
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.2.4/bin/terraform terraform
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/vault/1.3.2/bin/vault vault
+
+[[ -s "/home/masayuki/.gvm/scripts/gvm" ]] && source "/home/masayuki/.gvm/scripts/gvm"
