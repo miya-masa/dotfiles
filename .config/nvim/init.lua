@@ -90,6 +90,8 @@ require('lazy').setup({
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
+      'ray-x/lsp_signature.nvim',
+      'onsails/lspkind.nvim',
     },
   },
 
@@ -105,6 +107,17 @@ require('lazy').setup({
       -- Adds LSP completion capabilities
       'hrsh7th/cmp-nvim-lsp',
       'hrsh7th/cmp-nvim-lsp-signature-help',
+      'hrsh7th/cmp-buffer',
+      'hrsh7th/cmp-path',
+      'hrsh7th/cmp-cmdline',
+      'hrsh7th/cmp-calc',
+      'hrsh7th/cmp-emoji',
+      {
+        'petertriho/cmp-git',
+        config = function()
+          require("cmp_git").setup()
+        end
+      },
 
       -- Adds a number of user-friendly snippets
       'rafamadriz/friendly-snippets',
@@ -202,6 +215,7 @@ require('lazy').setup({
         end,
       },
       "nvim-telescope/telescope-live-grep-args.nvim",
+      'nvim-telescope/telescope-ui-select.nvim',
     },
   },
 
@@ -236,95 +250,95 @@ require('lazy').setup({
 vim.o.swapfile = false
 vim.o.autoread = true
 vim.o.viminfo = '\'100,n' .. os.getenv("HOME") .. '/.vim/files/info/viminfo'
-vim.o.ambiwidth = 'single'
-vim.o.list = true
-vim.o.listchars = 'tab:^\\ ,trail:~'
-vim.o.expandtab = true
-vim.o.smarttab = true
-vim.o.incsearch = true
-vim.o.magic = true
-vim.o.lazyredraw = true
-vim.o.errorbells = false
-vim.o.visualbell = false
-vim.o.linebreak = true
-vim.o.textwidth = 500
-vim.o.autoindent = true
-vim.o.smartindent = true
-vim.o.wrap = true
-vim.o.laststatus = 2
-vim.o.writebackup = false
-vim.o.backup = false
-vim.o.display = 'lastline'
-vim.o.scrolloff = 7
--- disable netrw at the very start of your init.lua (strongly advised)
+-- vim.o.ambiwidth = 'single'
+-- vim.o.list = true
+-- vim.o.listchars = 'tab:^\\ ,trail:~'
+-- vim.o.expandtab = true
+-- vim.o.smarttab = true
+-- vim.o.incsearch = true
+-- vim.o.magic = true
+-- vim.o.lazyredraw = true
+-- vim.o.errorbells = false
+-- vim.o.visualbell = false
+-- vim.o.linebreak = true
+-- vim.o.textwidth = 500
+-- vim.o.autoindent = true
+-- vim.o.smartindent = true
+-- vim.o.wrap = true
+-- vim.o.laststatus = 2
+-- vim.o.writebackup = false
+-- vim.o.backup = false
+-- vim.o.display = 'lastline'
+-- vim.o.scrolloff = 7
+-- -- disable netrw at the very start of your init.lua (strongly advised)
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 vim.o.shiftwidth = 2
 vim.o.softtabstop = 2
 vim.o.tabstop = 4
-
--- set termguicolors to enable highlight groups
-vim.opt.termguicolors = true
-
-
--- Set highlight on search
-vim.o.hlsearch = true
-
--- Make line numbers default
-vim.wo.number = true
-
--- Enable mouse mode
-vim.o.mouse = 'a'
-
--- Sync clipboard between OS and Neovim.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
+--
+-- -- set termguicolors to enable highlight groups
+-- vim.opt.termguicolors = true
+--
+--
+-- -- Set highlight on search
+-- vim.o.hlsearch = true
+--
+-- -- Make line numbers default
+-- vim.wo.number = true
+--
+-- -- Enable mouse mode
+-- vim.o.mouse = 'a'
+--
+-- -- Sync clipboard between OS and Neovim.
+-- --  Remove this option if you want your OS clipboard to remain independent.
+-- --  See `:help 'clipboard'`
 vim.o.clipboard = 'unnamedplus'
-
--- Enable break indent
-vim.o.breakindent = true
-
--- Save undo history
+--
+-- -- Enable break indent
+-- vim.o.breakindent = true
+--
+-- -- Save undo history
 vim.o.undofile = true
 vim.o.undodir = os.getenv("HOME") .. '/undodir'
-
--- Case-insensitive searching UNLESS \C or capital in search
-vim.o.ignorecase = true
-vim.o.smartcase = true
-
--- Keep signcolumn on by default
-vim.wo.signcolumn = 'yes'
-
--- Decrease update time
-vim.o.updatetime = 250
-vim.o.timeoutlen = 300
-
--- Set completeopt to have a better completion experience
-vim.o.completeopt = 'menuone,noselect'
-
--- NOTE: You should make sure your terminal supports this
-vim.o.termguicolors = true
-
--- [[ Basic Keymaps ]]
-
--- Keymaps for better default experience
--- See `:help vim.keymap.set()`
-vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
-
--- Remap for dealing with word wrap
-vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
-vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-
--- [[ Highlight on yank ]]
--- See `:help vim.highlight.on_yank()`
-local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
-vim.api.nvim_create_autocmd('TextYankPost', {
-  callback = function()
-    vim.highlight.on_yank()
-  end,
-  group = highlight_group,
-  pattern = '*',
-})
+--
+-- -- Case-insensitive searching UNLESS \C or capital in search
+-- vim.o.ignorecase = true
+-- vim.o.smartcase = true
+--
+-- -- Keep signcolumn on by default
+-- vim.wo.signcolumn = 'yes'
+--
+-- -- Decrease update time
+-- vim.o.updatetime = 250
+-- vim.o.timeoutlen = 300
+--
+-- -- Set completeopt to have a better completion experience
+-- vim.o.completeopt = 'menuone,noselect'
+--
+-- -- NOTE: You should make sure your terminal supports this
+-- vim.o.termguicolors = true
+--
+-- -- [[ Basic Keymaps ]]
+--
+-- -- Keymaps for better default experience
+-- -- See `:help vim.keymap.set()`
+-- vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+--
+-- -- Remap for dealing with word wrap
+-- vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
+-- vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+--
+-- -- [[ Highlight on yank ]]
+-- -- See `:help vim.highlight.on_yank()`
+-- local highlight_group = vim.api.nvim_create_augroup('YankHighlight', { clear = true })
+-- vim.api.nvim_create_autocmd('TextYankPost', {
+--   callback = function()
+--     vim.highlight.on_yank()
+--   end,
+--   group = highlight_group,
+--   pattern = '*',
+-- })
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
@@ -369,7 +383,26 @@ require('telescope').setup {
       -- theme = "dropdown", -- use dropdown theme
       -- theme = { }, -- use own theme spec
       -- layout_config = { mirror=true }, -- mirror preview pane
-    }
+    },
+    ["ui-select"] = {
+      require("telescope.themes").get_dropdown {
+        -- even more opts
+      }
+
+      -- pseudo code / specification for writing custom displays, like the one
+      -- for "codeactions"
+      -- specific_opts = {
+      --   [kind] = {
+      --     make_indexed = function(items) -> indexed_items, width,
+      --     make_displayer = function(widths) -> displayer
+      --     make_display = function(displayer) -> function(e)
+      --     make_ordinal = function(e) -> string
+      --   },
+      --   -- for example to disable the custom builtin "codeactions" display
+      --      do the following
+      --   codeactions = false,
+      -- }
+    },
   }
 }
 
@@ -398,6 +431,8 @@ vim.keymap.set('n', '<leader>sg', require('telescope').extensions.live_grep_args
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]resume' })
 
+require("telescope").load_extension("ui-select")
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
@@ -409,7 +444,7 @@ require('nvim-treesitter.configs').setup {
     "terraform" },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-  auto_install = false,
+  auto_install = true,
 
   highlight = { enable = true },
   indent = { enable = true },
@@ -574,7 +609,10 @@ local servers = {
 }
 
 -- Setup neovim lua configuration
-require('neodev').setup()
+require("neodev").setup({
+  library = { plugins = { "neotest" }, types = true },
+  ...
+})
 
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
 local capabilities = vim.lsp.protocol.make_client_capabilities()

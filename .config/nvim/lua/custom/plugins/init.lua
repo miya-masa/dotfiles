@@ -1,16 +1,4 @@
 return {
-  'hrsh7th/cmp-buffer',
-  'hrsh7th/cmp-path',
-  'hrsh7th/cmp-cmdline',
-  'hrsh7th/cmp-calc',
-  'hrsh7th/cmp-emoji',
-  {
-    'petertriho/cmp-git',
-    config = function()
-      require("cmp_git").setup()
-    end
-  },
-
   'mattn/vim-goimports',
   {
     'kana/vim-operator-replace',
@@ -20,7 +8,27 @@ return {
   },
   'christoomey/vim-tmux-navigator',
   'dhruvasagar/vim-table-mode',
-  'diepm/vim-rest-console',
+  {
+    'diepm/vim-rest-console',
+    config = function()
+      vim.g.vrc_curl_opts = {
+        ['-b'] = '/tmp/cookie.txt',
+        ['-c'] = '/tmp/cookie.txt',
+        ['-L'] = '',
+        ['-i'] = '',
+        ['--max-time'] = 60
+      }
+
+      vim.g.vrc_auto_format_response_enabled = 1
+      vim.g.vrc_show_command = 1
+      vim.g.vrc_response_default_content_type = 'application/json'
+      vim.g.vrc_auto_format_response_patterns = {
+        json = 'jq \".\"',
+        xml = 'tidy -xml -i -'
+      }
+      vim.g.vrc_trigger = '<Leader><C-o>'
+    end
+  },
   'simeji/winresizer',
   'tpope/vim-abolish',
   'thinca/vim-quickrun',
@@ -31,7 +39,6 @@ return {
   'kamykn/popup-menu.nvim',
   'machakann/vim-sandwich',
   'vim-jp/vimdoc-ja',
-  'ray-x/lsp_signature.nvim',
   {
     'tyru/operator-camelize.vim',
     dependencies = {
@@ -66,7 +73,6 @@ return {
   "smartpde/telescope-recent-files",
   'tpope/vim-dispatch',
   'kyoh86/vim-go-coverage',
-  'onsails/lspkind.nvim',
   {
     'echasnovski/mini.nvim',
     version = '*',
@@ -85,4 +91,11 @@ return {
   },
   'sentriz/vim-print-debug',
   'chrisbra/unicode.vim',
+  {
+    'windwp/nvim-autopairs',
+    event = "InsertEnter",
+    opts = {} -- this is equalent to setup({}) function
+  },
+  'deris/vim-rengbang',
+  'mattn/vim-goaddtags',
 }

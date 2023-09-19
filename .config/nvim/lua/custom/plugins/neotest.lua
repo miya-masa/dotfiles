@@ -1,6 +1,8 @@
 return {
   "nvim-neotest/neotest",
   dependencies = {
+    "nvim-lua/plenary.nvim",
+    "nvim-treesitter/nvim-treesitter",
     'nvim-neotest/neotest-python',
     "nvim-neotest/neotest-go",
     -- Your other test adapters here
@@ -25,11 +27,6 @@ return {
         }),
         require("neotest-python"),
       },
-      floating = {
-        border = "rounded",
-        max_height = 0.9,
-        max_width = 0.9,
-      },
       icons = {
         failed = "X",
         final_child_indent = " ",
@@ -38,8 +35,8 @@ return {
         passed = "O",
         running = "-",
         running_animated = { "/", "|", "\\", "-", "/", "|", "\\", "-" },
-        skipped = "-",
-        unknown = "-"
+        skipped = "s",
+        unknown = "u"
       },
     })
     vim.keymap.set('n', 't<C-n>', ':lua require("neotest").run.run()<CR>')
