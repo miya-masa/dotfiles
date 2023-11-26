@@ -1,5 +1,6 @@
 return {
   'mattn/vim-goimports',
+  'sindrets/diffview.nvim',
   {
     'kana/vim-operator-replace',
     dependencies = {
@@ -98,4 +99,58 @@ return {
   },
   'deris/vim-rengbang',
   'mattn/vim-goaddtags',
+  {
+    'mfussenegger/nvim-lint',
+    version = '*',
+    config = function()
+      require('lint').linters_by_ft = {
+        markdown = { 'vale', 'markdownlint' },
+        yaml = { 'yamllint' },
+        go = { 'golangcilint' },
+        python = { 'flake8' },
+        dockerfile = { 'hadolint' },
+        sh = { 'shellcheck' },
+        sql = { 'sqlfluff' },
+        proto = { 'buf_lint' }
+      }
+      vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+        callback = function()
+          require("lint").try_lint()
+        end,
+      })
+    end
+  },
+  {
+    'mhartington/formatter.nvim',
+    version = '*',
+    config = function()
+      -- Utilities for creating configurations
+      local util = require "formatter.util"
+      -- Provides the Format, FormatWrite, FormatLock, and FormatWriteLock commands
+      require("formatter").setup {
+        filetype = {
+          -- Formatter configurations for filetype "lua" go here
+          -- and will be executed in order
+          lua = {
+            require("formatter.filetypes.lua").stylua,
+          },
+          python = {
+            require("formatter.filetypes.python").black,
+            require("formatter.filetypes.python").isort
+          },
+
+          -- Use the special "*" filetype for defining formatter configurations on
+          -- any filetype
+          ["*"] = {
+            -- "formatter.filetypes.any" defines default configurations for any
+            -- filetype
+            require("formatter.filetypes.any").remove_trailing_whitespace
+          }
+        }
+      }
+      vim.api.nvim_create_autocmd({ "BufWritePost" }, {
+        command = "FormatWrite"
+      })
+    end
+  }
 }
