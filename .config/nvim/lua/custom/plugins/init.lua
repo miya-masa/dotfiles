@@ -38,7 +38,7 @@ return {
   'tmux-plugins/vim-tmux-focus-events',
   'kamykn/spelunker.vim',
   'kamykn/popup-menu.nvim',
-  'machakann/vim-sandwich',
+  'tpope/vim-surround',
   'vim-jp/vimdoc-ja',
   {
     'tyru/operator-camelize.vim',

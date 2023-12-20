@@ -4,19 +4,35 @@ return {
   config = function()
     require('dashboard').setup {
       theme = 'hyper',
+      -- theme = 'doom',
       config = {
         week_header = {
           enable = true,
+        },
+        project = {
+          enable = false
         },
         shortcut = {
           { desc = '󰊳 Update', group = '@property', action = 'Lazy update', key = 'u' },
           {
             icon = ' ',
             icon_hl = '@variable',
-            desc = 'Git Files',
+            desc = 'Files',
             group = 'Label',
-            action = 'Telescope git_files',
+            action = 'Telescope find_files',
             key = 'f',
+          },
+          {
+            desc = ' Apps',
+            group = 'DiagnosticHint',
+            action = 'Telescope app',
+            key = 'a',
+          },
+          {
+            desc = ' dotfiles',
+            group = 'Number',
+            action = 'Telescope dotfiles',
+            key = 'd',
           },
         },
       },
@@ -24,17 +40,3 @@ return {
   end,
   dependencies = { 'nvim-tree/nvim-web-devicons' }
 }
--- db.custom_header = {
---   '',
---   '           __                                                                               __',
---   '  ___ ___ /\\_\\  __  __     __               ___ ___      __      ____     __        __  __ /\\_\\    ___ ___',
---   '/\\\' __` __`\\/\\ \\/\\ \\/\\ \\  /\'__`\\   _______ /\' __` __`\\  /\'__`\\   /\',__\\  /\'__`\\     /\\ \\/\\ \\\\/\\ \\ /\' __` __`\\',
---   '/\\ \\/\\ \\/\\ \\ \\ \\ \\ \\_\\ \\/\\ \\L\\.\\_/\\______\\/\\ \\/\\ \\/\\ \\/\\ \\L\\.\\_/\\__, `\\/\\ \\L\\.\\_   \\ \\ \\_/ |\\ \\ \\/\\ \\/\\ \\/\\ \\',
---   '\\ \\_\\ \\_\\ \\_\\ \\_\\/`____ \\ \\__/.\\_\\/______/\\ \\_\\ \\_\\ \\_\\ \\__/.\\_\\/\\____/\\ \\__/.\\_\\   \\ \\___/  \\ \\_\\ \\_\\ \\_\\ \\_\\',
---   ' \\/_/\\/_/\\/_/\\/_/`/___/> \\/__/\\/_/         \\/_/\\/_/\\/_/\\/__/\\/_/\\/___/  \\/__/\\/_/    \\/__/    \\/_/\\/_/\\/_/\\/_/',
---   '                    /\\___/',
---   '                    \\/__/',
---   '',
---   '',
---   '',
--- }
