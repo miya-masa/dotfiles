@@ -1,5 +1,6 @@
-# autojump
-[ -f /usr/local/etc/profile.d/autojump.sh ] && . /usr/local/etc/profile.d/autojump.sh
+ssh-add --apple-use-keychain ~/.ssh/id_rsa
+ssh-add --apple-use-keychain ~/.ssh/id_ecdsa
+
 alias ll='ls -GalF'
 alias la='ls -GA'
 alias l='ls -GCF'

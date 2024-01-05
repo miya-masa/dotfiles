@@ -10,8 +10,11 @@ IFS=$'\n\t'
 if [ ! -d ~/nerd-fonts ] ; then
   git clone https://github.com/ryanoasis/nerd-fonts.git --depth 1 ~/nerd-fonts
 fi
-git pull
 cd ~/nerd-fonts
+git pull
 ./install.sh IBMPlexMono
-./install.sh Go-Mono
 ./install.sh FiraCode
+./install.sh FiraMono
+./install.sh Hack
+./install.sh Hasklig
+./install.sh SourceCodePro
