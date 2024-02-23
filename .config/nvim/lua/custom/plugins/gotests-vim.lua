@@ -1,6 +1,6 @@
 return {
-  "buoto/gotests-vim",
+  'buoto/gotests-vim',
   config = function()
-    vim.g.gotests_template = "testify"
+    vim.g.gotests_template = 'testify'
   end,
 }

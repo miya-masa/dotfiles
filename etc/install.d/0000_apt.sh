@@ -60,4 +60,3 @@ sudo cp .config/neofetch/banner.txt /etc/update-motd.d/
 if ! sudo grep -q "$HOME/.config/neofetch/config.conf" /etc/update-motd.d/00-header; then
   sudo echo "$HOME/.config/neofetch/config.conf" | sudo tee -a /etc/update-motd.d/00-header
 fi
-

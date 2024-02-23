@@ -14,3 +14,4 @@ export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
 export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 brew bundle --file=./Brewfile_linux
+rtx install -y

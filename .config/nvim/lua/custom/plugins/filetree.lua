@@ -1,15 +1,15 @@
 return {
-  "nvim-neo-tree/neo-tree.nvim",
-  version = "*",
+  'nvim-neo-tree/neo-tree.nvim',
+  version = '*',
   dependencies = {
-    "nvim-lua/plenary.nvim",
-    "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-    "MunifTanjim/nui.nvim",
+    'nvim-lua/plenary.nvim',
+    'nvim-tree/nvim-web-devicons', -- not strictly required, but recommended
+    'MunifTanjim/nui.nvim',
   },
   config = function()
     vim.keymap.set('n', '|', ':Neotree reveal<cr>')
     vim.keymap.set('n', '-', ':Neotree<cr>')
-    require("neo-tree").setup({
+    require('neo-tree').setup {
       filesystem = {
         filtered_items = {
           visible = true, -- when true, they will just be displayed differently than normal items
@@ -17,13 +17,13 @@ return {
           hide_gitignored = true,
           hide_hidden = true, -- only works on Windows for hidden files/directories
           hide_by_name = {
-            ".DS_Store",
-            "thumbs.db",
+            '.DS_Store',
+            'thumbs.db',
             --"node_modules",
           },
           hide_by_pattern = {
-            "release*",
-            ".git",
+            'release*',
+            '.git',
             --"*/src/*/tsconfig.json",
           },
           always_show = { -- remains visible even if other settings would normally hide it
@@ -37,7 +37,7 @@ return {
             --".null-ls_*",
           },
         },
-      }
-    })
+      },
+    }
   end,
 }

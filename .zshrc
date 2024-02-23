@@ -20,8 +20,6 @@ fi
 # See https://github.com/romkatv/powerlevel10k#how-do-i-initialize-direnv-when-using-instant-prompt
 (( ${+commands[direnv]} )) && emulate zsh -c "$(direnv export zsh)"
 
-[[ -s "${HOME}/.gvm/scripts/gvm" ]] && source "${HOME}/.gvm/scripts/gvm"
-
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -34,13 +32,11 @@ export PAGER=less
 export EDITOR=nvim
 export TERM=screen-256color
 
-export PYENV_ROOT="$HOME/.pyenv"
 export XDG_CONFIG_HOME=$HOME/.config
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 export PATH=${PATH}:${HOME}/bin
 [ -f ~/.zprofile.local ] && source ~/.zprofile.local
 export PATH="/usr/local/opt/mysql-client/bin:$PATH"
-export PATH="$PYENV_ROOT/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
@@ -262,5 +258,4 @@ fi
 
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.2.4/bin/terraform terraform
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/vault/1.3.2/bin/vault vault
-
-[[ -s "/home/masayuki/.gvm/scripts/gvm" ]] && source "/home/masayuki/.gvm/scripts/gvm"
+eval "$(~/.local/bin/mise activate zsh)"

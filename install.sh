@@ -164,9 +164,11 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.config/nvim ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/neofetch ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/yamllint ${HOME}/.config
+  ln -fs ${DOTFILES_DIRECTORY}/.config/mise ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.fzf.zsh ${HOME}/.fzf.zsh
   ln -fs ${DOTFILES_DIRECTORY}/.tigrc ${HOME}/.tigrc
   ln -fs ${DOTFILES_DIRECTORY}/.markdownlintrc ${HOME}/.markdownlintrc
+  ln -fs ${DOTFILES_DIRECTORY}/.mise.toml ${HOME}/.mise.toml
   ln -fs ${DOTFILES_DIRECTORY}/.local/bin/ide.sh ${HOME}/.local/bin/ide.sh
   if [ ! -e ~/.ssh/config ]; then
     cp ${DOTFILES_DIRECTORY}/.ssh/config.sample ${HOME}/.ssh/config

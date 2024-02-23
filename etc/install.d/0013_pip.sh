@@ -27,5 +27,3 @@ pip install \
 pip install --upgrade autopep8
 pip install jupyter_nbextensions_configurator
 pip install --user pipenv
-jupyter contrib nbextension install --user
-jupyter nbextensions_configurator enable --user

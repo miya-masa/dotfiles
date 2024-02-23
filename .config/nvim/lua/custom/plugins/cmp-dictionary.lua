@@ -1,31 +1,30 @@
 return {
-  "uga-rosa/cmp-dictionary",
+  'uga-rosa/cmp-dictionary',
   config = function()
-    require("cmp").setup({
+    require('cmp').setup {
       -- other settings
       sources = {
         -- other sources
         {
-          name = "dictionary",
+          name = 'dictionary',
           keyword_length = 2,
         },
-      }
-    })
-    local dict = require("cmp_dictionary")
-    dict.setup({
+      },
+    }
+    local dict = require 'cmp_dictionary'
+    dict.setup {
       dic = {
-        ["*"] = "/usr/share/dict/words",
+        ['*'] = '/usr/share/dict/words',
       },
       -- The following are default values.
-      exact = 2,
+      exact_length = 2,
       first_case_insensitive = false,
       document = false,
-      document_command = "wn %s -over",
+      document_command = 'wn %s -over',
       sqlite = false,
-      max_items = -1,
-      capacity = 5,
+      max_number_items = -1,
       debug = false,
-    })
+    }
 
     -- dict.switcher({
     --   filetype = {
