@@ -17,6 +17,6 @@ return {
     }
     -- command! G Neogit
     --
-    vim.api.nvim_create_user_command('G', 'Neogit', {})
+    vim.keymap.set('n', '<leader>G', ':Neogit<CR>')
   end,
 }

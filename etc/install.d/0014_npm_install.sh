@@ -13,3 +13,5 @@ npm i -g prettier
 npm i -g write-good
 npm i -g markdownlint-cli
 npm i -g md-to-pdf
+npm i -g commitizen
+npm i -g cz-git

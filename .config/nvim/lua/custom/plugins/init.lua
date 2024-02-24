@@ -134,7 +134,7 @@ return {
       'nvim-lua/plenary.nvim',
     },
     config = function()
-      vim.keymap.set('n', '<leader>G', ':LazyGit<CR>')
+      vim.api.nvim_create_user_command('G', 'LazyGit', {})
     end,
   },
   {
@@ -186,6 +186,15 @@ return {
     'zbirenbaum/copilot-cmp',
     config = function()
       require('copilot_cmp').setup()
+    end,
+  },
+  {
+    'f-person/git-blame.nvim',
+    config = function()
+      require('gitblame').setup {
+        --Note how the `gitblame_` prefix is omitted in `setup`
+        enabled = false,
+      }
     end,
   },
 }

@@ -22,6 +22,7 @@ pip install \
   python-lsp-black \
   poetry \
   jupyter \
+  neovim-remote \
   pre-commit \
   jupyter_contrib_nbextensions
 pip install --upgrade autopep8

@@ -77,3 +77,4 @@ Brewfile_linux.lock.json
 # End of https://www.toptal.com/developers/gitignore/api/homebrew
 .dbext_profile
 .venv
+.config/lazygit/state.yml
