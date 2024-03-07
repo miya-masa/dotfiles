@@ -24,7 +24,8 @@ pip install \
   jupyter \
   neovim-remote \
   pre-commit \
-  jupyter_contrib_nbextensions
+  jupyter_contrib_nbextensions \
+  ruff
 pip install --upgrade autopep8
 pip install jupyter_nbextensions_configurator
 pip install --user pipenv

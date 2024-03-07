@@ -10,11 +10,14 @@ return {
       null_ls.builtins.diagnostics.markdownlint.with {
         args = { '--stdin', '-c', vim.fn.expand '$HOME/.markdownlintrc' },
       },
-      null_ls.builtins.diagnostics.pyproject_flake8,
-      null_ls.builtins.formatting.isort,
-      null_ls.builtins.formatting.black,
+      require 'none-ls.formatting.jq',
+      require 'none-ls.formatting.ruff',
+      require 'none-ls.diagnostics.ruff',
     }
 
     null_ls.setup { sources = sources }
   end,
+  dependencies = {
+    'nvimtools/none-ls-extras.nvim',
+  },
 }

@@ -1,44 +1,44 @@
 return {
-  "nvim-neotest/neotest",
+  'nvim-neotest/neotest',
   dependencies = {
-    "nvim-lua/plenary.nvim",
-    "nvim-treesitter/nvim-treesitter",
+    'nvim-lua/plenary.nvim',
+    'nvim-treesitter/nvim-treesitter',
+    'antoinemadec/FixCursorHold.nvim',
     'nvim-neotest/neotest-python',
-    "nvim-neotest/neotest-go",
+    'nvim-neotest/neotest-go',
     -- Your other test adapters here
   },
   config = function()
     -- get neotest namespace (api call creates or returns namespace)
-    local neotest_ns = vim.api.nvim_create_namespace("neotest")
+    local neotest_ns = vim.api.nvim_create_namespace 'neotest'
     vim.diagnostic.config({
       virtual_text = {
         format = function(diagnostic)
-          local message =
-              diagnostic.message:gsub("\n", " "):gsub("\t", " "):gsub("%s+", " "):gsub("^%s+", "")
+          local message = diagnostic.message:gsub('\n', ' '):gsub('\t', ' '):gsub('%s+', ' '):gsub('^%s+', '')
           return message
         end,
       },
     }, neotest_ns)
-    require("neotest").setup({
+    require('neotest').setup {
       -- your neotest config here
       adapters = {
-        require("neotest-go")({
-          args = { "-count=1", "-timeout=60s" }
-        }),
-        require("neotest-python"),
+        require 'neotest-go' {
+          args = { '-count=1', '-timeout=60s' },
+        },
+        require 'neotest-python',
       },
       icons = {
-        failed = "X",
-        final_child_indent = " ",
-        final_child_prefix = "╰",
-        non_collapsible = "─",
-        passed = "O",
-        running = "-",
-        running_animated = { "/", "|", "\\", "-", "/", "|", "\\", "-" },
-        skipped = "s",
-        unknown = "u"
+        failed = 'X',
+        final_child_indent = ' ',
+        final_child_prefix = '╰',
+        non_collapsible = '─',
+        passed = 'O',
+        running = '-',
+        running_animated = { '/', '|', '\\', '-', '/', '|', '\\', '-' },
+        skipped = 's',
+        unknown = 'u',
       },
-    })
+    }
     vim.keymap.set('n', 't<C-n>', ':lua require("neotest").run.run()<CR>')
     vim.keymap.set('n', 'ti<C-n>', ':lua require("neotest").run.run()<CR>')
     vim.keymap.set('n', 't<C-m>', ':lua require("neotest").run.stop()<CR>')

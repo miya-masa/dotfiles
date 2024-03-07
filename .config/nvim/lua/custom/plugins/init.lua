@@ -89,7 +89,9 @@ return {
   },
   {
     'folke/trouble.nvim',
-    requires = 'nvim-tree/nvim-web-devicons',
+    dependencies = {
+      'nvim-tree/nvim-web-devicons',
+    },
     config = function()
       require('trouble').setup {
         -- your configuration comes here
@@ -135,6 +137,9 @@ return {
     },
     config = function()
       vim.api.nvim_create_user_command('G', 'LazyGit', {})
+      if vim.fn.executable 'nvr' == 1 then
+        vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+      end
     end,
   },
   {
