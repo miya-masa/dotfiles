@@ -8,5 +8,6 @@ set -o pipefail
 IFS=$'\n\t'
 
 curl https://mise.jdx.dev/install.sh | sh
+eval "$(~/.local/bin/mise activate zsh)"
 mise --version
 mise install -y
