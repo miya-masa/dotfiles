@@ -9,3 +9,4 @@ IFS=$'\n\t'
 
 curl https://mise.jdx.dev/install.sh | sh
 mise --version
+mise install -y
