@@ -172,6 +172,7 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.mise.toml ${HOME}/.mise.toml
   ln -fs ${DOTFILES_DIRECTORY}/.local/bin/ide.sh ${HOME}/.local/bin/ide.sh
   ln -fs ${DOTFILES_DIRECTORY}/.czrc ${HOME}/.czrc
+  ln -fs ${DOTFILES_DIRECTORY}/.wezterm.lua ${HOME}/.wezterm.lua
   if [ ! -e ~/.ssh/config ]; then
     cp ${DOTFILES_DIRECTORY}/.ssh/config.sample ${HOME}/.ssh/config
   fi
