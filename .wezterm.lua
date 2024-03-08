@@ -17,10 +17,11 @@ end
 config.color_scheme = "kanagawabones"
 
 -- config.font = wezterm.font 'Monaspace Argon Var'
-config.font_size = 12.0
+config.font_size = 11.0
 config.font = wezterm.font_with_fallback({
-  { family = "PlemolJP Console NF", weight = "Medium" },
-  { family = "HackGen Console NF",  weight = "Regular" },
+  { family = "Moralerspace Neon HWNF", weight = "Regular" },
+  { family = "PlemolJP Console NF",    weight = "Medium" },
+  { family = "HackGen Console NF",     weight = "Regular" },
 })
 
 wezterm.on("gui-startup", function()
