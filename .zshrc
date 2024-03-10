@@ -258,7 +258,7 @@ fi
 
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.2.4/bin/terraform terraform
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/vault/1.3.2/bin/vault vault
-eval "$(~/.local/bin/mise activate zsh)"
+[ -s "$HOME/.local/bin/mise" ] && eval "$(~/.local/bin/mise activate zsh)"
 
 if [ -n "$NVIM_LISTEN_ADDRESS" ]; then
     alias nvim=nvr -cc split --remote-wait +'set bufhidden=wipe'

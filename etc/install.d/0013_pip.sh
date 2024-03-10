@@ -7,13 +7,14 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
+PATH="~/.local/share/mise/shims:$PATH"
 pip install \
   pgcli \
   mycli \
   black \
   isort \
   flake8 \
-  mypy \
+  "mypy >= 1.9" \
   pyls-flake8 \
   pylsp-mypy \
   pyls-isort \

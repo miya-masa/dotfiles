@@ -5,10 +5,7 @@ return {
       paths = { '/usr/share/dict/words' },
       exact_length = 2,
       first_case_insensitive = true,
-      document = {
-        enable = false,
-        command = {},
-      },
+      document = false,
     }
   end,
 }

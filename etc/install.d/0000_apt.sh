@@ -8,8 +8,8 @@ set -o pipefail
 IFS=$'\n\t'
 
 
-sudo apt update
-sudo add-apt-repository universe
+sudo apt update -y
+sudo add-apt-repository universe -y
 sudo apt install -y \
   autojump \
   asciidoc \
