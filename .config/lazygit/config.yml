@@ -54,16 +54,16 @@ gui:
 #   animateExplosion: true # shows an explosion animation when nuking the working tree
 #   portraitMode: 'auto' # one of 'auto' | 'never' | 'always'
 git:
-#   paging:
-#     colorArg: always
-#     useConfig: false
-#   commit:
-#     signOff: false
-#   merging:
-#     # only applicable to unix users
-#     manualCommit: false
-#     # extra args passed to `git merge`, e.g. --no-ff
-#     args: ''
+  #   paging:
+  #     colorArg: always
+  #     useConfig: false
+  #   commit:
+  #     signOff: false
+  #   merging:
+  #     # only applicable to unix users
+  #     manualCommit: false
+  #     # extra args passed to `git merge`, e.g. --no-ff
+  #     args: ''
   log:
     # one of date-order, author-date-order, topo-order or default.
     # topo-order makes it easier to read the git log graph, but commits may not
@@ -79,20 +79,20 @@ git:
     # displays the whole git graph by default in the commits panel (equivalent to passing the `--all` argument to `git log`)
     showWholeGraph: true
     # skipHookPrefix: WIP
-#   # The main branches. We colour commits green if they belong to one of these branches,
-#   # so that you can easily see which commits are unique to your branch (coloured in yellow)
-#   mainBranches: [master, main]
-#   autoFetch: true
-#   autoRefresh: true
-#   fetchAll: true # Pass --all flag when running git fetch. Set to false to fetch only origin (or the current branch's upstream remote if there is one)
-  branchLogCmd: 'git log --graph --color=always --abbrev-commit --decorate --date=relative  --pretty=oneline {{branchName}} --'
-  allBranchesLogCmd: 'git log --graph --all --color=always --abbrev-commit --decorate --date=relative --pretty=oneline'
+  #   # The main branches. We colour commits green if they belong to one of these branches,
+  #   # so that you can easily see which commits are unique to your branch (coloured in yellow)
+  #   mainBranches: [master, main]
+  #   autoFetch: true
+  #   autoRefresh: true
+  #   fetchAll: true # Pass --all flag when running git fetch. Set to false to fetch only origin (or the current branch's upstream remote if there is one)
+  branchLogCmd: "git log --graph --color=always --abbrev-commit --decorate --date=relative  --pretty=oneline {{branchName}} --"
+  allBranchesLogCmd: "git log --graph --all --color=always --abbrev-commit --decorate --date=relative --pretty=oneline"
 #   overrideGpg: false # prevents lazygit from spawning a separate process when using GPG
 #   disableForcePushing: false
 #   parseEmoji: false
-os:
+# os:
 #   copyToClipboardCmd: '' # See 'Custom Command for Copying to Clipboard' section
-  editPreset: 'nvim-remote' # see 'Configuring File Editing' section
+# editPreset: "nvim-remote" # see 'Configuring File Editing' section
 #   edit: ''
 #   editAtLine: ''
 #   editAtLineAndWait: ''
@@ -241,10 +241,10 @@ os:
 #     init: 'i'
 #     update: 'u'
 #     bulkMenu: 'b'
-customCommands:
-  - key: "C"
-    command: "git cz"
-    description: "commit with commitizen"
-    context: "files"
-    loadingText: "opening commitizen commit tool"
-    subprocess: true
+# customCommands:
+#   - key: "C"
+#     command: "git cz"
+#     description: "commit with commitizen"
+#     context: "files"
+#     loadingText: "opening commitizen commit tool"
+#     subprocess: true

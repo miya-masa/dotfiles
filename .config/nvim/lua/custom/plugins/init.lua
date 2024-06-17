@@ -6,12 +6,17 @@ return {
     config = function()
       require('toggleterm').setup {
         open_mapping = [[<C-z>]],
-        direction = 'float',
+        direction = 'vertical',
+        size = vim.o.columns * 0.4,
       }
 
       function _G.set_terminal_keymaps()
         local opts = { buffer = 0 }
-        vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+
+        local filetype = vim.bo.filetype
+        if filetype ~= 'lazygit' then
+          vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+        end
         vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
         vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
         vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
@@ -140,6 +145,20 @@ return {
       if vim.fn.executable 'nvr' == 1 then
         vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
       end
+      vim.g.lazygit_floating_window_scaling_factor = 0.97
+
+      -- Lazygit起動時にESCを無効化する
+      vim.api.nvim_create_augroup('LazygitKeyMapping', {})
+      vim.api.nvim_create_autocmd('TermOpen', {
+        group = 'LazygitKeyMapping',
+        pattern = '*',
+        callback = function()
+          local filetype = vim.bo.filetype
+          if filetype == 'lazygit' then
+            vim.api.nvim_buf_set_keymap(0, 't', '<ESC>', '<ESC>', { noremap = true, silent = true })
+          end
+        end,
+      })
     end,
   },
   {
@@ -175,23 +194,141 @@ return {
       })
     end,
   },
-  'jbyuki/venn.nvim',
   {
-    'zbirenbaum/copilot.lua',
-    cmd = 'Copilot',
-    event = 'InsertEnter',
+    'jbyuki/venn.nvim',
     config = function()
-      require('copilot').setup {
-        suggestion = { enabled = false },
-        panel = { enabled = false },
-      }
+      -- A機能をトグルする関数を定義
+      local function toggle_venn_feature()
+        -- バッファローカル変数 'a_feature_enabled' の現在の値を取得
+        -- 存在しない場合はデフォルトでfalseを設定
+        local is_enabled = vim.b.venn or {}
+        is_enabled.feature_enabled = is_enabled.feature_enabled or false
+
+        -- トグル操作
+        if is_enabled.feature_enabled then
+          -- A機能が有効な場合は無効にする
+          vim.cmd [[setlocal ve=]]
+          vim.cmd [[mapclear <buffer>]]
+          is_enabled.feature_enabled = false
+          print 'venn off'
+        else
+          -- A機能が無効な場合は有効にする
+          vim.cmd [[setlocal ve=all]]
+          -- draw a line on HJKL keystokes
+          -- draw a box by pressing "f" with visual selection
+          vim.api.nvim_buf_set_keymap(0, 'v', '<CR>', ':VBox<CR>', { noremap = true })
+          is_enabled.feature_enabled = true
+          print 'venn on'
+        end
+      end
+
+      -- 'AToggle' という名前のコマンドを作成して、上記の関数を割り当てる
+      vim.api.nvim_create_user_command('ToggleVenn', toggle_venn_feature, { desc = 'Toggle Venn feature' })
     end,
   },
   {
-    'zbirenbaum/copilot-cmp',
+    {
+      'CopilotC-Nvim/CopilotChat.nvim',
+      branch = 'canary',
+      dependencies = {
+        { 'zbirenbaum/copilot.lua' }, -- or github/copilot.vim
+        { 'nvim-lua/plenary.nvim' },  -- for curl, log wrapper
+      },
+      config = function(_, opts)
+        local chat = require 'CopilotChat'
+        local select = require 'CopilotChat.select'
+        opts.prompts = {
+          Explain = {
+            prompt = '/COPILOT_EXPLAIN 上記のコードの説明をテキストの段落として記述してください。',
+          },
+          Tests = {
+            prompt = '/COPILOT_TESTS 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。',
+          },
+          GoTests = {
+            prompt =
+            '/COPILOT_GO_TESTS 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。アサーションは `github.com/stretchr/testify` を使用してください。モックは使用しません。',
+          },
+          TestsWithMock = {
+            prompt = '/COPILOT_TESTS_WITH_MOCK 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。',
+          },
+          GoTestsWithMock = {
+            prompt =
+            '/COPILOT_GO_TESTS_WITH_MOCK 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。アサーションは `github.com/stretchr/testify` を使用してください。必要に応じてモックライブラリとして `go.uber.org/mock/gomock` を使用してください。',
+          },
+          GoBench = {
+            prompt = '/COPILOT_GO_Bench 上記のコードに対して一連のベンチマークテストを作成してください。',
+          },
+          Fix = {
+            prompt = '/COPILOT_FIX このコードには問題があります。バグが修正された状態で表示されるようにコードを書き換えてください。',
+          },
+          Optimize = {
+            prompt = '/COPILOT_REFACTOR 選択したコードを最適化して、パフォーマンスと可読性を向上させてください。',
+          },
+          Docs = {
+            prompt =
+            '/COPILOT_REFACTOR 選択したコードのドキュメントを作成してください。返信は、元のコードとコメントとして追加されたドキュメントを含むコードブロックである必要があります。使用するプログラミング言語に最も適切なドキュメント スタイルを使用します (例: JavaScript の場合は JSDoc、Python の場合は docstrings など)。',
+          },
+          FixDiagnostic = {
+            prompt = 'ファイル内の次の診断問題にご協力ください。:',
+            selection = select.diagnostics,
+          },
+          Commit = {
+            prompt =
+            'commitize の規則に従って、変更に対するコミットメッセージを記述してください。タイトルは最大 50 文字で、メッセージは 72 文字で折り返されるようにしてください。メッセージ全体を gitcommit 言語のコード ブロックでラップします。',
+            selection = select.gitdiff,
+          },
+          CommitStaged = {
+            prompt =
+            'commitize の規則に従って、変更に対するコミットメッセージを記述してください。タイトルは最大 50 文字で、メッセージは 72 文字で折り返されるようにしてください。メッセージ全体を gitcommit 言語のコード ブロックでラップします。',
+            selection = function(source)
+              return select.gitdiff(source, true)
+            end,
+          },
+          ExtractMethod = {
+            prompt = '選択したコードをメソッドに抽出してください。',
+          },
+        }
+        chat.setup(opts)
+      end,
+      -- opts = {
+      --   -- debug = true, -- Enable debugging
+      --   -- See Configuration section for rest
+      --   --
+      --   -- prompts
+      -- },
+      -- See Commands section for default commands if you want to lazy load on them
+    },
+  },
+  {
+    'jackMort/ChatGPT.nvim',
+    event = 'VeryLazy',
     config = function()
-      require('copilot_cmp').setup()
+      require('chatgpt').setup {
+        openai_params = {
+          model = 'gpt-4o-2024-05-13',
+          frequency_penalty = 0,
+          presence_penalty = 0,
+          max_tokens = 300,
+          temperature = 0,
+          top_p = 1,
+          n = 1,
+        },
+        openai_edit_params = {
+          model = 'gpt-4o-2024-05-13',
+          frequency_penalty = 0,
+          presence_penalty = 0,
+          temperature = 0,
+          top_p = 1,
+          n = 1,
+        },
+      }
     end,
+    dependencies = {
+      'MunifTanjim/nui.nvim',
+      'nvim-lua/plenary.nvim',
+      'folke/trouble.nvim',
+      'nvim-telescope/telescope.nvim',
+    },
   },
   {
     'f-person/git-blame.nvim',
@@ -200,6 +337,12 @@ return {
         --Note how the `gitblame_` prefix is omitted in `setup`
         enabled = false,
       }
+    end,
+  },
+  {
+    'RaafatTurki/hex.nvim',
+    config = function()
+      require('hex').setup()
     end,
   },
 }

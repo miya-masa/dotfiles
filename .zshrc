@@ -30,6 +30,7 @@ export LANG=ja_JP.UTF-8
 export LC_ALL=ja_JP.UTF-8
 export PAGER=less
 export EDITOR=nvim
+export VISUAL="nvim"
 export TERM=screen-256color
 
 export XDG_CONFIG_HOME=$HOME/.config
@@ -259,18 +260,6 @@ fi
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.2.4/bin/terraform terraform
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/vault/1.3.2/bin/vault vault
 [ -s "$HOME/.local/bin/mise" ] && eval "$(~/.local/bin/mise activate zsh)"
-
-if [ -n "$NVIM_LISTEN_ADDRESS" ]; then
-    alias nvim=nvr -cc split --remote-wait +'set bufhidden=wipe'
-fi
-
-if [ -n "$NVIM_LISTEN_ADDRESS" ]; then
-    export VISUAL="nvr -cc split --remote-wait +'set bufhidden=wipe'"
-    export EDITOR="nvr -cc split --remote-wait +'set bufhidden=wipe'"
-else
-    export VISUAL="nvim"
-    export EDITOR="nvim"
-fi
 
 # Load a few important annexes, without Turbo
 # (this is currently required for annexes)
