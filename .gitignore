@@ -27,7 +27,7 @@ tags
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
 
 # Thumbnails
 ._*
@@ -78,3 +78,9 @@ Brewfile_linux.lock.json
 .dbext_profile
 .venv
 .config/lazygit/state.yml
+.config/nvim/spell/en.utf-8.add
+.config/nvim/spell/en.utf-8.add.spl
+.config/nvim/spell/en.utf-8.add
+.config/nvim/spell/en.utf-8.add.spl
+.config/nvim/spell/en.utf-8.add
+.config/nvim/spell/en.utf-8.add.spl
