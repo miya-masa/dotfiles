@@ -6,6 +6,7 @@ return {
       require('toggleterm').setup {
         open_mapping = [[<C-z>]],
         direction = 'horizontal',
+        size = 20,
       }
 
       function _G.set_terminal_keymaps()
@@ -106,19 +107,39 @@ return {
   'sentriz/vim-print-debug',
   'deris/vim-rengbang',
   'mattn/vim-goaddtags',
+
+  -- nvim v0.8.0
   {
     'kdheepak/lazygit.nvim',
+    cmd = {
+      'LazyGit',
+      'LazyGitConfig',
+      'LazyGitCurrentFile',
+      'LazyGitFilter',
+      'LazyGitFilterCurrentFile',
+    },
     -- optional for floating window border decoration
     dependencies = {
       'nvim-lua/plenary.nvim',
     },
+    -- setting the keybinding for LazyGit with 'keys' is recommended in
+    -- order to load the plugin when the command is run for the first time
+    keys = {
+      { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+    },
     config = function()
-      vim.api.nvim_create_user_command('G', 'LazyGit', {})
+      if vim.fn.has 'nvim' == 1 and vim.fn.executable 'nvr' == 1 then
+        vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+      end
+      config = function()
+        require('telescope').load_extension 'lazygit'
+      end
+
       if vim.fn.executable 'nvr' == 1 then
         vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
       end
       vim.g.lazygit_floating_window_scaling_factor = 0.97
-
+      require('telescope').load_extension 'lazygit'
       -- Lazygit起動時にESCを無効化する
       vim.api.nvim_create_augroup('LazygitKeyMapping', {})
       vim.api.nvim_create_autocmd('TermOpen', {
@@ -133,25 +154,21 @@ return {
       })
     end,
   },
+
   {
     'jbyuki/venn.nvim',
     config = function()
-      -- A機能をトグルする関数を定義
       local function toggle_venn_feature()
-        -- バッファローカル変数 'a_feature_enabled' の現在の値を取得
-        -- 存在しない場合はデフォルトでfalseを設定
         local is_enabled = vim.b.venn or {}
         is_enabled.feature_enabled = is_enabled.feature_enabled or false
 
         -- トグル操作
         if is_enabled.feature_enabled then
-          -- A機能が有効な場合は無効にする
           vim.cmd [[setlocal ve=]]
           vim.cmd [[mapclear <buffer>]]
           is_enabled.feature_enabled = false
           print 'venn off'
         else
-          -- A機能が無効な場合は有効にする
           vim.cmd [[setlocal ve=all]]
           -- draw a line on HJKL keystrokes
           -- draw a box by pressing "f" with visual selection
@@ -175,33 +192,81 @@ return {
     config = function(_, opts)
       local chat = require 'CopilotChat'
       local select = require 'CopilotChat.select'
+      local prompts = require 'kickstart.plugins.copilot-chat-prompts'
+
+      opts.model = 'gpt-4' -- GPT model to use, 'gpt-3.5-turbo' or 'gpt-4'
+      opts.context = 'buffers'
+      opts.history_path = '~/.copilotchat_history' -- Default path to stored history
+      opts.system_prompts = prompts.COPILOT_INSTRUCTIONS
       opts.prompts = {
         Explain = {
           prompt = '/COPILOT_EXPLAIN 上記のコードの説明をテキストの段落として記述してください。',
         },
+        Review = {
+          prompt = '/COPILOT_REVIEW 選択したコードをレビューします。',
+          callback = function(response, source)
+            local ns = vim.api.nvim_create_namespace 'copilot_review'
+            local diagnostics = {}
+            for line in response:gmatch '[^\r\n]+' do
+              if line:find '^line=' then
+                local start_line = nil
+                local end_line = nil
+                local message = nil
+                local single_match, message_match = line:match '^line=(%d+): (.*)$'
+                if not single_match then
+                  local start_match, end_match, m_message_match = line:match '^line=(%d+)-(%d+): (.*)$'
+                  if start_match and end_match then
+                    start_line = tonumber(start_match)
+                    end_line = tonumber(end_match)
+                    message = m_message_match
+                  end
+                else
+                  start_line = tonumber(single_match)
+                  end_line = start_line
+                  message = message_match
+                end
+
+                if start_line and end_line then
+                  table.insert(diagnostics, {
+                    lnum = start_line - 1,
+                    end_lnum = end_line - 1,
+                    col = 0,
+                    message = message,
+                    severity = vim.diagnostic.severity.WARN,
+                    source = 'Copilot Review',
+                  })
+                end
+              end
+            end
+            vim.diagnostic.set(ns, source.bufnr, diagnostics)
+          end,
+        },
         Tests = {
-          prompt = '/COPILOT_TESTS 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。',
+          prompt = '/COPILOT_GENERATE 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。',
         },
         GoTests = {
-          prompt = '/COPILOT_GO_TESTS 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。アサーションは `github.com/stretchr/testify` を使用してください。モックは使用しません。',
+          prompt = '/COPILOT_GENERATE 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。アサーションは `github.com/stretchr/testify` を使用してください。モックは使用しません。パッケージは `_test` の接尾辞をつけてください。`.` によるセルフインポートも追加してください。関数名は構造体のメソッドはTest<構造体名>_<テスト対象関数名>とし、そうでない場合は Test<テスト対象関数名>としてください。テストの期待値はwantから連想される変数名を使用し、テスト中の実際の値はgotから連想される文字列を使用してください。テストケースの構造体はtestsという変数名を使用し、変数はttとしてください。',
         },
         TestsWithMock = {
-          prompt = '/COPILOT_TESTS_WITH_MOCK 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。',
+          prompt = '/COPILOT_GENERATE 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。',
         },
         GoTestsWithMock = {
-          prompt = '/COPILOT_GO_TESTS_WITH_MOCK 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。アサーションは `github.com/stretchr/testify` を使用してください。必要に応じてモックライブラリとして `go.uber.org/mock/gomock` を使用してください。',
+          prompt = '/COPILOT_GENERATE 上記のコードに対して一連の詳細な単体テスト関数をテーブルテスト形式で作成してください。アサーションは `github.com/stretchr/testify` を使用してください。必要に応じてモックライブラリとして `go.uber.org/mock/gomock` を使用してください。パッケージは `_test` の接尾辞をつけてください。`.` によるセルフインポートも追加してください。関数名は構造体のメソッドはTest<構造体名>_<テスト対象関数名>とし、そうでない場合は Test<テスト対象関数名>としてください。テストの期待値はwantから連想される変数名を使用し、取得した値はgotから連想される文字列を使用してください。テストケースの構造体はtestsという変数名を使用し、変数はttとしてください。',
+        },
+        GoTestsValidator = {
+          prompt = '/COPILOT_GENERATE 上記の構造体のコードに対して、github.com/go-playground/validator/v10 を使用したバリデーションの網羅的な単体テストを書いてください。パッケージは `_test` の接尾辞をつけてください。`.` によるセルフインポートも追加してください。関数名は構造体のメソッドはTest<構造体名>_<テスト対象関数名>とし、そうでない場合は Test<テスト対象関数名>としてください。テストの期待値はwantから連想される変数名を使用し、取得した値はgotから連想される文字列を使用してください。テストケースの構造体はtestsという変数名を使用し、変数はttとしてください。',
         },
         GoBench = {
-          prompt = '/COPILOT_GO_Bench 上記のコードに対して一連のベンチマークテストを作成してください。',
+          prompt = '/COPILOT_GENERATE 上記のコードに対して一連のベンチマークテストを作成してください。',
         },
         Fix = {
-          prompt = '/COPILOT_FIX このコードには問題があります。バグが修正された状態で表示されるようにコードを書き換えてください。',
+          prompt = '/COPILOT_GENERATE このコードには問題があります。バグが修正された状態で表示されるようにコードを書き換えてください。',
         },
         Optimize = {
-          prompt = '/COPILOT_REFACTOR 選択したコードを最適化して、パフォーマンスと可読性を向上させてください。',
+          prompt = '/COPILOT_GENERATE 選択したコードを最適化して、パフォーマンスと可読性を向上させてください。',
         },
         Docs = {
-          prompt = '/COPILOT_REFACTOR 選択したコードのドキュメントを作成してください。返信は、元のコードとコメントとして追加されたドキュメントを含むコードブロックである必要があります。使用するプログラミング言語に最も適切なドキュメント スタイルを使用します (例: JavaScript の場合は JSDoc、Python の場合は docstrings など)。',
+          prompt = '/COPILOT_GENERATE 選択したコードのドキュメントを作成してください。返信は、元のコードとコメントとして追加されたドキュメントを含むコードブロックである必要があります。使用するプログラミング言語に最も適切なドキュメント スタイルを使用します (例: JavaScript の場合は JSDoc、Python の場合は docstrings など)。',
         },
         FixDiagnostic = {
           prompt = 'ファイル内の次の診断問題にご協力ください。:',
@@ -240,7 +305,7 @@ return {
           model = 'gpt-4o-2024-05-13',
           frequency_penalty = 0,
           presence_penalty = 0,
-          max_tokens = 300,
+          max_tokens = 10000,
           temperature = 0,
           top_p = 1,
           n = 1,
@@ -253,6 +318,7 @@ return {
           top_p = 1,
           n = 1,
         },
+        actions_paths = { '~/.config/nvim/lua/kickstart/plugins/chatgpt/actions.json' },
       }
     end,
     dependencies = {
@@ -302,4 +368,40 @@ return {
     },
   },
   'tpope/vim-dispatch',
+  {
+    'buoto/gotests-vim',
+    config = function()
+      vim.g.gotests_template = 'testify'
+    end,
+  },
+
+  {
+    'uga-rosa/translate.nvim',
+    keys = {
+      {
+        '<leader>tse',
+        '<cmd>Translate en -output=replace<CR>',
+        mode = { 'n', 'x' },
+      },
+      {
+        '<leader>tsj',
+        '<cmd>Translate ja -output=replace<CR>',
+        mode = { 'n', 'x' },
+      },
+    },
+    config = function()
+      require('translate').setup {
+        default = {
+          command = 'trans',
+        },
+        preset = {
+          output = {
+            split = {
+              append = true,
+            },
+          },
+        },
+      }
+    end,
+  },
 }

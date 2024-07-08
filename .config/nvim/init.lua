@@ -165,7 +165,7 @@ vim.opt.swapfile = false
 vim.opt.autoread = true
 vim.opt.viminfo = "'100,n" .. os.getenv 'HOME' .. '/.vim/files/info/viminfo'
 
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '<leader><cr>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
@@ -621,9 +621,7 @@ require('lazy').setup({
         clangd = {},
         gopls = {
           gopls = {
-            experimentalPostfixCompletions = true,
             buildFlags = { '-tags=integration,wireinject' },
-            gofumpt = true,
           },
           init_options = {
             usePlaceholders = true,
@@ -744,58 +742,75 @@ require('lazy').setup({
       format_on_save = {
         -- I recommend these options. See :help conform.format for details.
         lsp_format = 'fallback',
-        timeout_ms = 500,
+        timeout_ms = 2000,
       },
       formatters_by_ft = {
-        lua = { 'stylua' },
+        lua = { 'stylua', 'codespell' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'ruff_format', 'ruff_organize_imports', 'codespell' },
+        sh = { 'shfmt', 'codespell' },
+        sql = { 'pg_format', 'sql_formatter', 'codespell' },
+        json = { 'jq', 'codespell' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
-        javascript = { { 'prettierd', 'prettier' } },
+        javascript = { { 'prettierd', 'prettier' }, 'codespell' },
         -- Conform will run multiple formatters sequentially
-        go = { 'goimports', 'gofmt' },
+        go = { { 'goimports', 'gofmt' }, 'gofumpt', 'codespell' },
+        markdown = { 'codespell' },
         -- Use the "*" filetype to run formatters on all filetypes.
-        ['*'] = { 'codespell' },
+        -- ['*'] = { 'codespell' },
         -- Use the "_" filetype to run formatters on filetypes that don't
         -- have other formatters configured.
-        ['_'] = { 'trim_whitespace' },
+        -- ['_'] = { 'trim_whitespace' },
       },
     },
   },
 
+  {
+    'zbirenbaum/copilot.lua',
+    cmd = 'Copilot',
+    event = 'InsertEnter',
+    config = function()
+      require('copilot').setup {
+        suggestion = { enabled = false },
+        panel = { enabled = false },
+      }
+    end,
+  },
+
+  {
+    'L3MON4D3/LuaSnip',
+    version = 'v2.*',
+    build = (function()
+      -- Build Step is needed for regex support in snippets.
+      -- This step is not supported in many windows environments.
+      -- Remove the below condition to re-enable on windows.
+      if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
+        return
+      end
+      return 'make install_jsregexp'
+    end)(),
+    dependencies = {
+      -- `friendly-snippets` contains a variety of premade snippets.
+      --    See the README about individual language/framework/plugin snippets:
+      --    https://github.com/rafamadriz/friendly-snippets
+      {
+        'rafamadriz/friendly-snippets',
+        config = function()
+          require('luasnip.loaders.from_vscode').lazy_load()
+          require('luasnip.loaders.from_snipmate').lazy_load()
+        end,
+      },
+    },
+  },
   { -- Autocompletion
     'hrsh7th/nvim-cmp',
     event = 'InsertEnter',
     dependencies = {
       -- Snippet Engine & its associated nvim-cmp source
-      {
-        'L3MON4D3/LuaSnip',
-        build = (function()
-          -- Build Step is needed for regex support in snippets.
-          -- This step is not supported in many windows environments.
-          -- Remove the below condition to re-enable on windows.
-          if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
-            return
-          end
-          return 'make install_jsregexp'
-        end)(),
-        dependencies = {
-          -- `friendly-snippets` contains a variety of premade snippets.
-          --    See the README about individual language/framework/plugin snippets:
-          --    https://github.com/rafamadriz/friendly-snippets
-          {
-            'rafamadriz/friendly-snippets',
-            config = function()
-              require('luasnip.loaders.from_vscode').lazy_load()
-            end,
-          },
-        },
-      },
       'saadparwaiz1/cmp_luasnip',
-
       -- Adds other completion capabilities.
       --  nvim-cmp does not ship with all sources by default. They are split
       --  into multiple repos for maintenance purposes.
@@ -820,18 +835,6 @@ require('lazy').setup({
         'petertriho/cmp-git',
         config = function()
           require('cmp_git').setup()
-        end,
-      },
-
-      {
-        'zbirenbaum/copilot.lua',
-        cmd = 'Copilot',
-        event = 'InsertEnter',
-        config = function()
-          require('copilot').setup {
-            suggestion = { enabled = false },
-            panel = { enabled = false },
-          }
         end,
       },
       {
@@ -875,9 +878,23 @@ require('lazy').setup({
         -- No, but seriously. Please read `:help ins-completion`, it is really good!
         mapping = cmp.mapping.preset.insert {
           -- Select the [n]ext item
-          ['<C-n>'] = cmp.mapping.select_next_item(),
+          -- ['<C-n>'] = cmp.mapping.select_next_item(),
+          ['<C-n>'] = vim.schedule_wrap(function(fallback)
+            if cmp.visible() and has_words_before() then
+              cmp.select_next_item { behavior = cmp.SelectBehavior.Select }
+            else
+              fallback()
+            end
+          end),
           -- Select the [p]revious item
-          ['<C-p>'] = cmp.mapping.select_prev_item(),
+          -- ['<C-p>'] = cmp.mapping.select_prev_item(),
+          ['<C-p>'] = vim.schedule_wrap(function(fallback)
+            if cmp.visible() and has_words_before() then
+              cmp.select_prev_item { behavior = cmp.SelectBehavior.Select }
+            else
+              fallback()
+            end
+          end),
 
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
@@ -897,7 +914,7 @@ require('lazy').setup({
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
-          ['<C-Space>'] = cmp.mapping.complete {},
+          -- ['<C-Space>'] = cmp.mapping.complete {},
 
           -- Think of <c-l> as moving to the right of your snippet expansion.
           --  So if you have a snippet that's like:
@@ -917,15 +934,6 @@ require('lazy').setup({
               luasnip.jump(-1)
             end
           end, { 'i', 's' }),
-
-          ['<Tab>'] = vim.schedule_wrap(function(fallback)
-            if cmp.visible() and has_words_before() then
-              cmp.select_next_item { behavior = cmp.SelectBehavior.Select }
-            else
-              fallback()
-            end
-          end),
-
           -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
           --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
         },
@@ -960,24 +968,6 @@ require('lazy').setup({
             'menu',
           },
           expandable_indicator = true,
-        },
-        sorting = {
-          priority_weight = 2,
-          comparators = {
-            require('copilot_cmp.comparators').prioritize,
-
-            -- Below is the default comparator list and order for nvim-cmp
-            cmp.config.compare.offset,
-            -- cmp.config.compare.scopes, --this is commented in nvim-cmp too
-            cmp.config.compare.exact,
-            cmp.config.compare.score,
-            cmp.config.compare.recently_used,
-            cmp.config.compare.locality,
-            cmp.config.compare.kind,
-            cmp.config.compare.sort_text,
-            cmp.config.compare.length,
-            cmp.config.compare.order,
-          },
         },
         sorting = {
           priority_weight = 2,
@@ -1048,8 +1038,7 @@ require('lazy').setup({
 
       require('mini.doc').setup {}
       require('mini.splitjoin').setup {}
-      require('mini.trailspace').setup {}
-      require('mini.operators').setup {}
+      require('mini.operators').setup { replace = { prefix = 'gr' } }
 
       -- -- Simple and easy statusline.
       -- --  You could remove this setup call if you don't like it,
@@ -1170,6 +1159,11 @@ require('lazy').setup({
       --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
+    dependencies = {
+      -- Additional treesitter modules
+      'nvim-treesitter/nvim-treesitter-textobjects',
+      'nvim-treesitter/nvim-treesitter-context',
+    },
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
@@ -1186,14 +1180,14 @@ require('lazy').setup({
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
-  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
-  require 'kickstart.plugins', -- adds gitsigns recommend keymaps
-  require 'kickstart.plugins.dashboard', -- adds gitsigns recommend keymaps
-  require 'kickstart.plugins.neotest', -- adds gitsigns recommend keymaps
-  require 'kickstart.plugins.none_ls', -- adds gitsigns recommend keymaps
-  require 'kickstart.plugins.other-nvim', -- adds gitsigns recommend keymaps
-  require 'kickstart.plugins.telekasten', -- adds gitsigns recommend keymaps
-  require 'kickstart.plugins.translate', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.gitsigns',
+  require 'kickstart.plugins',
+  require 'kickstart.plugins.dashboard',
+  require 'kickstart.plugins.neotest',
+  require 'kickstart.plugins.none_ls',
+  require 'kickstart.plugins.other-nvim',
+  require 'kickstart.plugins.telekasten',
+  require 'kickstart.plugins.translate',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
