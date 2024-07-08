@@ -106,8 +106,6 @@ function _initialize_mac() {
   fi
   cd ${DOTFILES_DIRECTORY}
   brew bundle --file=./Brewfile
-  nodebrew install-binary stable
-  nodebrew use stable
 
   # TODO standardlization
   SSH_RSA=~/.ssh/id_rsa
