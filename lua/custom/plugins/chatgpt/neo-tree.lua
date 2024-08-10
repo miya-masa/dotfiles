@@ -16,11 +16,6 @@ return {
   config = function()
     require('neo-tree').setup {
       filesystem = {
-        window = {
-          mappings = {
-            ['\\'] = 'close_window',
-          },
-        },
         filtered_items = {
           visible = true, -- when true, they will just be displayed differently than normal items
           hide_dotfiles = false,
