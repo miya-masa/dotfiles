@@ -452,4 +452,5 @@ return {
       vim.api.nvim_set_keymap('n', '<Leader>l', '<Cmd>noh<CR>', kopts)
     end,
   },
+  { 'ellisonleao/glow.nvim', config = true, cmd = 'Glow' },
 }
