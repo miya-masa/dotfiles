@@ -281,25 +281,30 @@ require('lazy').setup({
 
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
-    event = 'VimEnter', -- Sets the loading event to 'VimEnter'
-    config = function() -- This is the function that runs, AFTER loading
-      require('which-key').setup()
-
-      -- Document existing key chains
-      require('which-key').register {
-        ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-        ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-        ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-        ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-        ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-        ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-        ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-      }
-      -- visual mode
-      require('which-key').register({
-        ['<leader>h'] = { 'Git [H]unk' },
-      }, { mode = 'v' })
-    end,
+    event = 'VeryLazy',
+    keys = {
+      {
+        '<leader>?',
+        function()
+          require('which-key').show { global = false }
+        end,
+        desc = 'Buffer Local Keymaps (which-key)',
+      },
+      { '<leader>c', group = '[C]ode' },
+      { '<leader>c_', hidden = true },
+      { '<leader>d', group = '[D]ocument' },
+      { '<leader>d_', hidden = true },
+      { '<leader>h', group = 'Git [H]unk' },
+      { '<leader>h_', hidden = true },
+      { '<leader>r', group = '[R]ename' },
+      { '<leader>r_', hidden = true },
+      { '<leader>s', group = '[S]earch' },
+      { '<leader>s_', hidden = true },
+      { '<leader>t', group = '[T]oggle' },
+      { '<leader>t_', hidden = true },
+      { '<leader>w', group = '[W]orkspace' },
+      { '<leader>w_', hidden = true },
+    },
   },
 
   -- NOTE: Plugins can specify dependencies.
@@ -329,6 +334,8 @@ require('lazy').setup({
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
+
+      { 'smartpde/telescope-recent-files' },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
@@ -416,6 +423,9 @@ require('lazy').setup({
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
+      -- Load extension.
+      require('telescope').load_extension 'recent_files'
+      -- Map a shortcut to open the picker.
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
@@ -428,7 +438,13 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sg', require('telescope').extensions.live_grep_args.live_grep_args, { desc = '[S]earch by [G]rep' })
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
-      vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+      -- vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
+      vim.keymap.set(
+        'n',
+        '<Leader>s.',
+        [[<cmd>lua require('telescope').extensions.recent_files.pick()<CR>]],
+        { desc = '[S]earch Recent Files ("." for repeat)' }
+      )
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<leader>gf', builtin.git_files, { desc = 'Search [G]it [F]iles' })
       vim.keymap.set('n', '<leader>gb', builtin.git_branches, { desc = 'Search [G]it [B]ranches' })
@@ -456,6 +472,18 @@ require('lazy').setup({
         builtin.find_files { cwd = vim.fn.stdpath 'config' }
       end, { desc = '[S]earch [N]eovim files' })
     end,
+  },
+  {
+    'prochri/telescope-all-recent.nvim',
+    dependencies = {
+      'nvim-telescope/telescope.nvim',
+      'kkharji/sqlite.lua',
+      -- optional, if using telescope for vim.ui.select
+      'stevearc/dressing.nvim',
+    },
+    opts = {
+      -- your config goes here
+    },
   },
 
   { -- LSP Configuration & Plugins
@@ -618,13 +646,10 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        clangd = {},
         gopls = {
-          gopls = {
-            buildFlags = { '-tags=integration,wireinject' },
-          },
           init_options = {
             usePlaceholders = true,
+            buildFlags = { '-tags=integration,wireinject' },
           },
         },
         pyright = {},
@@ -690,6 +715,13 @@ require('lazy').setup({
           init_options = {
             config = '~/.config/nvim/spell/.typos.toml',
           },
+          on_attach = function(client, bufnr)
+            local filetype = vim.bo[bufnr].filetype
+            if filetype == 'toggleterm' or filetype == 'neo-tree' then
+              client.stop()
+              return
+            end
+          end,
         },
       }
 
@@ -745,20 +777,21 @@ require('lazy').setup({
         timeout_ms = 2000,
       },
       formatters_by_ft = {
-        lua = { 'stylua', 'codespell' },
+        lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        python = { 'ruff_format', 'ruff_organize_imports', 'codespell' },
-        sh = { 'shfmt', 'codespell' },
-        sql = { 'pg_format', 'sql_formatter', 'codespell' },
-        json = { 'jq', 'codespell' },
+        python = { 'ruff_format', 'ruff_organize_imports' },
+        sh = { 'shfmt' },
+        sql = { 'pg_format' },
+        json = { 'jq' },
+        proto = { 'buf' },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
         -- is found.
         -- javascript = { { "prettierd", "prettier" } },
-        javascript = { { 'prettierd', 'prettier' }, 'codespell' },
+        javascript = { 'prettierd', 'prettier', stop_after_the_first = true },
         -- Conform will run multiple formatters sequentially
-        go = { { 'goimports', 'gofmt' }, 'gofumpt', 'codespell' },
-        markdown = { 'codespell' },
+        go = { 'goimports', 'gofmt', 'gofumpt', stop_after_the_first = true },
+        -- markdown = { 'codespell' },
         -- Use the "*" filetype to run formatters on all filetypes.
         -- ['*'] = { 'codespell' },
         -- Use the "_" filetype to run formatters on filetypes that don't
@@ -887,14 +920,14 @@ require('lazy').setup({
             end
           end),
           -- Select the [p]revious item
-          -- ['<C-p>'] = cmp.mapping.select_prev_item(),
-          ['<C-p>'] = vim.schedule_wrap(function(fallback)
-            if cmp.visible() and has_words_before() then
-              cmp.select_prev_item { behavior = cmp.SelectBehavior.Select }
-            else
-              fallback()
-            end
-          end),
+          ['<C-p>'] = cmp.mapping.select_prev_item(),
+          -- ['<C-p>'] = vim.schedule_wrap(function(fallback)
+          --   if cmp.visible() and has_words_before() then
+          --     cmp.select_prev_item { behavior = cmp.SelectBehavior.Select }
+          --   else
+          --     fallback()
+          --   end
+          -- end),
 
           -- Scroll the documentation window [b]ack / [f]orward
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
@@ -995,6 +1028,20 @@ require('lazy').setup({
       }
     end,
   },
+  {
+    'nvimdev/lspsaga.nvim',
+    config = function()
+      require('lspsaga').setup {
+        lightbulb = {
+          enable = false,
+        },
+      }
+    end,
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter', -- optional
+      'nvim-tree/nvim-web-devicons', -- optional
+    },
+  },
 
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
@@ -1034,11 +1081,28 @@ require('lazy').setup({
       -- - saiw) - [S]urround [A]dd [I]inner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
+
+      require('mini.surround').setup {
+        mappings = {
+          add = 'ys',
+          delete = 'ds',
+          find = '',
+          find_left = '',
+          highlight = '',
+          replace = 'cs',
+          update_n_lines = '',
+
+          -- Add this only if you don't want to use extended mappings
+          suffix_last = '',
+          suffix_next = '',
+        },
+        search_method = 'cover_or_next',
+      }
 
       require('mini.doc').setup {}
-      require('mini.splitjoin').setup {}
-      require('mini.operators').setup { replace = { prefix = 'gr' } }
+      require('mini.operators').setup {
+        sort = { prefix = 'gz' },
+      }
 
       -- -- Simple and easy statusline.
       -- --  You could remove this setup call if you don't like it,

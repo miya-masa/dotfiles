@@ -24,6 +24,19 @@ return {
       end
 
       vim.cmd 'autocmd! TermOpen term://* lua set_terminal_keymaps()'
+
+      local Terminal = require('toggleterm.terminal').Terminal
+      local lazygit = Terminal:new {
+        cmd = 'lazygit',
+        hidden = true,
+        direction = 'float',
+      }
+
+      function LazygitToggle()
+        lazygit:toggle()
+      end
+
+      vim.api.nvim_set_keymap('n', '<leader>lg', '<cmd>lua LazygitToggle()<CR>', { noremap = true, silent = true })
     end,
   },
   'sindrets/diffview.nvim',
@@ -86,7 +99,7 @@ return {
   {
     'ggandor/leap.nvim',
     config = function()
-      require('leap').set_default_keymaps()
+      require('leap').create_default_mappings()
     end,
   },
   {
@@ -103,58 +116,8 @@ return {
     end,
   },
   'kyoh86/vim-go-coverage',
-  'smartpde/telescope-recent-files',
-  'sentriz/vim-print-debug',
   'deris/vim-rengbang',
   'mattn/vim-goaddtags',
-
-  -- nvim v0.8.0
-  {
-    'kdheepak/lazygit.nvim',
-    cmd = {
-      'LazyGit',
-      'LazyGitConfig',
-      'LazyGitCurrentFile',
-      'LazyGitFilter',
-      'LazyGitFilterCurrentFile',
-    },
-    -- optional for floating window border decoration
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-    },
-    -- setting the keybinding for LazyGit with 'keys' is recommended in
-    -- order to load the plugin when the command is run for the first time
-    keys = {
-      { '<leader>lg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
-    },
-    config = function()
-      if vim.fn.has 'nvim' == 1 and vim.fn.executable 'nvr' == 1 then
-        vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
-      end
-      config = function()
-        require('telescope').load_extension 'lazygit'
-      end
-
-      if vim.fn.executable 'nvr' == 1 then
-        vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
-      end
-      vim.g.lazygit_floating_window_scaling_factor = 0.97
-      require('telescope').load_extension 'lazygit'
-      -- Lazygit起動時にESCを無効化する
-      vim.api.nvim_create_augroup('LazygitKeyMapping', {})
-      vim.api.nvim_create_autocmd('TermOpen', {
-        group = 'LazygitKeyMapping',
-        pattern = '*',
-        callback = function()
-          local filetype = vim.bo.filetype
-          if filetype == 'lazygit' then
-            vim.api.nvim_buf_set_keymap(0, 't', '<ESC>', '<ESC>', { noremap = true, silent = true })
-          end
-        end,
-      })
-    end,
-  },
-
   {
     'jbyuki/venn.nvim',
     config = function()
@@ -402,6 +365,91 @@ return {
           },
         },
       }
+    end,
+  },
+  {
+    'ahmedkhalf/project.nvim',
+    config = function()
+      require('project_nvim').setup {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+      }
+    end,
+  },
+  {
+    'Wansmer/treesj',
+    keys = { '<space>m', '<space>j', '<space>s' },
+    dependencies = { 'nvim-treesitter/nvim-treesitter' }, -- if you install parsers with `nvim-treesitter`
+    config = function()
+      require('treesj').setup {--[[ your config ]]
+      }
+    end,
+  },
+  {
+    'romgrk/barbar.nvim',
+    dependencies = {
+      'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
+      'nvim-tree/nvim-web-devicons', -- OPTIONAL: for file icons
+    },
+    init = function()
+      vim.g.barbar_auto_setup = true
+      vim.keymap.set('n', '<A-l>', '<cmd>BufferNext<CR>', { buffer = bufnr })
+      vim.keymap.set('n', '<A-h>', '<cmd>BufferPrevious<CR>', { buffer = bufnr })
+    end,
+    opts = {
+      -- lazy.nvim will automatically call setup for you. put your options here, anything missing will use the default:
+      -- animation = true,
+      -- insert_at_start = true,
+      -- …etc.
+    },
+    version = '^1.0.0', -- optional: only update when a new 1.x version is released
+  },
+  {
+    'kazhala/close-buffers.nvim',
+    config = function()
+      require('close_buffers').setup {
+        filetype_ignore = { 'neo-tree', 'lazy' },
+      }
+      vim.api.nvim_set_keymap('n', '<space>bda', [[<CMD>lua require('close_buffers').delete({type = 'hidden'})<CR>]], { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<space>bdt', [[<CMD>lua require('close_buffers').delete({type = 'this'})<CR>]], { noremap = true, silent = true })
+    end,
+  },
+  {
+    'stevearc/aerial.nvim',
+    opts = {},
+    -- Optional dependencies
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter',
+      'nvim-tree/nvim-web-devicons',
+    },
+    config = function()
+      require('aerial').setup {
+        -- optionally use on_attach to set keymaps when aerial has attached to a buffer
+        on_attach = function(bufnr)
+          -- Jump forwards/backwards with '{' and '}'
+          vim.keymap.set('n', '{', '<cmd>AerialPrev<CR>', { buffer = bufnr })
+          vim.keymap.set('n', '}', '<cmd>AerialNext<CR>', { buffer = bufnr })
+        end,
+      }
+    end,
+    vim.keymap.set('n', '<leader>o', '<cmd>AerialToggle!<CR>'),
+  },
+  {
+    'kevinhwang91/nvim-hlslens',
+    config = function()
+      require('hlslens').setup()
+
+      local kopts = { noremap = true, silent = true }
+
+      vim.api.nvim_set_keymap('n', 'n', [[<Cmd>execute('normal! ' . v:count1 . 'n')<CR><Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('n', 'N', [[<Cmd>execute('normal! ' . v:count1 . 'N')<CR><Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('n', '*', [[*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('n', '#', [[#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('n', 'g*', [[g*<Cmd>lua require('hlslens').start()<CR>]], kopts)
+      vim.api.nvim_set_keymap('n', 'g#', [[g#<Cmd>lua require('hlslens').start()<CR>]], kopts)
+
+      vim.api.nvim_set_keymap('n', '<Leader>l', '<Cmd>noh<CR>', kopts)
     end,
   },
 }

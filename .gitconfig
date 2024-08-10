@@ -8,7 +8,7 @@
 	renames = true
 
 [core]
-    editor = nvim
+    editor = nvr -cc split --remote-wait
     pager = delta
 
 [interactive]

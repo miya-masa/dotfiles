@@ -6,9 +6,9 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-wget https://luarocks.org/releases/luarocks-3.11.0.tar.gz
-tar zxpf luarocks-3.11.0.tar.gz
-cd luarocks-3.11.0
+wget https://luarocks.org/releases/luarocks-3.11.1.tar.gz
+tar zxpf luarocks-3.11.1.tar.gz
+cd luarocks-3.11.1
 ./configure && make && sudo make install
-cd .. && rm -rf luarocks-3.11.0*
-luarocks install tiktoken_core --local
+cd .. && rm -rf luarocks-3.11.1*
+luarocks install tiktoken_core --local --force
