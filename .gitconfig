@@ -8,7 +8,7 @@
 	renames = true
 
 [core]
-    editor = nvr -cc split --remote-wait
+    editor = nvr -cc split --remote-wait +'set bufhidden=wipe'
     pager = delta
 
 [interactive]
