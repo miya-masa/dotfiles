@@ -13,7 +13,7 @@ return {
         size = 20,
       }
 
-      function _G.set_terminal_keymaps()
+      function _G.set_terminal_keymaps_1()
         local opts = { buffer = 0 }
 
         local filetype = vim.bo.filetype
@@ -27,7 +27,7 @@ return {
         vim.keymap.set('t', '<C-w>', [[<C-\><C-n><C-w>]], opts)
       end
 
-      vim.cmd 'autocmd! TermOpen term://* lua set_terminal_keymaps()'
+      vim.cmd 'autocmd! TermOpen term://* lua set_terminal_keymaps_1()'
 
       local Terminal = require('toggleterm.terminal').Terminal
       local lazygit = Terminal:new {
@@ -40,7 +40,27 @@ return {
         lazygit:toggle()
       end
 
+      local lazydocker = require('toggleterm.terminal').Terminal:new {
+        cmd = 'lazydocker',
+        hidden = true,
+        direction = 'float',
+      }
+      function LazydockerToggle()
+        lazydocker:toggle()
+      end
+
+      local htop = require('toggleterm.terminal').Terminal:new {
+        cmd = 'htop',
+        hidden = true,
+        direction = 'float',
+      }
+      function HtopToggle()
+        htop:toggle()
+      end
+
       vim.api.nvim_set_keymap('n', '<leader>lg', '<cmd>lua LazygitToggle()<CR>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader>ld', '<cmd>lua LazydockerToggle()<CR>', { noremap = true, silent = true })
+      vim.api.nvim_set_keymap('n', '<leader>ht', '<cmd>lua HtopToggle()<CR>', { noremap = true, silent = true })
     end,
   },
   'sindrets/diffview.nvim',
@@ -72,6 +92,17 @@ return {
   {
     'stevearc/overseer.nvim',
     opts = {},
+    config = function()
+      require('overseer').setup {
+        task_list = {
+          bindings = {
+            ['K'] = 'ScrollOutputUp',
+            ['J'] = 'ScrollOutputDown',
+          },
+        },
+        strategy = 'toggleterm',
+      }
+    end,
   },
   'stefandtw/quickfix-reflector.vim',
   'tmux-plugins/vim-tmux-focus-events',
