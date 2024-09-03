@@ -65,7 +65,18 @@ return {
   },
   'sindrets/diffview.nvim',
   'christoomey/vim-tmux-navigator',
-  'dhruvasagar/vim-table-mode',
+  {
+    'dhruvasagar/vim-table-mode',
+    config = function()
+      vim.g.table_mode_disable_mappings = 0
+      local wk = require 'which-key'
+      wk.add {
+        { '<Leader>tm', 'TableModeToggle<CR>', desc = '[T]oggle Table [M]ode' },
+        { '<Leader>tr', 'TableModeRealine<CR>', desc = '[T]able Mode [R]ealine' },
+        { '<Leader>tt', 'Tableize<CR>', desc = '[T]able Mode [T]ablaize' },
+      }
+    end,
+  },
   {
     'diepm/vim-rest-console',
     config = function()
@@ -94,6 +105,7 @@ return {
     opts = {},
     config = function()
       require('overseer').setup {
+        templates = { 'builtin', 'user.run_script', 'user.go_generate' },
         task_list = {
           bindings = {
             ['K'] = 'ScrollOutputUp',
@@ -101,6 +113,17 @@ return {
           },
         },
         strategy = 'toggleterm',
+      }
+      local wk = require 'which-key'
+      wk.add {
+        { '<Leader>o', group = 'overseer' },
+        { '<Leader>or', '<cmd>OverseerRun<CR>', desc = '[O]verseer[R]un' },
+        { '<Leader>oc', ':OverseerRunCmd ', desc = '[O]verseer Run [C]md' },
+        { '<Leader>om', ':OverseerRunCmd make ', desc = '[O]verseer Run Cmd [M]ake' },
+        { '<Leader>os', '<cmd>OverseerRun shell<CR>', desc = '[O]verseer Run [S]hell' },
+        { '<Leader>ot', '<cmd>OverseerToggle<CR>', desc = '[O]verseer[T]oggle' },
+        { '<Leader>oqw', '<cmd>OverseerQuickAction watch<CR>', desc = '[O]verseer[Q]uickAction [W]atch' },
+        { '<Leader>oqr', '<cmd>OverseerQuickAction restart<CR>', desc = '[O]verseer[Q]uickAction Re[S]tart' },
       }
     end,
   },
@@ -178,6 +201,10 @@ return {
 
       -- 'AToggle' という名前のコマンドを作成して、上記の関数を割り当てる
       vim.api.nvim_create_user_command('ToggleVenn', toggle_venn_feature, { desc = 'Toggle Venn feature' })
+      local wk = require 'which-key'
+      wk.add {
+        { '<Leader>tv', '<cmd>ToggleVenn<CR>', desc = '[T]oggle [V]enn feature' },
+      }
     end,
   },
   {
@@ -436,7 +463,7 @@ return {
         end,
       }
     end,
-    vim.keymap.set('n', '<leader>o', '<cmd>AerialToggle!<CR>'),
+    vim.keymap.set('n', '<cmd>AerialToggle!<CR>', '<leader>ta', { desc = '[T]oggle [A]erial' }),
   },
   {
     'kevinhwang91/nvim-hlslens',
@@ -541,5 +568,9 @@ return {
     'MeanderingProgrammer/render-markdown.nvim',
     opts = {},
     dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
+  },
+  {
+    'numToStr/Comment.nvim',
+    opts = {},
   },
 }
