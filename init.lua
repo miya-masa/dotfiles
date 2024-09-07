@@ -1027,6 +1027,7 @@ require('lazy').setup({
           barbar = true,
           grug_far = true,
         },
+        transparent_background = true,
       }
     end,
     init = function()
