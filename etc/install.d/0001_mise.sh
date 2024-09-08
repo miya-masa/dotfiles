@@ -7,7 +7,7 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-curl https://mise.run | sh | sh
+curl https://mise.run | sh
 if ! has mise; then
   export PATH="$HOME/.local/bin:$PATH"
   __shell_name=$(basename "$SHELL")

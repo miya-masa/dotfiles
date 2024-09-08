@@ -17,6 +17,7 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.local/share/mise/shims:$PATH"
 export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
 export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
+export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
 
 #===  FUNCTION  ================================================================
 #         NAME:  usage
@@ -37,14 +38,27 @@ function has() {
   type "$1" >/dev/null 2>&1
 }
 
+# sudo コマンドをラップする関数
+sudo_wrap() {
+    if [ -n "$SUDO_ASKPASS" ]; then
+        sudo -A "$@"
+    else
+        sudo "$@"
+    fi
+}
+
 function initialize() {
   if [[ ${UNAME} == "Linux" ]]; then
-    read -s -p "input password: " password
-    echo
-    temp_file=$(mktemp)
-    echo "$password" > "$temp_file"
-    export SUDO_ASKPASS=$temp_file
-    sudo -A apt update -y
+    if [[ ! ${SKIP_INPUT_PASSWORD:-} ]]; then
+      read -s -p "input password: " password
+      echo
+      temp_file=$(mktemp)
+      echo "#!/usr/bin/env bash" > "$temp_file"
+      echo "echo $password" >> "$temp_file"
+      chmod 755 "$temp_file"
+      export SUDO_ASKPASS=$temp_file
+    fi
+    sudo_wrap apt update -y
     if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
       sudo -A apt install -y git software-properties-common
       git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
@@ -59,10 +73,6 @@ function initialize() {
   fi
   git remote set-url origin git@github.com:miya-masa/dotfiles.git
   echo "Successful!! Restart your machine."
-}
-
-function ask_pass {
-
 }
 
 function _initialize_linux() {

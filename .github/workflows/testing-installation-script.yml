@@ -9,7 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SSH_PASSPHRASE: super-secret
+      SKIP_INPUT_PASSWORD: 1
+      TZ: Asia/Tokyo
     steps:
+      - run: export TZ=Asia/Tokyo
+      # - run: apt update && apt install -y curl sudo
       - run: sudo apt update && sudo apt install -y curl sudo
       - run: DOTFILES_BRANCH=${GITHUB_REF_NAME} /bin/bash <(curl -L https://raw.github.com/miya-masa/dotfiles/${GITHUB_REF_NAME:-master}/install.sh)
       - run: echo "🍏 This job's status is ${{ job.status }}."
