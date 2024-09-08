@@ -7,7 +7,6 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-
 sudo apt update -y
 sudo add-apt-repository universe -y
 sudo apt install -y \

@@ -13,6 +13,7 @@ DOTFILES_DIRECTORY=${DOTFILES_DIRECTORY:-~/dotfiles}
 DOTFILES_BRANCH=${DOTFILES_BRANCH:-master}
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 SSH_PASSPHRASE=${SSH_PASSPHRASE:-""}
+export PATH="$HOME/.local/bin:$PATH"
 
 #===  FUNCTION  ================================================================
 #         NAME:  usage
@@ -38,12 +39,13 @@ function initialize() {
     sudo apt update -y
     if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
       if ! has git; then
-        sudo apt install -y git
+        sudo apt install -y git software-properties-common
       fi
       git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
-      cd ${DOTFILES_DIRECTORY}
+      cd "${DOTFILES_DIRECTORY}"
+      git submodule update --init --recursive
     fi
-    cd ${DOTFILES_DIRECTORY}
+    cd "${DOTFILES_DIRECTORY}"
     _initialize_linux
   else
     _initialize_mac

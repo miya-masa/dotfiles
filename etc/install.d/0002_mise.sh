@@ -8,5 +8,8 @@ set -o pipefail
 IFS=$'\n\t'
 
 curl https://mise.jdx.dev/install.sh | sh
+if ! has mise; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
 mise --version
 mise install -y
