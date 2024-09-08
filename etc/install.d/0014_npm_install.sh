@@ -17,3 +17,5 @@ npm i -g commitizen
 npm i -g cz-git
 npm i -g markdownlint
 npm i -g prettier
+npm i -g prettier
+npm i -g opencommit@latest

@@ -26,6 +26,6 @@ pip install \
   pre-commit \
   jupyter_contrib_nbextensions \
   ruff
-pip install --upgrade autopep8
+pip install --upgrade autopep8 pip
 pip install jupyter_nbextensions_configurator
 pip install --user pipenv

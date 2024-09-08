@@ -65,9 +65,9 @@ function initialize() {
       cd "${DOTFILES_DIRECTORY}"
       git submodule update --init --recursive
     fi
-    rm -f "$temp_file"
     cd "${DOTFILES_DIRECTORY}"
     _initialize_linux
+    rm -f "$temp_file"
   else
     _initialize_mac
   fi
