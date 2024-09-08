@@ -38,7 +38,7 @@ sudo apt install -y \
   libyaml-dev \
   libpq-dev \
   openssh-server \
-  autoconf automake \
+  pkg-config autoconf automake \
   rename \
   ripgrep \
   tk-dev \
@@ -47,6 +47,7 @@ sudo apt install -y \
   xsel \
   rpm \
   zlib1g-dev \
+  python3-docutils \
   libnss3-tools \
   zsh \
   neofetch \
