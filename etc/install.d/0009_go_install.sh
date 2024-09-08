@@ -7,7 +7,6 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-PATH="~/.local/share/mise/shims:$PATH"
 go install golang.org/x/tools/cmd/goimports@latest
 go install github.com/mattn/memo@latest
 go install github.com/google/gops@latest

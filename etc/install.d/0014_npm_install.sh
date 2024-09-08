@@ -7,7 +7,6 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-PATH="$HOME/.local/share/mise/shims:$PATH"
 npm i -g @redocly/cli@latest
 npm i -g redoc-cli
 npm i -g prettier

@@ -7,7 +7,6 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-PATH="~/.local/share/mise/shims:$PATH"
 pip install \
   pgcli \
   mycli \
