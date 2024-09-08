@@ -7,10 +7,9 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-curl https://mise.jdx.dev/install.sh | sh
+curl https://mise.run | sh | sh
 if ! has mise; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
 mise --version
-sudo apt install -y pkg-config
 mise install -y
