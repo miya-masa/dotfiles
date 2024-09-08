@@ -7,7 +7,7 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-if ! has docker ; then
+if ! has docker; then
   curl -fsSL https://get.docker.com | sh
   curl -fsSL https://get.docker.com/rootless | sh
 fi

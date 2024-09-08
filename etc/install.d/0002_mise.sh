@@ -12,4 +12,5 @@ if ! has mise; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
 mise --version
+sudo apt install -y pkg-config
 mise install -y
