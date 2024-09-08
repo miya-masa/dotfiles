@@ -1,7 +1,7 @@
 [tools]
 node = "latest"
 ruby = '3.1'
-python = 'latest'
+python = ['latest', '3.11', '3.10']
 go = "1.22"
 poetry = 'latest'
 task = 'latest'
