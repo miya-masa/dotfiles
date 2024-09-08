@@ -13,7 +13,7 @@ pip install \
   black \
   isort \
   flake8 \
-  mypy \
+  "mypy >= 1.9" \
   pyls-flake8 \
   pylsp-mypy \
   pyls-isort \
@@ -22,10 +22,10 @@ pip install \
   python-lsp-black \
   poetry \
   jupyter \
+  neovim-remote \
   pre-commit \
-  jupyter_contrib_nbextensions
+  jupyter_contrib_nbextensions \
+  ruff
 pip install --upgrade autopep8
 pip install jupyter_nbextensions_configurator
 pip install --user pipenv
-jupyter contrib nbextension install --user
-jupyter nbextensions_configurator enable --user

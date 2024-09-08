@@ -7,7 +7,7 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-if [ ! -d ~/nerd-fonts ] ; then
+if [ ! -d ~/nerd-fonts ]; then
   git clone https://github.com/ryanoasis/nerd-fonts.git --depth 1 ~/nerd-fonts
 fi
 cd ~/nerd-fonts

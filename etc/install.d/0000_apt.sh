@@ -7,9 +7,8 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-
-sudo apt update
-sudo add-apt-repository universe
+sudo apt update -y
+sudo add-apt-repository universe -y
 sudo apt install -y \
   autojump \
   asciidoc \
@@ -39,7 +38,7 @@ sudo apt install -y \
   libyaml-dev \
   libpq-dev \
   openssh-server \
-  pkg-config autoconf automake \
+  autoconf automake \
   rename \
   ripgrep \
   tk-dev \
@@ -48,15 +47,14 @@ sudo apt install -y \
   xsel \
   rpm \
   zlib1g-dev \
-  python3-docutils \
   libnss3-tools \
   zsh \
   neofetch \
   mercurial \
-  snapd
+  snapd \
+  fd-find
 
 sudo cp .config/neofetch/banner.txt /etc/update-motd.d/
 if ! sudo grep -q "$HOME/.config/neofetch/config.conf" /etc/update-motd.d/00-header; then
   sudo echo "$HOME/.config/neofetch/config.conf" | sudo tee -a /etc/update-motd.d/00-header
 fi
-

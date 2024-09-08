@@ -8,6 +8,7 @@
 	renames = true
 
 [core]
+    editor = nvr -cc split --remote-wait +'set bufhidden=wipe'
     pager = delta
 
 [interactive]
@@ -26,9 +27,6 @@
 	root = ~/.ghq
 	root = ~/go/src
 
-[core]
-	editor = nvim
-    # hooksPath = ~/.config/git/hooks
 [push]
 	default = current
 [pull]
