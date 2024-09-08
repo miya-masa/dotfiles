@@ -39,13 +39,19 @@ function has() {
 
 function initialize() {
   if [[ ${UNAME} == "Linux" ]]; then
-    sudo apt update -y
+    read -s -p "input password: " password
+    echo
+    temp_file=$(mktemp)
+    echo "$password" > "$temp_file"
+    export SUDO_ASKPASS=$temp_file
+    sudo -A apt update -y
     if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
-      sudo apt install -y git software-properties-common
+      sudo -A apt install -y git software-properties-common
       git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
       cd "${DOTFILES_DIRECTORY}"
       git submodule update --init --recursive
     fi
+    rm -f "$temp_file"
     cd "${DOTFILES_DIRECTORY}"
     _initialize_linux
   else
@@ -53,6 +59,10 @@ function initialize() {
   fi
   git remote set-url origin git@github.com:miya-masa/dotfiles.git
   echo "Successful!! Restart your machine."
+}
+
+function ask_pass {
+
 }
 
 function _initialize_linux() {
@@ -137,12 +147,6 @@ function _initialize_mac() {
   fi
 
   deploy
-}
-
-function password() {
-  password=""
-  printf "sudo password: "
-  read -s password
 }
 
 function deploy() {

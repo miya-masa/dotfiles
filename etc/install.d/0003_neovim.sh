@@ -10,6 +10,6 @@ IFS=$'\n\t'
 PATH="~/.local/share/mise/shims:$PATH"
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
 chmod u+x nvim.appimage
-sudo mv ./nvim.appimage /usr/bin/nvim
+sudo -A mv ./nvim.appimage /usr/bin/nvim
 npm install -g neovim
 pip install pynvim
