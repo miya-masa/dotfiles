@@ -7,9 +7,12 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-export LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
-export CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
-export PKG_CONFIG_PATH="$(brew --prefix openssl@1.1)/lib/pkgconfig"
+LDFLAGS="-L$(brew --prefix openssl@1.1)/lib"
+export LDFLAGS
+CPPFLAGS="-I$(brew --prefix openssl@1.1)/include"
+export CPPFLAGS
+PKG_CONFIG_PATH="$(brew --prefix openssl@1.1)/lib/pkgconfig"
+export PKG_CONFIG_PATH
 
 curl https://mise.run | sh
 if ! has mise; then
