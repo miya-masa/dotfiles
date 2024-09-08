@@ -88,17 +88,6 @@ rm -f ~/.zcompdump; compinit
 ### zsh-autosuggestions
 zinit light zsh-users/zsh-autosuggestions
 
-### anyframe
-zinit light "mollifier/anyframe"
-fpath=($HOME/.zsh/anyframe(N-/) $fpath)
-autoload -Uz anyframe-init
-anyframe-init
-
-anyframe-widget-checkout-git-remote-branch() {
-  anyframe-source-git-branch -n -r | grep -v HEAD | anyframe-selector-auto | awk '{print $1}' | sed "s/origin\///" | anyframe-action-execute git checkout
-}
-zle -N anyframe-widget-checkout-git-remote-branch
-
 if [[ -x "`which glab`" ]] ; then
   anyframe-widget-insert-issue-branch-name() {
   issueNumber=$(glab ls | tail -n +3 | anyframe-selector-auto | awk '{print $1}')
@@ -107,11 +96,6 @@ if [[ -x "`which glab`" ]] ; then
   zle -N anyframe-widget-insert-issue-branch-name
 fi
 
-anyframe-widget-git-log() {
-  git log --oneline | anyframe-selector-auto |  awk '{print $1}' | anyframe-action-insert
-}
-zle -N anyframe-widget-git-log
-
 ### docker(completion)
 zinit snippet https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker
 zinit snippet https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/zsh/_docker-compose
@@ -119,19 +103,51 @@ zinit snippet https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/co
 ### zsh-syntax-highlighting
 zinit light "zsh-users/zsh-syntax-highlighting"
 
+
+# fbr - checkout git branch (including remote branches)
+fbr() {
+  local branches branch
+  branches=$(git branch --all | grep -v HEAD) &&
+  branch=$(echo "$branches" |
+           fzf --tmux -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
+  if [ -z "$branch" ]; then
+    return
+  fi
+  git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+  # redisplay the command line
+  zle -R -c
+}
+zle -N fbr
+
+__cd-git(){
+  local repo=$(ghq list | fzf)
+  if [ -z "$repo" ]; then
+    return
+  fi
+  cd "$(ghq root)/$repo"
+  # redisplay the command line
+  zle -R -c
+}
+zle -N cd-git __cd-git
+
+# fh - repeat history
+__fh() {
+  local cmd=$( ([ -n "$ZSH_NAME" ] && fc -l 1 || history) | fzf +s --tac | sed -E 's/ *[0-9]*\*? *//' | sed -E 's/\\/\\\\/g')
+  LBUFFER+="$cmd"
+  CURSOR=$#LBUFFER
+  # redisplay the command line
+  zle -R -c
+}
+zle -N fh __fh
+
 ### reset bind key
 bindkey -d
 bindkey -v
 bindkey "^N" down-line-or-history
 bindkey "^P" up-line-or-history
-bindkey '^e^e' anyframe-widget-checkout-git-branch
-bindkey '^e^r' anyframe-widget-checkout-git-remote-branch
-bindkey '^g' anyframe-widget-cd-ghq-repository
-bindkey '^x^i' anyframe-widget-insert-git-branch
-bindkey '^f' anyframe-widget-insert-filename
-bindkey '^xl' anyframe-widget-git-log
-bindkey '^r' anyframe-widget-execute-history
-bindkey '^x^b' anyframe-widget-insert-issue-branch-name
+bindkey '^e^e' fbr
+bindkey '^g' cd-git
+bindkey '^r' fh
 
 zstyle ':completion:*:default' menu select=1
 zstyle ":anyframe:selector:" use fzf
@@ -206,7 +222,7 @@ set -o glob_complete
 ### End of Zinit's installer chunk
 
 if [[ -x "`which jira`" ]]; then
-  jira completion zsh > "${fpath[1]}/_jira"
+  jira completion zsh > ~/.local/share/zinit/completions/_jira
 fi
 if [[ -x "`which kubectl`" ]]; then
   source <(kubectl completion zsh)
@@ -262,7 +278,7 @@ cd() {
     fi
     local dir
     dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) &&
-    cd "$dir"
+ cd "$dir"
 }
 
 # Use fd and fzf to get the args to a command.
