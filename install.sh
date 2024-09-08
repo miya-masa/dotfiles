@@ -38,9 +38,7 @@ function initialize() {
   if [[ ${UNAME} == "Linux" ]]; then
     sudo apt update -y
     if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
-      if ! has git; then
-        sudo apt install -y git software-properties-common
-      fi
+      sudo apt install -y git software-properties-common
       git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
       cd "${DOTFILES_DIRECTORY}"
       git submodule update --init --recursive
