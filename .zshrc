@@ -55,6 +55,7 @@ if [[ -e $HOME/.krew ]]; then
 fi
 
 [[ -s /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
+export FZF_DEFAULT_OPTS='--tmux --layout reverse'
 
 
 ###
@@ -118,7 +119,6 @@ zinit snippet https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/co
 ### zsh-syntax-highlighting
 zinit light "zsh-users/zsh-syntax-highlighting"
 
-
 ### reset bind key
 bindkey -d
 bindkey -v
@@ -151,36 +151,16 @@ esac
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
-alias datef='date -j -f "%Y%m%d%H%M%S" "+%s"'
 alias dps='docker ps'
 alias dim='docker images'
 alias dkill='docker container ls -q | xargs docker kill'
 alias dc='docker compose'
 alias rand="head -n 10 /dev/urandom | base64 | head -n 1 | cut -c 1-32 | tr '/+' '_-'"
-
-pass() {
-  op item get --fields label=password $(op item list | fzf --height=25% | awk '{print $1}')
-}
-
-tmn() {
-  if type "autojump" > /dev/null 2>&1; then
-    j $1
-  fi
-  tmux new-session -s $1 -n $1
-}
-alias ide="~/.local/bin/ide.sh"
 alias tagsort="git tag | tr - \~ | sort -V | tr \~ -"
-
-tm() {
-  [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
-  if [ $1 ]; then
-    tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
-  fi
-  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
-}
 
 # DO NOT EDIT HERE
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+# Open in tmux popup if on tmux, otherwise use --height mode
 # DO NOT EDIT END
 
 # # options
@@ -243,15 +223,6 @@ fi
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# Load a few important annexes, without Turbo
-# (this is currently required for annexes)
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
-
-
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 if [[ -x "`which op`" ]]; then
   eval "$(op completion zsh)"; compdef _op op
@@ -270,3 +241,114 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-rust
 
 ### End of Zinit's installer chunk
+
+j() {
+    local preview_cmd="ls {2..}"
+    if command -v exa &> /dev/null; then
+        preview_cmd="exa -l {2}"
+    fi
+
+    if [[ $# -eq 0 ]]; then
+                 cd "$(autojump -s | sort -k1gr | awk -F : '$1 ~ /[0-9]/ && $2 ~ /^\s*\// {print $1 $2}' | fzf --height 40% --reverse --inline-info --preview "$preview_cmd" --preview-window down:50% | cut -d$'\t' -f2- | sed 's/^\s*//')"
+    else
+        cd $(autojump $@)
+    fi
+}
+
+cd() {
+    if [[ "$#" != 0 ]]; then
+        builtin cd "$@";
+        return
+    fi
+    local dir
+    dir=$(find ${1:-.} -type d 2> /dev/null | fzf +m) &&
+    cd "$dir"
+}
+
+# Use fd and fzf to get the args to a command.
+# Works only with zsh
+# Examples:
+# f mv # To move files. You can write the destination after selecting the files.
+# f 'echo Selected:'
+# f 'echo Selected music:' --extension mp3
+# fm rm # To rm files in current directory
+f() {
+    sels=( "${(@f)$(fd "${fd_default[@]}" "${@:2}"| fzf)}" )
+    test -n "$sels" && print -z -- "$1 ${sels[@]:q:q}"
+}
+
+# Like f, but not recursive.
+fm() f "$@" --max-depth 1
+
+# Deps
+alias fz="fzf-noempty --bind 'tab:toggle,shift-tab:toggle+beginning-of-line+kill-line,ctrl-j:toggle+beginning-of-line+kill-line,ctrl-t:top' --color=light -1 -m"
+fzf-noempty () {
+	local in="$(</dev/stdin)"
+	test -z "$in" && (
+		exit 130
+	) || {
+		ec "$in" | fzf "$@"
+	}
+}
+ec () {
+	if [[ -n $ZSH_VERSION ]]
+	then
+		print -r -- "$@"
+	else
+		echo -E -- "$@"
+	fi
+}
+
+# Usage: rgf [<rg SYNOPSIS>]
+function rgf {
+# 1. Search for text in files using Ripgrep
+# 2. Interactively narrow down the list using fzf
+# 3. Open the file in Vim
+rg --color=always --line-number --no-heading --smart-case "${*:-}" |
+  fzf --ansi \
+      --color "hl:-1:underline,hl+:-1:underline:reverse" \
+      --delimiter : \
+      --preview 'bat --color=always {1} --highlight-line {2}' \
+      --bind 'enter:become(vim {1} +{2})'
+}
+
+# zsh; needs setopt re_match_pcre. You can, of course, adapt it to your own shell easily.
+tmuxkillf () {
+    local sessions
+    sessions="$(tmux ls|fzf --exit-0 --multi)"  || return $?
+    local i
+    for i in "${(f@)sessions}"
+    do
+        [[ $i =~ '([^:]*):.*' ]] && {
+            echo "Killing $match[1]"
+            tmux kill-session -t "$match[1]"
+        }
+    done
+}
+
+# tm - create new tmux session, or switch to existing one. Works from within tmux too. (@bag-man)
+# `tm` will allow you to select your tmux session via fzf.
+# `tm irc` will attach to the irc session (if it exists), else it will create it.
+
+tm() {
+  [[ -n "$TMUX" ]] && change="switch-client" || change="attach-session"
+  if [ $1 ]; then
+    tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
+  fi
+  session=$(tmux list-sessions 2>/dev/null | fzf --exit-0 | awk -F: '{ print $1 }') && tmux $change -t "$session" || echo "No sessions found."
+}
+
+pass() {
+  op connect server list > /dev/null
+  local result=$?
+
+  if [ $result -ne 0 ]; then
+    return
+  fi
+
+  local id=$(op item list | fzf --exit-0 | awk '{print $1}')
+  if [ -z "$id" ]; then
+    return
+  fi
+  op item get --fields label=password "$id" | xclip -selection clipboard
+}
