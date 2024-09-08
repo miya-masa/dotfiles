@@ -88,14 +88,6 @@ rm -f ~/.zcompdump; compinit
 ### zsh-autosuggestions
 zinit light zsh-users/zsh-autosuggestions
 
-if [[ -x "`which glab`" ]] ; then
-  anyframe-widget-insert-issue-branch-name() {
-  issueNumber=$(glab ls | tail -n +3 | anyframe-selector-auto | awk '{print $1}')
-    echo "feature/${issueNumber}"_ | anyframe-action-insert
-  }
-  zle -N anyframe-widget-insert-issue-branch-name
-fi
-
 ### docker(completion)
 zinit snippet https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker
 zinit snippet https://raw.githubusercontent.com/docker/compose/1.29.2/contrib/completion/zsh/_docker-compose
@@ -106,6 +98,7 @@ zinit light "zsh-users/zsh-syntax-highlighting"
 
 # fbr - checkout git branch (including remote branches)
 fbr() {
+  zle -I             # キー入力のバッファをクリア
   local branches branch
   branches=$(git branch --all | grep -v HEAD) &&
   branch=$(echo "$branches" |
@@ -113,20 +106,27 @@ fbr() {
   if [ -z "$branch" ]; then
     return
   fi
-  git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+  local checkout_branch=$(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+
   # redisplay the command line
-  zle -R -c
+
+  BUFFER="git checkout $checkout_branch"
+  zle accept-line
+  zle reset-prompt
 }
 zle -N fbr
 
 __cd-git(){
+  zle -I             # キー入力のバッファをクリア
   local repo=$(ghq list | fzf)
   if [ -z "$repo" ]; then
     return
   fi
   cd "$(ghq root)/$repo"
   # redisplay the command line
-  zle -R -c
+  BUFFER="cd \"$(ghq root)/$repo\""  # cdコマンドをBUFFERに代入
+  zle accept-line
+  zle reset-prompt
 }
 zle -N cd-git __cd-git
 
@@ -140,6 +140,22 @@ __fh() {
 }
 zle -N fh __fh
 
+if [[ -x "`which glab`" ]] ; then
+  __insert-issue-id() {
+    local issue_number_row=$(glab ls | tail -n +3 | fzf)
+    if [ -z "$issue_number_row" ]; then
+      return
+    fi
+    local issue_number=$(echo $issue_number_row | awk '{print $1}')
+    LBUFFER+="feature/${issue_number}_"
+    CURSOR=$#LBUFFER
+    # redisplay the command line
+    zle -R -c
+  }
+  zle -N insert-issue-id __insert-issue-id
+fi
+
+
 ### reset bind key
 bindkey -d
 bindkey -v
@@ -148,11 +164,7 @@ bindkey "^P" up-line-or-history
 bindkey '^e^e' fbr
 bindkey '^g' cd-git
 bindkey '^r' fh
-
-zstyle ':completion:*:default' menu select=1
-zstyle ":anyframe:selector:" use fzf
-zstyle ":anyframe:selector:fzf:" command 'fzf --height=25%'
-
+bindkey '^x^b' insert-issue-id
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
