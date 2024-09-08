@@ -14,4 +14,4 @@ if ! has mise; then
   eval "$(~/.local/bin/mise activate "${__shell_name}")"
 fi
 mise --version
-mise install -y || true
+mise install -y
