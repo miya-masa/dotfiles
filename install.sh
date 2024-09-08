@@ -172,6 +172,7 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.czrc ${HOME}/.czrc
   ln -fs ${DOTFILES_DIRECTORY}/.wezterm.lua ${HOME}/.wezterm.lua
   ln -fs ${DOTFILES_DIRECTORY}/.sqlfluff ${HOME}/.sqlfluff
+  ln -fs ${DOTFILES_DIRECTORY}/.editorconfig ${HOME}/.editorconfig
   if [ ! -e ~/.ssh/config ]; then
     cp ${DOTFILES_DIRECTORY}/.ssh/config.sample ${HOME}/.ssh/config
   fi
