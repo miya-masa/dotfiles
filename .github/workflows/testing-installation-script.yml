@@ -11,6 +11,6 @@ jobs:
       SSH_PASSPHRASE: super-secret
     steps:
       - run: sudo apt update && sudo apt install -y curl sudo
-      - run: DOTFILES_BRANCH=${GITHUB_REF_NAME} /bin/bash <(curl -L https://raw.github.com/miya-masa/dotfiles/${GITHUB_REF_NAME}/install.sh)
+      - run: DOTFILES_BRANCH=${GITHUB_REF_NAME} /bin/bash <(curl -L https://raw.github.com/miya-masa/dotfiles/${GITHUB_REF_NAME:-master}/install.sh)
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
