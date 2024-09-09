@@ -40,11 +40,11 @@ function has() {
 
 # sudo コマンドをラップする関数
 sudo_wrap() {
-    if [ -n "$SUDO_ASKPASS" ]; then
-        sudo -A "$@"
-    else
-        sudo "$@"
-    fi
+  if [ -n "${SUDO_ASKPASS:-}" ]; then
+    sudo -A "$@"
+  else
+    sudo "$@"
+  fi
 }
 
 function initialize() {
@@ -53,8 +53,8 @@ function initialize() {
       read -s -p "input password: " password
       echo
       temp_file=$(mktemp)
-      echo "#!/usr/bin/env bash" > "$temp_file"
-      echo "echo $password" >> "$temp_file"
+      echo "#!/usr/bin/env bash" >"$temp_file"
+      echo "echo $password" >>"$temp_file"
       chmod 755 "$temp_file"
       export SUDO_ASKPASS=$temp_file
     fi
