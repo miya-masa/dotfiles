@@ -14,10 +14,6 @@ DOTFILES_BRANCH=${DOTFILES_BRANCH:-master}
 XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$HOME/.config}
 SSH_PASSPHRASE=${SSH_PASSPHRASE:-""}
 export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.local/share/mise/shims:$PATH"
-export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
-export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
-export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
 
 #===  FUNCTION  ================================================================
 #         NAME:  usage
