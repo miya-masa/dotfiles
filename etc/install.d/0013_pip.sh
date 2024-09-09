@@ -9,6 +9,7 @@ IFS=$'\n\t'
 
 __shell_name=$(basename "$SHELL")
 eval "$(~/.local/bin/mise activate "${__shell_name}")"
+mise use python
 pip install \
   pgcli \
   mycli \
