@@ -1,5 +1,5 @@
-ssh-add --apple-use-keychain ~/.ssh/id_rsa
-ssh-add --apple-use-keychain ~/.ssh/id_ecdsa
+/usr/bin/ssh-add --apple-use-keychain ~/.ssh/id_rsa
+/usr/bin/ssh-add --apple-use-keychain ~/.ssh/id_ecdsa
 
 alias ll='ls -GalF'
 alias la='ls -GA'
