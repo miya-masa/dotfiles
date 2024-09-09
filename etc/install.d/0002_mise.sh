@@ -9,10 +9,8 @@ IFS=$'\n\t'
 
 curl https://mise.run | sh
 if ! has mise; then
-  export PATH="$HOME/.local/bin:$PATH"
   __shell_name=$(basename "$SHELL")
   eval "$(~/.local/bin/mise activate "${__shell_name}")"
 fi
-mise --version
-rm -rf ~/.cache/mise/python
-mise install -y
+"$HOME"/.local/bin/mise --version
+"$HOME"/.local/bin/mise install -y

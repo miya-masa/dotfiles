@@ -11,7 +11,4 @@ if ! has brew; then
   export NONINTERACTIVE=1
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
-export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
-export PATH=/home/linuxbrew/.linuxbrew/sbin:$PATH
-[ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-brew bundle --file=./Brewfile_linux
+/home/linuxbrew/.linuxbrew/bin/brew bundle --file=./Brewfile_linux
