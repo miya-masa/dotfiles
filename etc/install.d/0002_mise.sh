@@ -14,4 +14,5 @@ if ! has mise; then
   eval "$(~/.local/bin/mise activate "${__shell_name}")"
 fi
 mise --version
+rm -rf ~/.cache/mise/python
 mise install -y
