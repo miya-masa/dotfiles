@@ -63,7 +63,12 @@ function initialize() {
     fi
     cd "${DOTFILES_DIRECTORY}"
     _initialize_linux
-    rm -f "$temp_file" || true
+
+    # is exist $temp_file then remove
+    if [[ -v temp_file ]]; then
+      rm -f "$temp_file"
+    fi
+
   else
     _initialize_mac
   fi
