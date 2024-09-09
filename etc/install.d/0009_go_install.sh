@@ -7,6 +7,8 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
+__shell_name=$(basename "$SHELL")
+eval "$(~/.local/bin/mise activate "${__shell_name}")"
 go install golang.org/x/tools/cmd/goimports@latest
 go install github.com/mattn/memo@latest
 go install github.com/google/gops@latest

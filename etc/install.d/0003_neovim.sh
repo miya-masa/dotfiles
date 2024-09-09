@@ -9,11 +9,11 @@ IFS=$'\n\t'
 
 # sudo コマンドをラップする関数
 sudo_wrap() {
-    if [ -n "$SUDO_ASKPASS" ]; then
-        sudo -A "$@"
-    else
-        sudo "$@"
-    fi
+  if [ -n "${SUDO_ASKPASS:-}" ]; then
+    sudo -A "$@"
+  else
+    sudo "$@"
+  fi
 }
 
 PATH="~/.local/share/mise/shims:$PATH"
