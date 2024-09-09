@@ -4,3 +4,7 @@
 alias ll='ls -GalF'
 alias la='ls -GA'
 alias l='ls -GCF'
+
+if [[ -x "`which mise`" ]]; then
+  eval "$(mise activate zsh)";
+fi
