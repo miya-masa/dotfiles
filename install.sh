@@ -63,7 +63,7 @@ function initialize() {
     fi
     cd "${DOTFILES_DIRECTORY}"
     _initialize_linux
-    rm -f "$temp_file"
+    rm -f "$temp_file" || true
   else
     _initialize_mac
   fi
