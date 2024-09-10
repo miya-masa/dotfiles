@@ -55,7 +55,7 @@ if [[ -e $HOME/.krew ]]; then
 fi
 
 [[ -s /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
-export FZF_DEFAULT_OPTS='--tmux --layout reverse'
+export FZF_DEFAULT_OPTS='--layout reverse'
 
 
 ###
@@ -100,10 +100,9 @@ zinit light "zsh-users/zsh-syntax-highlighting"
 fbr() {
   zle -I             # キー入力のバッファをクリア
   local branches branch
-  branches=$(git branch --all | grep -v HEAD) &&
-  branch=$(echo "$branches" |
-           fzf --tmux -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
-  if [ -z "$branch" ]; then
+  branches=$(git branch --all --sort=-authordate | grep -v HEAD)
+  branch=$(echo "$branches" | fzf -d $(( 2 + $(wc -l <<< "$branches") )) +m)
+  if [[ $branch = '' ]]; then
     return
   fi
   local checkout_branch=$(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
