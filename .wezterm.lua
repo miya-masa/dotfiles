@@ -17,14 +17,14 @@ end
 config.color_scheme = "Catppuccin Mocha"
 config.use_ime = true
 config.enable_wayland = false
-config.window_background_opacity = 0.9
+config.window_background_opacity = 0.8
 
 -- config.font = wezterm.font 'Monaspace Argon Var'
 config.font_size = 11.0
 config.font = wezterm.font_with_fallback({
+  { family = "HackGen Console NF", weight = "Regular" },
   { family = "Moralerspace Neon HWNF", weight = "Regular" },
   { family = "PlemolJP Console NF", weight = "Medium" },
-  { family = "HackGen Console NF", weight = "Regular" },
 })
 
 wezterm.on("gui-startup", function()
