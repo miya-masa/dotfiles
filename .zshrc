@@ -55,7 +55,7 @@ if [[ -e $HOME/.krew ]]; then
 fi
 
 [[ -s /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
-export FZF_DEFAULT_OPTS='--layout reverse'
+export FZF_DEFAULT_OPTS='--layout reverse --height=30%'
 
 
 ###

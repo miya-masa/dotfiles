@@ -4,7 +4,6 @@
 
 root = true
 
-
 [*]
 
 # Change these settings to your own preference
@@ -19,3 +18,6 @@ insert_final_newline = true
 
 [*.md]
 trim_trailing_whitespace = false
+
+[{Makefile,**.mk}]
+indent_style = tab
