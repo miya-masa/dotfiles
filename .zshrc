@@ -14,17 +14,6 @@ if [ $(uname) = "Darwin" ]; then
 elif [ $(uname) = "Linux" ]; then
    . ~/.zshrc_linux
 fi
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-# See https://github.com/romkatv/powerlevel10k#how-do-i-initialize-direnv-when-using-instant-prompt
-(( ${+commands[direnv]} )) && emulate zsh -c "$(direnv export zsh)"
-
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-
-(( ${+commands[direnv]} )) && emulate zsh -c "$(direnv hook zsh)"
 
 export LANG=ja_JP.UTF-8
 export LC_ALL=ja_JP.UTF-8
@@ -78,7 +67,6 @@ autoload -Uz _zinit
 
 ## plugins
 ### powerlevel10k
-zinit ice depth=1; zinit light romkatv/powerlevel10k
 
 ### zsh-completions
 zinit light zsh-users/zsh-completions
@@ -228,8 +216,6 @@ set -o glob_complete
 # autoload -U +X bashcompinit && bashcompinit
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 ### End of Zinit's installer chunk
 
 if [[ -x "`which jira`" ]]; then
@@ -379,3 +365,13 @@ pass() {
   fi
   op item get --fields label=password "$id" | xclip -selection clipboard
 }
+
+
+function has() {
+  type "$1" >/dev/null 2>&1
+}
+
+if ! has starship; then
+  curl -sS https://starship.rs/install.sh | sh
+fi
+eval "$(starship init zsh)"
