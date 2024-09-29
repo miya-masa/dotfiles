@@ -67,6 +67,9 @@ source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
+autoload -Uz compinit
+compinit
+
 ## plugins
 
 zinit light zsh-users/zsh-completions
@@ -370,3 +373,4 @@ if ! has starship; then
   curl -sS https://starship.rs/install.sh | sh
 fi
 eval "$(starship init zsh)"
+source <(starship completions zsh)
