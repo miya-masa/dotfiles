@@ -7,8 +7,7 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-__shell_name=$(basename "$SHELL")
-eval "$(~/.local/bin/mise activate "${__shell_name}")"
+eval "$(~/.local/bin/mise activate "bash")"
 mise use node
 npm i -g @redocly/cli@latest
 npm i -g redoc-cli
