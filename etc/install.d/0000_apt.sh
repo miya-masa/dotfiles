@@ -44,7 +44,7 @@ sudo apt install -y \
   tk-dev \
   uidmap \
   uuid-dev \
-  xsel \
+  xclip \
   rpm \
   zlib1g-dev \
   libnss3-tools \
@@ -52,6 +52,8 @@ sudo apt install -y \
   neofetch \
   mercurial \
   snapd \
+  tmux \
+  zsh \
   fd-find
 
 sudo cp .config/neofetch/banner.txt /etc/update-motd.d/
