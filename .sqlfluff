@@ -404,7 +404,6 @@ prefer_quoted_identifiers = False
 prefer_quoted_keywords = False
 ignore_words = None
 ignore_words_regex = None
-force_enable = False
 
 [sqlfluff:rules:layout.long_lines]
 # Line length

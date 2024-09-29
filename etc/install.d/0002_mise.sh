@@ -7,6 +7,10 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
+function has() {
+  type "$1" >/dev/null 2>&1
+}
+
 curl https://mise.run | sh
 if ! has mise; then
   __shell_name=$(basename "$SHELL")

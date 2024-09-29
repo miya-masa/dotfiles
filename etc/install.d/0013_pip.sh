@@ -7,8 +7,7 @@ set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
 
-__shell_name=$(basename "$SHELL")
-eval "$(~/.local/bin/mise activate "${__shell_name}")"
+eval "$(~/.local/bin/mise activate "bash")"
 mise use python
 pip install \
   pgcli \
@@ -29,6 +28,7 @@ pip install \
   pre-commit \
   jupyter_contrib_nbextensions \
   pynvim \
+  sqlfluff \
   ruff
 pip install --upgrade autopep8 pip
 pip install jupyter_nbextensions_configurator

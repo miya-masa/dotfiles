@@ -31,11 +31,6 @@ export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
 export PATH="/usr/local/opt/gettext/bin:$PATH"
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-if [[ -x "`which pyenv`" ]]; then
-  export PATH="$(pyenv root)/shims:$PATH"
-  eval "$(pyenv init -)"
-fi
 export PATH="${PATH}:${HOME}/.local/bin/"
 export PATH="/home/linuxbrew/.linuxbrew/opt/glibc/bin:$PATH"
 export PATH="/home/linuxbrew/.linuxbrew/opt/glibc/sbin:$PATH"
@@ -227,17 +222,12 @@ if [[ -x "`which minikube`" ]]; then
   source <(minikube completion zsh)
 fi
 
+[[ -x "$(command -v direnv)" ]] && eval "$(direnv hook zsh)"
+[[ -x "$(command -v op)" ]] && eval "$(op completion zsh)"; compdef _op op
+
 [[ ! -f ~/.cargo/env ]] || source ~/.cargo/env
-[[ ! -f ~/.rbenv/rbenv ]] || eval "$(rbenv init - zsh)"
 ### End of Zinit's installer chunk
 
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
-if [[ -x "`which op`" ]]; then
-  eval "$(op completion zsh)"; compdef _op op
-fi
 
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/terraform/1.2.4/bin/terraform terraform
 # complete -o nospace -C /home/linuxbrew/.linuxbrew/Cellar/vault/1.3.2/bin/vault vault
@@ -365,12 +355,6 @@ pass() {
 }
 
 
-function has() {
-  type "$1" >/dev/null 2>&1
-}
-
-if ! has starship; then
-  curl -sS https://starship.rs/install.sh | sh
-fi
+! [[ -x "$(command -v starship)" ]] && curl -sS https://starship.rs/install.sh | sh
 eval "$(starship init zsh)"
 source <(starship completions zsh)
