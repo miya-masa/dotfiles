@@ -57,7 +57,7 @@ function initialize() {
     sudo_wrap apt update -y
     if [[ ! -d ${DOTFILES_DIRECTORY} ]]; then
       sudo -A apt install -y git software-properties-common
-      git clone http://github.com/miya-masa/dotfiles.git -b ${DOTFILES_BRANCH} ${DOTFILES_DIRECTORY}
+      git clone http://github.com/miya-masa/dotfiles.git -b "${DOTFILES_BRANCH}" "${DOTFILES_DIRECTORY}"
       cd "${DOTFILES_DIRECTORY}"
       git submodule update --init --recursive
     fi

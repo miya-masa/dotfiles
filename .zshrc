@@ -206,7 +206,7 @@ set -o glob_complete
 # set -o always_last_prompt
 # set -o interactivecomments
 
-# autoload -U +X bashcompinit && bashcompinit
+autoload -U +X bashcompinit && bashcompinit
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
 ### End of Zinit's installer chunk
@@ -358,3 +358,5 @@ pass() {
 ! [[ -x "$(command -v starship)" ]] && curl -sS https://starship.rs/install.sh | sh
 eval "$(starship init zsh)"
 source <(starship completions zsh)
+
+complete -C '/usr/local/bin/aws_completer' aws
