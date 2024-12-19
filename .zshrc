@@ -362,10 +362,10 @@ source <(starship completions zsh)
 complete -C '/usr/local/bin/aws_completer' aws
 
 ### NVIM REMOTE
-if [ -n "$NVIM_LISTEN_ADDRESS" ]; then
+if [ -n "$NVIM" ]; then
     alias nvim=nvr -cc split --remote-wait +'set bufhidden=wipe'
 fi
-if [ -n "$NVIM_LISTEN_ADDRESS" ]; then
+if [ -n "$NVIM" ]; then
     export VISUAL="nvr -cc split --remote-wait +'set bufhidden=wipe'"
     export EDITOR="nvr -cc split --remote-wait +'set bufhidden=wipe'"
 else
