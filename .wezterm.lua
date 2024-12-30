@@ -20,10 +20,10 @@ config.enable_wayland = false
 config.window_background_opacity = 0.8
 
 -- config.font = wezterm.font 'Monaspace Argon Var'
-config.font_size = 11.0
+config.font_size = 10.5
 config.font = wezterm.font_with_fallback({
-  { family = "HackGen Console NF", weight = "Regular" },
   { family = "Moralerspace Neon HWNF", weight = "Regular" },
+  { family = "HackGen Console NF", weight = "Regular" },
   { family = "PlemolJP Console NF", weight = "Medium" },
 })
 
