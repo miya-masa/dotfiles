@@ -1,6 +1,10 @@
 [tools]
-go = "1.23"
+go = "latest"
 poetry = 'latest'
 task = 'latest'
 node = "latest"
 python = "latest"
+argc = "latest"
+aws-cli = "latest"
+lua = "latest"
+buf = "latest"

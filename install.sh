@@ -179,6 +179,7 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.config/yamllint ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/mise ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/lazygit ${HOME}/.config
+  ln -fs ${DOTFILES_DIRECTORY}/.config/fastfetch ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.fzf.zsh ${HOME}/.fzf.zsh
   ln -fs ${DOTFILES_DIRECTORY}/.tigrc ${HOME}/.tigrc
   ln -fs ${DOTFILES_DIRECTORY}/.markdownlintrc ${HOME}/.markdownlintrc

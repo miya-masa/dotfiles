@@ -372,3 +372,10 @@ else
     export VISUAL="nvim"
     export EDITOR="nvim"
 fi
+
+### fastfetch
+if command -v fastfetch &> /dev/null; then
+  if [ ${SHLVL} -eq 1 ]; then
+    fastfetch
+  fi
+fi
