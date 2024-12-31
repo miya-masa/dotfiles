@@ -12,6 +12,7 @@ sudo add-apt-repository universe -y
 sudo apt install -y \
   asciidoc \
   curl \
+  certbot \
   build-essential \
   dbus-user-session \
   fcitx \

@@ -17,7 +17,7 @@ end
 config.color_scheme = "Catppuccin Mocha"
 config.use_ime = true
 config.enable_wayland = false
-config.window_background_opacity = 0.8
+config.window_background_opacity = 0.9
 
 -- config.font = wezterm.font 'Monaspace Argon Var'
 config.font_size = 10.5
