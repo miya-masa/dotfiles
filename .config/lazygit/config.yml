@@ -91,8 +91,8 @@ git:
 #   disableForcePushing: false
 #   parseEmoji: false
 os:
-#   copyToClipboardCmd: '' # See 'Custom Command for Copying to Clipboard' section
-    editPreset: "nvim-remote" # see 'Configuring File Editing' section
+  #   copyToClipboardCmd: '' # See 'Custom Command for Copying to Clipboard' section
+  editPreset: "nvim" # see 'Configuring File Editing' section
 #   edit: ''
 #   editAtLine: ''
 #   editAtLineAndWait: ''

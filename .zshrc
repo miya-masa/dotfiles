@@ -336,7 +336,7 @@ tm() {
   if [ $1 ]; then
     tmux $change -t "$1" 2>/dev/null || (tmux new-session -d -s $1 && tmux $change -t "$1"); return
   fi
-  session=$(tmux list-sessions 2>/dev/null | fzf --exit-0 | awk -F: '{ print $1 }') && tmux $change -t "$session" || echo "No sessions found."
+  session=$(tmux list-sessions -F "#{session_name}" 2>/dev/null | fzf --exit-0) &&  tmux $change -t "$session" || echo "No sessions found."
 }
 
 pass() {
@@ -364,8 +364,6 @@ complete -C '/usr/local/bin/aws_completer' aws
 ### NVIM REMOTE
 if [ -n "$NVIM" ]; then
     alias nvim=nvr -cc split --remote-wait +'set bufhidden=wipe'
-fi
-if [ -n "$NVIM" ]; then
     export VISUAL="nvr -cc split --remote-wait +'set bufhidden=wipe'"
     export EDITOR="nvr -cc split --remote-wait +'set bufhidden=wipe'"
 else
@@ -379,3 +377,13 @@ if command -v fastfetch &> /dev/null; then
     fastfetch
   fi
 fi
+
+## yazi
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
