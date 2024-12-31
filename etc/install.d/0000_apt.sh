@@ -37,6 +37,7 @@ sudo apt install -y \
   libyaml-dev \
   libpq-dev \
   openssh-server \
+  luajit \
   autoconf automake \
   rename \
   ripgrep \
