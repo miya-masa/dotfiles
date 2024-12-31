@@ -10,7 +10,6 @@ IFS=$'\n\t'
 sudo apt update -y
 sudo add-apt-repository universe -y
 sudo apt install -y \
-  autojump \
   asciidoc \
   curl \
   build-essential \
@@ -49,14 +48,12 @@ sudo apt install -y \
   zlib1g-dev \
   libnss3-tools \
   zsh \
-  neofetch \
   mercurial \
   snapd \
   tmux \
   zsh \
   fd-find
 
-sudo cp .config/neofetch/banner.txt /etc/update-motd.d/
-if ! sudo grep -q "$HOME/.config/neofetch/config.conf" /etc/update-motd.d/00-header; then
-  sudo echo "$HOME/.config/neofetch/config.conf" | sudo tee -a /etc/update-motd.d/00-header
-fi
+sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
+sudo apt update
+sudo apt install -y fastfetch
