@@ -1,0 +1,5 @@
+formatter:
+  type: basic
+  drop_merge_tag: true
+  trim_trailing_whitespace: true
+  include_document_start: false
