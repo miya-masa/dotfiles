@@ -38,8 +38,8 @@ if [[ -e $HOME/.krew ]]; then
   export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 fi
 
-[[ -s /usr/share/autojump/autojump.sh ]] && . /usr/share/autojump/autojump.sh
 export FZF_DEFAULT_OPTS='--layout reverse --height=30%'
+export FORGIT_COPY_CMD='xclip -selection clipboard'
 
 
 ###
@@ -63,6 +63,7 @@ compinit
 
 zinit light zsh-users/zsh-completions
 zinit light zsh-users/zsh-autosuggestions
+zinit load wfxr/forgit
 
 ### docker(completion)
 zinit snippet https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker

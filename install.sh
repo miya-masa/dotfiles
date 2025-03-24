@@ -177,6 +177,7 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.config/nvim ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/neofetch ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/yamllint ${HOME}/.config
+  ln -fs ${DOTFILES_DIRECTORY}/.config/yamlfmt ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/mise ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/lazygit ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/fastfetch ${HOME}/.config
