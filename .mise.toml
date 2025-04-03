@@ -1,6 +1,5 @@
 [tools]
-go = "latest"
-poetry = 'latest'
+go = "1.23"
 task = 'latest'
 node = "latest"
 python = "latest"

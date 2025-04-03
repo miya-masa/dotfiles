@@ -378,3 +378,4 @@ function y() {
 
 ## zoxide
 eval "$(zoxide init zsh)"
+eval "$(uv generate-shell-completion zsh)"
