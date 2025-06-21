@@ -90,9 +90,9 @@ git:
 #   overrideGpg: false # prevents lazygit from spawning a separate process when using GPG
 #   disableForcePushing: false
 #   parseEmoji: false
-os:
-  #   copyToClipboardCmd: '' # See 'Custom Command for Copying to Clipboard' section
-  editPreset: "nvim" # see 'Configuring File Editing' section
+# os:
+#   copyToClipboardCmd: '' # See 'Custom Command for Copying to Clipboard' section
+# editPreset: "nvim" # see 'Configuring File Editing' section
 #   edit: ''
 #   editAtLine: ''
 #   editAtLineAndWait: ''

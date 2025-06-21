@@ -11,5 +11,5 @@
 ## deploy
 
 ```ash
-/install.sh deploy
+./install.sh deploy
 ```

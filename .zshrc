@@ -41,7 +41,6 @@ fi
 export FZF_DEFAULT_OPTS='--layout reverse --height=30%'
 export FORGIT_COPY_CMD='xclip -selection clipboard'
 
-
 ###
 ### history
 ###
@@ -367,3 +366,4 @@ function y() {
 ## zoxide
 eval "$(zoxide init zsh)"
 eval "$(uv generate-shell-completion zsh)"
+alias claude="/home/masayuki/.claude/local/claude"

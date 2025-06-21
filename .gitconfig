@@ -8,7 +8,7 @@
 	renames = true
 
 [core]
-    editor = nvr -cc split --remote-wait +'set bufhidden=wipe'
+    editor = nvim
     pager = delta
 
 [interactive]
