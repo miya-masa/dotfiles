@@ -11,6 +11,7 @@ IFS=$'\n\t'
 echo "🔧 Installing system packages via apt..."
 
 sudo apt update -y
+sudo apt install -y software-properties-common
 sudo add-apt-repository universe -y
 sudo apt install -y \
   asciidoc \

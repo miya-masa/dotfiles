@@ -15,10 +15,8 @@ echo "🍺 Installing Homebrew and packages..."
 
 {{- if eq .chezmoi.os "linux" }}
 # Install Homebrew for Linux
-if ! has brew; then
-  export NONINTERACTIVE=1
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
+export NONINTERACTIVE=1
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 # Create temporary Brewfile_linux
 cat > /tmp/Brewfile_linux << 'EOF'
@@ -100,7 +98,11 @@ brew "songmu/tap/gocredits"
 EOF
 
 # Install packages from temporary Brewfile
-{{ .homebrew_prefix }}/bin/brew bundle --file=/tmp/Brewfile_linux
+if command -v brew >/dev/null 2>&1; then
+  brew bundle --file=/tmp/Brewfile_linux
+else
+  /home/linuxbrew/.linuxbrew/bin/brew bundle --file=/tmp/Brewfile_linux
+fi
 
 # Cleanup
 rm -f /tmp/Brewfile_linux
