@@ -18,8 +18,7 @@ SSH_PASSPHRASE=${SSH_PASSPHRASE:-""}
 #         NAME:  usage
 #  DESCRIPTION:  Display usage information.
 #===============================================================================
-function usage ()
-{
+function usage() {
   echo "Usage :  $0 [options] [comand]
 
     Command:
@@ -28,10 +27,10 @@ function usage ()
     Options:
       -h|help       Display this message
       -v|version    Display script version"
-}    # ----------  end of function usage  ----------
+} # ----------  end of function usage  ----------
 
 function has() {
-  type "$1" > /dev/null 2>&1
+  type "$1" >/dev/null 2>&1
 }
 
 function initialize() {
@@ -55,8 +54,8 @@ function initialize() {
 }
 
 function _initialize_linux() {
-  for i in "${DOTFILES_DIRECTORY}"/etc/install.d/*.sh ; do
-    echo "Installing: "`basename ${i}`
+  for i in "${DOTFILES_DIRECTORY}"/etc/install.d/*.sh; do
+    echo "Installing: "$(basename ${i})
     source "${i}"
   done
 
@@ -94,21 +93,18 @@ function _initialize_linux() {
   fi
 }
 
-
 function _initialize_mac() {
   echo TODO
 }
 
-
 function password() {
-    password=""
-    printf "sudo password: "
-    read -s password
+  password=""
+  printf "sudo password: "
+  read -s password
 }
 
 function deploy() {
   mkdir -p ${HOME}/.tmux
-  mkdir -p ${HOME}/.vim
   mkdir -p ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.tmux/tmuxline.conf ${HOME}/.tmux/tmuxline.conf
   ln -fs ${DOTFILES_DIRECTORY}/.tmux.conf ${HOME}/.tmux.conf
@@ -119,7 +115,6 @@ function deploy() {
   ln -fs ${DOTFILES_DIRECTORY}/.p10k.zsh ${HOME}/.p10k.zsh
   ln -fs ${DOTFILES_DIRECTORY}/.zprofile ${HOME}/.zprofile
   ln -fs ${DOTFILES_DIRECTORY}/.gitconfig ${HOME}/.gitconfig
-  ln -fs ${DOTFILES_DIRECTORY}/.vim/vimrcs ${HOME}/.vim
   ln -fs ${DOTFILES_DIRECTORY}/.config/nvim ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.config/alacritty ${HOME}/.config
   ln -fs ${DOTFILES_DIRECTORY}/.fzf.zsh ${HOME}/.fzf.zsh
@@ -129,21 +124,34 @@ function deploy() {
 #  Handle command line arguments
 #-----------------------------------------------------------------------
 
-while getopts ":hv" opt
-do
+while getopts ":hv" opt; do
   case $opt in
 
-  h )  usage; exit 0   ;;
-  v )  echo "$0 -- Version $__ScriptVersion"; exit 0   ;;
-  * )  echo -e "\n  Option does not exist : $OPTARG\n"
-      usage; exit 1   ;;
+  h)
+    usage
+    exit 0
+    ;;
+  v)
+    echo "$0 -- Version $__ScriptVersion"
+    exit 0
+    ;;
+  *)
+    echo -e "\n  Option does not exist : $OPTARG\n"
+    usage
+    exit 1
+    ;;
 
-  esac    # --- end of case ---
+  esac # --- end of case ---
 done
 
-
 case ${1:-initialize} in
-  deploy ) deploy; exit 0 ;;
-  initialize ) initialize; exit 0 ;;
-  * ) echo "Unknown command $1"
+deploy)
+  deploy
+  exit 0
+  ;;
+initialize)
+  initialize
+  exit 0
+  ;;
+*) echo "Unknown command $1" ;;
 esac
