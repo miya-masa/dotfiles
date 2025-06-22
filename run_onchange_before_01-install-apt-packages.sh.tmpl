@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+{{- if eq .chezmoi.os "linux" }}
 
 set -o nounset
 set -o errexit
@@ -6,6 +7,8 @@ trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
 set -o errtrace
 set -o pipefail
 IFS=$'\n\t'
+
+echo "🔧 Installing system packages via apt..."
 
 sudo apt update -y
 sudo add-apt-repository universe -y
@@ -55,6 +58,11 @@ sudo apt install -y \
   zsh \
   fd-find
 
-sudo add-apt-repository ppa:zhangsongcui3371/fastfetch
+# Install fastfetch from PPA
+sudo add-apt-repository ppa:zhangsongcui3371/fastfetch -y
 sudo apt update
 sudo apt install -y fastfetch
+
+echo "✅ System packages installed successfully!"
+
+{{- end }}

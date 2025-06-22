@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+echo "🔐 Generating SSH keys..."
+
+SSH_PASSPHRASE=${SSH_PASSPHRASE:-""}
+
+# Generate RSA key
+SSH_RSA=~/.ssh/id_rsa
+if [ ! -s ${SSH_RSA} ]; then
+  if [ "${SSH_PASSPHRASE}" = "" ]; then
+    printf "ssh key passphrase (leave empty for no passphrase): "
+    read -s SSH_PASSPHRASE
+    echo
+  fi
+  ssh-keygen -t rsa -b 4096 -P "${SSH_PASSPHRASE}" -f ${SSH_RSA} -C "{{ .git_email }}"
+  echo "✅ RSA key generated"
+fi
+
+# Generate ECDSA key  
+SSH_ECDSA=~/.ssh/id_ecdsa
+if [ ! -s ${SSH_ECDSA} ]; then
+  if [ "${SSH_PASSPHRASE}" = "" ]; then
+    printf "ssh key passphrase (leave empty for no passphrase): "
+    read -s SSH_PASSPHRASE
+    echo
+  fi
+  ssh-keygen -t ecdsa -b 384 -P "${SSH_PASSPHRASE}" -f ${SSH_ECDSA} -C "{{ .git_email }}"
+  echo "✅ ECDSA key generated"
+fi
+
+# Generate ED25519 key
+SSH_ED25519=~/.ssh/id_ed25519
+if [ ! -s ${SSH_ED25519} ]; then
+  if [ "${SSH_PASSPHRASE}" = "" ]; then
+    printf "ssh key passphrase (leave empty for no passphrase): "
+    read -s SSH_PASSPHRASE
+    echo
+  fi
+  ssh-keygen -t ed25519 -P "${SSH_PASSPHRASE}" -f ${SSH_ED25519} -C "{{ .git_email }}"
+  echo "✅ ED25519 key generated"
+fi
+
+echo "🔐 SSH key generation completed!"
+echo "📋 Add these public keys to your Git services:"
+echo "RSA:     $(cat ~/.ssh/id_rsa.pub)"
+echo "ECDSA:   $(cat ~/.ssh/id_ecdsa.pub)" 
+echo "ED25519: $(cat ~/.ssh/id_ed25519.pub)"

@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+{{- if eq .chezmoi.os "linux" }}
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+# sudo wrapper function
+sudo_wrap() {
+  if [ -n "${SUDO_ASKPASS:-}" ]; then
+    sudo -A "$@"
+  else
+    sudo "$@"
+  fi
+}
+
+echo "📝 Installing latest Neovim..."
+
+export PATH="~/.local/share/mise/shims:$PATH"
+
+# Get latest Neovim version
+NVIM_VERSION=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep -Po '"tag_name": "\K[^"]*')
+echo "Installing Neovim version: $NVIM_VERSION"
+
+# Download URL for x86_64
+NVIM_URL="https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/nvim-linux-x86_64.tar.gz"
+
+# Create temporary directory
+TMP_DIR=$(mktemp -d)
+cd "$TMP_DIR"
+
+# Download Neovim tar.gz
+curl -LO "$NVIM_URL"
+
+# Extract
+tar -xzf nvim-linux-x86_64.tar.gz
+
+# Find extracted directory name
+INSTALL_DIR=$(find . -maxdepth 1 -type d -name "nvim*" | head -n 1)
+
+# Install to /opt
+sudo_wrap rm -rf /opt/nvim
+sudo_wrap mv "$INSTALL_DIR" /opt/nvim
+
+# Create symlink
+sudo_wrap ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+
+# Cleanup
+cd ~
+rm -rf "$TMP_DIR"
+
+# Verify installation
+echo "✅ Neovim $NVIM_VERSION installed successfully!"
+nvim --version
+
+# Install Neovim support for npm and pip (requires mise to be activated)
+eval "$(~/.local/bin/mise activate bash)"
+npm install -g neovim
+pip install pynvim
+
+{{- end }}

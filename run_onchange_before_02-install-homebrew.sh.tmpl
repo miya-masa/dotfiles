@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+function has() {
+  type "$1" >/dev/null 2>&1
+}
+
+echo "🍺 Installing Homebrew and packages..."
+
+{{- if eq .chezmoi.os "linux" }}
+# Install Homebrew for Linux
+export NONINTERACTIVE=1
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install packages from Brewfile_linux
+{{ .homebrew_prefix }}/bin/brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile_linux"
+{{- else if eq .chezmoi.os "darwin" }}
+# Install Homebrew for macOS
+if ! has brew; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+
+# Install packages from Brewfile
+brew bundle --file="{{ .chezmoi.sourceDir }}/Brewfile"
+{{- end }}
+
+echo "✅ Homebrew and packages installed successfully!"

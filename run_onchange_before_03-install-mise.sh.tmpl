@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+function has() {
+  type "$1" >/dev/null 2>&1
+}
+
+echo "⚙️ Installing mise (language version manager)..."
+
+# Install mise
+curl https://mise.run | sh
+
+# Activate mise for current session
+if ! has mise; then
+  __shell_name=$(basename "$SHELL")
+  eval "$(~/.local/bin/mise activate "${__shell_name}")"
+fi
+
+# Verify installation and install languages from .mise.toml
+"$HOME"/.local/bin/mise --version
+"$HOME"/.local/bin/mise install -y
+
+echo "✅ mise and language versions installed successfully!"
