@@ -19,7 +19,7 @@ if [ ! -s ${SSH_RSA} ]; then
     read -s SSH_PASSPHRASE
     echo
   fi
-  ssh-keygen -t rsa -b 4096 -P "${SSH_PASSPHRASE}" -f ${SSH_RSA}"
+  ssh-keygen -t rsa -b 4096 -P "${SSH_PASSPHRASE}" -f ${SSH_RSA}
   echo "✅ RSA key generated"
 fi
 
@@ -31,7 +31,7 @@ if [ ! -s ${SSH_ECDSA} ]; then
     read -s SSH_PASSPHRASE
     echo
   fi
-  ssh-keygen -t ecdsa -b 384 -P "${SSH_PASSPHRASE}" -f ${SSH_ECDSA}"
+  ssh-keygen -t ecdsa -b 384 -P "${SSH_PASSPHRASE}" -f ${SSH_ECDSA}
   echo "✅ ECDSA key generated"
 fi
 
@@ -43,7 +43,7 @@ if [ ! -s ${SSH_ED25519} ]; then
     read -s SSH_PASSPHRASE
     echo
   fi
-  ssh-keygen -t ed25519 -P "${SSH_PASSPHRASE}" -f ${SSH_ED25519}"
+  ssh-keygen -t ed25519 -P "${SSH_PASSPHRASE}" -f ${SSH_ED25519}
   echo "✅ ED25519 key generated"
 fi
 
