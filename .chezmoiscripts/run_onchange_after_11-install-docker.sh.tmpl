@@ -31,7 +31,7 @@ sudo apt update
 sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # Add user to docker group
-sudo usermod -aG docker {{ .chezmoi.username }}
+sudo usermod -aG docker $USER
 
 # Enable and start Docker service
 sudo systemctl enable docker
