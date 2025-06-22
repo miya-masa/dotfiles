@@ -1,9 +1,0 @@
-alias ll='ls -alF --color'
-alias la='ls -A --color'
-alias l='ls -CF --color'
-
-[[ -f $(which keychain 2> /dev/null) ]] && \
-	keychain --nogui --quiet ~/.ssh/id_ecdsa ~/.ssh/id_rsa ~/.ssh/id_ed25519
-
-[[ -f $HOME/.keychain/${HOST}-sh ]] && \
-	source $HOME/.keychain/${HOST}-sh
