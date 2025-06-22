@@ -19,11 +19,11 @@ if [ ! -s ${SSH_RSA} ]; then
     read -s SSH_PASSPHRASE
     echo
   fi
-  ssh-keygen -t rsa -b 4096 -P "${SSH_PASSPHRASE}" -f ${SSH_RSA} -C "{{ .git_email }}"
+  ssh-keygen -t rsa -b 4096 -P "${SSH_PASSPHRASE}" -f ${SSH_RSA}"
   echo "✅ RSA key generated"
 fi
 
-# Generate ECDSA key  
+# Generate ECDSA key
 SSH_ECDSA=~/.ssh/id_ecdsa
 if [ ! -s ${SSH_ECDSA} ]; then
   if [ "${SSH_PASSPHRASE}" = "" ]; then
@@ -31,7 +31,7 @@ if [ ! -s ${SSH_ECDSA} ]; then
     read -s SSH_PASSPHRASE
     echo
   fi
-  ssh-keygen -t ecdsa -b 384 -P "${SSH_PASSPHRASE}" -f ${SSH_ECDSA} -C "{{ .git_email }}"
+  ssh-keygen -t ecdsa -b 384 -P "${SSH_PASSPHRASE}" -f ${SSH_ECDSA}"
   echo "✅ ECDSA key generated"
 fi
 
@@ -43,12 +43,12 @@ if [ ! -s ${SSH_ED25519} ]; then
     read -s SSH_PASSPHRASE
     echo
   fi
-  ssh-keygen -t ed25519 -P "${SSH_PASSPHRASE}" -f ${SSH_ED25519} -C "{{ .git_email }}"
+  ssh-keygen -t ed25519 -P "${SSH_PASSPHRASE}" -f ${SSH_ED25519}"
   echo "✅ ED25519 key generated"
 fi
 
 echo "🔐 SSH key generation completed!"
 echo "📋 Add these public keys to your Git services:"
 echo "RSA:     $(cat ~/.ssh/id_rsa.pub)"
-echo "ECDSA:   $(cat ~/.ssh/id_ecdsa.pub)" 
+echo "ECDSA:   $(cat ~/.ssh/id_ecdsa.pub)"
 echo "ED25519: $(cat ~/.ssh/id_ed25519.pub)"
