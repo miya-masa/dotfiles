@@ -5,11 +5,13 @@
 ### install and deploy
 
 ```bash
-/bin/bash <(curl -L https://raw.github.com/miya-masa/dotfiles/master/install.sh)
+apt update && apt install -y curl sudo git
+sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply
 ```
 
-## deploy
+## daily operations
 
 ```ash
-./install.sh deploy
+chezmoi update
+chezmoi apply
 ```
