@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+{{- if eq .chezmoi.os "linux" }}
 
 set -o nounset
 set -o errexit
@@ -24,7 +25,9 @@ fi
 
 # Verify installation and install languages from .mise.toml
 "$HOME"/.local/bin/mise --version
-"$HOME"/.local/bin/mise trust
+"$HOME"/.local/bin/mise trust "$HOME"/.mise.toml
 "$HOME"/.local/bin/mise install -y
 
 echo "✅ mise and language versions installed successfully!"
+
+{{- end }}
