@@ -9,8 +9,10 @@ IFS=$'\n\t'
 
 echo "📦 Installing Node.js packages..."
 
+{{- if eq .chezmoi.os "linux" }}
 # Activate mise to ensure Node.js is available
 eval "$(~/.local/bin/mise activate bash)"
+{{- end }}
 
 # Install global npm packages
 npm install -g \

@@ -9,8 +9,10 @@ IFS=$'\n\t'
 
 echo "🐍 Installing Python packages..."
 
+{{- if eq .chezmoi.os "linux" }}
 # Activate mise to ensure Python is available
 eval "$(~/.local/bin/mise activate bash)"
+{{- end }}
 
 # Install Python packages
 pip install --upgrade pip
