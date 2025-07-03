@@ -1,5 +1,6 @@
 [font]
-normal = { family = "Moralerspace Neon HWNF", style = "Regular" }
+# normal = { family = "Moralerspace Neon HWNF", style = "Regular" }
+normal = { family = "PlemolJP Console NF", style = "Regular" }
 
 size = 11.5
 
@@ -10,6 +11,6 @@ opacity = 0.85
 bindings = [
   { key = "Tab", mods = "Control", action = "SelectNextTab" },
   { key = "Tab", mods = "Control|Shift", action = "SelectPreviousTab" },
-  { key = "¥", chars = '\'},
-  { key = "¥", mods="Alt", chars = '¥'},
+  { key = "¥", chars = '\' },
+  { key = "¥", mods = "Alt", chars = '¥' },
 ]
