@@ -1,2 +1,12 @@
-no-duplicate-heading:
+# MD024/no-duplicate-heading : Multiple headings with the same content : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md024.md
+MD024:
+  # Only check sibling headings
   siblings_only: true
+# MD013/line-length : Line length : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md013.md
+MD013:
+  # Number of characters
+  line_length: 250
+  # Number of characters for headings
+  heading_line_length: 250
+  # Number of characters for code blocks
+  code_block_line_length: 250
