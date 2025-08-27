@@ -1,8 +1,6 @@
-# MD024/no-duplicate-heading : Multiple headings with the same content : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md024.md
-MD024:
-  # Only check sibling headings
-  siblings_only: true
-# MD013/line-length : Line length : https://github.com/DavidAnson/markdownlint/blob/v0.32.1/doc/md013.md
+# Example markdownlint YAML configuration with all properties set to their default value
+
+# MD013/line-length - Line length
 MD013:
   # Number of characters
   line_length: 250
@@ -10,3 +8,16 @@ MD013:
   heading_line_length: 250
   # Number of characters for code blocks
   code_block_line_length: 250
+  # Include code blocks
+  code_blocks: true
+  # Include tables
+  tables: true
+  # Include headings
+  headings: true
+  # Strict length checking
+  strict: false
+  # Stern length checking
+  stern: false
+
+MD024:
+  siblings_only: true
