@@ -1,0 +1,8 @@
+# markdownlint configuration
+config:
+  # Disable line length check
+  MD013: false
+  # Disable fenced code language requirement
+  MD040: false
+  # Disable heading style check
+  MD003: false

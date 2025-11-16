@@ -366,4 +366,7 @@ function y() {
 ## zoxide
 eval "$(zoxide init zsh)"
 eval "$(uv generate-shell-completion zsh)"
-alias claude="/home/masayuki/.claude/local/claude"
+alias claude="~/.claude/local/claude"
+
+# opencode
+export PATH=/home/masayuki/.opencode/bin:$PATH

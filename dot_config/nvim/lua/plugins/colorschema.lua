@@ -3,10 +3,20 @@ return {
     "LazyVim/LazyVim",
     opts = {
       colorscheme = "catppuccin",
+      -- colorscheme = "tokyonight",
+    },
+  },
+  {
+    "folke/tokyonight.nvim",
+    lazy = true,
+    opts = {
+      transparent_background = true,
+      style = "moon",
     },
   },
   {
     "catppuccin/nvim",
+    lazy = true,
     name = "catppuccin",
     opts = {
       transparent_background = true,
@@ -55,7 +65,7 @@ return {
         optional = true,
         opts = function(_, opts)
           if (vim.g.colors_name or ""):find("catppuccin") then
-            opts.highlights = require("catppuccin.groups.integrations.bufferline").get()
+            opts.highlights = require("catppuccin.special.bufferline").get_theme()
           end
         end,
       },

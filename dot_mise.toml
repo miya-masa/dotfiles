@@ -8,40 +8,6 @@ lua = "latest"
 buf = "latest"
 perl = "latest"
 zig = "latest"
-go = "latest"
+go = "lateset"
 gofumpt = "latest"
 uv = "latest"
-
-[tasks.mcp-atlassian]
-description = "MCPにAtlassianのSSEエンドポイントを追加"
-run = "claude mcp add --transport sse atlassian https://mcp.atlassian.com/v1/sse"
-
-[tasks.mcp-godoc]
-description = "MCPにGoDoc連携を追加"
-env = { GOPATH = "${GOPATH}", GOMODCACHE = "${GOMODCACHE}" }
-run = '''
-claude mcp add-json godoc '{ "command": "'${GOBIN}/godoc-mcp'", "args": [], "env": { "GOPATH": "'${GOPATH}'", "GOMODCACHE": "'${GOMODCACHE}'" } }'
-'''
-
-[tasks.mcp-gitlab]
-description = "MCPにGitLab連携を追加"
-env = { GITLAB_PERSONAL_ACCESS_TOKEN = "${GITLAB_TOKEN}", GITLAB_API_URL = "${GITLAB_API_URL}" }
-run = '''
-claude mcp add-json gitlab '{ "command": "npx", "args": ["-y", "@zereight/mcp-gitlab"], "env": { "GITLAB_PERSONAL_ACCESS_TOKEN": "'${GITLAB_PERSONAL_ACCESS_TOKEN}'", "GITLAB_API_URL": "'${GITLAB_API_URL}'", "GITLAB_READ_ONLY_MODE": "false", "USE_GITLAB_WIKI": "false", "USE_MILESTONE": "false", "USE_PIPELINE": "true" } }'
-'''
-
-[tasks.mcp-serena]
-description = "MCPにSerenaを追加"
-env = { GOPATH = "${GOPATH}", GOMODCACHE = "${GOMODCACHE}" }
-run = '''
-claude mcp add serena -- uv run --directory ${GOPATH}/src/github.com/oraios/serena serena start-mcp-server --context ide-assistant --project $(pwd)
-'''
-
-[tasks.mcp-all]
-description = "すべてのMCP連携を実行"
-run = '''
-mise run mcp-atlassian
-mise run mcp-godoc
-mise run mcp-gitlab
-mise run mcp-serena
-'''
