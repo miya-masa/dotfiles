@@ -6,3 +6,5 @@ config:
   MD040: false
   # Disable heading style check
   MD003: false
+  # no-dpulicate-heading
+  MD024: false
