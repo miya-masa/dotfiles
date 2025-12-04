@@ -370,3 +370,28 @@ alias claude="~/.claude/local/claude"
 
 # opencode
 export PATH=/home/masayuki/.opencode/bin:$PATH
+
+awsprofile() {
+  # ==== profile 一覧取得 ====
+  local profiles
+  profiles=$(aws configure list-profiles 2>/dev/null)
+
+  if [[ -z "$profiles" ]]; then
+    echo "❌ ~/.aws/config に AWS プロファイルが見つかりません。"
+    return 1
+  fi
+
+  # ==== fzfで選択 ====
+  local selected
+  selected=$(echo "$profiles" | fzf --prompt="Select AWS profile: " --height=20 --reverse)
+
+  # Ctrl-C や Esc で抜けたとき
+  if [[ -z "$selected" ]]; then
+    echo "キャンセルしました。"
+    return 1
+  fi
+
+  # ==== export ====
+  export AWS_PROFILE="$selected"
+  echo "✅ AWS_PROFILE を設定しました: $AWS_PROFILE"
+}
