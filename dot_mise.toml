@@ -1,0 +1,13 @@
+[tools]
+task = 'latest'
+node = "latest"
+python = "latest"
+argc = "latest"
+aws-cli = "latest"
+lua = "latest"
+buf = "latest"
+perl = "latest"
+zig = "latest"
+go = "latest"
+gofumpt = "latest"
+uv = "latest"

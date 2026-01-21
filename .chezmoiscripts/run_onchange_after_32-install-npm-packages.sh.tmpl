@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+echo "📦 Installing Node.js packages..."
+
+{{- if eq .chezmoi.os "linux" }}
+# Activate mise to ensure Node.js is available
+eval "$(~/.local/bin/mise activate bash)"
+{{- end }}
+
+npm install -g npm
+# Install global npm packages
+npm install -g \
+  @angular/cli \
+  @nestjs/cli \
+  @vue/cli \
+  eslint \
+  markdownlint-cli \
+  neovim \
+  prettier \
+  sql-language-server \
+  typescript \
+  typescript-language-server \
+  vscode-langservers-extracted \
+  mcp-hub \
+  yaml-language-server
+
+echo "✅ Node.js packages installed successfully!"

@@ -1,6 +1,5 @@
 tap "bufbuild/buf"
 tap "derailed/k9s"
-tap "homebrew/bundle"
 tap "mscharley/homebrew"
 tap "norwoodj/tap"
 tap "songmu/tap"
