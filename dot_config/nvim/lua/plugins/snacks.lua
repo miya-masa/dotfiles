@@ -25,6 +25,23 @@ return {
           },
         },
       },
+      picker = {
+        actions = {
+          sidekick_send = function(...)
+            return require("sidekick.cli.picker.snacks").send(...)
+          end,
+        },
+        win = {
+          input = {
+            keys = {
+              ["<C-b>"] = {
+                "sidekick_send",
+                mode = { "n", "i" },
+              },
+            },
+          },
+        },
+      },
     },
   },
 }
