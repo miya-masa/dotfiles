@@ -361,7 +361,7 @@ eval "$(zoxide init zsh)"
 eval "$(uv generate-shell-completion zsh)"
 
 # opencode
-export PATH=/home/masayuki/.opencode/bin:$PATH
+export PATH=~/.opencode/bin:$PATH
 
 awsprofile() {
   # ==== profile 一覧取得 ====
