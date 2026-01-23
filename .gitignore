@@ -85,3 +85,4 @@ Brewfile_linux.lock.json
 .config/nvim/spell/en.utf-8.add
 .config/nvim/spell/en.utf-8.add.spl
 .aider*
+.serena
