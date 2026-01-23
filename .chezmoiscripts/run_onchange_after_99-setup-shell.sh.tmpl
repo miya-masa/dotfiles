@@ -11,11 +11,19 @@ echo "🐚 Setting up shell environment..."
 
 # Change default shell to zsh (skip in CI environment)
 if [[ ${CI:-"false"} != "true" ]]; then
-  if [ "$SHELL" != "$(which zsh)" ]; then
-    echo "Changing default shell to zsh..."
-    chsh -s $(which zsh)
-    echo "✅ Default shell changed to zsh"
-    echo "📌 Please log out and log back in for the change to take effect"
+  zsh_path=$(command -v zsh || true)
+  if [[ -z "$zsh_path" ]]; then
+    echo "⚠️  zsh not found; skipping default shell change"
+  elif [[ "$SHELL" != "$zsh_path" ]]; then
+    if grep -qx "$zsh_path" /etc/shells; then
+      echo "Changing default shell to zsh..."
+      chsh -s "$zsh_path"
+      echo "✅ Default shell changed to zsh"
+      echo "📌 Please log out and log back in for the change to take effect"
+    else
+      echo "⚠️  $zsh_path is not in /etc/shells; skipping default shell change"
+      echo "   Add it to /etc/shells and re-run if desired"
+    fi
   else
     echo "✅ Default shell is already zsh"
   fi
