@@ -1,9 +1,2 @@
 os:
   editCommand: "nvim"
-
-customCommands:
-  - key: "E"
-    command: "$HOME/.config/lazygit/ai_commit_message.sh"
-    context: "global"
-    description: "Generate commit message with Claude"
-    loadingText: "Generating commit message"
