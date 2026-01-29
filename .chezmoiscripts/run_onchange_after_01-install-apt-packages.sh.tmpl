@@ -54,6 +54,7 @@ sudo apt install -y \
   rpm \
   zlib1g-dev \
   libnss3-tools \
+  locales \
   mercurial \
   snapd \
   tmux \
@@ -64,6 +65,11 @@ sudo apt install -y \
 sudo add-apt-repository ppa:zhangsongcui3371/fastfetch -y
 sudo apt update
 sudo apt install -y fastfetch
+
+# Setup Japanese locale
+echo "🌏 Setting up Japanese locale..."
+sudo locale-gen ja_JP.UTF-8
+sudo update-locale LANG=ja_JP.UTF-8 LC_ALL=ja_JP.UTF-8
 
 echo "✅ System packages installed successfully!"
 
