@@ -394,3 +394,11 @@ case ":$PATH:" in
   *) export PATH="$PNPM_HOME:$PATH" ;;
 esac
 
+# OPENSPEC:START
+# OpenSpec shell completions configuration
+if [[ -d ~/.zsh/completions ]]; then
+  fpath=(~/.zsh/completions $fpath)
+  autoload -Uz compinit
+  compinit
+fi
+# OPENSPEC:END
