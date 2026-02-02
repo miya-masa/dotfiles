@@ -17,13 +17,11 @@ description: Conventional Commits形式のコミットメッセージ作成や�
 ```
 
 - `<scope>` は任意。対象が明確なら指定し、迷う場合は省略する。
-- 破壊的変更は `<type>!` またはフッターで明示する。
+- 破壊的変更はフッターで明示する。
 
 ### 破壊的変更
 
 ```
-feat!: drop legacy auth flow
-
 BREAKING CHANGE: legacy auth endpoints are removed
 ```
 
@@ -67,4 +65,4 @@ revert: revert "feat: add oauth login"
 - typeは変更内容に合っている。
 - scopeは必要な時だけ付けている。
 - subjectは英語の命令形で簡潔。
-- 破壊的変更は `!` か `BREAKING CHANGE:` で明示している。
+- 破壊的変更は`BREAKING CHANGE:` で明示している。
