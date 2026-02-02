@@ -1,0 +1,104 @@
+{
+  "env": {
+    "MAX_MCP_OUTPUT_TOKENS": "100000"
+  },
+  "enabledPlugins": {
+    "security-guidance@claude-code-plugins": true,
+    "claude-md-management@claude-plugins-official": true,
+    "plugin-dev@claude-code-plugins": true,
+    "context7@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "serena@claude-plugins-official": true,
+    "code-simplifier@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "github@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true
+  },
+  "language": "日本語",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".go\"))' | xargs -r gofmt -w --"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:pkg.go.dev)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(go:*)",
+      "Bash(make:*)",
+      "Bash(task:*)",
+      "Bash(find:*)",
+      "Bash(cp:*)",
+      "Bash(rg:*)",
+      "Bash(cat:*)",
+      "Bash(tree:*)",
+      "Bash(openspec:*)",
+      "Bash(git worktree list:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(goimports:*)",
+      "Bash(golangci-lint:*)",
+      "Skill",
+      "SlashCommand(/openspec:*)",
+      "mcp__ide",
+      "mcp__plugin_serena_serena",
+      "mcp__plugin_context7_context7"
+    ],
+    "deny": [
+      "Bash(sudo:*)",
+      "Bash(su:*)",
+      "Bash(rm -rf:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(shutdown:*)",
+      "Bash(reboot:*)",
+      "Bash(wget:*)",
+      "Bash(nc:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(git clean -fd:*)",
+      "Bash(git checkout -f:*)",
+      "Bash(npm install -g:*)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(./.credentials*)",
+      "Read(./.intdash/**)",
+      "Edit(./.env)",
+      "Edit(./.env.*)",
+      "Edit(~/.ssh/**)",
+      "Edit(~/.intdash/**)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(curl:*)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "npx -y ccstatusline@latest",
+    "padding": 0
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  }
+}
