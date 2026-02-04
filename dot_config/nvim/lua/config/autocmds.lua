@@ -24,3 +24,17 @@ vim.api.nvim_create_autocmd({ "FocusGained", "TermOpen" }, {
     end
   end,
 })
+
+-- diffview:// など「実ファイルではない」バッファでLSPを無効化する
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufReadPre", "BufEnter" }, {
+  callback = function(ev)
+    local name = vim.api.nvim_buf_get_name(ev.buf)
+    if name:match("^diffview://") then
+      vim.b[ev.buf].lsp_disable = true
+      -- 念のため既にattach済みなら外す（環境差の保険）
+      for _, c in ipairs(vim.lsp.get_clients({ bufnr = ev.buf })) do
+        vim.lsp.buf_detach_client(ev.buf, c.id)
+      end
+    end
+  end,
+})
