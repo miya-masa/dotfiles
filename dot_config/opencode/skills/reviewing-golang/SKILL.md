@@ -12,9 +12,9 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 
 ## 関連スキルへの参照
 
-| スキル | 確認内容 |
-|--------|----------|
-| **coding-golang** | プロダクトコードの規約（chi、GORM、エラーハンドリング等） |
+| スキル             | 確認内容                                                     |
+| ------------------ | ------------------------------------------------------------ |
+| **coding-golang**  | プロダクトコードの規約（chi、GORM、エラーハンドリング等）    |
 | **testing-golang** | テストコードの規約（testify、mockery、テーブル駆動テスト等） |
 
 **REQUIRED:** レビュー対象がプロダクトコードなら coding-golang、テストコードなら testing-golang の規約に準拠しているか確認すること。
@@ -60,14 +60,14 @@ digraph review_flow {
 
 詳細は [go-review-checklist.md](references/go-review-checklist.md) を参照。
 
-| カテゴリ | 確認項目 |
-|----------|----------|
-| **ゴルーチン安全性** | リーク、無制限生成、競合状態 |
-| **チャネル** | デッドロック、クローズ忘れ、nil送受信 |
-| **リソース管理** | Close()呼び出し、defer使用、コネクションプール |
-| **エラーハンドリング** | 無視されたエラー、rows.Err()、ラッピング |
-| **コンテキスト** | 伝播、キャンセル対応、タイムアウト |
-| **同期** | Mutex unlock漏れ、WaitGroup誤用、sync.Once |
+| カテゴリ               | 確認項目                                       |
+| ---------------------- | ---------------------------------------------- |
+| **ゴルーチン安全性**   | リーク、無制限生成、競合状態                   |
+| **チャネル**           | デッドロック、クローズ忘れ、nil送受信          |
+| **リソース管理**       | Close()呼び出し、defer使用、コネクションプール |
+| **エラーハンドリング** | 無視されたエラー、rows.Err()、ラッピング       |
+| **コンテキスト**       | 伝播、キャンセル対応、タイムアウト             |
+| **同期**               | Mutex unlock漏れ、WaitGroup誤用、sync.Once     |
 
 ### 2. よくある問題パターン
 
@@ -131,25 +131,30 @@ digraph review_flow {
 ## レビュー結果
 
 ### Critical Issues
+
 - [行番号] 問題の説明と修正案
 
 ### High Priority
+
 - [行番号] 問題の説明と修正案
 
 ### Medium Priority
+
 - [行番号] 問題の説明と修正案
 
 ### Suggestions
+
 - 改善提案
 
 ### 確認事項
+
 - coding-golang/testing-golang 規約への準拠: [OK/要修正]
 - プロジェクト固有の規約: [OK/要修正/未確認]
 ```
 
 ## リファレンス一覧
 
-| ファイル | 内容 |
-|----------|------|
-| [go-review-checklist.md](references/go-review-checklist.md) | Go特有のレビュー観点詳細 |
-| [common-go-issues.md](references/common-go-issues.md) | よくある問題パターンと修正例 |
+| ファイル                                                    | 内容                         |
+| ----------------------------------------------------------- | ---------------------------- |
+| [go-review-checklist.md](references/go-review-checklist.md) | Go特有のレビュー観点詳細     |
+| [common-go-issues.md](references/common-go-issues.md)       | よくある問題パターンと修正例 |

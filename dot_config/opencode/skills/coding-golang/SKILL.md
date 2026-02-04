@@ -8,12 +8,12 @@ invocation: user
 
 ## 対応バージョン
 
-| 項目 | バージョン |
-|------|-----------|
-| Go | 1.21+ |
-| chi | v5.x |
-| GORM | v1.25+ |
-| GORM-Gen | v0.3+ |
+| 項目     | バージョン |
+| -------- | ---------- |
+| Go       | 1.21+      |
+| chi      | v5.x       |
+| GORM     | v1.25+     |
+| GORM-Gen | v0.3+      |
 
 ## 概要
 
@@ -41,11 +41,11 @@ invocation: user
 
 ## 主要な技術スタック
 
-| ライブラリ | 用途 | 参照 |
-|-----------|------|------|
-| **chi** | HTTPルーター | [chi-patterns.md](references/chi-patterns.md) |
-| **GORM / GORM-Gen** | ORM（GORM-Gen優先） | [gorm-patterns.md](references/gorm-patterns.md) |
-| **プロジェクト固有ロガー** | ロギング | プロジェクト内のコードを参照 |
+| ライブラリ                 | 用途                | 参照                                            |
+| -------------------------- | ------------------- | ----------------------------------------------- |
+| **chi**                    | HTTPルーター        | [chi-patterns.md](references/chi-patterns.md)   |
+| **GORM / GORM-Gen**        | ORM（GORM-Gen優先） | [gorm-patterns.md](references/gorm-patterns.md) |
+| **プロジェクト固有ロガー** | ロギング            | プロジェクト内のコードを参照                    |
 
 ## コード作成の基本原則
 
@@ -143,13 +143,13 @@ func CreateUser(ctx context.Context, name, email string) (*User, error) {
 
 実装時には該当するパターンを参照すること：
 
-| ファイル | 内容 |
-|----------|------|
-| [chi-patterns.md](references/chi-patterns.md) | chiルーターの使用パターン（ルーティング、ミドルウェア、認証） |
-| [gorm-patterns.md](references/gorm-patterns.md) | GORM/GORM-Genの使用パターン（CRUD、リレーション、トランザクション） |
-| [error-handling.md](references/error-handling.md) | エラーハンドリングパターン（カスタムエラー、ラッピング） |
-| [coding-standards.md](references/coding-standards.md) | コーディング規約とベストプラクティス |
-| [modern-go.md](references/modern-go.md) | Go 1.21+の新機能（slog、errors.Join等） |
+| ファイル                                              | 内容                                                                |
+| ----------------------------------------------------- | ------------------------------------------------------------------- |
+| [chi-patterns.md](references/chi-patterns.md)         | chiルーターの使用パターン（ルーティング、ミドルウェア、認証）       |
+| [gorm-patterns.md](references/gorm-patterns.md)       | GORM/GORM-Genの使用パターン（CRUD、リレーション、トランザクション） |
+| [error-handling.md](references/error-handling.md)     | エラーハンドリングパターン（カスタムエラー、ラッピング）            |
+| [coding-standards.md](references/coding-standards.md) | コーディング規約とベストプラクティス                                |
+| [modern-go.md](references/modern-go.md)               | Go 1.21+の新機能（slog、errors.Join等）                             |
 
 ## 実装フロー
 

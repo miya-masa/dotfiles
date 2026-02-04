@@ -5,6 +5,12 @@ description: Conventional Commits形式のコミットメッセージ作成や�
 
 # Conventional Commitsガイド
 
+## コンテキスト
+
+- Git Status !`git status`
+- Git Diff !`git diff --stat HEAD`
+- Git Log !`git log --oneline -20`
+
 ## 目的
 
 - 変更内容を一貫した形式で伝える。
@@ -66,3 +72,4 @@ revert: revert "feat: add oauth login"
 - scopeは必要な時だけ付けている。
 - subjectは英語の命令形で簡潔。
 - 破壊的変更は`BREAKING CHANGE:` で明示している。
+- コミットメッセージは原則英語とする。ただし、過去のメッセージが日本語の場合は一貫性を優先しても良い。
