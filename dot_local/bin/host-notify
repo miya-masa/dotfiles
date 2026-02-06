@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+title="${1:-Claude}"
+body="${2:-Done}"
+
+# Ghostty: OSC 9 (notification) + ST terminator
+osc="$(printf '\033]9;%s — %s\033\\' "$title" "$body")"
+
+# tmuxクライアントのTTYを取得（複数クライアントがある場合は全員に出す）
+if [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then
+  # すべてのクライアントに通知（必要なら絞れます）
+  tmux list-clients -F '#{client_tty}' 2>/dev/null | while IFS= read -r tty; do
+    [ -n "$tty" ] || continue
+    # 直接クライアントTTYへ書く
+    printf '%s' "$osc" >"$tty" || true
+  done
+else
+  # tmuxはそのまま標準出力
+  printf '%s' "$osc"
+fi
+
