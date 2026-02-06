@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# 使い方: osc52-copy "text"
+text="$1"
+# 改行を保持しつつ base64、末尾の改行は削除
+b64=$(printf %s "$text" | base64 | tr -d '\n')
+# 今アクティブな pane の TTY を取得
+tty=$(tmux display -p -F "#{pane_tty}")
+# その TTY に向けて OSC52 を送る（→ クライアントの端末に届く）
+printf '\033]52;c;%s\a' "$b64" > "$tty"
+
