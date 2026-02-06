@@ -19,4 +19,3 @@ else
   # tmuxはそのまま標準出力
   printf '%s' "$osc"
 fi
-

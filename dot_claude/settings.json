@@ -3,6 +3,7 @@
     "MAX_MCP_OUTPUT_TOKENS": "100000"
   },
   "enabledPlugins": {
+    "atlassian@claude-plugins-official": true,
     "security-guidance@claude-code-plugins": true,
     "claude-md-management@claude-plugins-official": true,
     "plugin-dev@claude-code-plugins": true,
@@ -24,6 +25,29 @@
           {
             "type": "command",
             "command": "jq -r '.tool_input.file_path | select(endswith(\".go\"))' | xargs -r gofmt -w --"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "host-notify \"Claude [$(tmux display-message -p '#S:#I.#P' 2>/dev/null || echo '?')]\" \"タスク完了\"",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "host-notify \"Claude [$(tmux display-message -p '#S:#I.#P' 2>/dev/null || echo '?')]\" \"承認待ち\"",
+            "async": true
           }
         ]
       }
