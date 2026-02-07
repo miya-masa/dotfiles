@@ -1,0 +1,10 @@
+# font-family = "PlemolJP Console NF"
+font-family = "Moralerspace Neon HW"
+font-style = Regular
+font-size = 11.0
+font-thicken = true
+font-thicken-strength = 60
+theme = Catppuccin Mocha
+shell-integration = zsh
+background-opacity = 0.85
+desktop-notifications = true
