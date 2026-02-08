@@ -24,12 +24,16 @@ export XDG_CONFIG_HOME=$HOME/.config
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 export PATH=${PATH}:${HOME}/bin:${HOME}/.local/bin
 [ -f ~/.zprofile.local ] && source ~/.zprofile.local
-export PATH="/usr/local/opt/mysql-client/bin:$PATH"
 export PATH="$HOME/.poetry/bin:$PATH"
 export PATH="$HOME/.rbenv/bin:$PATH"
-export PATH="/usr/local/opt/gettext/bin:$PATH"
 export PATH="/home/linuxbrew/.linuxbrew/opt/glibc/bin:$PATH"
 export PATH="/home/linuxbrew/.linuxbrew/opt/glibc/sbin:$PATH"
+# mysql-client / gettext は brew prefix から引く
+if command -v brew >/dev/null; then
+  export PATH="$(brew --prefix)/opt/mysql-client/bin:$PATH"
+  export PATH="$(brew --prefix)/opt/gettext/bin:$PATH"
+fi
+
 if [[ -e $HOME/.krew ]]; then
   export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 fi
@@ -327,8 +331,6 @@ pass() {
 eval "$(starship init zsh)"
 source <(starship completions zsh)
 
-complete -C '/usr/local/bin/aws_completer' aws
-
 ### NVIM REMOTE
 if [ -n "$NVIM" ]; then
     alias nvim="nvr -cc split --remote-wait +'set bufhidden=wipe'"
@@ -357,7 +359,9 @@ function y() {
 }
 
 ## zoxide
-eval "$(zoxide init zsh)"
+if command -v zoxide >/dev/null; then
+  eval "$(zoxide init zsh)"
+fi
 eval "$(uv generate-shell-completion zsh)"
 
 # opencode
@@ -395,10 +399,12 @@ case ":$PATH:" in
 esac
 
 # OPENSPEC:START
-# OpenSpec shell completions configuration
-if [[ -d ~/.zsh/completions ]]; then
-  fpath=(~/.zsh/completions $fpath)
-  autoload -Uz compinit
-  compinit
-fi
+fpath=("$HOME/.zsh/completions" $fpath)
 # OPENSPEC:END
+
+# bun completions
+[ -s "~/.bun/_bun" ] && source "~/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
