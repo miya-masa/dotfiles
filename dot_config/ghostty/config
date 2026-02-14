@@ -8,3 +8,5 @@ theme = Catppuccin Mocha
 shell-integration = zsh
 background-opacity = 0.85
 desktop-notifications = true
+clipboard-read = deny
+clipboard-write = allow
