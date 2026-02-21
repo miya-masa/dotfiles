@@ -1,6 +1,15 @@
 return {
   {
     "snacks.nvim",
+    keys = {
+      {
+        "<leader>dk",
+        function()
+          Snacks.terminal("lazydocker", { cwd = LazyVim.root() })
+        end,
+        desc = "Lazydocker (Root Dir)",
+      },
+    },
     opts = {
       animate = {
         enabled = false,
