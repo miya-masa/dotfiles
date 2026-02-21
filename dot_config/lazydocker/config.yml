@@ -1,0 +1,27 @@
+gui:
+  # 起動時に logs panel を開かない（最重要）
+  showLogPanel: false
+
+  # stats refresh を落とす（デフォルトよりかなり安全）
+  refreshRate: 1
+
+  # events stream を抑制
+  showContainerEvents: false
+
+  # 表示件数制限（バッファ抑制）
+  logPanel:
+    maxLines: 2000
+
+stats:
+  # stats API polling 間隔
+  refreshInterval: 5
+
+logs:
+  # auto follow しない
+  tail: 200
+  sinceSeconds: 300
+
+# events stream disable
+events:
+  ignore:
+    - health_status
