@@ -1,2 +1,33 @@
 os:
   editCommand: "nvim"
+gui:
+  mouseEvents: true
+  sidePanelWidth: 0.3
+  showCommitHashLength: 8
+  showBranchCommitHash: true
+  showBottomLine: false
+  showFileTree: true
+  theme:
+    activeBorderColor:
+      - "#a6e3a1"
+      - bold
+    inactiveBorderColor:
+      - "#585b70"
+    searchingActiveBorderColor:
+      - "#f9e2af"
+      - bold
+    optionsTextColor:
+      - "#89b4fa"
+    selectedLineBgColor:
+      - "#313244"
+    inactiveViewSelectedLineBgColor:
+      - "#1e1e2e"
+git:
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never --line-numbers
+  autoFetch: true
+  autoRefresh: true
+  skipHookPrefix: WIP
+notARepository: quit
+promptToReturnFromSubprocess: false
