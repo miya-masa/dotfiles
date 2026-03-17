@@ -134,7 +134,7 @@ ctop"
     stats)
       local ids
       ids=$(__dk_select_container --multi) || return
-      __dk_run docker stats --no-stream $ids
+      __dk_run docker stats --no-stream ${(f)ids}
       ;;
     images)
       __dk_run docker images
@@ -147,12 +147,12 @@ ctop"
     compose-restart)
       local svcs
       svcs=$(__dk_select_service --multi) || return
-      __dk_run docker compose restart $svcs
+      __dk_run docker compose restart ${(f)svcs}
       ;;
     compose-up)
       local svcs
       svcs=$(__dk_select_service --multi) || return
-      __dk_run docker compose up -d $svcs
+      __dk_run docker compose up -d ${(f)svcs}
       ;;
     compose-down)
       __dk_run docker compose down
