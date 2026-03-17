@@ -153,13 +153,10 @@ esac
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
-alias dps='docker ps'
-alias dim='docker images'
-alias dkill='docker container ls -q | xargs docker kill'
-alias dc='docker compose'
 alias rand="head -n 10 /dev/urandom | base64 | head -n 1 | cut -c 1-32 | tr '/+' '_-'"
 alias tagsort="git tag | tr - \~ | sort -V | tr \~ -"
 source <(fzf --zsh)
+[ -f ~/.zsh/docker.zsh ] && source ~/.zsh/docker.zsh
 #
 # # options
 # set -o auto_list
