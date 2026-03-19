@@ -157,6 +157,7 @@ alias rand="head -n 10 /dev/urandom | base64 | head -n 1 | cut -c 1-32 | tr '/+'
 alias tagsort="git tag | tr - \~ | sort -V | tr \~ -"
 source <(fzf --zsh)
 [ -f ~/.zsh/docker.zsh ] && source ~/.zsh/docker.zsh
+[ -f ~/.zsh/tmuxp.zsh ] && source ~/.zsh/tmuxp.zsh
 #
 # # options
 # set -o auto_list
