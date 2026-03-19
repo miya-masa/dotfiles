@@ -6,8 +6,8 @@
 
 tp() {
   # 依存コマンドのガード
-  command -v tmuxp >/dev/null || { echo "tmuxp is not installed"; return 1 }
-  command -v fzf >/dev/null || { echo "fzf is not installed"; return 1 }
+  command -v tmuxp >/dev/null || { echo "tmuxp is not installed"; return 1; }
+  command -v fzf >/dev/null || { echo "fzf is not installed"; return 1; }
 
   # ghq / zoxide のどちらかは必要
   if ! command -v ghq >/dev/null && ! command -v zoxide >/dev/null; then
