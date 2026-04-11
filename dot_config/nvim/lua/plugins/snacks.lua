@@ -14,14 +14,28 @@ return {
       animate = {
         enabled = false,
       },
-      scroll = {
-        animate = {
-          duration = { step = 15, total = 25 },
-        },
-      },
-      indent = {
-        animate = {
-          enabled = false,
+      dashboard = {
+        preset = {
+          header = (function()
+            local lines = {
+              [[           __                                     __]],
+              [[  ___ ___ /\_\  __  __     __             __  __ /\_\    ___ ___]],
+              [[ /' __` __`\/\ \/\ \/\ \  /'__`\   _______/\ \/\ \\/\ \ /' __` __`\]],
+              [[/\ \/\ \/\ \ \ \ \ \_\ \/\ \L\.\_/\______\ \ \_/ |\ \ \/\ \/\ \/\ \]],
+              [[\ \_\ \_\ \_\ \_\/`____ \ \__/.\_\/______/\ \___/  \ \_\ \_\ \_\ \_\]],
+              [[ \/_/\/_/\/_/\/_/`/___/> \/__/\/_/         \/__/    \/_/\/_/\/_/\/_/]],
+              [[                    /\___/]],
+              [[                    \/__/]],
+            }
+            local max = 0
+            for _, l in ipairs(lines) do
+              if #l > max then max = #l end
+            end
+            for i, l in ipairs(lines) do
+              lines[i] = l .. string.rep(" ", max - #l)
+            end
+            return table.concat(lines, "\n")
+          end)(),
         },
       },
       terminal = {
