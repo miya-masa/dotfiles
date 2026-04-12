@@ -406,3 +406,9 @@ fpath=("$HOME/.zsh/completions" $fpath)
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+
+source "$HOME/.config/cc-pane/functions.sh" # cc-pane
+
+alias claude-mem='bun "/home/masayuki/.claude/plugins/cache/thedotmack/claude-mem/12.1.0/scripts/worker-service.cjs"'
