@@ -1,0 +1,8 @@
+session_name: tile
+windows:
+  - layout: tiled
+    panes:
+      - null
+      - null
+      - null
+      - null

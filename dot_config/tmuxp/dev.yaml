@@ -1,0 +1,13 @@
+session_name: dev
+windows:
+  - layout: main-vertical
+    options:
+      main-pane-width: 66%
+    panes:
+      - shell_command:
+          - nvim
+        focus: true
+      - shell_command:
+          - claude
+      - null
+      - null
