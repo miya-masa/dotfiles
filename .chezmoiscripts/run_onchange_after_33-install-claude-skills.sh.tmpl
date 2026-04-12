@@ -14,8 +14,15 @@ echo "📦 Installing Claude Code skills..."
 eval "$(~/.local/bin/mise activate bash)"
 {{- end }}
 
-npx skills add https://github.com/obra/superpowers --skill brainstorming -y --global -a claude-code
+# superpowersスキルはClaude Codeプラグインで提供されるため除外
+# (opencode向けには別スクリプトでセットアップ)
+
+# Claude Code専用スキル (プラグイン代替なし)
 npx skills add https://github.com/vercel-labs/skills --skill find-skills -y --global -a claude-code
 npx skills add https://github.com/antfu/skills --skill slidev -y --global -a claude-code
+
+# 旧スキルのクリーンアップ
+rm -rf ~/.agents/skills/brainstorming ~/.agents/skills/using-git-worktrees
+rm -f ~/.claude/skills/brainstorming ~/.claude/skills/using-git-worktrees
 
 echo "✅ Claude Code skills installed successfully!"

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+echo "📦 Installing opencode superpowers..."
+
+SUPERPOWERS_DIR="${HOME}/.config/opencode/superpowers"
+
+# 1. superpowersリポジトリをclone (既存なら更新)
+if [ -d "${SUPERPOWERS_DIR}" ]; then
+  cd "${SUPERPOWERS_DIR}" && git pull
+else
+  git clone https://github.com/obra/superpowers.git "${SUPERPOWERS_DIR}"
+fi
+
+# 2. ディレクトリ作成
+mkdir -p ~/.config/opencode/plugins ~/.config/opencode/skills
+
+# 3. 既存symlink削除 (冪等性)
+rm -f ~/.config/opencode/plugins/superpowers.js
+rm -rf ~/.config/opencode/skills/superpowers
+
+# 4. symlink作成
+ln -s "${SUPERPOWERS_DIR}/.opencode/plugins/superpowers.js" ~/.config/opencode/plugins/superpowers.js
+ln -s "${SUPERPOWERS_DIR}/skills" ~/.config/opencode/skills/superpowers
+
+echo "✅ opencode superpowers installed successfully!"
