@@ -1,57 +1,14 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "respectGitignore": true,
   "env": {
-    "MAX_MCP_OUTPUT_TOKENS": "100000"
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "MAX_MCP_OUTPUT_TOKENS": "300000"
   },
-  "enabledPlugins": {
-    "atlassian@claude-plugins-official": true,
-    "security-guidance@claude-code-plugins": true,
-    "claude-md-management@claude-plugins-official": true,
-    "plugin-dev@claude-code-plugins": true,
-    "context7@claude-plugins-official": true,
-    "feature-dev@claude-plugins-official": true,
-    "serena@claude-plugins-official": true,
-    "code-simplifier@claude-plugins-official": true,
-    "superpowers@claude-plugins-official": true,
-    "github@claude-plugins-official": true,
-    "commit-commands@claude-plugins-official": true,
-    "gopls-lsp@claude-plugins-official": true
-  },
-  "language": "日本語",
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "jq -r '.tool_input.file_path | select(endswith(\".go\"))' | xargs -r gofmt -w --"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "host-notify \"Claude [$(tmux display-message -p '#S:#I.#P' 2>/dev/null || echo '?')]\" \"タスク完了\"",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "permission_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "host-notify \"Claude [$(tmux display-message -p '#S:#I.#P' 2>/dev/null || echo '?')]\" \"承認待ち\"",
-            "async": true
-          }
-        ]
-      }
-    ]
+  "attribution": {
+    "commit": "",
+    "pr": ""
   },
   "permissions": {
     "allow": [
@@ -59,6 +16,7 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:pkg.go.dev)",
       "Bash(mkdir:*)",
+      "Bash(wt:*)",
       "Bash(ls:*)",
       "Bash(grep:*)",
       "Bash(go:*)",
@@ -69,20 +27,52 @@
       "Bash(rg:*)",
       "Bash(cat:*)",
       "Bash(tree:*)",
+      "Bash(cd:*)",
       "Bash(openspec:*)",
-      "Bash(git worktree list:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git branch:*)",
-      "Bash(git show:*)",
+      "Bash(git:*)",
       "Bash(goimports:*)",
       "Bash(golangci-lint:*)",
+      "Bash(tail:*)",
       "Skill",
       "SlashCommand(/openspec:*)",
       "mcp__ide",
       "mcp__plugin_serena_serena",
-      "mcp__plugin_context7_context7"
+      "mcp__plugin_context7_context7",
+      "Bash(bd:*)",
+      "Bash(beads:*)",
+      "Bash(docker:*)",
+      "Bash(docker compose:*)",
+      "Bash(gh:*)",
+      "Bash(node:*)",
+      "Bash(python3:*)",
+      "Bash(codex:*)",
+      "Bash(echo:*)",
+      "Bash(delta:*)",
+      "Bash(head:*)",
+      "Bash(jq:*)",
+      "Bash(yq:*)",
+      "Bash(awk:*)",
+      "Bash(cut:*)",
+      "Bash(sort:*)",
+      "Bash(uniq:*)",
+      "Bash(printf:*)",
+      "mcp__claude_ai_atlassian",
+      "mcp__plugin_slack_slack__slack_read_thread",
+      "mcp__plugin_slack_slack__slack_read_channel",
+      "mcp__plugin_slack_slack__slack_read_user_profile",
+      "mcp__plugin_slack_slack__slack_read_canvas",
+      "mcp__plugin_slack_slack__slack_search_channels",
+      "mcp__plugin_slack_slack__slack_search_public",
+      "mcp__plugin_slack_slack__slack_search_public_and_private",
+      "mcp__plugin_slack_slack__slack_search_users",
+      "mcp__plugin_atlassian_atlassian",
+      "mcp__plugin_claude-mem_mcp-search",
+      "Bash(/tmp/claude-:*)",
+      "Bash(agent-browser:*)",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:go.dev)",
+      "WebFetch(domain:docs.github.com)",
+      "WebSearch"
     ],
     "deny": [
       "Bash(sudo:*)",
@@ -94,35 +84,308 @@
       "Bash(reboot:*)",
       "Bash(wget:*)",
       "Bash(nc:*)",
+      "Bash(git -C:*)",
       "Bash(git reset --hard:*)",
       "Bash(git clean -fd:*)",
       "Bash(git checkout -f:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git checkout -- .:*)",
+      "Bash(git checkout .:*)",
+      "Bash(git restore .:*)",
+      "Bash(git stash drop:*)",
+      "Bash(git branch -D:*)",
       "Bash(npm install -g:*)",
       "Read(./.env)",
-      "Read(./.env.*)",
-      "Read(~/.ssh/**)",
-      "Read(~/.aws/**)",
-      "Read(./.credentials*)",
-      "Read(./.intdash/**)",
-      "Edit(./.env)",
-      "Edit(./.env.*)",
-      "Edit(~/.ssh/**)",
-      "Edit(~/.intdash/**)"
+      "Read(~/.ssh)",
+      "Read(./.credentials)",
+      "Edit(~/.env)",
+      "Edit(~/.ssh)",
+      "Write(./.env)",
+      "Write(./.credentials)",
+      "Write(~/.ssh)",
+      "Write(~/.aws)"
     ],
     "ask": [
-      "Bash(git push:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(curl:*)"
+      "Bash(git push main*)",
+      "Bash(git push master*)",
+      "Bash(git add main*)",
+      "Bash(git add master*)",
+      "Bash(git commit main*)",
+      "Bash(git commit master*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(aws:*)",
+      "Read(~/.aws)",
+      "mcp__plugin_slack_slack__slack_send_message",
+      "mcp__plugin_slack_slack__slack_send_message_draft",
+      "mcp__plugin_slack_slack__slack_schedule_message",
+      "mcp__plugin_slack_slack__slack_create_canvas",
+      "mcp__plugin_slack_slack__slack_update_canvas"
+    ],
+    "additionalDirectories": [
+      "~/go",
+      "~/claude/skills",
+      "/tmp/claude"
+    ]
+  },
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event Notification",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event PermissionRequest",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event PostCompact",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".go\"))' | xargs -r gofmt -w --"
+          },
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path | select(endswith(\".py\"))' | xargs -r ruff format --"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event PostToolUse",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event PreCompact",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/masayuki/.claude/hooks/block-bash-file-write.sh",
+            "timeout": 3000,
+            "statusMessage": "Checking for Bash file-write redirects..."
+          },
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_TOOL_INPUT\" | jq -re '.command | test(\"^git commit\")' >/dev/null 2>&1 || exit 0; which go >/dev/null 2>&1 || exit 0; go vet ./... 2>&1 && go build -race ./... 2>&1 || echo '{\"decision\":\"block\",\"reason\":\"go vet or race build failed\"}'",
+            "timeout": 30000,
+            "statusMessage": "Running pre-commit checks (go vet + race build)..."
+          },
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_TOOL_INPUT\" | jq -re '.command | test(\"^git commit\")' >/dev/null 2>&1 || exit 0; which go >/dev/null 2>&1 || exit 0; tags=$(git diff --cached --name-only -- '*.go' 2>/dev/null | xargs grep -l '//go:build' 2>/dev/null | while read -r f; do grep -oP '//go:build \\K\\S+' \"$f\"; done | sort -u); for tag in $tags; do pkgs=$(git diff --cached --name-only -- '*.go' 2>/dev/null | xargs grep -l \"//go:build.*$tag\" 2>/dev/null | xargs -r dirname | sort -u | sed 's|$|/...|'); if [ -n \"$pkgs\" ]; then go build -tags \"$tag\" $pkgs 2>&1 || { echo \"{\\\"decision\\\":\\\"block\\\",\\\"reason\\\":\\\"build with -tags $tag failed\\\"}\"; exit 0; }; fi; done",
+            "timeout": 30000,
+            "statusMessage": "Checking build-tagged files..."
+          },
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_TOOL_INPUT\" | jq -re '.command | test(\"^git commit\")' >/dev/null 2>&1 || exit 0; unstaged=$(git diff --name-only -- '*.pb.go' '*.connect.go' '*mock*/*.go' '*_gen.go' 2>/dev/null); if [ -n \"$unstaged\" ]; then echo \"{\\\"decision\\\":\\\"block\\\",\\\"reason\\\":\\\"unstaged generated files detected: $(echo $unstaged | head -c 200)\\\"}\"; fi",
+            "timeout": 5000,
+            "statusMessage": "Checking for unstaged generated files..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event PreToolUse",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/masayuki/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event SessionEnd",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event SessionStart",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event Stop",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cc-pane update-state --event UserPromptSubmit",
+            "async": true
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
     "type": "command",
-    "command": "npx -y ccstatusline@latest",
-    "padding": 0
+    "command": "bash $HOME/.claude/statusline.sh"
   },
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  }
+  "enabledPlugins": {
+    "atlassian@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true,
+    "code-review@claude-plugins-official": false,
+    "code-simplifier@claude-plugins-official": false,
+    "codex@openai-codex": true,
+    "context7@claude-plugins-official": true,
+    "document-skills@anthropic-agent-skills": true,
+    "explanatory-output-style@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "serena@claude-plugins-official": false,
+    "slack@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": false,
+    "worktrunk@worktrunk": true,
+    "claude-api@anthropic-agent-skills": true,
+    "claude-mem@thedotmack": true
+  },
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    },
+    "worktrunk": {
+      "source": {
+        "source": "github",
+        "repo": "max-sixty/worktrunk"
+      }
+    },
+    "thedotmack": {
+      "source": {
+        "source": "github",
+        "repo": "thedotmack/claude-mem"
+      }
+    }
+  },
+  "language": "日本語",
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "network": {
+      "allowedDomains": [
+        "github.com",
+        "*.npmjs.org",
+        "registry.yarnpkg.com",
+        "pkg.go.dev",
+        "proxy.golang.org",
+        "sum.golang.org",
+        "storage.googleapis.com",
+        "*.amazonaws.com",
+        "*.aws.amazon.com",
+        "sts.amazonaws.com",
+        "raw.githubusercontent.com"
+      ],
+      "allowUnixSockets": [
+        "/var/run/docker.sock"
+      ],
+      "allowLocalBinding": true
+    },
+    "excludedCommands": [
+      "docker",
+      "docker-compose",
+      "git",
+      "aws",
+      "gh",
+      "glab",
+      "node",
+      "codex",
+      "ssh",
+      "scp",
+      "rtk docker",
+      "rtk docker-compose",
+      "rtk git",
+      "rtk aws",
+      "rtk gh",
+      "rtk glab",
+      "rtk node",
+      "rtk codex",
+      "rtk ssh",
+      "rtk scp",
+      "rtk git",
+      "python3"
+    ]
+  },
+  "effortLevel": "high",
+  "defaultMode": "auto"
 }
