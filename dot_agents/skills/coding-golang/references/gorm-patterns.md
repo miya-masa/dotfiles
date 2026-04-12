@@ -599,10 +599,68 @@ func CreateUser(db *gorm.DB, user *User) error {
 ## ベストプラクティス
 
 1. **GORM-Gen優先**: プロジェクトにGORM-Genが存在する場合は生成されたコードを使用
-2. **トランザクション**: 複数の関連操作は必ずトランザクション内で実行
+2. **トランザクション**: 複数の関連操作は必ずトランザクション内で実行（下記「トランザクション境界設計」参照）
 3. **Preload**: N+1問題を避けるため、関連データはPreloadを使用
 4. **エラーハンドリング**: `gorm.ErrRecordNotFound`などの特定エラーを適切に処理
 5. **インデックス**: 頻繁に検索するカラムにはインデックスを設定
 6. **ソフトデリート**: 論理削除が必要な場合は`gorm.DeletedAt`を使用
 7. **バッチ処理**: 大量データ処理はバッチで実行してメモリ効率を向上
 8. **Raw SQL**: 複雑なクエリはRaw SQLを使用して可読性とパフォーマンスを確保
+
+## トランザクション境界設計
+
+### トランザクションが必要なケース
+
+| ケース | 理由 | 例 |
+|--------|------|-----|
+| **複数の書き込み操作** | 部分失敗でデータ不整合になる | secret削除 + recovery codes削除 |
+| **読み取り→判断→書き込み（TOCTOU）** | チェックと操作の間に競合が起きる | MFA要件チェック → TOTP削除 |
+| **削除→再作成** | 削除だけ成功すると復旧不可 | 既存コード削除 → 新コード保存 |
+
+### トランザクション外に置くべき操作
+
+| 操作 | 理由 |
+|------|------|
+| **bcrypt比較/ハッシュ生成** | 意図的に遅い関数。トランザクション内だとDB接続を長時間占有 |
+| **暗号化/復号処理** | CPU負荷が高い |
+| **外部API呼び出し** | ネットワーク遅延でトランザクションが長引く |
+| **ランダム値/コード生成** | 純粋な計算処理でDBアクセス不要 |
+
+### usecase層での典型パターン（DoInTransaction）
+
+```go
+func (u *Usecase) Operation(ctx context.Context, input Input) error {
+    // Phase 1: トランザクション外 — CPU負荷の高い事前処理
+    user, err := u.userRepo.FindByUUID(ctx, input.UserUUID)
+    if err != nil {
+        return xerrors.Errorf("find user: %w", err)
+    }
+    if err := u.hasher.Compare(input.Password, user.Password.Hash); err != nil {
+        return xerrors.Errorf("invalid password: %w", errors.ErrUnauthorized)
+    }
+
+    // Phase 2: トランザクション内 — 条件チェック + 書き込みを原子的に実行
+    result := u.transaction.DoInTransaction(ctx, func(ctx context.Context) *transaction.Result {
+        // 条件チェック（TOCTOU防止のためトランザクション内）
+        existing, err := u.repo.Find(ctx, input.ID)
+        if err != nil {
+            return transaction.Failure(xerrors.Errorf("find: %w", err))
+        }
+        if !existing.IsActive() {
+            return transaction.Failure(xerrors.Errorf("not active: %w", errors.ErrConflict))
+        }
+
+        // 複数の書き込み操作（原子性保証）
+        if err := u.repo.Delete(ctx, input.ID); err != nil {
+            return transaction.Failure(xerrors.Errorf("delete: %w", err))
+        }
+        if err := u.relatedRepo.DeleteByParentID(ctx, input.ID); err != nil {
+            return transaction.Failure(xerrors.Errorf("delete related: %w", err))
+        }
+
+        return transaction.Success(nil)
+    })
+
+    return result.Err
+}
+```

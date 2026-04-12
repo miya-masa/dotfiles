@@ -1,7 +1,7 @@
 ---
 name: reviewing-golang
-description: Use when reviewing Go code (production or test). Triggers on code review requests, PR reviews, or when asked to check Go code quality. Covers goroutine safety, error handling, resource leaks, and project conventions from coding-golang/testing-golang skills.
-invocation: user
+description: Goコードの品質確認が必要な全てのタスクで使用。明示的なレビュー依頼だけでなく、バグ修正や機能実装の完了後にも自動発動し、修正コードの安全性を検証する。並行ライフサイクルの安全性、goroutineリーク、エラーハンドリング、リソース管理、対称構造（upstream/downstream）の修正漏れを体系的にチェックする。
+invocation: auto
 ---
 
 # Go Code Reviewer (reviewing-golang)
@@ -19,46 +19,11 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 
 **REQUIRED:** レビュー対象がプロダクトコードなら coding-golang、テストコードなら testing-golang の規約に準拠しているか確認すること。
 
-## レビューフロー
-
-```dot
-digraph review_flow {
-    rankdir=TB;
-    node [shape=box];
-
-    start [label="コードレビュー開始" shape=ellipse];
-    check_type [label="コードの種類を判定" shape=diamond];
-
-    prod_skill [label="coding-golang規約を確認"];
-    test_skill [label="testing-golang規約を確認"];
-
-    go_issues [label="Go特有の問題をチェック\n(references/go-review-checklist.md)"];
-    common_issues [label="よくある問題パターン確認\n(references/common-go-issues.md)"];
-
-    project_check [label="プロジェクト固有の規約確認\n(既存コードとの一貫性)"];
-    summary [label="レビュー結果を整理\n(重要度順)"];
-    done [label="レビュー完了" shape=ellipse];
-
-    start -> check_type;
-    check_type -> prod_skill [label="プロダクトコード"];
-    check_type -> test_skill [label="テストコード"];
-    check_type -> prod_skill [label="両方"];
-    check_type -> test_skill [label="両方"];
-
-    prod_skill -> go_issues;
-    test_skill -> go_issues;
-    go_issues -> common_issues;
-    common_issues -> project_check;
-    project_check -> summary;
-    summary -> done;
-}
-```
-
 ## レビュー観点
 
 ### 1. Go特有の問題（最重要）
 
-詳細は [go-review-checklist.md](references/go-review-checklist.md) を参照。
+**REQUIRED**: レビュー開始時に `references/go-review-checklist.md` を **Read ツールで読み込む**こと。リンクを見るだけでなく、ファイルの全内容を読み込んでからレビューを行う。特に修正が状態遷移・ライフサイクル管理・クリーンアップ処理に関わる場合、「並行ライフサイクルの安全性」セクションのチェックリストを全項目適用すること。
 
 | カテゴリ               | 確認項目                                       |
 | ---------------------- | ---------------------------------------------- |
@@ -109,6 +74,18 @@ digraph review_flow {
 - [ ] Mutexのunlockがすべてのパスで保証されているか
 - [ ] エラーが無視されていないか
 - [ ] コンテキストが適切に伝播されているか
+- [ ] 複数のRepository書き込み操作が `DoInTransaction` で囲まれているか
+- [ ] 読み取り→判断→書き込み（TOCTOU）パターンが同一トランザクション内にあるか
+
+### Critical（並行ライフサイクル — 状態遷移・クリーンアップ・リソースライフサイクルを含む修正の場合）
+
+修正が状態遷移、クリーンアップ処理、リソースのライフサイクル管理に関わる場合、以下を**すべて明示的に確認し、各項目のOK/NG判定を出力に含める**こと。
+
+- [ ] 旧状態と新状態が共存する遷移期間で、すべての操作の挙動が定義されているか
+- [ ] クリーンアップ処理（Close, Shutdown, Cleanup等）が、並行して確立された新しい状態を上書きしないか（キャッシュ済みの旧状態を無条件に書き込んでいないか。書き込み前に最新状態を読み取り、既に遷移済みならスキップすべき）
+- [ ] interface越しに特定の実装の挙動に依存していないか（実装が差し替え可能な設計の場合、現在の実装固有の挙動 — インメモリ参照共有、キャッシュの暗黙的同期、接続プールの共有など — に依存していると、実装を差し替えた時に壊れる。検証: 該当interfaceの具体実装のSave/Find/Close等をReadし、コレクションフィールドがディープコピーされているか、状態の独立性が保たれているかを確認する）
+- [ ] 初期化後に動的に変化する状態が、変化時点で明示的に永続化されているか（初期化時のSaveだけで十分か、動的変化もSaveが必要か）
+- [ ] 対称・ミラー構造のコンポーネントに同一のバグ・修正漏れがないか
 
 ### High（重要）
 

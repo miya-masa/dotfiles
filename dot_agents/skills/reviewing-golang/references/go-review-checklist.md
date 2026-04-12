@@ -66,6 +66,41 @@ for _, item := range items {
 - [ ] 共有変数へのアクセスが同期されているか
 - [ ] `go run -race` でテストされているか
 
+### 並行ライフサイクルの安全性
+
+**REQUIRED**: 並行処理に関わるコードのレビューでは、以下のチェックリストを**すべて明示的に確認し、各項目のOK/NG判定を出力に含める**こと。
+
+**確認ポイント:**
+
+- [ ] 旧状態と新状態が共存する遷移期間で、すべての操作の挙動が定義されているか
+- [ ] クリーンアップ処理（Close, Shutdown等）が、並行して確立された新しい状態を上書きしないか（読み取り→判断→書き込みの順序）
+- [ ] interface越しに特定の実装の挙動に依存していないか（実装が差し替え可能な設計の場合、現在の実装固有の挙動に依存していないか。検証: 該当interfaceの具体実装のSave/Find/Close等をReadし、コレクションフィールド（map, slice）がディープコピーされているか、状態の独立性が保たれているかを確認する）
+- [ ] 初期化後に動的に変化する状態が、変化時点で明示的に永続化されているか
+- [ ] 対称・ミラー構造のコンポーネントに同一の修正が必要なパターンではないか
+
+**危険パターン:**
+
+```go
+// NG: Close()が無条件にキャッシュ状態を書き込む
+func (h *Handler) Close() error {
+    h.state.DisconnectedAt = timePtr(time.Now())
+    return h.repo.Save(h.state) // 並行Resumeでローテート済みの状態を上書き
+}
+
+// OK: 現在の状態を確認してから書き込む
+func (h *Handler) Close() error {
+    current, err := h.repo.Load(h.streamID)
+    if err != nil {
+        return err
+    }
+    if current.DisconnectedAt != nil || current.ResumeToken != h.cachedToken {
+        return nil // 既に遷移済み
+    }
+    current.DisconnectedAt = timePtr(time.Now())
+    return h.repo.Save(current)
+}
+```
+
 ---
 
 ## 2. チャネル操作
@@ -324,3 +359,84 @@ for i := 0; i < n; i++ {
 
 - [ ] `t.Parallel()` 使用時に競合状態がないか
 - [ ] 共有リソースへのアクセスが同期されているか
+
+---
+
+## 8. トランザクション安全性（usecase層）
+
+### 複数書き込みの原子性
+
+**確認ポイント:**
+
+- [ ] 1つのusecase操作内で複数のRepository書き込み（Create/Update/Delete）がある場合、`DoInTransaction` で囲まれているか
+- [ ] 読み取り→判断→書き込みパターン（TOCTOU）で、読み取りと書き込みが同一トランザクション内にあるか
+- [ ] 部分失敗時にデータ不整合が発生しないか（例: 関連リソースの片方だけ削除される）
+
+### トランザクション境界の適切性
+
+**確認ポイント:**
+
+- [ ] CPU負荷の高い操作（bcrypt比較、ハッシュ生成、暗号化処理）がトランザクション外に配置されているか（DB接続保持時間の最小化）
+- [ ] トランザクション内で外部API呼び出しやネットワーク通信を行っていないか
+
+**危険パターン:**
+
+```go
+// NG: 複数書き込みがトランザクション外で別々に実行される
+func (u *Usecase) Delete(ctx context.Context, id string) error {
+    // 条件チェック（トランザクション外）
+    setting, _ := u.settingRepo.Find(ctx)
+    if setting.RequireItem {
+        items, _ := u.itemRepo.FindByID(ctx, id)
+        if len(items) == 0 {
+            return errors.ErrBadRequest
+        }
+    }
+    // 書き込み（トランザクション外） — チェックと書き込みの間に競合あり
+    if err := u.secretRepo.Delete(ctx, id); err != nil {
+        return err
+    }
+    // 2つ目の書き込み — 1つ目が成功し2つ目が失敗すると不整合
+    if err := u.codeRepo.Delete(ctx, id); err != nil {
+        return err
+    }
+    return nil
+}
+
+// OK: CPU負荷操作はトランザクション外、条件チェック+書き込みはトランザクション内
+func (u *Usecase) Delete(ctx context.Context, id string, password string) error {
+    // パスワード検証（bcrypt — トランザクション外）
+    user, err := u.userRepo.FindByID(ctx, id)
+    if err != nil {
+        return err
+    }
+    if err := u.hasher.Compare(password, user.Password.Hash); err != nil {
+        return errors.ErrUnauthorized
+    }
+
+    // 条件チェック + 書き込みはトランザクション内
+    result := u.transaction.DoInTransaction(ctx, func(ctx context.Context) *transaction.Result {
+        setting, err := u.settingRepo.Find(ctx)
+        if err != nil {
+            return transaction.Failure(err)
+        }
+        if setting.RequireItem {
+            items, err := u.itemRepo.FindByID(ctx, id)
+            if err != nil {
+                return transaction.Failure(err)
+            }
+            if len(items) == 0 {
+                return transaction.Failure(errors.ErrBadRequest)
+            }
+        }
+        if err := u.secretRepo.Delete(ctx, id); err != nil {
+            return transaction.Failure(err)
+        }
+        if err := u.codeRepo.Delete(ctx, id); err != nil {
+            return transaction.Failure(err)
+        }
+        return transaction.Success(nil)
+    })
+    return result.Err
+}
+```

@@ -1,7 +1,7 @@
 ---
 name: coding-golang
-description: Go言語のコード作成・修正が必要な時に使用するスキル。新規機能実装、リファクタリング、バグ修正、APIエンドポイント追加、データベースモデル・クエリ作成、ミドルウェア実装、ビジネスロジック実装などに対応。chi（HTTPルーター）、GORM/GORM-Gen（ORM）を使用したプロジェクトで特に有効。Goのベストプラクティスとプロジェクト規約に従った高品質なコードを生成し、エラーハンドリング、並行処理、RESTful API設計などGoの慣例を遵守する。
-invocation: user
+description: Goコードの読み書きが発生する全てのタスクで使用。バグ調査・原因特定、バグ修正、新規機能実装、リファクタリング、コード読解・分析を含む。Goファイル(.go)の読み取りや修正案の作成が必要な場合に自動発動する。並行処理パターン、エラーハンドリング、chi/GORM等のプロジェクト規約を提供する。
+invocation: auto
 ---
 
 # Go Coder (coding-golang)
@@ -99,21 +99,6 @@ func CreateUser(ctx context.Context, name, email string) (*User, error) {
 }
 ```
 
-## テストコードについて
-
-**テストコードの作成・修正が必要な場合は、`testing-golang` スキルを使用すること。**
-
-```
-/testing-golang
-```
-
-このスキルは以下に対応：
-
-- ユニットテストの作成
-- テーブル駆動テストのパターン
-- モックの作成
-- 統合テストの作成
-
 ## コード品質チェックリスト
 
 コード作成時に以下を確認すること：
@@ -128,6 +113,7 @@ func CreateUser(ctx context.Context, name, email string) (*User, error) {
 - [ ] エクスポートされる要素にコメントを記述している
 - [ ] 早期リターンでネストを浅く保っている
 - [ ] 関数は単一責任を持っている
+- [ ] 複数のRepository書き込みがトランザクションで保護されている（[gorm-patterns.md](references/gorm-patterns.md) の「トランザクション境界設計」参照）
 
 ### ライブラリ固有
 
@@ -150,56 +136,26 @@ func CreateUser(ctx context.Context, name, email string) (*User, error) {
 | [error-handling.md](references/error-handling.md)     | エラーハンドリングパターン（カスタムエラー、ラッピング）            |
 | [coding-standards.md](references/coding-standards.md) | コーディング規約とベストプラクティス                                |
 | [modern-go.md](references/modern-go.md)               | Go 1.21+の新機能（slog、errors.Join等）                             |
+| [concurrency-patterns.md](references/concurrency-patterns.md) | 並行処理の実装パターン（遷移期間、Close()非破壊、抽象化境界） |
 
 ## 実装フロー
 
-### 新機能実装の手順
+1. **既存コードの調査**: プロジェクト構造、類似機能の実装、規約の把握
+2. **要件の整理**: 実装する機能の明確化、必要なエンドポイントやデータモデルの特定
+3. **設計**: レイヤー構造（Handler → Service → Repository）、データモデル、エラーハンドリング、並行処理分析（下記参照）
 
-```
-1. 既存コードの調査
-   ├─ プロジェクト構造の確認
-   ├─ 類似機能の実装を参照
-   └─ 規約とパターンの把握
+必要に応じてリファレンスドキュメントを参照し、プロジェクト固有の規約とGoのベストプラクティスに従ったコードを作成すること。
+テスト作成時は testing-golang、レビュー時は reviewing-golang を発動すること。
 
-2. 要件の整理
-   ├─ 実装する機能の明確化
-   └─ 必要なエンドポイントやデータモデルの特定
+### 並行処理分析の必須手順
 
-3. 設計
-   ├─ レイヤー構造（Handler → Service → Repository）
-   ├─ データモデル定義
-   └─ エラーハンドリング戦略
+タスクが以下のいずれかに該当する場合、`references/concurrency-patterns.md` を **Read ツールで読み込んでから** 設計・実装を行うこと:
 
-4. 実装
-   ├─ モデル定義
-   ├─ リポジトリ実装（GORM-Gen/GORM）
-   ├─ サービス層（ビジネスロジック）
-   ├─ ハンドラー（HTTPエンドポイント）
-   └─ ミドルウェア（必要に応じて）
+- 状態遷移やリソースのライフサイクル管理を含む
+- クリーンアップ処理（Close, Shutdown等）が状態を書き込む
+- interface実装（Repository等）を介した状態の保存・復元がある
+- 複数のgoroutineやコネクションが同じリソースにアクセスする
 
-5. 品質確認
-   ├─ コーディング規約の遵守
-   ├─ エラーハンドリングの適切性
-   ├─ ロギングの実装
-   └─ コメントの追加
+リファレンスを読んだ上で、各パターンが該当するか判断し、該当するパターンを修正に適用すること。
+新しい状態遷移を追加した場合、その状態を書き込む既存コードパス（Close/Shutdown等）が新しい遷移と安全に共存するか確認すること。
 
-6. コードレビュー
-   └─ reviewing-golang スキルを使用してレビュー
-```
-
-必要に応じてリファレンスドキュメントを参照し、プロジェクト固有の規約とGoのベストプラクティスに従った高品質なコードを作成すること。
-
-## 実装完了時のレビュー
-
-**実装が完了したら、必ず `reviewing-golang` スキルを使用してコードレビューを実施すること。**
-
-```
-/reviewing-golang
-```
-
-このスキルは以下を確認：
-
-- goroutine安全性
-- エラーハンドリング
-- リソースリーク
-- プロジェクト規約への準拠
