@@ -368,7 +368,7 @@ for i := 0; i < n; i++ {
 
 **確認ポイント:**
 
-- [ ] 1つのusecase操作内で複数のRepository書き込み（Create/Update/Delete）がある場合、`DoInTransaction` で囲まれているか
+- [ ] 1つのusecase操作内で複数のRepository書き込み（Create/Update/Delete）がある場合、トランザクションで囲まれているか（I/Fはプロジェクトにより異なる: GORM `db.Transaction()`、独自ラッパー等）
 - [ ] 読み取り→判断→書き込みパターン（TOCTOU）で、読み取りと書き込みが同一トランザクション内にあるか
 - [ ] 部分失敗時にデータ不整合が発生しないか（例: 関連リソースの片方だけ削除される）
 
@@ -381,62 +381,31 @@ for i := 0; i < n; i++ {
 
 **危険パターン:**
 
-```go
+```
 // NG: 複数書き込みがトランザクション外で別々に実行される
-func (u *Usecase) Delete(ctx context.Context, id string) error {
-    // 条件チェック（トランザクション外）
-    setting, _ := u.settingRepo.Find(ctx)
-    if setting.RequireItem {
-        items, _ := u.itemRepo.FindByID(ctx, id)
-        if len(items) == 0 {
-            return errors.ErrBadRequest
-        }
-    }
-    // 書き込み（トランザクション外） — チェックと書き込みの間に競合あり
-    if err := u.secretRepo.Delete(ctx, id); err != nil {
-        return err
-    }
-    // 2つ目の書き込み — 1つ目が成功し2つ目が失敗すると不整合
-    if err := u.codeRepo.Delete(ctx, id); err != nil {
-        return err
-    }
-    return nil
-}
+Usecase.Delete(ctx, id):
+    setting = settingRepo.Find(ctx)            // 条件チェック（トランザクション外）
+    if setting.RequireItem:
+        items = itemRepo.FindByID(ctx, id)
+        if len(items) == 0 → error
+
+    secretRepo.Delete(ctx, id)                 // 書き込み1（トランザクション外）
+    codeRepo.Delete(ctx, id)                   // 書き込み2 — 1が成功し2が失敗すると不整合
 
 // OK: CPU負荷操作はトランザクション外、条件チェック+書き込みはトランザクション内
-func (u *Usecase) Delete(ctx context.Context, id string, password string) error {
-    // パスワード検証（bcrypt — トランザクション外）
-    user, err := u.userRepo.FindByID(ctx, id)
-    if err != nil {
-        return err
-    }
-    if err := u.hasher.Compare(password, user.Password.Hash); err != nil {
-        return errors.ErrUnauthorized
-    }
+Usecase.Delete(ctx, id, password):
+    user = userRepo.FindByID(ctx, id)
+    verify password (bcrypt — トランザクション外)
 
-    // 条件チェック + 書き込みはトランザクション内
-    result := u.transaction.DoInTransaction(ctx, func(ctx context.Context) *transaction.Result {
-        setting, err := u.settingRepo.Find(ctx)
-        if err != nil {
-            return transaction.Failure(err)
-        }
-        if setting.RequireItem {
-            items, err := u.itemRepo.FindByID(ctx, id)
-            if err != nil {
-                return transaction.Failure(err)
-            }
-            if len(items) == 0 {
-                return transaction.Failure(errors.ErrBadRequest)
-            }
-        }
-        if err := u.secretRepo.Delete(ctx, id); err != nil {
-            return transaction.Failure(err)
-        }
-        if err := u.codeRepo.Delete(ctx, id); err != nil {
-            return transaction.Failure(err)
-        }
-        return transaction.Success(nil)
-    })
-    return result.Err
-}
+    BEGIN TRANSACTION
+        setting = settingRepo.Find(ctx)        // 条件チェック（TOCTOU防止）
+        if setting.RequireItem:
+            items = itemRepo.FindByID(ctx, id)
+            if len(items) == 0 → error
+
+        secretRepo.Delete(ctx, id)             // 書き込み1（原子性保証）
+        codeRepo.Delete(ctx, id)               // 書き込み2
+    COMMIT
 ```
+
+トランザクションI/Fはプロジェクトにより異なる（GORM `db.Transaction()`、独自ラッパー等）。レビュー時は具体的なI/Fではなく、**境界の適切性**（何が内で何が外か）を確認する。

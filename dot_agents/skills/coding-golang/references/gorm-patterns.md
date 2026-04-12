@@ -626,41 +626,22 @@ func CreateUser(db *gorm.DB, user *User) error {
 | **外部API呼び出し** | ネットワーク遅延でトランザクションが長引く |
 | **ランダム値/コード生成** | 純粋な計算処理でDBアクセス不要 |
 
-### usecase層での典型パターン（DoInTransaction）
+### usecase層での典型パターン
 
-```go
-func (u *Usecase) Operation(ctx context.Context, input Input) error {
+```
+Usecase.Operation(ctx, input):
     // Phase 1: トランザクション外 — CPU負荷の高い事前処理
-    user, err := u.userRepo.FindByUUID(ctx, input.UserUUID)
-    if err != nil {
-        return xerrors.Errorf("find user: %w", err)
-    }
-    if err := u.hasher.Compare(input.Password, user.Password.Hash); err != nil {
-        return xerrors.Errorf("invalid password: %w", errors.ErrUnauthorized)
-    }
+    user = userRepo.Find(ctx, input.UserID)
+    verify password (bcrypt等 — 遅い処理はトランザクション外)
 
     // Phase 2: トランザクション内 — 条件チェック + 書き込みを原子的に実行
-    result := u.transaction.DoInTransaction(ctx, func(ctx context.Context) *transaction.Result {
-        // 条件チェック（TOCTOU防止のためトランザクション内）
-        existing, err := u.repo.Find(ctx, input.ID)
-        if err != nil {
-            return transaction.Failure(xerrors.Errorf("find: %w", err))
-        }
-        if !existing.IsActive() {
-            return transaction.Failure(xerrors.Errorf("not active: %w", errors.ErrConflict))
-        }
+    BEGIN TRANSACTION
+        existing = repo.Find(ctx, input.ID)          // 条件チェック（TOCTOU防止）
+        if !existing.IsActive() → error
 
-        // 複数の書き込み操作（原子性保証）
-        if err := u.repo.Delete(ctx, input.ID); err != nil {
-            return transaction.Failure(xerrors.Errorf("delete: %w", err))
-        }
-        if err := u.relatedRepo.DeleteByParentID(ctx, input.ID); err != nil {
-            return transaction.Failure(xerrors.Errorf("delete related: %w", err))
-        }
-
-        return transaction.Success(nil)
-    })
-
-    return result.Err
-}
+        repo.Delete(ctx, input.ID)                    // 書き込み1
+        relatedRepo.DeleteByParentID(ctx, input.ID)   // 書き込み2（原子性保証）
+    COMMIT (失敗時は自動ROLLBACK)
 ```
+
+トランザクションの開始・コミット・ロールバックの具体的なI/Fはプロジェクトによって異なる（GORM の `db.Transaction()`、独自の `DoInTransaction()` ラッパー等）。重要なのはI/Fではなく、**何をトランザクション内に入れ、何を外に出すか**の判断。
