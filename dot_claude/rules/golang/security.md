@@ -1,19 +1,15 @@
 ---
 paths:
   - "**/*.go"
+  - "**/go.mod"
+  - "**/go.sum"
 ecc-source:
   upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3
   upstream-path: rules/golang/security.md
-  imported-at: 2026-04-27T00:00:00+09:00
+  imported-at: "2026-04-27T00:00:00+09:00"
   adapted: false
 ---
 
----
-paths:
-  - "**/*.go"
-  - "**/go.mod"
-  - "**/go.sum"
----
 # Go Security
 
 > This file extends [common/security.md](../common/security.md) with Go specific content.
