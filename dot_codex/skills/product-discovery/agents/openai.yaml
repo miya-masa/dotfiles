@@ -1,0 +1,4 @@
+interface:
+  display_name: "Product Discovery"
+  short_description: "曖昧な機能アイデアを対話で実装可能な仕様へ整理する"
+  default_prompt: "Use $product-discovery to interview me and turn this idea into an implementation-ready specification."

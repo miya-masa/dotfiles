@@ -20,13 +20,9 @@
         "-y",
         "@upstash/context7-mcp"
       ]
-    },
-    "atlassian": {
-      "type": "remote",
-      "url": "https://mcp.atlassian.com/v1/mcp"
     }
   },
   "plugin": [
-    "oh-my-opencode@latest"
+    "oh-my-openagent"
   ]
 }

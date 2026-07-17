@@ -1,6 +1,6 @@
 ---
 name: hexagonal-architecture
-description: Design, implement, and refactor Ports & Adapters systems with clear domain boundaries, dependency inversion, and testable use-case orchestration across TypeScript, Java, Kotlin, and Go services.
+description: Design, implement, or refactor Ports & Adapters systems with domain boundaries and dependency inversion.
 origin: ECC
 ecc-source:
   upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3

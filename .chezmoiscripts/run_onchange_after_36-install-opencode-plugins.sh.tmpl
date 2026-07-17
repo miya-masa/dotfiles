@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+if ! command -v opencode >/dev/null 2>&1; then
+    echo "ℹ️  opencode not installed; skipping plugin install."
+    exit 0
+fi
+
+echo "📦 Installing opencode plugins (oh-my-openagent)..."
+
+OPENCODE_CONFIG="${HOME}/.config/opencode"
+mkdir -p "${OPENCODE_CONFIG}"
+cd "${OPENCODE_CONFIG}"
+
+if [[ ! -f package.json ]]; then
+    cat > package.json <<'EOF'
+{
+  "dependencies": {}
+}
+EOF
+fi
+
+if command -v bun >/dev/null 2>&1; then
+    bun add oh-my-openagent@latest
+elif command -v npm >/dev/null 2>&1; then
+    npm install --save oh-my-openagent@latest
+else
+    echo "Error: neither bun nor npm is available. Install bun or activate mise (Node.js)." >&2
+    exit 1
+fi
+
+echo "✅ opencode plugins installed successfully!"

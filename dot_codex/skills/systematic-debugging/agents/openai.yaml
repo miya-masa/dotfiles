@@ -1,0 +1,4 @@
+interface:
+  display_name: "Systematic Debugging"
+  short_description: "不具合を再現し証拠からroot causeと修正条件を確定する"
+  default_prompt: "Use $systematic-debugging to reproduce this bug and identify its root cause before changing code."

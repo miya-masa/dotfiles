@@ -87,3 +87,17 @@ Brewfile_linux.lock.json
 .aider*
 .serena
 /.omc/state
+/.worktrees
+/docs/superpowers
+/docs/superpowers/codex-jobs/
+/.codex
+/nvim.log
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Claude Code working dir created in worktrees
+/.claude/
+/.review/archive

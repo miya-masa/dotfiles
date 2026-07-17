@@ -1,7 +1,16 @@
 ---
 name: reviewing-golang
-description: Goコードの品質確認が必要な全てのタスクで使用。明示的なレビュー依頼だけでなく、バグ修正や機能実装の完了後にも自動発動し、修正コードの安全性を検証する。並行ライフサイクルの安全性、goroutineリーク、エラーハンドリング、リソース管理、対称構造（upstream/downstream）の修正漏れを体系的にチェックする。
+description: Goコードレビューや修正後検証で使用。並行処理、goroutineリーク、エラー処理、リソース管理を確認する。
 invocation: auto
+ecc-imports:
+  - upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3
+    upstream-path: agents/go-reviewer.md
+    sections-merged: []
+    conflicts:
+      - "Review Priorities"
+      - "Diagnostic Commands"
+      - "Approval Criteria"
+    imported-at: 2026-04-27T00:00:00+09:00
 ---
 
 # Go Code Reviewer (reviewing-golang)
@@ -62,6 +71,19 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 - SQLインジェクション
 - 入力バリデーション
 - 機密情報の扱い
+- **gosec** で静的セキュリティ解析を実行する: `gosec ./...`
+- 外部呼び出し（HTTP/DB/gRPC等）には必ず `context.WithTimeout` でタイムアウトを設定する
+  ```go
+  ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+  defer cancel()
+  ```
+- secrets は `os.Getenv("KEY")` の戻り値を空文字チェックし、未設定なら error を返す（silent failure 防止）
+  ```go
+  apiKey := os.Getenv("API_KEY")
+  if apiKey == "" {
+      return fmt.Errorf("API_KEY not configured")
+  }
+  ```
 
 ## 必須チェックリスト
 
@@ -79,13 +101,7 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 
 ### Critical（並行ライフサイクル — 状態遷移・クリーンアップ・リソースライフサイクルを含む修正の場合）
 
-修正が状態遷移、クリーンアップ処理、リソースのライフサイクル管理に関わる場合、以下を**すべて明示的に確認し、各項目のOK/NG判定を出力に含める**こと。
-
-- [ ] 旧状態と新状態が共存する遷移期間で、すべての操作の挙動が定義されているか
-- [ ] クリーンアップ処理（Close, Shutdown, Cleanup等）が、並行して確立された新しい状態を上書きしないか（キャッシュ済みの旧状態を無条件に書き込んでいないか。書き込み前に最新状態を読み取り、既に遷移済みならスキップすべき）
-- [ ] interface越しに特定の実装の挙動に依存していないか（実装が差し替え可能な設計の場合、現在の実装固有の挙動 — インメモリ参照共有、キャッシュの暗黙的同期、接続プールの共有など — に依存していると、実装を差し替えた時に壊れる。検証: 該当interfaceの具体実装のSave/Find/Close等をReadし、コレクションフィールドがディープコピーされているか、状態の独立性が保たれているかを確認する）
-- [ ] 初期化後に動的に変化する状態が、変化時点で明示的に永続化されているか（初期化時のSaveだけで十分か、動的変化もSaveが必要か）
-- [ ] 対称・ミラー構造のコンポーネントに同一のバグ・修正漏れがないか
+修正が状態遷移、クリーンアップ処理、リソースのライフサイクル管理に関わる場合、詳細チェックリストは [go-review-checklist.md](references/go-review-checklist.md) §並行ライフサイクルの安全性 を参照し、全項目のOK/NG判定を出力に含めること。
 
 ### High（重要）
 
@@ -135,3 +151,18 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 | ----------------------------------------------------------- | ---------------------------- |
 | [go-review-checklist.md](references/go-review-checklist.md) | Go特有のレビュー観点詳細     |
 | [common-go-issues.md](references/common-go-issues.md)       | よくある問題パターンと修正例 |
+
+## ECC 由来: agents/go-reviewer.md
+
+> ECC base commit `4e66b2882da9afb9747468b08a253ca2f09c85f3` の `agents/go-reviewer.md`（76 行）を検証したが、本 skill の構造（`references/` に詳細を委譲する索引型 + プロジェクト固有規約優先）と異なるため統合せず、**全 H2 を conflicts として記録**。
+>
+> ECC `go-reviewer` は CRITICAL/HIGH/MEDIUM の severity 階層を持つレビューチェックリスト形式:
+>
+> - **Review Priorities** (severity 階層): SQL injection / Command injection / Race conditions / Goroutine leaks / errors.Is/As / Mutex misuse 等
+>   - 既存の §レビュー観点 / §必須チェックリスト + `references/go-review-checklist.md` / `references/common-go-issues.md` で同等の網羅性をカバー（重複につき conflicts）
+> - **Diagnostic Commands**: `go vet` / `staticcheck` / `golangci-lint` / `go test -race` / `govulncheck`
+>   - 必要に応じて `references/diagnostic-commands.md` として将来配置可能（本 spec のスコープ外）
+> - **Approval Criteria**: Approve/Warning/Block の判定基準
+>   - 本 skill の §レビュー結果 で同等
+
+## /ECC 由来: agents/go-reviewer.md

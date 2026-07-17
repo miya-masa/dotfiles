@@ -1,4 +1,5 @@
 gui:
+  returnImmediately: true
   # 起動時に logs panel を開かない（最重要）
   showLogPanel: false
 

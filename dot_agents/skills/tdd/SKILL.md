@@ -1,6 +1,35 @@
 ---
 name: tdd
-description: テスト駆動開発(TDD)の進め方をガイドし、テスト設計/実装/リファクタリングの反復を支援する。ユーザーが「TDDで実装して」「テストファーストで進めたい」「レッド・グリーン・リファクタで」「テストを先に書いて」などと依頼した時に使う。
+description: TDD、テストファースト、レッド・グリーン・リファクタで実装する時に使用。
+ecc-imports:
+  - upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3
+    upstream-path: agents/tdd-guide.md
+    sections-merged: []
+    conflicts:
+      - "Your Role"
+      - "TDD Workflow"
+      - "Test Types Required"
+      - "Edge Cases You MUST Test"
+      - "Test Anti-Patterns to Avoid"
+      - "Quality Checklist"
+      - "v1.8 Eval-Driven TDD Addendum"
+    imported-at: 2026-04-27T00:00:00+09:00
+  - upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3
+    upstream-path: skills/tdd-workflow/SKILL.md
+    sections-merged: []
+    conflicts:
+      - "When to Activate"
+      - "Core Principles"
+      - "TDD Workflow Steps"
+      - "Testing Patterns"
+      - "Test File Organization"
+      - "Mocking External Services"
+      - "Test Coverage Verification"
+      - "Common Testing Mistakes to Avoid"
+      - "Continuous Testing"
+      - "Best Practices"
+      - "Success Metrics"
+    imported-at: 2026-04-27T00:00:00+09:00
 ---
 
 # TDDガイド
@@ -69,3 +98,27 @@ TDDで機能追加や不具合修正を進めるための、短い反復手順�
 - まず振る舞いを確認し、最小のテストケースに落とす。
 - 1サイクルずつ進め、各段階の差分を明確に示す。
 - 既存テストがある場合は整合性を確認する。
+
+## ECC 由来: agents/tdd-guide.md
+
+> ECC base commit `4e66b2882da9afb9747468b08a253ca2f09c85f3` の `agents/tdd-guide.md`（91 行、英語）を検証したが、本 skill のコンパクトな日本語ガイド構造と異なるため統合せず、**全 H2 を conflicts として記録**。
+>
+> ECC 由来 H2 と本 skill との対応:
+>
+> - **TDD Workflow** → 本 skill §基本ワークフロー で同等（既存優先）
+> - **Quality Checklist** → 本 skill §検証チェックリスト で同等（既存優先）
+> - **Edge Cases You MUST Test** / **Test Anti-Patterns to Avoid** / **Test Types Required** / **v1.8 Eval-Driven TDD Addendum** → 本 skill になし。**将来取り込み余地あり**（references/ecc-tdd-guide.md として配置するか、特定章を本文に追記する選択肢）
+
+## /ECC 由来: agents/tdd-guide.md
+
+## ECC 由来: skills/tdd-workflow/SKILL.md
+
+> ECC base commit `4e66b2882da9afb9747468b08a253ca2f09c85f3` の `skills/tdd-workflow/SKILL.md`（463 行、英語）を検証したが、本 skill のコンパクトな日本語ガイド構造と異なるため統合せず、**全 H2 を conflicts として記録**。
+>
+> ECC `tdd-workflow` は包括的な TDD Workflow 解説:
+>
+> - **重複領域** (本 skill と概念重複): When to Activate / Core Principles / TDD Workflow Steps / Testing Patterns / Best Practices / Common Testing Mistakes to Avoid
+> - **既存になし** (将来取り込み余地あり): Test File Organization / Mocking External Services / Test Coverage Verification / Continuous Testing / Success Metrics
+>   - `testing-golang` skill の references/ や `tdd` skill のリファレンス追記で取り込む選択肢あり（本 spec のスコープ外）
+
+## /ECC 由来: skills/tdd-workflow/SKILL.md

@@ -1,0 +1,8 @@
+session_name: mac
+windows:
+  - layout: tiled
+    panes:
+      - ssh mac
+      - ssh mac
+      - ssh mac
+      - ssh mac

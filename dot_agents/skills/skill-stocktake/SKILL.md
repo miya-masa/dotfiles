@@ -1,5 +1,5 @@
 ---
-description: "Use when auditing Claude skills and commands for quality. Supports Quick Scan (changed skills only) and Full Stocktake modes with sequential subagent batch evaluation."
+description: "Audit skills and commands for quality with Quick Scan or Full Stocktake modes."
 origin: ECC
 ecc-source:
   upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3
@@ -80,11 +80,12 @@ Scanning:
 
 ### Phase 2 — Quality Evaluation
 
-Launch an Agent tool subagent (**general-purpose agent**) with the full inventory and checklist:
+Launch an Agent tool subagent (**general-purpose agent**, run on **haiku** — this is a mechanical checklist-matching task, so a lighter model keeps tokens low) with the full inventory and checklist:
 
 ```text
 Agent(
   subagent_type="general-purpose",
+  model="haiku",          # 定型 checklist 照合のみ。haiku で十分（トークン節約）
   prompt="
 Evaluate the following skill inventory against the checklist.
 
@@ -146,7 +147,7 @@ Evaluation is **holistic AI judgment** — not a numeric rubric. Guiding dimensi
   - Good: `"276 lines; Section 'Framework Comparison' (L80–140) duplicates ai-era-architecture-principles; delete it to reach ~150 lines."`
 - For **Keep** (mtime-only change in Quick Scan): restate the original verdict rationale, do not write "unchanged"
   - Bad: `"Unchanged"`
-  - Good: `"mtime updated but content unchanged. Unique Python reference explicitly imported by rules/python/; no overlap found."`
+  - Good: `"mtime updated but content unchanged. Unique Python reference explicitly imported by the python-patterns skill; no overlap found."`
 
 ### Phase 3 — Summary Table
 

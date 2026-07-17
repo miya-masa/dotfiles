@@ -18,7 +18,6 @@ fi
 export LANG=ja_JP.UTF-8
 export LC_ALL=ja_JP.UTF-8
 export PAGER=less
-export TERM=screen-256color
 
 export XDG_CONFIG_HOME=$HOME/.config
 [ -f /home/linuxbrew/.linuxbrew/bin/brew ] && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
@@ -38,7 +37,7 @@ if [[ -e $HOME/.krew ]]; then
   export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 fi
 
-export FZF_DEFAULT_OPTS='--layout reverse --height=30%'
+export FZF_DEFAULT_OPTS='--layout reverse --tmux center'
 export FORGIT_COPY_CMD='xclip -selection clipboard'
 
 ###
@@ -114,22 +113,6 @@ __fh() {
 }
 zle -N fh __fh
 
-if command -v glab &>/dev/null; then
-  __insert-issue-id() {
-    local issue_number_row=$(glab ls | tail -n +3 | fzf)
-    if [ -z "$issue_number_row" ]; then
-      return
-    fi
-    local issue_number=$(echo $issue_number_row | awk '{print $1}')
-    LBUFFER+="feature/${issue_number}_"
-    CURSOR=$#LBUFFER
-    # redisplay the command line
-    zle -R -c
-  }
-  zle -N insert-issue-id __insert-issue-id
-fi
-
-
 ### reset bind key
 bindkey -d
 bindkey -v
@@ -138,7 +121,6 @@ bindkey "^P" up-line-or-history
 bindkey '^e^e' fbr
 bindkey '^g' cd-git
 bindkey '^r' fh
-bindkey '^x^b' insert-issue-id
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -200,9 +182,6 @@ set -o glob_complete
 autoload -U +X bashcompinit && bashcompinit
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
-if command -v jira &>/dev/null; then
-  jira completion zsh > ~/.local/share/zinit/completions/_jira
-fi
 if command -v kubectl &>/dev/null; then
   source <(kubectl completion zsh)
 fi
@@ -390,6 +369,31 @@ awsprofile() {
   echo "✅ AWS_PROFILE を設定しました: $AWS_PROFILE"
 }
 
+# AWS SSO device-code login (SSH 越しでも完結する)
+awssso() {
+  local profile="${1:-${AWS_PROFILE:-}}"
+  if [[ -z "$profile" ]]; then
+    echo "usage: awssso <profile>  (or set AWS_PROFILE)" >&2
+    return 1
+  fi
+  aws sso login --profile "$profile" --use-device-code --no-browser
+}
+
+# sso-session 単位で device-code login（同セッション配下の全 profile が一括有効化）
+awsssosession() {
+  local session="${1:-}"
+  if [[ -z "$session" ]]; then
+    echo "usage: awsssosession <sso-session>" >&2
+    return 1
+  fi
+  aws sso login --sso-session "$session" --use-device-code --no-browser
+}
+
+# 現在 active な caller を即確認
+awswho() {
+  aws sts get-caller-identity ${AWS_PROFILE:+--profile "$AWS_PROFILE"}
+}
+
 export PNPM_HOME="~/.local/share/pnpm"
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
@@ -407,8 +411,16 @@ fpath=("$HOME/.zsh/completions" $fpath)
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+sshf() {
+  local host
+  host=$(awk '
+    $1=="Host" {
+      for(i=2;i<=NF;i++)
+        if($i!="*" && $i!~ /[?*]/)
+          print $i
+    }' ~/.ssh/config ~/.ssh/conf.d/* 2>/dev/null | sort -u \
+    | fzf) || return
+  ssh "$host"
+}
+
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
-
-source "$HOME/.config/cc-pane/functions.sh" # cc-pane
-
-alias claude-mem='bun "/home/masayuki/.claude/plugins/cache/thedotmack/claude-mem/12.1.0/scripts/worker-service.cjs"'

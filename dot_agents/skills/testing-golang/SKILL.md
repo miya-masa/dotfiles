@@ -1,7 +1,27 @@
 ---
 name: testing-golang
-description: Goのテストに関わる全てのタスクで使用。テストコードの作成・修正はもちろん、バグ修正や機能実装に伴うテスト設計・テスト案の提示でも自動発動する。Goコードの修正が行われた場合、対応するテストの作成が必要かを常に判断する。並行処理テストパターン、モック、テーブル駆動テスト等の規約を提供する。
+description: Goテストの作成・修正・設計で使用。並行処理テスト、モック、テーブル駆動テストを扱う。
 invocation: auto
+ecc-imports:
+  - upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3
+    upstream-path: skills/golang-testing/SKILL.md
+    sections-merged: []
+    conflicts:
+      - "When to Activate"
+      - "TDD Workflow for Go"
+      - "Table-Driven Tests"
+      - "Subtests and Sub-benchmarks"
+      - "Test Helpers"
+      - "Golden Files"
+      - "Mocking with Interfaces"
+      - "Benchmarks"
+      - "Fuzzing (Go 1.18+)"
+      - "Test Coverage"
+      - "HTTP Handler Testing"
+      - "Testing Commands"
+      - "Best Practices"
+      - "Integration with CI/CD"
+    imported-at: 2026-04-27T00:00:00+09:00
 ---
 
 # Go Test Writer (testing-golang)
@@ -289,3 +309,17 @@ func TestDatabaseOperation(t *testing.T) {
 - DB等の外部依存を含むテスト → `references/testcontainers-patterns.md` を読む
 
 リファレンスに記載されたテストパターンが該当するか判断し、該当するパターンをテスト設計に適用すること。「参照」ではなく「読み込んで適用」が必須。
+
+## ECC 由来: skills/golang-testing/SKILL.md
+
+> ECC base commit `4e66b2882da9afb9747468b08a253ca2f09c85f3` の `skills/golang-testing/SKILL.md` を検証したが、本 skill の構造（`references/` に詳細を委譲する索引型 + プロジェクト固有規約 chi/GORM/testify 優先）と異なるため統合せず、**全 H2 を conflicts として記録**。
+>
+> ECC `golang-testing` は idiomatic Go testing の汎用解説（720 行）:
+>
+> - **重複領域** (既存と重複、既存優先): Table-Driven Tests / Mocking with Interfaces / TDD Workflow for Go
+>   - 既存: §テーブル駆動テストパターン, §モック作成パターン, references/mock-patterns.md, `tdd` skill
+> - **既存になし** (将来取り込み余地あり): Subtests and Sub-benchmarks / Test Helpers / Golden Files / Benchmarks / Fuzzing / HTTP Handler Testing / Test Coverage / Testing Commands / Integration with CI/CD
+>   - 必要に応じて ECC 原文を `references/ecc-golang-testing.md` として配置するか、特定章を抜粋して既存 reference に追記する形で将来取り込む（本 spec のスコープ外）
+> - **TDD は別 skill** (`tdd` skill) に責務を委譲しているため、TDD 関連は本 skill に統合しない方針
+
+## /ECC 由来: skills/golang-testing/SKILL.md

@@ -1,0 +1,390 @@
+#!/usr/bin/env bash
+
+set -o nounset
+set -o errexit
+trap 'echo "Aborting due to errexit on line $LINENO. Exit code: $?" >&2' ERR
+set -o errtrace
+set -o pipefail
+IFS=$'\n\t'
+
+upsert_top_level() {
+  local config_file=$1 key=$2 value=$3
+
+  cp -p "${config_file}" "${config_file}.tmp"
+  awk -v key="${key}" -v value="${value}" '
+    BEGIN { in_top = 1; found = 0 }
+    /^[[:space:]]*\[/ {
+      if (in_top && !found) { print key " = " value; found = 1 }
+      in_top = 0
+    }
+    in_top && $0 ~ "^[[:space:]]*" key "[[:space:]]*=" {
+      if (!found) { print key " = " value; found = 1 }
+      next
+    }
+    { print }
+    END { if (!found) print key " = " value }
+  ' "${config_file}" > "${config_file}.tmp"
+  mv "${config_file}.tmp" "${config_file}"
+}
+
+upsert_table_key() {
+  local config_file=$1 table=$2 key=$3 value=$4
+
+  cp -p "${config_file}" "${config_file}.tmp"
+  awk -v table="${table}" -v key="${key}" -v value="${value}" '
+    BEGIN { in_table = 0; table_found = 0; key_found = 0; header = "" }
+    /^[[:space:]]*\[/ {
+      if (in_table && !key_found) { print key " = " value; key_found = 1 }
+      header = $0
+      sub(/^[[:space:]]*\[/, "", header)
+      sub(/\][[:space:]]*(#.*)?$/, "", header)
+      in_table = (header == table)
+      if (in_table) table_found = 1
+    }
+    in_table && $0 ~ "^[[:space:]]*" key "[[:space:]]*=" {
+      if (!key_found) { print key " = " value; key_found = 1 }
+      next
+    }
+    { print }
+    END {
+      if (in_table && !key_found) print key " = " value
+      else if (!table_found) { print ""; print "[" table "]"; print key " = " value }
+    }
+  ' "${config_file}" > "${config_file}.tmp"
+  mv "${config_file}.tmp" "${config_file}"
+}
+
+upsert_table_array_key() {
+  local config_file=$1 table=$2 key=$3 value=$4
+
+  cp -p "${config_file}" "${config_file}.tmp"
+  awk -v table="${table}" -v key="${key}" -v value="${value}" '
+    BEGIN { in_table = 0; table_found = 0; key_found = 0; skip_value = 0; header = "" }
+    skip_value {
+      if ($0 ~ /\][[:space:]]*(#.*)?$/) skip_value = 0
+      next
+    }
+    /^[[:space:]]*\[/ {
+      if (in_table && !key_found) { print key " = " value; key_found = 1 }
+      header = $0
+      sub(/^[[:space:]]*\[/, "", header)
+      sub(/\][[:space:]]*(#.*)?$/, "", header)
+      in_table = (header == table)
+      if (in_table) table_found = 1
+    }
+    in_table && $0 ~ "^[[:space:]]*" key "[[:space:]]*=" {
+      if (!key_found) { print key " = " value; key_found = 1 }
+      current_value = $0
+      sub("^[[:space:]]*" key "[[:space:]]*=[[:space:]]*", "", current_value)
+      if (current_value !~ /\][[:space:]]*(#.*)?$/) skip_value = 1
+      next
+    }
+    { print }
+    END {
+      if (in_table && !key_found) print key " = " value
+      else if (!table_found) { print ""; print "[" table "]"; print key " = " value }
+    }
+  ' "${config_file}" > "${config_file}.tmp"
+  mv "${config_file}.tmp" "${config_file}"
+}
+
+validate_toml() {
+  python3 - "${1}" <<'PY'
+import pathlib
+import sys
+import tomllib
+
+with pathlib.Path(sys.argv[1]).open("rb") as config_file:
+    tomllib.load(config_file)
+PY
+}
+
+merged_writable_roots_value() {
+  python3 - "${1}" <<'PY'
+import json
+import pathlib
+import sys
+import tomllib
+
+with pathlib.Path(sys.argv[1]).open("rb") as config_file:
+    config = tomllib.load(config_file)
+
+sandbox = config.get("sandbox_workspace_write", {})
+if not isinstance(sandbox, dict):
+    raise TypeError("sandbox_workspace_write must be a table")
+roots = sandbox.get("writable_roots", [])
+if not isinstance(roots, list) or not all(isinstance(root, str) for root in roots):
+    raise TypeError("sandbox_workspace_write.writable_roots must be an array of strings")
+
+required_roots = [
+    str(pathlib.Path.home() / "go"),
+    "/tmp/claude",
+]
+removed_root = str(pathlib.Path.home() / "claude" / "skills")
+merged_roots = [root for root in roots if root != removed_root]
+for root in required_roots:
+    if root not in merged_roots:
+        merged_roots.append(root)
+
+print("[" + ", ".join(json.dumps(root, ensure_ascii=False) for root in merged_roots) + "]")
+PY
+}
+
+remove_legacy_and_managed_config() {
+  python3 - "${1}" <<'PY'
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+legacy_tables = {
+    "agents.agent_luna_worker",
+    "agents.agent_explorer",
+    "agents.agent_implementer",
+    "agents.agent_reviewer",
+    "agents.agent_verifier",
+    "agents.agent_investigator",
+    "agents.agent_decision_reviewer",
+    "agents.reviewer",
+}
+header_pattern = re.compile(r"^\s*\[\[?([^][]+)]\]?\s*(?:#.*)?$")
+output = []
+table = None
+skip_table = False
+skip_managed = False
+for line in lines:
+    if line.rstrip("\r\n") == "# BEGIN CODEX MANAGED DELIVERY":
+        skip_managed = True
+        continue
+    if skip_managed:
+        if line.rstrip("\r\n") == "# END CODEX MANAGED DELIVERY":
+            skip_managed = False
+        continue
+    match = header_pattern.match(line)
+    if match:
+        table = match.group(1).strip()
+        skip_table = table in legacy_tables
+    if skip_table:
+        continue
+    if table == "features" and re.match(r"^\s*multi_agent\s*=\s*true\s*(?:#.*)?$", line):
+        continue
+    if table == "agents" and re.match(
+        r"^\s*(?:max_depth\s*=\s*1|max_threads\s*=\s*6)\s*(?:#.*)?$", line
+    ):
+        continue
+    output.append(line)
+path.write_text("".join(output), encoding="utf-8")
+PY
+}
+
+append_managed_config() {
+  python3 - "${1}" <<'PY'
+import json
+import pathlib
+import sys
+
+path = pathlib.Path(sys.argv[1])
+names = (
+    "feature-development",
+    "bugfix",
+    "spec-review",
+    "context-budget",
+    "skill-stocktake",
+    "handoff",
+    "writing-gpt-prompts",
+    "skill-creator",
+)
+text = path.read_text(encoding="utf-8").rstrip() + "\n\n"
+text += "# BEGIN CODEX MANAGED DELIVERY\n"
+text += "[agents.reviewer]\n"
+text += 'description = "Read-only artifact reviewer for correctness, adversarial risks, product fit, and simplicity."\n'
+text += 'config_file = "agents/reviewer.toml"\n'
+for name in names:
+    skill_path = pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md"
+    text += "\n[[skills.config]]\n"
+    text += f"path = {json.dumps(str(skill_path))}\n"
+    text += "enabled = false\n"
+text += "# END CODEX MANAGED DELIVERY\n"
+path.write_text(text, encoding="utf-8")
+PY
+}
+
+validate_config_update() {
+  python3 - "${1}" "${2}" <<'PY'
+import copy
+import pathlib
+import sys
+import tomllib
+
+def load(path):
+    with pathlib.Path(path).open("rb") as config_file:
+        return tomllib.load(config_file)
+
+before = load(sys.argv[1])
+after = load(sys.argv[2])
+expected = copy.deepcopy(before)
+expected.update({
+    "model": "gpt-5.6-sol",
+    "model_reasoning_effort": "medium",
+    "plan_mode_reasoning_effort": "high",
+    "approval_policy": "never",
+    "model_auto_compact_token_limit": 260000,
+    "model_auto_compact_token_limit_scope": "total",
+})
+
+sandbox = expected.setdefault("sandbox_workspace_write", {})
+if not isinstance(sandbox, dict):
+    raise TypeError("sandbox_workspace_write must be a table")
+roots = sandbox.get("writable_roots", [])
+if not isinstance(roots, list) or not all(isinstance(root, str) for root in roots):
+    raise TypeError("sandbox_workspace_write.writable_roots must be an array of strings")
+removed_root = str(pathlib.Path.home() / "claude" / "skills")
+roots = [root for root in roots if root != removed_root]
+for root in (str(pathlib.Path.home() / "go"), "/tmp/claude"):
+    if root not in roots:
+        roots.append(root)
+sandbox.update({"writable_roots": roots, "network_access": True})
+
+features = expected.get("features")
+if isinstance(features, dict) and features.get("multi_agent") is True:
+    del features["multi_agent"]
+
+agents = expected.setdefault("agents", {})
+if not isinstance(agents, dict):
+    raise TypeError("agents must be a table")
+if agents.get("max_depth") == 1:
+    del agents["max_depth"]
+if agents.get("max_threads") == 6:
+    del agents["max_threads"]
+for name in (
+    "agent_luna_worker", "agent_explorer", "agent_implementer", "agent_reviewer",
+    "agent_verifier", "agent_investigator", "agent_decision_reviewer", "reviewer",
+):
+    agents.pop(name, None)
+agents["reviewer"] = {
+    "description": "Read-only artifact reviewer for correctness, adversarial risks, product fit, and simplicity.",
+    "config_file": "agents/reviewer.toml",
+}
+
+disabled_names = {
+    "feature-development", "bugfix", "spec-review", "context-budget",
+    "skill-stocktake", "handoff",
+    "writing-gpt-prompts", "skill-creator",
+}
+skills = expected.setdefault("skills", {})
+configs = skills.get("config", [])
+if not isinstance(configs, list):
+    raise TypeError("skills.config must be an array of tables")
+if "# BEGIN CODEX MANAGED DELIVERY" in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"):
+    for name in disabled_names:
+        managed_path = str(pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md")
+        for index in range(len(configs) - 1, -1, -1):
+            item = configs[index]
+            if isinstance(item, dict) and item == {"path": managed_path, "enabled": False}:
+                del configs[index]
+                break
+configs.extend(
+    {"path": str(pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md"), "enabled": False}
+    for name in (
+        "feature-development", "bugfix", "spec-review", "context-budget",
+        "skill-stocktake", "handoff",
+        "writing-gpt-prompts", "skill-creator",
+    )
+)
+skills["config"] = configs
+
+if after != expected:
+    raise ValueError("Codex config update changed unrelated TOML values or missed required settings")
+PY
+}
+
+restore_config() {
+  local config_file=$1 backup_file=$2 working_file=$3 config_existed=$4
+
+  if [ "${config_existed}" -eq 1 ]; then
+    cp -p "${backup_file}" "${config_file}"
+  else
+    rm -f "${config_file}"
+  fi
+  rm -f "${working_file}" "${working_file}.tmp" "${backup_file}"
+  printf 'Codex config update failed; restored original state.\n' >&2
+}
+
+configure_codex() {
+  local config_file=$1 backup_file config_existed=0 writable_roots_value working_file
+
+  if [ -L "${config_file}" ]; then
+    printf 'Codex config symlinks are unsupported; left unchanged: %s\n' "${config_file}" >&2
+    return 1
+  fi
+  if [ -e "${config_file}" ]; then
+    config_existed=1
+    validate_toml "${config_file}"
+  fi
+
+  backup_file=$(mktemp "${config_file}.codex-backup.XXXXXX") || return 1
+  if [ "${config_existed}" -eq 1 ] && ! cp -p "${config_file}" "${backup_file}"; then
+    rm -f "${backup_file}"
+    return 1
+  fi
+  if ! working_file=$(mktemp "${config_file}.codex-working.XXXXXX"); then
+    rm -f "${backup_file}"
+    return 1
+  fi
+  if ! cp -p "${backup_file}" "${working_file}"; then
+    restore_config "${config_file}" "${backup_file}" "${working_file}" "${config_existed}"
+    return 1
+  fi
+
+  if ! remove_legacy_and_managed_config "${working_file}" ||
+     ! writable_roots_value=$(merged_writable_roots_value "${working_file}") ||
+     ! upsert_top_level "${working_file}" model '"gpt-5.6-sol"' ||
+     ! upsert_top_level "${working_file}" model_reasoning_effort '"medium"' ||
+     ! upsert_top_level "${working_file}" plan_mode_reasoning_effort '"high"' ||
+     ! upsert_top_level "${working_file}" approval_policy '"never"' ||
+     ! upsert_top_level "${working_file}" model_auto_compact_token_limit 260000 ||
+     ! upsert_top_level "${working_file}" model_auto_compact_token_limit_scope '"total"' ||
+     ! upsert_table_key "${working_file}" sandbox_workspace_write network_access true ||
+     ! upsert_table_array_key "${working_file}" sandbox_workspace_write writable_roots "${writable_roots_value}" ||
+     ! append_managed_config "${working_file}" ||
+     ! validate_toml "${working_file}" ||
+     ! validate_config_update "${backup_file}" "${working_file}"; then
+    restore_config "${config_file}" "${backup_file}" "${working_file}" "${config_existed}"
+    return 1
+  fi
+
+  if ! mv "${working_file}" "${config_file}"; then
+    restore_config "${config_file}" "${backup_file}" "${working_file}" "${config_existed}"
+    return 1
+  fi
+  rm -f "${backup_file}" || printf 'Warning: stale Codex config backup remains at %s.\n' "${backup_file}" >&2
+}
+
+remove_codex_superpowers_link() {
+  local link_path="${HOME}/.agents/skills/superpowers"
+  local expected_target="${HOME}/.codex/superpowers/skills"
+  local actual_real expected_real
+
+  if [ ! -L "${link_path}" ]; then
+    return
+  fi
+  actual_real=$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "${link_path}")
+  expected_real=$(python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "${expected_target}")
+  if [ "${actual_real}" = "${expected_real}" ]; then
+    rm -- "${link_path}"
+  fi
+}
+
+main() {
+  local codex_config="${HOME}/.codex/config.toml"
+
+  mkdir -p "${HOME}/.codex"
+  remove_codex_superpowers_link
+  configure_codex "${codex_config}"
+  echo "✅ Codex configured successfully!"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

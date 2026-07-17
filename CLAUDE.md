@@ -41,6 +41,7 @@ Chezmoi uses special prefixes to manage dotfiles:
 - `dot_config/` → `.config/`
 - `.chezmoiscripts/` → Auto-executed installation scripts
 - `symlink_` → symlink (e.g., `dot_claude/skills/symlink_foo` creates `.claude/skills/foo` as symlink)
+- `dot_codex/` → `.codex/` (Codex instructions, workflow skills, and reviewer)
 
 ### Installation Scripts
 
@@ -59,8 +60,10 @@ Located in `.chezmoiscripts/`, prefixed with `run_onchange_after_` and executed 
 - `16` - beads (git-backed issue tracker)
 - `30` - Go tools
 - `31` - Python packages
-- `32` - npm packages
+- `32` - npm packages (including Codex CLI)
 - `33` - Claude skills
+- `35` - Codex configuration and shared-skill visibility
+- `36` - opencode plugins
 - `99` - Set zsh as default shell
 
 ### Core Components
@@ -74,6 +77,8 @@ Located in `.chezmoiscripts/`, prefixed with `run_onchange_after_` and executed 
 **Languages**: mise manages versions (Go, Node, Python, Lua, Zig, etc. - see `dot_mise.toml`)
 
 **Claude Code**: Custom skills (`dot_claude/skills/`), agents (`dot_claude/agents/`), and settings (`dot_claude/settings.json`) are chezmoi-managed.
+
+**Codex**: Dedicated instructions, lean `product-discovery` / `systematic-debugging` / `software-delivery` skills, and a read-only reviewer are managed under `dot_codex/`. Codex uses its native subagents. Shared skills remain in `dot_agents/skills/`, while the installer disables broad workflow and Claude-specific skills that Codex should not auto-load.
 
 ### Key Bindings
 
@@ -89,4 +94,3 @@ Templates (`.tmpl` files) use Go templating with `{{ if eq .chezmoi.os "linux" }
 ### Git Branch Strategy
 
 This repo uses a public/private split. `master` branch pushes to `origin` (private), `master-upstream` pushes to `upstream` (public). When making changes, consider whether they contain private information before syncing to upstream.
-

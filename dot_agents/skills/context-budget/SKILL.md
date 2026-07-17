@@ -1,12 +1,12 @@
 ---
 name: context-budget
-description: Audits Claude Code context window consumption across agents, skills, MCP servers, and rules. Identifies bloat, redundant components, and produces prioritized token-savings recommendations.
+description: Audit context usage across agents, skills, and MCP servers; recommend token savings.
 origin: ECC
 ecc-source:
   upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3
   upstream-path: skills/context-budget/SKILL.md
   imported-at: "2026-04-27T00:00:00+09:00"
-  adapted: false
+  adapted: true
 ---
 
 
@@ -26,31 +26,41 @@ Analyze token overhead across every loaded component in a Claude Code session an
 
 ### Phase 1: Inventory
 
-Scan all component directories and estimate token consumption:
+Scan all component directories and estimate token consumption.
 
-**Agents** (`agents/*.md`)
-- Count lines and tokens per file (words × 1.3)
-- Extract `description` frontmatter length
-- Flag: files >200 lines (heavy), description >30 words (bloated frontmatter)
+**Delegate the raw scan to a haiku subagent** (token-economy: the scan reads many files
+whose contents you never reference again — keep them out of the main context). Use the
+`Agent` tool with `subagent_type="general-purpose", model="haiku"` and instruct it to
+*measure and normalize, not to judge*. The subagent does the file walk / line+token
+counting / symlink resolution and returns structured data; the main context does Phase 2–4
+(meaning-making). This mirrors the skill-stocktake precedent (mechanical work → haiku).
 
-**Skills** (`skills/*/SKILL.md`)
-- Count tokens per SKILL.md
-- Flag: files >400 lines
-- Check for duplicate copies in `.agents/skills/` — skip identical copies to avoid double-counting
+The haiku subagent prompt MUST include these instructions verbatim:
 
-**Rules** (`rules/**/*.md`)
-- Count tokens per file
-- Flag: files >100 lines
-- Detect content overlap between rule files in the same language module
+> **Symlink rule (apply to EVERY file before counting)**: run `readlink` / `ls -la` on each
+> file first. If it is a symlink, attribute it to its target's canonical path and **do not
+> count it again**. The same applies to symlinked directories
+> (e.g. `.claude/skills/foo -> .agents/skills/foo`). This avoids DUPE false-positives in
+> chezmoi-style setups that cross-link via symlinks.
+>
+> **Return only measured/normalized data — make NO value judgments** (no Always/Sometimes/
+> Rarely bucketing; that is the caller's job). Return:
+> 1. Normalized inventory rows: `canonical_path | type(agent|skill|mcp|claude.md) | lines | est_tokens | is_symlink | symlink_target` (symlinks already collapsed onto their target, no double counts).
+> 2. Flag candidates as RAW data only: agents >200 lines, descriptions >30 words, skills >400 lines, MCP servers >20 tools, CLAUDE.md chain total >300 lines.
+> 3. Category subtotals + grand total tokens.
 
-**MCP Servers** (`.mcp.json` or active MCP config)
-- Count configured servers and total tool count
-- Estimate schema overhead at ~500 tokens per tool
-- Flag: servers with >20 tools, servers that wrap simple CLI commands (`gh`, `git`, `npm`, `supabase`, `vercel`)
+Scope the subagent over these surfaces:
+- **Agents** (`agents/*.md`): lines + tokens (words × 1.3) per file, `description` frontmatter length.
+- **Skills** (`skills/*/SKILL.md`): tokens per SKILL.md (symlinks collapsed onto target first).
+- **MCP Servers** (`.mcp.json` / active MCP config): server count + total tool count (~500 tok/tool rough; spread ~80–1.8k).
+- **CLAUDE.md** (project + user-level): tokens per file, follow `@imports` recursively.
 
-**CLAUDE.md** (project + user-level)
-- Count tokens per file in the CLAUDE.md chain
-- Flag: combined total >300 lines
+**Preferred source of truth (applied in the main context, not delegated)**: run the
+built-in `/context` command first. It reports authoritative live token counts per component
+(system prompt, system tools, MCP tools, custom agents, memory files, skills, messages, free
+space) for the *current* session. Treat the haiku subagent's `words × 1.3` heuristics only as
+a supplement (per-file breakdown, redundancy hints) — never override `/context` numbers with
+heuristic estimates.
 
 ### Phase 2: Classify
 
@@ -68,9 +78,11 @@ Identify the following problem patterns:
 
 - **Bloated agent descriptions** — description >30 words in frontmatter loads into every Task tool invocation
 - **Heavy agents** — files >200 lines inflate Task tool context on every spawn
-- **Redundant components** — skills that duplicate agent logic, rules that duplicate CLAUDE.md
+- **Redundant components** — skills that duplicate agent logic, or skills that duplicate
+  CLAUDE.md / AGENTS.md instructions. **Exclude symlink pairs** (same canonical inode = not
+  redundant) — only flag when two genuinely independent files have overlapping content.
 - **MCP over-subscription** — >10 servers, or servers wrapping CLI tools available for free
-- **CLAUDE.md bloat** — verbose explanations, outdated sections, instructions that should be rules
+- **CLAUDE.md bloat** — verbose explanations, outdated sections, instructions that belong in a skill or AGENTS.md
 
 ### Phase 4: Report
 
@@ -90,7 +102,6 @@ Component Breakdown:
 ├─────────────────┼────────┼───────────┤
 │ Agents          │ N      │ ~X,XXX    │
 │ Skills          │ N      │ ~X,XXX    │
-│ Rules           │ N      │ ~X,XXX    │
 │ MCP tools       │ N      │ ~XX,XXX   │
 │ CLAUDE.md       │ N      │ ~X,XXX    │
 └─────────────────┴────────┴───────────┘
@@ -134,8 +145,21 @@ Skill: Current overhead 33% → adding 5 servers (~50 tools) would add ~25,000 t
 
 ## Best Practices
 
-- **Token estimation**: use `words × 1.3` for prose, `chars / 4` for code-heavy files
-- **MCP is the biggest lever**: each tool schema costs ~500 tokens; a 30-tool server costs more than all your skills combined
-- **Agent descriptions are loaded always**: even if the agent is never invoked, its description field is present in every Task tool context
+- **Prefer `/context` over heuristics**: the built-in `/context` slash command gives
+  authoritative live token counts. Use this skill for *what to do about them*, not for
+  re-estimating numbers `/context` already knows.
+- **Resolve symlinks before any duplicate check**: hash-comparing two paths that point
+  at the same inode always returns "identical". Call `readlink` / `ls -la` first and
+  attribute symlinks to their canonical target. Without this, every dotfiles repo that
+  cross-references rules via symlinks will produce false "DUPE" warnings.
+- **Token estimation fallback**: when `/context` isn't available, use `words × 1.3` for
+  prose, `chars / 4` for code-heavy files. Treat these as ±30% rough.
+- **MCP is the biggest lever**: per-tool schema cost varies wildly (~80–1.8k tokens).
+  A 30-tool server can outweigh all your skills combined — use `/context` to see the
+  real per-tool numbers before recommending cuts.
+- **Skills are lazy-loaded; agents have two surfaces**: only the *name + description*
+  of each skill is auto-loaded (~20–200 tok each). For agents, both the frontmatter
+  (always loaded into the Agent tool) and the body (loaded only on invoke) cost
+  context — report them separately.
 - **Verbose mode for debugging**: use when you need to pinpoint the exact files driving overhead, not for regular audits
 - **Audit after changes**: run after adding any agent, skill, or MCP server to catch creep early

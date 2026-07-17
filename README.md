@@ -33,6 +33,17 @@ chezmoi edit      # Edit source files
 - **Terminal**: Tmux (prefix: `Ctrl+s`), WezTerm, Alacritty
 - **Languages**: mise (Go, Node, Python, etc.)
 - **Tools**: fzf, ripgrep, lazygit, lazydocker, ghq, delta
+- **AI agents**: Claude Code uses shared instructions and skills from `.agents/`; opencode uses its own instructions plus shared skills; Codex uses dedicated instructions, three lean discovery/debugging/delivery skills, native subagents, and selected shared skills
+
+### opencode
+
+Global instructions, agents, and MCP servers are chezmoi-managed under `dot_config/opencode/`.
+
+- `AGENTS.md` → opencode 固有のグローバル指示
+- `agents/` → `iot-data-pipeline-architect` を `~/.claude/agents/` から再利用
+- skills は配置不要（opencode が `~/.agents/skills/` を自動 walk）
+- superpowers は `.chezmoiscripts/run_onchange_after_34-install-opencode-superpowers.sh.tmpl` が `obra/superpowers` を `~/.config/opencode/superpowers/` に clone し、plugin と skills を symlink で expose
+- `oh-my-openagent` plugin（旧名 `oh-my-opencode`）は `.chezmoiscripts/run_onchange_after_36-install-opencode-plugins.sh.tmpl` が bun/npm install
 
 ## Public / Private Repository Split
 

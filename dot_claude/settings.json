@@ -56,16 +56,6 @@
       "Bash(sort:*)",
       "Bash(uniq:*)",
       "Bash(printf:*)",
-      "mcp__claude_ai_atlassian",
-      "mcp__plugin_slack_slack__slack_read_thread",
-      "mcp__plugin_slack_slack__slack_read_channel",
-      "mcp__plugin_slack_slack__slack_read_user_profile",
-      "mcp__plugin_slack_slack__slack_read_canvas",
-      "mcp__plugin_slack_slack__slack_search_channels",
-      "mcp__plugin_slack_slack__slack_search_public",
-      "mcp__plugin_slack_slack__slack_search_public_and_private",
-      "mcp__plugin_slack_slack__slack_search_users",
-      "mcp__plugin_atlassian_atlassian",
       "mcp__plugin_claude-mem_mcp-search",
       "Bash(/tmp/claude-:*)",
       "Bash(agent-browser:*)",
@@ -116,12 +106,7 @@
       "Bash(ssh:*)",
       "Bash(scp:*)",
       "Bash(aws:*)",
-      "Read(~/.aws)",
-      "mcp__plugin_slack_slack__slack_send_message",
-      "mcp__plugin_slack_slack__slack_send_message_draft",
-      "mcp__plugin_slack_slack__slack_schedule_message",
-      "mcp__plugin_slack_slack__slack_create_canvas",
-      "mcp__plugin_slack_slack__slack_update_canvas"
+      "Read(~/.aws)"
     ],
     "additionalDirectories": [
       "~/go",
@@ -130,41 +115,6 @@
     ]
   },
   "hooks": {
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event Notification",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event PermissionRequest",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PostCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event PostCompact",
-            "async": true
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
@@ -178,39 +128,12 @@
             "command": "jq -r '.tool_input.file_path | select(endswith(\".py\"))' | xargs -r ruff format --"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event PostToolUse",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event PreCompact",
-            "async": true
-          }
-        ]
       }
     ],
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "/home/masayuki/.claude/hooks/block-bash-file-write.sh",
-            "timeout": 3000,
-            "statusMessage": "Checking for Bash file-write redirects..."
-          },
           {
             "type": "command",
             "command": "echo \"$CLAUDE_TOOL_INPUT\" | jq -re '.command | test(\"^git commit\")' >/dev/null 2>&1 || exit 0; which go >/dev/null 2>&1 || exit 0; go vet ./... 2>&1 && go build -race ./... 2>&1 || echo '{\"decision\":\"block\",\"reason\":\"go vet or race build failed\"}'",
@@ -230,77 +153,10 @@
             "statusMessage": "Checking for unstaged generated files..."
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event PreToolUse",
-            "async": true
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/home/masayuki/.claude/hooks/rtk-rewrite.sh"
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event SessionEnd",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event SessionStart",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event Stop",
-            "async": true
-          }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cc-pane update-state --event UserPromptSubmit",
-            "async": true
-          }
-        ]
       }
     ]
   },
-  "statusLine": {
-    "type": "command",
-    "command": "bash $HOME/.claude/statusline.sh"
-  },
   "enabledPlugins": {
-    "atlassian@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "code-review@claude-plugins-official": false,
     "code-simplifier@claude-plugins-official": false,
@@ -311,7 +167,6 @@
     "feature-dev@claude-plugins-official": true,
     "gopls-lsp@claude-plugins-official": true,
     "serena@claude-plugins-official": false,
-    "slack@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": false,
     "worktrunk@worktrunk": true,
@@ -367,7 +222,6 @@
       "git",
       "aws",
       "gh",
-      "glab",
       "node",
       "codex",
       "ssh",
@@ -377,7 +231,6 @@
       "rtk git",
       "rtk aws",
       "rtk gh",
-      "rtk glab",
       "rtk node",
       "rtk codex",
       "rtk ssh",

@@ -1,7 +1,24 @@
 ---
 name: coding-golang
-description: Goコードの読み書きが発生する全てのタスクで使用。バグ調査・原因特定、バグ修正、新規機能実装、リファクタリング、コード読解・分析を含む。Goファイル(.go)の読み取りや修正案の作成が必要な場合に自動発動する。並行処理パターン、エラーハンドリング、chi/GORM等のプロジェクト規約を提供する。
+description: Goコードの読解・修正・実装・レビュー時に使用。並行処理、エラー処理、chi/GORM規約を扱う。
 invocation: auto
+ecc-imports:
+  - upstream-commit: 4e66b2882da9afb9747468b08a253ca2f09c85f3
+    upstream-path: skills/golang-patterns/SKILL.md
+    sections-merged: []
+    conflicts:
+      - "When to Activate"
+      - "Core Principles"
+      - "Error Handling Patterns"
+      - "Concurrency Patterns"
+      - "Interface Design"
+      - "Package Organization"
+      - "Struct Design"
+      - "Memory and Performance"
+      - "Go Tooling Integration"
+      - "Quick Reference: Go Idioms"
+      - "Anti-Patterns to Avoid"
+    imported-at: 2026-04-27T00:00:00+09:00
 ---
 
 # Go Coder (coding-golang)
@@ -147,6 +164,21 @@ func CreateUser(ctx context.Context, name, email string) (*User, error) {
 必要に応じてリファレンスドキュメントを参照し、プロジェクト固有の規約とGoのベストプラクティスに従ったコードを作成すること。
 テスト作成時は testing-golang、レビュー時は reviewing-golang を発動すること。
 
+## ECC 由来: skills/golang-patterns/SKILL.md
+
+> ECC base commit `4e66b2882da9afb9747468b08a253ca2f09c85f3` の `skills/golang-patterns/SKILL.md` を検証したが、本 skill の構造（`references/` に詳細を委譲する索引型 + プロジェクト固有規約優先）と異なるため統合せず、**全 H2 を conflicts として記録**。
+>
+> ECC `golang-patterns` は idiomatic Go の汎用パターン解説（674 行）:
+>
+> - **重複領域** (既存 references/ と重複、既存優先): Core Principles / Error Handling Patterns / Concurrency Patterns
+>   - 既存: `references/error-handling.md`, `references/concurrency-patterns.md`, `references/coding-standards.md`
+> - **既存になし** (将来取り込み余地あり): Interface Design / Package Organization / Struct Design / Memory and Performance / Go Tooling Integration / Quick Reference: Go Idioms / Anti-Patterns to Avoid
+>   - 必要に応じて ECC 原文を `references/ecc-golang-patterns.md` として配置するか、特定章を抜粋して既存 reference に追記する形で将来取り込む（本 spec のスコープ外）
+>
+> 本 skill は **プロジェクト固有規約最優先**（chi / GORM / プロジェクト固有ロガー）を SKILL.md 冒頭で明記しており、ECC を一括統合すると索引性が下がるため。
+
+## /ECC 由来: skills/golang-patterns/SKILL.md
+
 ### 並行処理分析の必須手順
 
 タスクが以下のいずれかに該当する場合、`references/concurrency-patterns.md` を **Read ツールで読み込んでから** 設計・実装を行うこと:
@@ -159,3 +191,31 @@ func CreateUser(ctx context.Context, name, email string) (*User, error) {
 リファレンスを読んだ上で、各パターンが該当するか判断し、該当するパターンを修正に適用すること。
 新しい状態遷移を追加した場合、その状態を書き込む既存コードパス（Close/Shutdown等）が新しい遷移と安全に共存するか確認すること。
 
+## コミット前 Go ビルド検証
+
+Go リポジトリでコミットする前に以下を検証する。
+
+### ビルドタグ付きファイルの検証
+
+変更ファイルにビルドタグ (`//go:build integration` 等) がある場合、タグ付きビルドで検証する:
+
+```bash
+go build -tags integration ./path/to/package/...
+```
+
+`go build ./...` はビルドタグ付きファイルをスキップするため、これだけでは不十分。staging 済みファイルのビルドタグを確認し、該当するパッケージをタグ付きでビルドすること。
+
+### コード生成後の staging 確認
+
+proto 生成 (`buf generate` 等)、Wire DI 生成 (`wire`)、mock 生成 (`go generate`) の実行後は、`git status` で未 staging の生成ファイルがないことを確認する。生成ツールは複数ディレクトリに出力することがある (例: `gen/` と `gengogofast/`)。生成コマンド実行後は必ず `git status` で全出力先を確認すること。
+
+## Makefile target 優先
+
+ビルド / テスト / デプロイ / 環境構築の操作で raw shell / ansible / docker / kubectl コマンドを書く前に、対応する Makefile target が存在するか確認する。
+
+1. `cat Makefile` / `make -n <target>` / `grep -E '^[a-zA-Z_-]+:' Makefile` で既存 target を確認
+2. 既存 target があれば優先 (差異が本質的にある場合のみ raw に逃げる)
+3. 似た target はあるが不足している場合は target 追加を提案、ad-hoc な shell に逃げない
+4. ansible / docker / kubectl の直叩きは「Makefile に該当 target なし」を確認した後の最終手段
+
+**例外**: 単発の調査コマンド (`docker ps`, `kubectl get pods` 等の read-only)、Makefile が存在しないリポジトリ、ユーザーが明示的に raw コマンドを指示。
