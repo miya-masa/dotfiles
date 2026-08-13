@@ -23,16 +23,14 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 
 | スキル             | 確認内容                                                     |
 | ------------------ | ------------------------------------------------------------ |
-| **coding-golang**  | プロダクトコードの規約（chi、GORM、エラーハンドリング等）    |
-| **testing-golang** | テストコードの規約（testify、mockery、テーブル駆動テスト等） |
+| **coding-golang**  | プロダクトコードの規約（並行処理、エラーハンドリング等）     |
+| **testing-golang** | テストコードの規約（アサーション、モック、テーブル駆動テスト等） |
 
 **REQUIRED:** レビュー対象がプロダクトコードなら coding-golang、テストコードなら testing-golang の規約に準拠しているか確認すること。
 
 ## レビュー観点
 
 ### 1. Go特有の問題（最重要）
-
-**REQUIRED**: レビュー開始時に `references/go-review-checklist.md` を **Read ツールで読み込む**こと。リンクを見るだけでなく、ファイルの全内容を読み込んでからレビューを行う。特に修正が状態遷移・ライフサイクル管理・クリーンアップ処理に関わる場合、「並行ライフサイクルの安全性」セクションのチェックリストを全項目適用すること。
 
 | カテゴリ               | 確認項目                                       |
 | ---------------------- | ---------------------------------------------- |
@@ -45,12 +43,7 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 
 ### 2. よくある問題パターン
 
-詳細は [common-go-issues.md](references/common-go-issues.md) を参照。
-
-- ループ変数のキャプチャ
-- nilインターフェース vs nil値
-- time.Afterのリーク
-- 空スライス vs nilスライス
+ループ変数のキャプチャ、nilインターフェース vs nil値、time.Afterのリーク、空スライス vs nilスライス等はgo vet/staticcheck/golangci-lintで検出できる一般的な問題のため、既存知識に従う。
 
 ### 3. コード品質
 
@@ -61,8 +54,8 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 
 ### 4. テストコード（該当する場合）
 
-- テーブル駆動テストの使用
-- assert/requireの適切な使い分け
+- 複数ケースでのテーブル駆動テストの適否
+- 対象リポジトリの assertion 方針との整合
 - エッジケースのカバー
 - モックの適切な使用
 
@@ -71,19 +64,9 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 - SQLインジェクション
 - 入力バリデーション
 - 機密情報の扱い
-- **gosec** で静的セキュリティ解析を実行する: `gosec ./...`
-- 外部呼び出し（HTTP/DB/gRPC等）には必ず `context.WithTimeout` でタイムアウトを設定する
-  ```go
-  ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-  defer cancel()
-  ```
-- secrets は `os.Getenv("KEY")` の戻り値を空文字チェックし、未設定なら error を返す（silent failure 防止）
-  ```go
-  apiKey := os.Getenv("API_KEY")
-  if apiKey == "" {
-      return fmt.Errorf("API_KEY not configured")
-  }
-  ```
+- 対象リポジトリの security tooling と CI に従う
+- 外部呼び出しが caller の deadline / cancellation 方針に従い、無制限に待たないこと
+- 必須設定が対象リポジトリの設定ロード規約に従って検証されること
 
 ## 必須チェックリスト
 
@@ -96,12 +79,12 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 - [ ] Mutexのunlockがすべてのパスで保証されているか
 - [ ] エラーが無視されていないか
 - [ ] コンテキストが適切に伝播されているか
-- [ ] 複数のRepository書き込み操作がトランザクションで囲まれているか
-- [ ] 読み取り→判断→書き込み（TOCTOU）パターンが同一トランザクション内にあるか
+- [ ] 原子性が必要な複数の永続化操作が、対象データストアのトランザクション境界で保護されているか
+- [ ] 競合を避ける必要がある読み取り→判断→書き込みが、適切な同期・トランザクション境界内にあるか
 
 ### Critical（並行ライフサイクル — 状態遷移・クリーンアップ・リソースライフサイクルを含む修正の場合）
 
-修正が状態遷移、クリーンアップ処理、リソースのライフサイクル管理に関わる場合、詳細チェックリストは [go-review-checklist.md](references/go-review-checklist.md) §並行ライフサイクルの安全性 を参照し、全項目のOK/NG判定を出力に含めること。
+修正が状態遷移、クリーンアップ処理、リソースのライフサイクル管理に関わる場合、並行して確立された新しい状態を古い cleanup が上書きしないこと、cleanup のべき等性、goroutine の終了を確認する。
 
 ### High（重要）
 
@@ -144,25 +127,3 @@ Go特有の観点でコードレビューを行うスキル。プロダクトコ
 - coding-golang/testing-golang 規約への準拠: [OK/要修正]
 - プロジェクト固有の規約: [OK/要修正/未確認]
 ```
-
-## リファレンス一覧
-
-| ファイル                                                    | 内容                         |
-| ----------------------------------------------------------- | ---------------------------- |
-| [go-review-checklist.md](references/go-review-checklist.md) | Go特有のレビュー観点詳細     |
-| [common-go-issues.md](references/common-go-issues.md)       | よくある問題パターンと修正例 |
-
-## ECC 由来: agents/go-reviewer.md
-
-> ECC base commit `4e66b2882da9afb9747468b08a253ca2f09c85f3` の `agents/go-reviewer.md`（76 行）を検証したが、本 skill の構造（`references/` に詳細を委譲する索引型 + プロジェクト固有規約優先）と異なるため統合せず、**全 H2 を conflicts として記録**。
->
-> ECC `go-reviewer` は CRITICAL/HIGH/MEDIUM の severity 階層を持つレビューチェックリスト形式:
->
-> - **Review Priorities** (severity 階層): SQL injection / Command injection / Race conditions / Goroutine leaks / errors.Is/As / Mutex misuse 等
->   - 既存の §レビュー観点 / §必須チェックリスト + `references/go-review-checklist.md` / `references/common-go-issues.md` で同等の網羅性をカバー（重複につき conflicts）
-> - **Diagnostic Commands**: `go vet` / `staticcheck` / `golangci-lint` / `go test -race` / `govulncheck`
->   - 必要に応じて `references/diagnostic-commands.md` として将来配置可能（本 spec のスコープ外）
-> - **Approval Criteria**: Approve/Warning/Block の判定基準
->   - 本 skill の §レビュー結果 で同等
-
-## /ECC 由来: agents/go-reviewer.md

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Execute and Ship"
+  short_description: "計画を実装しcommit・push・MR・CIまで連続して進める"
+  default_prompt: "Use $execute-and-ship to execute this reviewed plan and continue through MR-ready CI."
+
+policy:
+  allow_implicit_invocation: false

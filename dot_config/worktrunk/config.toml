@@ -1,0 +1,54 @@
+# Worktree path: inside the repository
+worktree-path = "{{ repo_path }}/.worktrees/{{ branch | sanitize }}"
+
+# LLM commit messages via Codex
+[commit.generation]
+command = "codex exec -m gpt-5.6-luna -c model_reasoning_effort='low' -c system_prompt='' --sandbox=read-only --json - | jq -sr '[.[] | select(.item.type? == \"agent_message\")] | last.item.text'"
+template-append = """
+- Use Conventional Commits format: `<type>(<scope>): <subject>`.
+- Write the subject in English, using imperative mood, starting with lowercase, with no trailing period.
+- Do not use emoji.
+- Do not add AI attribution, `Co-authored-by`, or other generated-by signatures.
+- Include a `BREAKING CHANGE:` footer when the change breaks an existing contract.
+"""
+
+# Stage only explicitly selected changes before commit
+[commit]
+stage = "none"
+
+# Merge defaults (Boris tip: always squash)
+[merge]
+squash = true
+rebase = true
+remove = true
+verify = true
+
+# Switch picker with delta
+[switch.picker]
+pager = "delta --paging=never"
+
+# Copy gitignored files (node_modules, build artifacts, etc.) to new worktrees
+# Exclude heavy caches that should be rebuilt
+[step.copy-ignored]
+exclude = [".cache/", ".turbo/", ".omc/"]
+
+# Global hooks stay in post-start. Copy must finish before an ignored .envrc can be allowed.
+[[post-start]]
+copy = "wt step copy-ignored"
+
+[[post-start]]
+direnv = "if command -v direnv >/dev/null 2>&1 && [ -f .envrc ]; then direnv allow; fi"
+
+# herdr の中で作った worktree を herdr workspace として開く。HERDR_ENV が無い
+# (tmux / 素の端末) 場合は何もしない。
+# `worktree open` は親リポジトリ workspace から始める必要があり、linked worktree の
+# パスを --cwd に渡すと linked_worktree_source で失敗するため、--cwd には
+# --git-common-dir から導出した親 root を渡す。--path は worktree 自身。
+# 既に開いていれば already_open=true が返るだけで workspace は増えない。
+# workspace の label は既定でブランチ名になるので --label は渡さない。
+[[post-start]]
+herdr = 'if [ "${HERDR_ENV:-}" = 1 ] && command -v herdr >/dev/null 2>&1; then root=$(git rev-parse --path-format=absolute --git-common-dir) && herdr worktree open --cwd "${root%/.git}" --path "$PWD" --no-focus >/dev/null; fi'
+
+# Use the stable envelope format for machine-readable worktree listings
+[list]
+json-schema = 2

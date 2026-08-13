@@ -118,6 +118,7 @@ if not isinstance(roots, list) or not all(isinstance(root, str) for root in root
 
 required_roots = [
     str(pathlib.Path.home() / "go"),
+    str(pathlib.Path.home() / ".cache" / "go-build"),
     "/tmp/claude",
 ]
 removed_root = str(pathlib.Path.home() / "claude" / "skills")
@@ -146,20 +147,32 @@ legacy_tables = {
     "agents.agent_verifier",
     "agents.agent_investigator",
     "agents.agent_decision_reviewer",
-    "agents.reviewer",
 }
 header_pattern = re.compile(r"^\s*\[\[?([^][]+)]\]?\s*(?:#.*)?$")
 output = []
 table = None
 skip_table = False
 skip_managed = False
+preserve_managed_table = False
 for line in lines:
     if line.rstrip("\r\n") == "# BEGIN CODEX MANAGED DELIVERY":
         skip_managed = True
+        preserve_managed_table = False
         continue
     if skip_managed:
         if line.rstrip("\r\n") == "# END CODEX MANAGED DELIVERY":
             skip_managed = False
+            preserve_managed_table = False
+            continue
+        match = header_pattern.match(line)
+        if match:
+            table = match.group(1).strip()
+            preserve_managed_table = table not in {
+                "agents.reviewer",
+                "skills.config",
+            }
+        if preserve_managed_table:
+            output.append(line)
         continue
     match = header_pattern.match(line)
     if match:
@@ -173,8 +186,52 @@ for line in lines:
         r"^\s*(?:max_depth\s*=\s*1|max_threads\s*=\s*6)\s*(?:#.*)?$", line
     ):
         continue
+    if table is not None and table.startswith("projects.") and re.match(
+        r"^\s*sandbox_mode\s*=", line
+    ):
+        continue
     output.append(line)
 path.write_text("".join(output), encoding="utf-8")
+PY
+}
+
+normalize_cc_pane_notify() {
+  python3 - "${1}" <<'PY'
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+lines = path.read_text(encoding="utf-8").splitlines(keepends=True)
+begin_marker = "##### cc-pane:begin #####"
+end_marker = "##### cc-pane:end #####"
+begin = [index for index, line in enumerate(lines) if line.rstrip("\r\n") == begin_marker]
+end = [index for index, line in enumerate(lines) if line.rstrip("\r\n") == end_marker]
+if not begin and not end:
+    raise SystemExit(0)
+if len(begin) != 1 or len(end) != 1 or begin[0] >= end[0]:
+    raise ValueError("cc-pane markers must form exactly one complete block")
+
+block = lines[begin[0] : end[0] + 1]
+notify_pattern = re.compile(r'^notify\s*=\s*\["cc-pane",\s*"update-state",\s*"--event",\s*"Stop",\s*"--agent",\s*"codex"\]\s*$')
+if sum(bool(notify_pattern.match(line.rstrip("\r\n"))) for line in block) != 1:
+    raise ValueError("unsupported cc-pane notify block")
+if any(re.match(r"^\s*\[", line) for line in block):
+    raise ValueError("cc-pane notify block must not contain a TOML table")
+
+first_table = next(
+    (index for index, line in enumerate(lines) if re.match(r"^\s*\[", line)),
+    len(lines),
+)
+if begin[0] < first_table:
+    raise SystemExit(0)
+
+remaining = lines[: begin[0]] + lines[end[0] + 1 :]
+first_table = next(
+    (index for index, line in enumerate(remaining) if re.match(r"^\s*\[", line)),
+    len(remaining),
+)
+path.write_text("".join(remaining[:first_table] + block + remaining[first_table:]), encoding="utf-8")
 PY
 }
 
@@ -186,20 +243,15 @@ import sys
 
 path = pathlib.Path(sys.argv[1])
 names = (
-    "feature-development",
+    "start",
     "bugfix",
-    "spec-review",
-    "context-budget",
-    "skill-stocktake",
+    "investigation",
     "handoff",
     "writing-gpt-prompts",
-    "skill-creator",
+    "herdr-delegate",
 )
 text = path.read_text(encoding="utf-8").rstrip() + "\n\n"
 text += "# BEGIN CODEX MANAGED DELIVERY\n"
-text += "[agents.reviewer]\n"
-text += 'description = "Read-only artifact reviewer for correctness, adversarial risks, product fit, and simplicity."\n'
-text += 'config_file = "agents/reviewer.toml"\n'
 for name in names:
     skill_path = pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md"
     text += "\n[[skills.config]]\n"
@@ -214,21 +266,41 @@ validate_config_update() {
   python3 - "${1}" "${2}" <<'PY'
 import copy
 import pathlib
+import re
 import sys
 import tomllib
+
+def normalized_before(path):
+    text = pathlib.Path(path).read_text(encoding="utf-8")
+    begin_marker = "##### cc-pane:begin #####"
+    end_marker = "##### cc-pane:end #####"
+    begin = text.find(begin_marker)
+    end = text.find(end_marker)
+    first_table = re.search(r"^\s*\[", text, re.MULTILINE)
+    if begin != -1 and end != -1 and first_table is not None and begin > first_table.start():
+        end += len(end_marker)
+        while end < len(text) and text[end] in "\r\n":
+            end += 1
+        block = text[begin:end]
+        text = text[:begin] + text[end:]
+        first_table = re.search(r"^\s*\[", text, re.MULTILINE)
+        insert_at = first_table.start() if first_table is not None else len(text)
+        text = text[:insert_at] + block + text[insert_at:]
+    return tomllib.loads(text)
 
 def load(path):
     with pathlib.Path(path).open("rb") as config_file:
         return tomllib.load(config_file)
 
-before = load(sys.argv[1])
+before = normalized_before(sys.argv[1])
 after = load(sys.argv[2])
 expected = copy.deepcopy(before)
 expected.update({
-    "model": "gpt-5.6-sol",
+    "model": "gpt-5.6-terra",
     "model_reasoning_effort": "medium",
-    "plan_mode_reasoning_effort": "high",
-    "approval_policy": "never",
+    "plan_mode_reasoning_effort": "medium",
+    "sandbox_mode": "workspace-write",
+    "approval_policy": "on-request",
     "model_auto_compact_token_limit": 260000,
     "model_auto_compact_token_limit_scope": "total",
 })
@@ -241,58 +313,69 @@ if not isinstance(roots, list) or not all(isinstance(root, str) for root in root
     raise TypeError("sandbox_workspace_write.writable_roots must be an array of strings")
 removed_root = str(pathlib.Path.home() / "claude" / "skills")
 roots = [root for root in roots if root != removed_root]
-for root in (str(pathlib.Path.home() / "go"), "/tmp/claude"):
+for root in (
+    str(pathlib.Path.home() / "go"),
+    str(pathlib.Path.home() / ".cache" / "go-build"),
+    "/tmp/claude",
+):
     if root not in roots:
         roots.append(root)
 sandbox.update({"writable_roots": roots, "network_access": True})
+
+projects = expected.get("projects", {})
+if isinstance(projects, dict):
+    for project in projects.values():
+        if isinstance(project, dict):
+            project.pop("sandbox_mode", None)
 
 features = expected.get("features")
 if isinstance(features, dict) and features.get("multi_agent") is True:
     del features["multi_agent"]
 
-agents = expected.setdefault("agents", {})
-if not isinstance(agents, dict):
-    raise TypeError("agents must be a table")
-if agents.get("max_depth") == 1:
-    del agents["max_depth"]
-if agents.get("max_threads") == 6:
-    del agents["max_threads"]
-for name in (
-    "agent_luna_worker", "agent_explorer", "agent_implementer", "agent_reviewer",
-    "agent_verifier", "agent_investigator", "agent_decision_reviewer", "reviewer",
-):
-    agents.pop(name, None)
-agents["reviewer"] = {
-    "description": "Read-only artifact reviewer for correctness, adversarial risks, product fit, and simplicity.",
-    "config_file": "agents/reviewer.toml",
-}
+agents = expected.get("agents")
+if agents is not None:
+    if not isinstance(agents, dict):
+        raise TypeError("agents must be a table")
+    if agents.get("max_depth") == 1:
+        del agents["max_depth"]
+    if agents.get("max_threads") == 6:
+        del agents["max_threads"]
+    for name in (
+        "agent_luna_worker", "agent_explorer", "agent_implementer", "agent_reviewer",
+        "agent_verifier", "agent_investigator", "agent_decision_reviewer",
+    ):
+        agents.pop(name, None)
 
-disabled_names = {
-    "feature-development", "bugfix", "spec-review", "context-budget",
-    "skill-stocktake", "handoff",
-    "writing-gpt-prompts", "skill-creator",
-}
 skills = expected.setdefault("skills", {})
 configs = skills.get("config", [])
 if not isinstance(configs, list):
     raise TypeError("skills.config must be an array of tables")
-if "# BEGIN CODEX MANAGED DELIVERY" in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"):
-    for name in disabled_names:
-        managed_path = str(pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md")
+before_text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+if "# BEGIN CODEX MANAGED DELIVERY" in before_text:
+    # installer は MANAGED ブロック内の [[skills.config]] を skill 名に関係なく削除する。
+    # 期待値側も同じ範囲を消す (無効化スキル名を列挙し続けないため)。
+    managed_block = before_text.split("# BEGIN CODEX MANAGED DELIVERY", 1)[1]
+    managed_block = managed_block.split("# END CODEX MANAGED DELIVERY", 1)[0]
+    if "[agents.reviewer]" in managed_block and isinstance(agents, dict):
+        agents.pop("reviewer", None)
+    # 1 出現につき 1 件だけ消す。同じ path が MANAGED ブロック外にもある場合
+    # (ユーザーが自分で無効化した skill) を巻き込まないよう、後ろから消す。
+    for managed_path in re.findall(r'^path = "(.+)"$', managed_block, re.MULTILINE):
         for index in range(len(configs) - 1, -1, -1):
-            item = configs[index]
-            if isinstance(item, dict) and item == {"path": managed_path, "enabled": False}:
+            if configs[index] == {"path": managed_path, "enabled": False}:
                 del configs[index]
                 break
 configs.extend(
     {"path": str(pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md"), "enabled": False}
     for name in (
-        "feature-development", "bugfix", "spec-review", "context-budget",
-        "skill-stocktake", "handoff",
-        "writing-gpt-prompts", "skill-creator",
+        "start", "bugfix", "investigation", "handoff", "writing-gpt-prompts",
+        "herdr-delegate",
     )
 )
 skills["config"] = configs
+
+if "agents" not in after:
+    expected.pop("agents", None)
 
 if after != expected:
     raise ValueError("Codex config update changed unrelated TOML values or missed required settings")
@@ -338,11 +421,13 @@ configure_codex() {
   fi
 
   if ! remove_legacy_and_managed_config "${working_file}" ||
+     ! normalize_cc_pane_notify "${working_file}" ||
      ! writable_roots_value=$(merged_writable_roots_value "${working_file}") ||
-     ! upsert_top_level "${working_file}" model '"gpt-5.6-sol"' ||
+     ! upsert_top_level "${working_file}" model '"gpt-5.6-terra"' ||
      ! upsert_top_level "${working_file}" model_reasoning_effort '"medium"' ||
-     ! upsert_top_level "${working_file}" plan_mode_reasoning_effort '"high"' ||
-     ! upsert_top_level "${working_file}" approval_policy '"never"' ||
+     ! upsert_top_level "${working_file}" plan_mode_reasoning_effort '"medium"' ||
+     ! upsert_top_level "${working_file}" sandbox_mode '"workspace-write"' ||
+     ! upsert_top_level "${working_file}" approval_policy '"on-request"' ||
      ! upsert_top_level "${working_file}" model_auto_compact_token_limit 260000 ||
      ! upsert_top_level "${working_file}" model_auto_compact_token_limit_scope '"total"' ||
      ! upsert_table_key "${working_file}" sandbox_workspace_write network_access true ||

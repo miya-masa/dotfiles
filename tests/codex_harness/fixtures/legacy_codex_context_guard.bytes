@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+import re
+
+
+HANDOFF_THRESHOLD = 220_000
+THREAD_ID_PATTERN = re.compile(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-"
+    r"[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+)
+
+
+def unknown(reason: str) -> int:
+    print(f"UNKNOWN {reason}")
+    return 2
+
+
+def find_session(codex_home: Path, thread_id: str) -> Path | None:
+    sessions = codex_home / "sessions"
+    candidates = [
+        path
+        for path in sessions.rglob("rollout-*.jsonl")
+        if path.name.endswith(f"-{thread_id}.jsonl")
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: (path.stat().st_mtime_ns, str(path)))
+
+
+def latest_input_tokens(path: Path) -> int | None:
+    latest = None
+    with path.open(encoding="utf-8") as session_file:
+        for line in session_file:
+            try:
+                event = json.loads(line)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            if not isinstance(event, dict):
+                continue
+            payload = event.get("payload")
+            if not isinstance(payload, dict) or payload.get("type") != "token_count":
+                continue
+            info = payload.get("info")
+            usage = info.get("last_token_usage") if isinstance(info, dict) else None
+            value = usage.get("input_tokens") if isinstance(usage, dict) else None
+            if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+                latest = value
+    return latest
+
+
+def main() -> int:
+    thread_id = os.environ.get("CODEX_THREAD_ID")
+    if not thread_id:
+        return unknown("missing-thread-id")
+    if not THREAD_ID_PATTERN.fullmatch(thread_id):
+        return unknown("invalid-thread-id")
+
+    codex_home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
+    try:
+        session = find_session(codex_home, thread_id)
+        if session is None:
+            return unknown("session-not-found")
+        input_tokens = latest_input_tokens(session)
+    except (OSError, UnicodeError):
+        return unknown("token-count-unavailable")
+
+    if input_tokens is None:
+        return unknown("token-count-unavailable")
+    state = "HANDOFF" if input_tokens >= HANDOFF_THRESHOLD else "OK"
+    print(f"{state} {input_tokens}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

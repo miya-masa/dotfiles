@@ -17,12 +17,60 @@ eval "$(~/.local/bin/mise activate bash)"
 # superpowersスキルはClaude Codeプラグインで提供されるため除外
 # (opencode向けには別スクリプトでセットアップ)
 
-# Claude Code専用スキル (プラグイン代替なし)
-npx skills add https://github.com/vercel-labs/skills --skill find-skills -y --global -a claude-code
-npx skills add https://github.com/antfu/skills --skill slidev -y --global -a claude-code
-
 # 旧スキルのクリーンアップ
 rm -rf ~/.agents/skills/brainstorming ~/.agents/skills/using-git-worktrees
 rm -f ~/.claude/skills/brainstorming ~/.claude/skills/using-git-worktrees
+
+# 廃止した旧 proposal パイプライン (2026-07-25)
+rm -rf ~/.agents/skills/review-harness-proposals
+rm -f ~/.claude/skills/review-harness-proposals
+rm -rf ~/.claude/scripts/review_feedback
+rm -f ~/.claude/scripts/review-feedback-scan.sh ~/.claude/scripts/review-feedback-analyzer.md
+rm -f ~/.claude/hooks/review-feedback-check.sh
+rm -rf ~/.claude/data/review-feedback
+
+# 運用外になった archived agent 4体を削除 (被参照0) (2026-07-25)
+rm -rf ~/.claude/agents_archived
+
+# 一般知識 skill を削除 (2026-07-25) — モデル知識で足りるため
+for s in slidev skill-creator python-testing python-patterns skill-stocktake \
+         hexagonal-architecture code-tour architecture-decision-records \
+         context-budget github-ops find-skills tdd agentcore; do
+  rm -rf "$HOME/.agents/skills/$s"
+  # symlink とは限らない (npx skills add 由来は実ディレクトリ) ので -rf で両対応
+  rm -rf "$HOME/.claude/skills/$s"
+done
+
+# 観点 skill を整理 (2026-07-25) — 固有価値は reviewer.md / CLAUDE.md へ移設済み
+for s in security-review; do
+  rm -rf "$HOME/.agents/skills/$s"
+  # symlink とは限らない (npx skills add 由来は実ディレクトリ) ので -rf で両対応
+  rm -rf "$HOME/.claude/skills/$s"
+done
+
+# Go の汎用 skill から一般知識・プロジェクト固有 reference を除去
+# chezmoi はソース削除を実機へ伝播しないため、旧版由来の既知ファイルだけを明示削除する
+rm -f ~/.agents/skills/coding-golang/references/api-conventions.md
+rm -f ~/.agents/skills/coding-golang/references/chi-patterns.md
+rm -f ~/.agents/skills/coding-golang/references/coding-standards.md
+rm -f ~/.agents/skills/coding-golang/references/concurrency-patterns.md
+rm -f ~/.agents/skills/coding-golang/references/error-handling.md
+rm -f ~/.agents/skills/coding-golang/references/gorm-patterns.md
+rm -f ~/.agents/skills/coding-golang/references/modern-go.md
+rm -f ~/.agents/skills/testing-golang/references/advanced-testing.md
+rm -f ~/.agents/skills/testing-golang/references/concurrency-testing.md
+rm -f ~/.agents/skills/testing-golang/references/edge-cases.md
+rm -f ~/.agents/skills/testing-golang/references/mock-patterns.md
+rm -f ~/.agents/skills/testing-golang/references/testcontainers-patterns.md
+rm -f ~/.agents/skills/reviewing-golang/references/common-go-issues.md
+rm -f ~/.agents/skills/reviewing-golang/references/go-review-checklist.md
+
+# AGENTS.md を dot_claude/CLAUDE.md へ統合したため削除 (2026-07-25)
+rm -f ~/.agents/AGENTS.md
+# opencode は未使用のため AGENTS.md への symlink を削除 (2026-07-25) — 放置すると broken link 化する
+rm -f ~/.config/opencode/AGENTS.md
+
+# 事前ブロック型 gate を廃止 (2026-07-25) — 証跡記録に置き換え
+rm -f ~/.claude/hooks/delegation-gate.sh ~/.claude/hooks/review-gate-check.sh
 
 echo "✅ Claude Code skills installed successfully!"

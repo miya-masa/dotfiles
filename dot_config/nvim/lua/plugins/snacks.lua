@@ -1,3 +1,23 @@
+-- herdr ペイン内（$TMUX 無し）では herdr-navigate へフォールバックする。
+-- tmux 内では従来どおり vim-tmux-navigator を呼ぶ（挙動は変えない）。
+-- terminal window 専用（win.keys）なので常に stopinsert を先頭に挟む
+-- （既存 rhs の <C-\><C-n> に相当）。core.lua とは重複するが、ファイル跨ぎの
+-- 共有モジュールにはしない（この変更のスコープ外）。
+local function nav(wincmd_dir, herdr_dir, tmux_cmd)
+  return function()
+    vim.cmd("stopinsert")
+    if vim.env.TMUX then
+      vim.cmd(tmux_cmd)
+      return
+    end
+    local w = vim.fn.winnr()
+    vim.cmd("wincmd " .. wincmd_dir)
+    if vim.fn.winnr() == w then
+      vim.fn.jobstart({ "herdr-navigate", "--force", herdr_dir })
+    end
+  end
+end
+
 return {
   {
     "snacks.nvim",
@@ -51,10 +71,10 @@ return {
       terminal = {
         win = {
           keys = {
-            nav_h = { "<C-h>", [[<C-\><C-n><Cmd>TmuxNavigateLeft<CR>]], desc = "Tmux Navigate Left", mode = "t" },
-            nav_j = { "<C-j>", [[<C-\><C-n><Cmd>TmuxNavigateDown<CR>]], desc = "Tmux Navigate Down", mode = "t" },
-            nav_k = { "<C-k>", [[<C-\><C-n><Cmd>TmuxNavigateUp<CR>]], desc = "Tmux Navigate Up", mode = "t" },
-            nav_l = { "<C-l>", [[<C-\><C-n><Cmd>TmuxNavigateRight<CR>]], desc = "Tmux Navigate Right", mode = "t" },
+            nav_h = { "<C-h>", nav("h", "left", "TmuxNavigateLeft"), desc = "Tmux Navigate Left", mode = "t" },
+            nav_j = { "<C-j>", nav("j", "down", "TmuxNavigateDown"), desc = "Tmux Navigate Down", mode = "t" },
+            nav_k = { "<C-k>", nav("k", "up", "TmuxNavigateUp"), desc = "Tmux Navigate Up", mode = "t" },
+            nav_l = { "<C-l>", nav("l", "right", "TmuxNavigateRight"), desc = "Tmux Navigate Right", mode = "t" },
           },
         },
       },

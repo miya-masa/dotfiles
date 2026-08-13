@@ -17,7 +17,7 @@ homepage: https://developer.1password.com/docs/cli/get-started/
 
 - 「op signin」「op whoami」「op vault list」など `op` コマンド全般
 - 「op service-account」「サービスアカウントで」「1Password から API token 取って `<コマンド>` に渡したい」
-- 他の skill や CLI が 1Password 経由で secret を扱う際の参照元
+- 既存 skill (`codex:setup`) が 1Password 経由で secret を扱う際の参照元
 
 ## 認証方式: service account (Claude セッション用)
 
@@ -49,7 +49,7 @@ token ファイルが無い / 失効した場合、ユーザーに以下を依�
    ```
    - 権限: `read_items` / `write_items` (read_items 必須) / `share_items` (read_items 必須)
    - 複数 vault は `--vault` を繰り返す。vault 作成も許すなら `--can-create-vaults`
-   - read のみで足りるなら `read_items` だけにする。1Password に item を書き戻す用途では `write_items` が必要
+   - read のみで足りるなら `read_items` だけにする。1Password に item を書き戻す用途 (例: `--out-op` オプションでの書き込み) は `write_items` が必要
 2. 作成時に表示される token (`ops_` で始まる) を**直ちに**token ファイルへ書く (**token は1回しか表示されない**):
    ```bash
    # token をコピーして貼り付け、ファイルに保存
@@ -109,7 +109,7 @@ openclaw 版は `op` を tmux session 内で実行し `capture-pane` でスク�
 - 1 つの service account token = 1 アカウント。複数 vault にアクセスしたい場合は **作成時に `--vault` を繰り返して** 権限を付与する:
   ```bash
   op service-account create ci --expires-in 30d \
-    --vault app-prod:read_items \
+    --vault engineering:read_items \
     --vault infra:read_items,write_items
   ```
 - 別アカウント / 別権限の service account を使い分ける場合は **token ファイルを分け**、注入時に切り替える:

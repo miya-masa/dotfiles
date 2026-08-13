@@ -1,0 +1,7 @@
+interface:
+  display_name: "Implementation Planning"
+  short_description: "承認済みspecをreview済みの実行計画へ変換する"
+  default_prompt: "Use $implementation-planning to turn the approved specification into a reviewed task plan."
+
+policy:
+  allow_implicit_invocation: false

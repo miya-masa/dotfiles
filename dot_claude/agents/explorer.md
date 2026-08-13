@@ -22,7 +22,7 @@ color: cyan
 - 抽象化レイヤーと境界を把握する
 
 ### 再現・原因特定（不具合修正の調査フェーズ）
-- systematic-debugging skill の規律に従う（root cause → pattern → hypothesis）
+- `bugfix` skill の診断規律に従う（root cause → pattern → hypothesis）
 - 不具合の再現手順を最小化して特定する
 - 症状ではなく原因を突き止める。推測で断定しない
 

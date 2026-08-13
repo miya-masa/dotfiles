@@ -88,8 +88,7 @@ Brewfile_linux.lock.json
 .serena
 /.omc/state
 /.worktrees
-/docs/superpowers
-/docs/superpowers/codex-jobs/
+/.aidocs/
 /.codex
 /nvim.log
 

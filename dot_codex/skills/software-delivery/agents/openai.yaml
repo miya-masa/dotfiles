@@ -1,4 +1,0 @@
-interface:
-  display_name: "Software Delivery"
-  short_description: "確定した変更を計画からレビュー・検証・出荷まで進める"
-  default_prompt: "Use $software-delivery to plan, implement, review, verify, and prepare this change for shipping."

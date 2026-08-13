@@ -1,0 +1,80 @@
+#!/bin/sh
+# 使い方: herdr-navigate <left|down|up|right>
+#         herdr-navigate --force <left|down|up|right>
+#
+# vim-tmux-navigator 相当。フォーカス中ペインの前面プロセスが
+# nvim/view/fzf 系なら herdr pane send-keys でキーを pass-through し、
+# それ以外なら herdr pane focus --direction でペインを移動する。
+#
+# --force は nvim の keymap から呼ぶ専用経路。対象ペインを $HERDR_PANE_ID
+# （ペイン内 env）で特定し、述語を評価せず pane focus --direction のみ行う。
+# 通常経路を呼び返すと send-keys → nvim keymap 再発火 → helper で終端条件の
+# 無いループになるため、send-keys は絶対に行わない。
+
+PATH="$HOME/.local/bin:/opt/homebrew/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+export PATH
+
+log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/herdr"
+log_file="$log_dir/navigate.log"
+mkdir -p "$log_dir"
+
+start_ms=$(date +%s%3N)
+
+# $1=dir $2=pane $3=reason
+die() {
+    end_ms=$(date +%s%3N)
+    echo "herdr-navigate: $3" >&2
+    echo "$start_ms $end_ms $1 $2 error" >>"$log_file"
+    exit 1
+}
+
+# $1=dir $2=pane $3=branch(passthrough|focus)
+log_ok() {
+    end_ms=$(date +%s%3N)
+    echo "$start_ms $end_ms $1 $2 $3" >>"$log_file"
+}
+
+force=0
+if [ "$1" = "--force" ]; then
+    force=1
+    shift
+fi
+
+dir="$1"
+case "$dir" in
+    left) key="ctrl+h" ;;
+    down) key="ctrl+j" ;;
+    up) key="ctrl+k" ;;
+    right) key="ctrl+l" ;;
+    *) die "$dir" "" "invalid direction: $dir" ;;
+esac
+
+if [ "$force" = 1 ]; then
+    pane="$HERDR_PANE_ID"
+    [ -n "$pane" ] || die "$dir" "" "HERDR_PANE_ID is empty"
+    herdr pane focus --direction "$dir" --pane "$pane" >/dev/null 2>&1 \
+        || die "$dir" "$pane" "herdr pane focus failed"
+    log_ok "$dir" "$pane" "focus"
+    exit 0
+fi
+
+pane="$HERDR_ACTIVE_PANE_ID"
+[ -n "$pane" ] || die "$dir" "" "HERDR_ACTIVE_PANE_ID is empty"
+
+names=$(herdr pane process-info --pane "$pane" 2>/dev/null \
+    | jq -r '.result.process_info.foreground_processes[].name' 2>/dev/null)
+
+matched=0
+if [ -n "$names" ] && echo "$names" | grep -qE '^(\S+/)?g?\.?(view|l?n?vim?x?|fzf)(diff)?(-wrapped)?$'; then
+    matched=1
+fi
+
+if [ "$matched" = 1 ]; then
+    herdr pane send-keys "$pane" "$key" >/dev/null 2>&1 \
+        || die "$dir" "$pane" "herdr pane send-keys failed"
+    log_ok "$dir" "$pane" "passthrough"
+else
+    herdr pane focus --direction "$dir" --pane "$pane" >/dev/null 2>&1 \
+        || die "$dir" "$pane" "herdr pane focus failed"
+    log_ok "$dir" "$pane" "focus"
+fi

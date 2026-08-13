@@ -1,0 +1,7 @@
+interface:
+  display_name: "Ship Change"
+  short_description: "検証済み変更をcommit・push・MR・CIまで安全に進める"
+  default_prompt: "Use $ship-change to commit, push, open an MR, and resolve in-scope CI failures."
+
+policy:
+  allow_implicit_invocation: false

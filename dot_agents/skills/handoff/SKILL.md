@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: このセッションの作業を引き継ぐ時に使う。状況を判定して2モードに分岐する — compact(同一セッションを /compact で圧縮して続ける) / new-session(セッションが壊れた・新しいセッションで続ける)。どちらも引き継ぎ内容を tmp ファイル(構造化 md)に書き出し、それを読んで再開させる短い起動文を出す。「コンパクト前準備」「コンパクトしたい」「圧縮して続けたい」「/compact の前に」「セッションが壊れた」「次のセッションに引き継ぐ」「クラッシュした」「session handoff」「新しいセッションで続けたい」などで発火。writing-plans → executing-plans 移行直前や worktree 切替直後の /compact 前にも使う。
+description: このセッションの作業を引き継ぐ時に使う。状況を判定して2モードに分岐する — compact(同一セッションを /compact で圧縮して続ける) / new-session(セッションが壊れた・新しいセッションで続ける)。どちらも引き継ぎ内容を tmp ファイル(構造化 md)に書き出し、それを読んで再開させる短い起動文を出す。「コンパクト前準備」「コンパクトしたい」「圧縮して続けたい」「/compact の前に」「セッションが壊れた」「次のセッションに引き継ぐ」「クラッシュした」「session handoff」「新しいセッションで続けたい」などで発火。worktree 切替直後の /compact 前や、implementation-planning → 実行 phase（execute-plan / execute-and-ship）移行直前にも使う。
 ---
 
 # Handoff
@@ -24,8 +24,8 @@ description: このセッションの作業を引き継ぐ時に使う。状況�
 
 | signal | → モード |
 |---|---|
-| 「compact」「圧縮して続けたい」「/compact の前に」「コンパクト前準備」「context 逼迫だが続けたい」、writing-plans → executing-plans 移行直前、worktree 切替直後の /compact | **compact** |
-| 「セッションが壊れた」「クラッシュ」「次のセッションに引き継ぐ」「新しいセッションで」「session handoff」「壊れたので引き継ぎ」 | **new-session** |
+| 「compact」「圧縮して続けたい」「/compact の前に」「コンパクト前準備」「context 逼迫だが続けたい」、worktree 切替直後の /compact | **compact** |
+| 「セッションが壊れた」「クラッシュ」「次のセッションに引き継ぐ」「新しいセッションで」「session handoff」「壊れたので引き継ぎ」、implementation-planning → 実行 phase（execute-plan / execute-and-ship）移行直前 | **new-session** |
 | どちらとも取れる(signal が弱い／拮抗) | **1問だけ** AskUserQuestion で確認 |
 
 - 判定が**明白**なら「○○モードと判断しました」と1行宣言して**即実行**。質問しない。
@@ -162,17 +162,17 @@ description: このセッションの作業を引き継ぐ時に使う。状況�
 
 ユーザーの応答は待たない。補足が来たらファイルに追記する。
 
-## superpowers ワークフロー特例(compact モード)
+## software delivery workflow 特例
 
-writing-plans 完了直後の compact では、conventions §6.2.1 に従い handoff md と focus に以下を**必ず**含める:
+compact / new-session いずれで session 引き継ぎ（`handoff` skill）を使う場合も、機械可読な state authority は `.aidocs/workflows/<workflow-id>/context.json` なので、handoff md には**その所在と現在地だけ**を書く(内容を写さない。写しは stale になり、context.json と矛盾したら stop condition になる)。handoff md(compact の場合は focus にも)に以下を**必ず**含める:
 
-- spec ファイルパス(`docs/superpowers/specs/xxx.md`)
-- plan ファイルパス(`docs/superpowers/plans/xxx-plan.md`)
-- worktree path(現 CWD)
-- 残タスク状態(完了 / 未着手)
-- accept 済み Ops Risks の状態
+- workflow artifact root の絶対パス(`.aidocs/workflows/<workflow-id>/`)
+- 現在の phase と `artifact_revision`
+- worktree path(現 CWD)と branch
+- 直前に通した gate と、次に来る未完了 gate
+- ユーザーが明示承認した事項(spec 承認 / 実行方法の選択 / shipping 認可)
 
-handoff md の `## 再開手順` には `/superpowers:executing-plans <plan-path>` の起動指示を含める。Pre-flight Ops alignment は plan を都度 Read して再 alignment する不変条件があるため(conventions §6.4)、md 内では「accept 済み」と書くだけで十分(plan が source of truth)。
+`## 再開手順` には、(1) `workflow_state.py validate` で `context.json` を検証し記録された artifact と Git evidence を確認する、(2) 最初の未完了 gate から再開する、(3) 完了済み task を再 dispatch せず記録済みの外部 write(push / MR)を重複させない、の 3 点と、再開する phase skill 名(`product-discovery` / `implementation-planning` / `execute-plan` / `ship-change` / `post-merge-cleanup`)を書く。
 
 ## Common Mistakes
 

@@ -37,7 +37,11 @@ if [[ -e $HOME/.krew ]]; then
   export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 fi
 
-export FZF_DEFAULT_OPTS='--layout reverse --tmux center'
+if [[ -n "$TMUX" ]]; then
+  export FZF_DEFAULT_OPTS='--layout reverse --tmux center'
+else
+  export FZF_DEFAULT_OPTS='--layout reverse --height 40% --border'
+fi
 export FORGIT_COPY_CMD='xclip -selection clipboard'
 
 ###
@@ -113,6 +117,22 @@ __fh() {
 }
 zle -N fh __fh
 
+if command -v glab &>/dev/null; then
+  __insert-issue-id() {
+    local issue_number_row=$(glab ls | tail -n +3 | fzf)
+    if [ -z "$issue_number_row" ]; then
+      return
+    fi
+    local issue_number=$(echo $issue_number_row | awk '{print $1}')
+    LBUFFER+="feature/${issue_number}_"
+    CURSOR=$#LBUFFER
+    # redisplay the command line
+    zle -R -c
+  }
+  zle -N insert-issue-id __insert-issue-id
+fi
+
+
 ### reset bind key
 bindkey -d
 bindkey -v
@@ -121,6 +141,7 @@ bindkey "^P" up-line-or-history
 bindkey '^e^e' fbr
 bindkey '^g' cd-git
 bindkey '^r' fh
+bindkey '^x^b' insert-issue-id
 
 # don't put duplicate lines or lines starting with space in the history.
 # See bash(1) for more options
@@ -140,6 +161,7 @@ alias tagsort="git tag | tr - \~ | sort -V | tr \~ -"
 source <(fzf --zsh)
 [ -f ~/.zsh/docker.zsh ] && source ~/.zsh/docker.zsh
 [ -f ~/.zsh/tmuxp.zsh ] && source ~/.zsh/tmuxp.zsh
+[ -f ~/.zsh/herdr.zsh ] && source ~/.zsh/herdr.zsh
 #
 # # options
 # set -o auto_list
@@ -182,6 +204,9 @@ set -o glob_complete
 autoload -U +X bashcompinit && bashcompinit
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
 
+if command -v jira &>/dev/null; then
+  jira completion zsh > ~/.local/share/zinit/completions/_jira
+fi
 if command -v kubectl &>/dev/null; then
   source <(kubectl completion zsh)
 fi
@@ -424,3 +449,5 @@ sshf() {
 }
 
 if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
+
+source "$HOME/.config/cc-pane/functions.sh" # cc-pane

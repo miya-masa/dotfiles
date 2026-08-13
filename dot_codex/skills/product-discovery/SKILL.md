@@ -5,37 +5,21 @@ description: 曖昧な機能アイデアを対話で実装可能な仕様へ整�
 
 # Product Discovery
 
-目的と利用者を起点に対話し、実装へ渡せる仕様を作る。コードを変更しない。実行計画も作成しない。
+controllerは高影響なproduct判断だけをユーザーと合意し、コードやplanを変更しない。
+詳細なartifact/packet形式は[spec-and-plan.md](../../workflows/software_delivery/references/spec-and-plan.md)を参照する。
 
-## 対話
+## 対話とdispatch
 
-- 最初にGoal、Context、Constraints、既知の前提を把握する。
-- 必要なら既存プロダクトやコードをread-onlyで確認する。
-- 一度に1〜3個の重要な質問だけを行い、回答を待つ。
-- ユーザーの解決案を目的と分け、前提、非目標、失敗条件を問い直す。
-- 選択肢がある場合は、利点、欠点、影響、推奨案を簡潔に示す。
-- 利用者の主要フロー、例外、互換性、運用、観測方法を必要な範囲で確認する。
-- 高影響な未決事項は残し、可逆な細部は根拠付きで仮定する。
+- Goal、利用者、Context、Constraints、scope、non-goal、主要方針、失敗条件を確認する。事実はrepositoryを限定探索し、ユーザーへ尋ねない。
+- `explorer`で事実を集め、要求が未確定ならnamed `specification`へ自己完結packetを渡してdraft/open decisionsを得る。
+- 方針を2〜3案とtrade-offで示し、open decisionsを依存順に整理して各turn原則1問だけ質問する。回答ごとにevidence packetを更新し、事実/仮定/未決/Given-When-Thenを検査する。
+- draft後は結論を互いに共有しないfresh Sol High reviewersを独立dispatchする。通常はCompletenessとSimplicity、protected contract/security/migration/並行状態時だけRiskを追加し、findingを採用・却下・ユーザー判断に分類して記録する。
 
-## 停止条件
+## 停止とhandoff
 
-- ユーザーが探索だけを求めた場合は、案と未決事項を報告して止める。
-- 実装、ファイル編集、実行計画、外部writeを行わない。
-- 十分に明確になる前に質問票や完成仕様を一括提示しない。
+- review反映済みspecをユーザーが明示承認するまでplanningや実装へ進まない（確認前はhandoffしない）。normative gapや証拠不足は`specification`へ戻す。
+- short pathは明確な要求/AC/検証、局所1〜2ファイル、protected contract等なし、安全な変更分離の全条件が必要。controllerがshort-path task artifactを作成し、fresh Luna Max `task-reviewer` preflight後に限り`execute-plan`/`execute-and-ship`二択（追加されるshipping authorityを説明）を提示する。
+- 通常のreview済みspec完了時は次phaseとして`implementation-planning`だけを案内し、plan review前の実装/実行選択は提示しない。探索だけならspecと未決で停止する。
+- 仕様briefはGoal/利用者、Constraints、Non-goals、normative requirements、flow/edge、compatibility、AC、assumptions、open decisionsを含める。
 
-## 仕様brief
-
-合意できた内容を次の順で簡潔にまとめる。
-
-1. Goalと利用者
-2. ContextとConstraints
-3. Non-goals
-4. Requirementsと主要フロー
-5. Decisionsと検討した代替案
-6. Edge casesと運用上の注意
-7. Done when
-8. Open questions
-
-handoff前に`~/.codex/review-policy.md`の仕様briefレンズでリスクを分類する。軽微はself-review、通常はread-only fresh reviewer、高リスクは該当する最大2レンズで確認し、Critical / Importantを解消する。Follow-upは仕様を勝手に拡張せず分離する。
-
-ユーザーが実装へ進む場合は、承認されたbriefを`software-delivery`へ渡す。確定事項を再質問しない。
+reviewの判定は`~/.codex/review-policy.md`に従う。

@@ -1,0 +1,119 @@
+#!/bin/sh
+# 使い方: herdr-broadcast（`prefix+e` の popup から起動される想定）
+#
+# popup で 1 コマンドを入力し、同じ tab の全ペインへ atomically 送信する
+# （tmux の synchronize-panes 相当・1 回送信版）。agent が検出されている
+# ペインは既定で除外する。popup を開いたペイン自身は送信対象に含める
+# （spike K2 の結果: popup 自身は pane list に現れず、popup 内の
+# HERDR_ACTIVE_PANE_ID は親ペインを指すため、自ペイン除外の判定はしない）。
+
+PATH="$HOME/.local/bin:/opt/homebrew/bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+export PATH
+
+log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/herdr"
+log_file="$log_dir/herdr-broadcast.log"
+mkdir -p "$log_dir"
+
+start_ms=$(date +%s%3N)
+
+# $1=message
+die() {
+    end_ms=$(date +%s%3N)
+    echo "herdr-broadcast: $1" >&2
+    echo "$start_ms $end_ms error $1" >>"$log_file"
+    exit 1
+}
+
+# $1=reason
+noop() {
+    end_ms=$(date +%s%3N)
+    echo "$start_ms $end_ms noop $1" >>"$log_file"
+    exit 0
+}
+
+tab="$HERDR_ACTIVE_TAB_ID"
+workspace="$HERDR_ACTIVE_WORKSPACE_ID"
+[ -n "$tab" ] || die "HERDR_ACTIVE_TAB_ID is empty"
+[ -n "$workspace" ] || die "HERDR_ACTIVE_WORKSPACE_ID is empty"
+
+printf 'broadcast> '
+if ! read -r cmd; then
+    noop "read failed (esc/eof)"
+fi
+
+# popup は Esc 単独では閉じず ESC 文字が入力欄に残る（herdr 本体の仕様）。
+# そのまま打ち直すと `ESC l s` のような制御文字混じりの文字列が全ペインへ
+# 送られ、受け側の readline/zle が ESC を meta prefix として解釈して
+# 意図しないコマンドになるため、制御文字を含む入力は送らない。
+case "$cmd" in
+    *[[:cntrl:]]*) noop "control chars in input" ;;
+esac
+
+case "$cmd" in
+    *[![:space:]]*) ;;
+    *) noop "empty input" ;;
+esac
+
+# 取得と整形を分ける。1 本のパイプにするとコマンド置換の exit status が
+# jq のものになり、herdr 側が失敗して空を返しても jq は exit 0 で通るため
+# die が発火しない（= agent 除外が全滅して稼働中の agent へ送信してしまう）。
+# 形状が変わった場合も jq の error() で fail-closed にする。
+pane_raw=$(herdr pane list --workspace "$workspace" 2>/dev/null) \
+    || die "herdr pane list failed"
+panes=$(printf '%s' "$pane_raw" | jq -r --arg tab "$tab" '
+    if (.result.panes | type) == "array"
+    then .result.panes[] | select(.tab_id == $tab) | .pane_id
+    else error("unexpected pane list shape") end') \
+    || die "herdr pane list parse failed"
+
+agent_raw=$(herdr agent list 2>/dev/null) \
+    || die "herdr agent list failed"
+agent_map=$(printf '%s' "$agent_raw" | jq -r '
+    if (.result.agents | type) == "array"
+    then .result.agents[] | "\(.pane_id) \(.agent)"
+    else error("unexpected agent list shape") end') \
+    || die "herdr agent list parse failed"
+
+sent_list=""
+excluded_list=""
+
+for pane in $panes; do
+    agent_name=$(printf '%s\n' "$agent_map" \
+        | awk -v p="$pane" '$1 == p { $1 = ""; sub(/^ +/, ""); print; exit }')
+    if [ -n "$agent_name" ]; then
+        excluded_list="$excluded_list$pane ($agent_name)
+"
+        continue
+    fi
+    if herdr pane run "$pane" "$cmd" >/dev/null 2>&1; then
+        sent_list="$sent_list$pane
+"
+    else
+        excluded_list="$excluded_list$pane (send failed)
+"
+    fi
+done
+
+echo "sent to:"
+if [ -n "$sent_list" ]; then
+    printf '%s' "$sent_list"
+else
+    echo "  (none)"
+fi
+echo "excluded:"
+if [ -n "$excluded_list" ]; then
+    printf '%s' "$excluded_list"
+else
+    echo "  (none)"
+fi
+
+sent_count=$(printf '%s' "$sent_list" | grep -c .)
+excluded_count=$(printf '%s' "$excluded_list" | grep -c .)
+end_ms=$(date +%s%3N)
+echo "$start_ms $end_ms sent sent=$sent_count excluded=$excluded_count" >>"$log_file"
+
+# K2(a): popup はコマンド終了で自動的に閉じるため、結果一覧を見せるには
+# 閉じる前に止める必要がある。
+printf 'press enter to close'
+read -r _
+exit 0

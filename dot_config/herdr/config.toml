@@ -1,0 +1,92 @@
+# herdr config 候補（spec の N1 / N2 に対応する最終形）
+# 既定値と同じになる設定は書かない。ただし「見た目を tmux に寄せる」意図で
+# 固定したいものは、herdr 側の既定変更に追随しないよう明示的に書く。
+
+onboarding = false
+
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+[keys]
+prefix = "ctrl+s"
+
+# tmux の bind | / bind - に対応
+split_vertical = "prefix+|"
+split_horizontal = "prefix+minus"
+
+# tmux の bind C-p / bind C-n に対応
+previous_tab = "prefix+ctrl+p"
+next_tab = "prefix+ctrl+n"
+
+# tmux 既定に合わせる
+rename_tab = "prefix+comma"
+close_tab = "prefix+ampersand"
+detach = "prefix+d"
+
+# tmux の bind r に対応。押し出された herdr 既定を退避する
+reload_config = "prefix+r"
+resize_mode = "prefix+shift+r"
+
+# tmux の choose-session に対応。押し出された herdr 既定を退避する
+workspace_picker = "prefix+s"
+settings = "prefix+shift+s"
+
+# prefix+e は同期入力に譲る
+edit_scrollback = "prefix+shift+e"
+
+# tmux の bind e (synchronize-panes) に対応（1 回送信版）
+[[keys.command]]
+key = "prefix+e"
+type = "popup"
+command = "$HOME/.local/bin/herdr-broadcast"
+description = "send one command to every pane in the tab"
+width = "80%"
+height = "20%"
+
+# vim-tmux-navigator 相当。nvim / fzf 前面時は pass-through する
+[[keys.command]]
+key = "ctrl+h"
+type = "shell"
+command = "$HOME/.local/bin/herdr-navigate left"
+description = "focus pane left (pass through to nvim/fzf)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "shell"
+command = "$HOME/.local/bin/herdr-navigate down"
+description = "focus pane down (pass through to nvim/fzf)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "shell"
+command = "$HOME/.local/bin/herdr-navigate up"
+description = "focus pane up (pass through to nvim/fzf)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "shell"
+command = "$HOME/.local/bin/herdr-navigate right"
+description = "focus pane right (pass through to nvim/fzf)"
+
+[ui]
+# tmux の status-position top に対応
+tab_bar_position = "top"
+pane_borders = true
+show_agent_labels_on_pane_borders = true
+# サイドバーの agent 一覧を space 順ではなく attention queue 順にする
+# （blocked = 承認・質問待ち、done = 未確認のまま完了、を上に持ってくる）。
+# tmux には対応物が無く、cc-pane の状態表示を herdr 側で置き換えるもの。
+agent_panel_sort = "priority"
+
+[ui.sidebar.spaces]
+rows = [["state_icon", "workspace"], ["branch", "git_status"]]
+
+[advanced]
+# tmux の history-limit 50000 に相当する上限（単位はバイトで概念が異なる）
+scrollback_limit_bytes = 10000000
+
+# `herdr integration install` が追記したもの。agent の通知を OS 通知ではなく
+# herdr 内の toast として出す。
+[ui.toast]
+delivery = "herdr"

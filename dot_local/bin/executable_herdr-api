@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+# 使い方: herdr-api <method> [<params-json>]
+# CLI に無い herdr の socket API（layout.export / layout.apply / pane.focus など）を
+# 直接叩くための最小 NDJSON クライアント。他の操作は herdr CLI を使うこと。
+import json
+import os
+import socket
+import sys
+
+
+def die(message):
+    sys.stderr.write(message + "\n")
+    sys.exit(1)
+
+
+def main():
+    if len(sys.argv) < 2:
+        die("usage: herdr-api <method> [<params-json>]")
+
+    method = sys.argv[1]
+
+    if len(sys.argv) >= 3:
+        params_raw = sys.argv[2]
+    else:
+        params_raw = sys.stdin.read()
+    params_raw = params_raw.strip()
+
+    if not params_raw:
+        params = {}
+    else:
+        try:
+            params = json.loads(params_raw)
+        except json.JSONDecodeError as e:
+            die("invalid params JSON: %s" % e)
+
+    socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.join(
+        os.path.expanduser("~"), ".config", "herdr", "herdr.sock"
+    )
+
+    request = {
+        "id": "herdr-api-%d-1" % os.getpid(),
+        "method": method,
+        "params": params,
+    }
+
+    # keys.command から呼ばれる helper なのでハングは厳禁。ローカル Unix socket
+    # 通信は通常ミリ秒オーダーで返るため、5 秒を待てば十分・かつ体感を損なわない。
+    timeout_seconds = 5.0
+
+    try:
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.settimeout(timeout_seconds)
+        sock.connect(socket_path)
+        sock.sendall((json.dumps(request) + "\n").encode("utf-8"))
+
+        buf = b""
+        while b"\n" not in buf:
+            chunk = sock.recv(65536)
+            if not chunk:
+                break
+            buf += chunk
+        sock.close()
+    except socket.timeout:
+        die(
+            "timed out after %gs waiting for response from herdr server at %s"
+            % (timeout_seconds, socket_path)
+        )
+    except OSError as e:
+        die("connection to %s failed: %s" % (socket_path, e))
+
+    if not buf:
+        die("no response from herdr server at %s" % socket_path)
+
+    line = buf.split(b"\n", 1)[0]
+
+    try:
+        response = json.loads(line.decode("utf-8"))
+    except json.JSONDecodeError as e:
+        die("invalid response JSON: %s" % e)
+
+    error = response.get("error")
+    if error:
+        if isinstance(error, dict):
+            message = error.get("message", str(error))
+        else:
+            message = str(error)
+        die(message)
+
+    result = response.get("result")
+    sys.stdout.write(json.dumps(result) + "\n")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception as e:
+        # トレースバックを出さず 1 行で失敗を伝える。
+        sys.stderr.write("herdr-api: unexpected error: %s\n" % e)
+        sys.exit(1)

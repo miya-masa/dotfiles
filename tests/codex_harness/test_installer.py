@@ -11,18 +11,17 @@ ROOT = Path(__file__).resolve().parents[2]
 INSTALLER = ROOT / ".chezmoiscripts/run_onchange_after_35-configure-codex.sh.tmpl"
 REQUIRED_WRITABLE_ROOTS = [
     str(Path.home() / "go"),
+    str(Path.home() / ".cache" / "go-build"),
     "/tmp/claude",
 ]
 REMOVED_WRITABLE_ROOT = str(Path.home() / "claude" / "skills")
 DISABLED_SKILLS = {
-    "feature-development",
+    "start",
     "bugfix",
-    "spec-review",
-    "context-budget",
-    "skill-stocktake",
+    "investigation",
     "handoff",
+    "herdr-delegate",
     "writing-gpt-prompts",
-    "skill-creator",
 }
 LEGACY_AGENT_NAMES = {
     "agent_luna_worker",
@@ -76,10 +75,11 @@ def disabled_skill_names(config: dict) -> set[str]:
 
 
 def assert_required_config(config: dict) -> None:
-    assert config["model"] == "gpt-5.6-sol"
+    assert config["model"] == "gpt-5.6-terra"
     assert config["model_reasoning_effort"] == "medium"
-    assert config["plan_mode_reasoning_effort"] == "high"
-    assert config["approval_policy"] == "never"
+    assert config["plan_mode_reasoning_effort"] == "medium"
+    assert config["sandbox_mode"] == "workspace-write"
+    assert config["approval_policy"] == "on-request"
     assert config["model_auto_compact_token_limit"] == 260_000
     assert config["model_auto_compact_token_limit_scope"] == "total"
     assert config["sandbox_workspace_write"]["network_access"] is True
@@ -87,16 +87,14 @@ def assert_required_config(config: dict) -> None:
         root in config["sandbox_workspace_write"]["writable_roots"]
         for root in REQUIRED_WRITABLE_ROOTS
     )
-    assert REMOVED_WRITABLE_ROOT not in config["sandbox_workspace_write"]["writable_roots"]
+    assert (
+        REMOVED_WRITABLE_ROOT not in config["sandbox_workspace_write"]["writable_roots"]
+    )
     assert "multi_agent" not in config.get("features", {})
-    agents = config["agents"]
+    agents = config.get("agents", {})
     assert "max_depth" not in agents
     assert "max_threads" not in agents
     assert not LEGACY_AGENT_NAMES.intersection(agents)
-    assert agents["reviewer"] == {
-        "description": "Read-only artifact reviewer for correctness, adversarial risks, product fit, and simplicity.",
-        "config_file": "agents/reviewer.toml",
-    }
     assert disabled_skill_names(config) == DISABLED_SKILLS
 
 
@@ -111,8 +109,9 @@ def test_existing_config_preserves_unknown_values_mode_and_is_idempotent(
         f'"{REMOVED_WRITABLE_ROOT}"]\n\n'
         "[features]\ncustom_feature = true\nmulti_agent = true\n\n"
         "[agents]\nmax_depth = 1\nmax_threads = 6\n\n"
-        "[agents.agent_explorer]\nconfig_file = \"legacy.toml\"\n\n"
-        "[agents.my_agent]\nconfig_file = \"agents/custom.toml\"\n\n"
+        '[agents.agent_explorer]\nconfig_file = "legacy.toml"\n\n'
+        '[agents.my_agent]\nconfig_file = "agents/custom.toml"\n\n'
+        '[projects."/work/project"]\ntrust_level = "trusted"\nsandbox_mode = "workspace-write"\n\n'
         "[unrelated]\nnested = 42\n",
         encoding="utf-8",
     )
@@ -131,6 +130,7 @@ def test_existing_config_preserves_unknown_values_mode_and_is_idempotent(
     ]
     assert parsed["features"]["custom_feature"] is True
     assert parsed["agents"]["my_agent"] == {"config_file": "agents/custom.toml"}
+    assert parsed["projects"]["/work/project"] == {"trust_level": "trusted"}
     assert parsed["unrelated"] == {"nested": 42}
     assert stat.S_IMODE(config.stat().st_mode) == 0o640
     assert artifacts(config) == []
@@ -145,8 +145,7 @@ def test_existing_config_preserves_unknown_values_mode_and_is_idempotent(
 def test_non_managed_native_agent_limits_are_preserved(tmp_path: Path) -> None:
     config = tmp_path / "config.toml"
     config.write_text(
-        "[features]\nmulti_agent = false\n\n"
-        "[agents]\nmax_depth = 2\nmax_threads = 3\n",
+        "[features]\nmulti_agent = false\n\n[agents]\nmax_depth = 2\nmax_threads = 3\n",
         encoding="utf-8",
     )
 
@@ -159,13 +158,94 @@ def test_non_managed_native_agent_limits_are_preserved(tmp_path: Path) -> None:
     assert parsed["agents"]["max_threads"] == 3
 
 
+def test_non_managed_reviewer_registration_is_preserved(tmp_path: Path) -> None:
+    config = tmp_path / "config.toml"
+    config.write_text(
+        '[agents.reviewer]\nconfig_file = "agents/custom-reviewer.toml"\n',
+        encoding="utf-8",
+    )
+
+    result = run_configure(config)
+
+    assert result.returncode == 0, result.stderr
+    assert load_config(config)["agents"]["reviewer"] == {
+        "config_file": "agents/custom-reviewer.toml"
+    }
+
+
+def test_managed_reviewer_registration_is_removed(tmp_path: Path) -> None:
+    config = tmp_path / "config.toml"
+    config.write_text(
+        "# BEGIN CODEX MANAGED DELIVERY\n"
+        "[agents.reviewer]\n"
+        'config_file = "agents/reviewer.toml"\n'
+        "# END CODEX MANAGED DELIVERY\n",
+        encoding="utf-8",
+    )
+
+    result = run_configure(config)
+
+    assert result.returncode == 0, result.stderr
+    assert "reviewer" not in load_config(config).get("agents", {})
+
+
+def test_cc_pane_notify_is_moved_to_top_level_and_preserved(tmp_path: Path) -> None:
+    config = tmp_path / "config.toml"
+    block = (
+        "##### cc-pane:begin #####\n"
+        "# cc-pane managed config. Do not edit between begin/end markers.\n"
+        "# Codex CLI only invokes notify on turn completion.\n"
+        'notify = ["cc-pane", "update-state", "--event", "Stop", "--agent", "codex"]\n'
+        "##### cc-pane:end #####\n"
+    )
+    config.write_text(
+        '[plugins."example"]\nenabled = true\n\n' + block,
+        encoding="utf-8",
+    )
+
+    first = run_configure(config)
+    assert first.returncode == 0, first.stderr
+    first_bytes = config.read_bytes()
+    text = first_bytes.decode()
+    parsed = load_config(config)
+    assert text.count(block) == 1
+    assert text.index(block) < text.index('[plugins."example"]')
+    assert parsed["notify"] == [
+        "cc-pane",
+        "update-state",
+        "--event",
+        "Stop",
+        "--agent",
+        "codex",
+    ]
+    assert parsed["plugins"]["example"] == {"enabled": True}
+
+    second = run_configure(config)
+    assert second.returncode == 0, second.stderr
+    assert config.read_bytes() == first_bytes
+
+
+def test_invalid_cc_pane_markers_roll_back_without_changes(tmp_path: Path) -> None:
+    config = tmp_path / "config.toml"
+    original = (
+        b'[plugins."example"]\nenabled = true\n\n'
+        b"##### cc-pane:begin #####\n"
+        b'notify = ["cc-pane", "update-state", "--event", "Stop", "--agent", "codex"]\n'
+    )
+    config.write_bytes(original)
+
+    result = run_configure(config)
+
+    assert result.returncode != 0
+    assert config.read_bytes() == original
+    assert artifacts(config) == []
+
+
 def test_preexisting_skill_config_is_preserved(tmp_path: Path) -> None:
     config = tmp_path / "config.toml"
-    existing_path = Path.home() / ".agents/skills/feature-development/SKILL.md"
+    existing_path = Path.home() / ".agents/skills/start/SKILL.md"
     config.write_text(
-        "[[skills.config]]\n"
-        f'path = "{existing_path}"\n'
-        "enabled = false\n",
+        f'[[skills.config]]\npath = "{existing_path}"\nenabled = false\n',
         encoding="utf-8",
     )
 
@@ -178,6 +258,31 @@ def test_preexisting_skill_config_is_preserved(tmp_path: Path) -> None:
     second = run_configure(config)
     assert second.returncode == 0, second.stderr
     assert config.read_bytes() == first_bytes
+
+
+def test_non_managed_table_inserted_before_managed_end_is_evacuated_and_preserved(
+    tmp_path: Path,
+) -> None:
+    config = tmp_path / "config.toml"
+
+    first = run_configure(config)
+    assert first.returncode == 0, first.stderr
+
+    text = config.read_text(encoding="utf-8")
+    marker = "# END CODEX MANAGED DELIVERY"
+    inserted = '[apps."example".tools."send"]\napproval_mode = "approve"\n\n'
+    config.write_text(text.replace(marker, inserted + marker), encoding="utf-8")
+
+    second = run_configure(config)
+    assert second.returncode == 0, second.stderr
+    second_bytes = config.read_bytes()
+    parsed = load_config(config)
+    assert parsed["apps"]["example"]["tools"]["send"] == {"approval_mode": "approve"}
+    assert config.read_text(encoding="utf-8").rstrip().endswith(marker)
+
+    third = run_configure(config)
+    assert third.returncode == 0, third.stderr
+    assert config.read_bytes() == second_bytes
 
 
 def test_skill_config_after_legacy_agent_is_preserved(tmp_path: Path) -> None:
@@ -221,6 +326,7 @@ def test_existing_writable_roots_keep_order_and_do_not_duplicate_required_roots(
         REQUIRED_WRITABLE_ROOTS[1],
         "/second",
         REQUIRED_WRITABLE_ROOTS[0],
+        *REQUIRED_WRITABLE_ROOTS[2:],
     ]
 
 
@@ -299,7 +405,9 @@ def test_superpowers_symlink_to_other_target_is_preserved(tmp_path: Path) -> Non
     assert superpowers_link.resolve() == other_skills
 
 
-def test_symlink_config_is_rejected_without_changing_link_or_target(tmp_path: Path) -> None:
+def test_symlink_config_is_rejected_without_changing_link_or_target(
+    tmp_path: Path,
+) -> None:
     target = tmp_path / "real-config.toml"
     original = b'custom = "unchanged"\n'
     target.write_bytes(original)

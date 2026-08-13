@@ -1,0 +1,517 @@
+#!/usr/bin/env python3
+"""Subcommand helper for the herdr-delegate cross-model contract.
+
+Handles the pieces prose cannot enforce reliably: prompt assembly (no shell
+expansion), pane JSON parsing, completion-marker checks, orphan selection
+from delegation records, permission-profile launch-argument construction
+(default-deny isolation, never `--sandbox`), and the pre-launch canary that
+verifies isolation actually took effect. See
+`.aidocs/workflows/herdr-agent-automation-harness-*/plan.md` (T02) and
+`spec.md` (section 0) for the design this implements.
+
+Never uses shell=True or os.system; all subprocess invocations pass argv
+lists directly.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import shlex
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any, Optional
+
+
+DEFAULT_MARKER = "<!-- DELEGATE-COMPLETE -->"
+
+# The only broad/shared roots explicitly called out as forbidden read
+# targets (in addition to the general ancestor-of-repo check below).
+_FORBIDDEN_HOME_RELATIVE_SUFFIXES: tuple[tuple[str, ...], ...] = (
+    (),
+    (".local",),
+    (".local", "share"),
+)
+
+
+def _read_text_from_arg(value: str) -> str:
+    """Read `value` as stdin ("-") or as a file path."""
+    if value == "-":
+        return sys.stdin.read()
+    return Path(value).read_text(encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# build-prompt
+# ---------------------------------------------------------------------------
+
+
+def cmd_build_prompt(args: argparse.Namespace) -> int:
+    try:
+        instruction = Path(args.instruction_file).read_text(encoding="utf-8")
+    except OSError as exc:
+        print(f"herdr-delegate: cannot read instruction file: {exc}", file=sys.stderr)
+        return 1
+
+    # Plain string concatenation only -- no shell is involved, so backticks,
+    # $(...), and quotes in `instruction` are preserved verbatim.
+    prompt = (
+        f"{instruction}\n"
+        "\n"
+        "---\n"
+        f"入力ファイルは {args.input_dir} にあります。\n"
+        f"作業が完了したら、結果を {args.output_path} に書き、"
+        f"ファイルの末尾に次のマーカーを付けてください: {DEFAULT_MARKER}\n"
+    )
+    sys.stdout.write(prompt)
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# parse-pane
+# ---------------------------------------------------------------------------
+
+
+def cmd_parse_pane(args: argparse.Namespace) -> int:
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError as exc:
+        print(f"herdr-delegate: invalid JSON on stdin: {exc}", file=sys.stderr)
+        return 1
+
+    result = data.get("result") if isinstance(data, dict) else None
+    pane = result.get("pane") if isinstance(result, dict) else None
+    pane_id = pane.get("pane_id") if isinstance(pane, dict) else None
+
+    if not isinstance(pane_id, str) or not pane_id:
+        print("herdr-delegate: missing result.pane.pane_id", file=sys.stderr)
+        return 1
+
+    print(pane_id)
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# check-marker
+# ---------------------------------------------------------------------------
+
+
+def cmd_check_marker(args: argparse.Namespace) -> int:
+    path = Path(args.path)
+    if not path.is_file():
+        return 1
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError:
+        return 1
+    if not content.rstrip().endswith(args.marker):
+        return 1
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# select-orphans
+# ---------------------------------------------------------------------------
+
+
+def cmd_select_orphans(args: argparse.Namespace) -> int:
+    try:
+        agent_list_raw = _read_text_from_arg(args.agent_list_json)
+    except OSError as exc:
+        print(f"herdr-delegate: cannot read agent list: {exc}", file=sys.stderr)
+        return 1
+    try:
+        agent_list = json.loads(agent_list_raw)
+    except json.JSONDecodeError as exc:
+        print(f"herdr-delegate: invalid agent list JSON: {exc}", file=sys.stderr)
+        return 1
+
+    agents: list[Any] = []
+    if isinstance(agent_list, dict):
+        result = agent_list.get("result")
+        if isinstance(result, dict):
+            raw_agents = result.get("agents")
+            if isinstance(raw_agents, list):
+                agents = raw_agents
+    live_names = {
+        agent.get("name")
+        for agent in agents
+        if isinstance(agent, dict) and isinstance(agent.get("name"), str)
+    }
+
+    records_path = Path(args.records)
+    if not records_path.exists():
+        # First-ever delegation in this workflow: no delegations.json has
+        # been written yet, which means there is nothing to reclaim -- not
+        # an error condition. A present-but-malformed file is still an
+        # error (handled below).
+        return 0
+    try:
+        records_raw = records_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        print(f"herdr-delegate: cannot read records: {exc}", file=sys.stderr)
+        return 1
+    try:
+        records = json.loads(records_raw)
+    except json.JSONDecodeError as exc:
+        print(f"herdr-delegate: invalid records JSON: {exc}", file=sys.stderr)
+        return 1
+
+    delegations = records.get("delegations") if isinstance(records, dict) else None
+    if not isinstance(delegations, list):
+        delegations = []
+
+    current_generation = args.current_generation
+    for entry in delegations:
+        if not isinstance(entry, dict):
+            continue
+        if entry.get("mode") != "agent":
+            continue
+        if entry.get("state") != "active":
+            continue
+        generation = entry.get("generation")
+        if not isinstance(generation, int) or generation >= current_generation:
+            continue
+        name = entry.get("agent_name")
+        if not isinstance(name, str) or name not in live_names:
+            continue
+        print(name)
+
+    return 0
+
+
+# ---------------------------------------------------------------------------
+# build-launch-args / verify-profile shared helpers
+# ---------------------------------------------------------------------------
+
+
+def _resolve_codex_path(
+    override: Optional[str],
+) -> tuple[Optional[Path], Optional[Path]]:
+    """Resolve the codex executable, both unresolved and symlink-resolved.
+
+    `override` exists solely so tests can inject a `command -v codex`
+    stand-in without hardcoding a real path; production callers omit it and
+    rely on PATH via shutil.which. The unresolved form is what `command -v
+    codex` / `shutil.which` returns; on a mise-managed install this is
+    often a symlink whose *own* parent directory is the one that actually
+    contains an executable named `codex` on PATH (the resolved target's
+    parent may only contain e.g. `codex.js`). Returns (None, None) if codex
+    cannot be found at all.
+    """
+    if override:
+        unresolved = Path(override)
+    else:
+        found = shutil.which("codex")
+        if not found:
+            return None, None
+        unresolved = Path(found)
+    return unresolved, unresolved.resolve()
+
+
+def _resolve_toolchain_root(codex_resolved: Path) -> Optional[Path]:
+    """Derive the toolchain root above the mise `installs/` layer."""
+    parts = codex_resolved.parts
+    if "installs" not in parts:
+        return None
+    idx = parts.index("installs")
+    if idx == 0:
+        return None
+    return Path(*parts[:idx])
+
+
+def _is_forbidden_root(root: Path, repo_root: Path) -> bool:
+    """True if `root` is a broad/shared root or an ancestor of `repo_root`."""
+    if root == Path(root.anchor):
+        return True
+
+    home_raw = os.environ.get("HOME")
+    if home_raw:
+        home = Path(home_raw)
+        for suffix in _FORBIDDEN_HOME_RELATIVE_SUFFIXES:
+            if root == Path(home, *suffix):
+                return True
+
+    repo_resolved = repo_root.resolve()
+    if root == repo_resolved or root in repo_resolved.parents:
+        return True
+
+    return False
+
+
+def _escape_toml_basic_string(value: str) -> str:
+    return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _build_permission_profile_body(root: Path, scratch: Path) -> str:
+    return (
+        '{description="herdr-delegate default-deny", filesystem={'
+        f'":minimal"="read", "{_escape_toml_basic_string(str(root))}"="read", '
+        f'"{_escape_toml_basic_string(str(scratch))}"={{"."="write"}}}}}}'
+    )
+
+
+def _resolve_and_guard(
+    codex_override: Optional[str], repo_root: Path
+) -> tuple[Optional[Path], Optional[Path], Optional[Path], Optional[str]]:
+    """Return (codex_unresolved, codex_resolved, toolchain_root, error_message).
+
+    Toolchain-root derivation (and the ancestor guard applied to it) always
+    uses the symlink-resolved path, since following symlinks to the real
+    mise `installs/` layout is the whole point of that derivation. Callers
+    that need to *launch* codex or put it on PATH should use
+    `codex_unresolved` instead -- see `_resolve_codex_path`.
+    """
+    codex_unresolved, codex_resolved = _resolve_codex_path(codex_override)
+    if codex_resolved is None:
+        return None, None, None, "cannot resolve codex on PATH"
+
+    root = _resolve_toolchain_root(codex_resolved)
+    if root is None:
+        return (
+            codex_unresolved,
+            codex_resolved,
+            None,
+            f"cannot derive toolchain root from {codex_resolved}",
+        )
+
+    if _is_forbidden_root(root, repo_root):
+        return (
+            codex_unresolved,
+            codex_resolved,
+            None,
+            f"refusing to grant read access to broad/ancestor root: {root}",
+        )
+
+    return codex_unresolved, codex_resolved, root, None
+
+
+# ---------------------------------------------------------------------------
+# build-launch-args
+# ---------------------------------------------------------------------------
+
+
+def cmd_build_launch_args(args: argparse.Namespace) -> int:
+    repo_root = Path(args.repo_root) if args.repo_root else Path.cwd()
+
+    codex_unresolved, codex_resolved, root, error = _resolve_and_guard(
+        args.codex_path, repo_root
+    )
+    if error is not None:
+        print(f"herdr-delegate: {error}", file=sys.stderr)
+        return 1
+    assert codex_unresolved is not None and codex_resolved is not None and root is not None
+
+    scratch = Path(args.scratch)
+    profile_body = _build_permission_profile_body(root, scratch)
+
+    lines = (
+        "-c",
+        f"permissions.{args.profile_name}={profile_body}",
+        "-c",
+        f'default_permissions="{_escape_toml_basic_string(args.profile_name)}"',
+        "-c",
+        'approval_policy="never"',
+        "-c",
+        'model_reasoning_effort="high"',
+    )
+    # Each output line is later wrapped in single quotes by the caller (see
+    # SKILL.md); a `'` or embedded newline in a line would corrupt that
+    # wrapping and silently launch codex with a mangled -c argument. Refuse
+    # outright rather than emit something the caller cannot safely quote.
+    for line in lines:
+        if "'" in line or "\n" in line:
+            print(
+                "herdr-delegate: refusing to emit a launch arg containing "
+                "a single quote or newline",
+                file=sys.stderr,
+            )
+            return 1
+
+    for line in lines:
+        print(line)
+
+    if args.env_out:
+        # Unresolved parent, not the symlink target's parent: on a
+        # mise-managed install the target dir may only hold e.g.
+        # `codex.js`, with no executable literally named `codex`.
+        codex_dir = str(codex_unresolved.parent)
+        current_path = os.environ.get("PATH", "")
+        Path(args.env_out).write_text(f"PATH={codex_dir}:{current_path}", encoding="utf-8")
+
+    return 0
+
+
+def _select_negative_canary_target(repo_root: Path) -> Optional[Path]:
+    """Pick a deterministic, always-present target for the negative canary
+    leg: the lexicographically first entry directly under `repo_root`.
+
+    A previous version hardcoded `repo_root / "CLAUDE.md"`. If that file
+    happened not to exist, `test -e` on it was nonzero even with zero
+    isolation in effect, which made verify-profile silently report
+    "isolated" when it was not (fail-open). Picking from whatever actually
+    exists on disk closes that gap without depending on a specific
+    filename.
+
+    Entries are filtered by actual existence (following symlinks, like the
+    canary's `test -e`): a dangling symlink sorting first would be nonzero
+    even with zero isolation, reintroducing the same fail-open.
+
+    Returns None if `repo_root` does not exist, is not a directory, or has
+    no existing entries -- callers must treat that as "cannot verify" and
+    fail closed (nonzero), not skip the negative leg.
+    """
+    if not repo_root.is_dir():
+        return None
+    try:
+        entries = sorted(os.listdir(repo_root))
+    except OSError:
+        return None
+    for entry in entries:
+        candidate = repo_root / entry
+        if candidate.exists():
+            return candidate
+    return None
+
+
+# ---------------------------------------------------------------------------
+# verify-profile
+# ---------------------------------------------------------------------------
+
+
+def _run_canary(
+    codex_path: Path,
+    scratch: Path,
+    profile_name: str,
+    profile_body: str,
+    target: Path,
+) -> Optional[int]:
+    """Run one `codex sandbox` canary probing whether `target` is visible.
+
+    Returns the exit code, or None if the process could not even be
+    launched (missing binary, exec permission, ...).
+    """
+    command = [
+        str(codex_path),
+        "sandbox",
+        "-C",
+        str(scratch),
+        "--permission-profile",
+        profile_name,
+        "-c",
+        f"permissions.{profile_name}={profile_body}",
+        "--",
+        "/bin/sh",
+        "-c",
+        f"test -e {shlex.quote(str(target))}",
+    ]
+    try:
+        completed = subprocess.run(command, capture_output=True, text=True, check=False)
+    except OSError:
+        return None
+    return completed.returncode
+
+
+def cmd_verify_profile(args: argparse.Namespace) -> int:
+    # The canary runs with cwd moved to the scratch dir (`codex sandbox -C
+    # <scratch>`), so a relative target would resolve against the scratch
+    # dir, always be absent, and read as "invisible" (fail-open).
+    repo_root = Path(args.repo_root).absolute()
+
+    negative_target = _select_negative_canary_target(repo_root)
+    if negative_target is None:
+        # Cannot pick a target to probe for invisibility -> cannot verify
+        # isolation. Fail closed rather than skipping the negative leg.
+        return 1
+
+    codex_unresolved, codex_resolved, root, error = _resolve_and_guard(
+        args.codex_path, repo_root
+    )
+    if error is not None:
+        return 1
+    assert codex_unresolved is not None and codex_resolved is not None and root is not None
+
+    scratch = Path(args.scratch)
+    profile_body = _build_permission_profile_body(root, scratch)
+
+    # Two-stage canary, judged on exit codes only (never on stderr text):
+    # - positive: scratch itself must be visible (read/write granted there),
+    #   so a healthy codex+profile combination must exit 0 here.
+    # - negative: the repo must stay invisible, so a healthy combination
+    #   must exit nonzero here.
+    # Requiring *both* closes the fail-open gap where a canary that cannot
+    # even parse `--permission-profile` (old codex, exit e.g. 2) or that
+    # fails to exec at all would previously be read as "isolated" just
+    # because its exit code happened to be nonzero.
+    positive_rc = _run_canary(
+        codex_unresolved, scratch, args.profile_name, profile_body, scratch
+    )
+    negative_rc = _run_canary(
+        codex_unresolved, scratch, args.profile_name, profile_body, negative_target
+    )
+
+    if positive_rc == 0 and negative_rc is not None and negative_rc != 0:
+        return 0
+    return 1
+
+
+# ---------------------------------------------------------------------------
+# CLI wiring
+# ---------------------------------------------------------------------------
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="herdr-delegate")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("build-prompt")
+    p.add_argument("--instruction-file", required=True)
+    p.add_argument("--input-dir", required=True)
+    p.add_argument("--output-path", required=True)
+    p.set_defaults(func=cmd_build_prompt)
+
+    p = sub.add_parser("parse-pane")
+    p.set_defaults(func=cmd_parse_pane)
+
+    p = sub.add_parser("check-marker")
+    p.add_argument("--path", required=True)
+    p.add_argument("--marker", default=DEFAULT_MARKER)
+    p.set_defaults(func=cmd_check_marker)
+
+    p = sub.add_parser("select-orphans")
+    p.add_argument("--agent-list-json", required=True)
+    p.add_argument("--records", required=True)
+    p.add_argument("--current-generation", required=True, type=int)
+    p.set_defaults(func=cmd_select_orphans)
+
+    p = sub.add_parser("build-launch-args")
+    p.add_argument("--scratch", required=True)
+    p.add_argument("--profile-name", required=True)
+    p.add_argument("--repo-root", default=None)
+    p.add_argument("--env-out", default=None)
+    # Test-only override; production callers rely on PATH resolution.
+    p.add_argument("--codex-path", default=None, help=argparse.SUPPRESS)
+    p.set_defaults(func=cmd_build_launch_args)
+
+    p = sub.add_parser("verify-profile")
+    p.add_argument("--scratch", required=True)
+    p.add_argument("--profile-name", required=True)
+    p.add_argument("--repo-root", required=True)
+    # Test-only override; production callers rely on PATH resolution.
+    p.add_argument("--codex-path", default=None, help=argparse.SUPPRESS)
+    p.set_defaults(func=cmd_verify_profile)
+
+    return parser
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    return int(args.func(args))
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

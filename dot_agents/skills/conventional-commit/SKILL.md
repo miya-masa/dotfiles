@@ -65,6 +65,8 @@ BREAKING CHANGE: legacy auth endpoints are removed
 - `<subject>` は命令形で書く。
 - 先頭は小文字にする。
 - 末尾にピリオドを付けない。
+- emoji を使わない。
+- AI attribution、`Co-authored-by`、その他の生成元署名を付けない。
 
 ## 例
 
@@ -176,7 +178,7 @@ Enable with: `git config commit.template .gitmessage`
 Git worktree で作業する場合、ファイル編集前に必ず以下を確認する。
 
 1. ユーザーが worktree での作業を指示した場合、最初の Edit/Write の前に `pwd` で現在のディレクトリを確認する
-2. CWD が意図した worktree パス (例: `~/worktrees/<ブランチ名>/<リポジトリ名>`) と一致しない場合、編集を開始せずユーザーに確認する
+2. CWD が意図した worktree パスと一致しない場合、編集を開始せずユーザーに確認する
 3. メインリポジトリのパスで worktree 向けの編集を行ってはならない
 
 **確認すべきタイミング**: セッション開始時に worktree パス言及 / `wt switch` 等の直後 / 別 worktree への切替時。

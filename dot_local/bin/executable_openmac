@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# openmac: Transfer a local file to a Mac and execute a command on it
+#
+# Usage:
+#   openmac [OPTIONS] [COMMAND] FILE
+#
+# The last argument is always the local file to transfer.
+# COMMAND defaults to "open". If COMMAND contains {}, it is replaced
+# with the remote path; otherwise the remote path is appended.
+#
+# Options:
+#   --host <name>   SSH host (default: mac)
+#   --dest <path>   Remote directory (default: /var/tmp/)
+#   --dry-run       Show what would be done without executing
+#   -h, --help      Show this help
+
+die() { echo "openmac: $*" >&2; exit 1; }
+
+usage() {
+  sed -n '3,/^$/{ s/^# \?//; p }' "$0"
+}
+
+main() {
+  local host="mac"
+  local dest="/var/tmp/"
+  local dry_run=0
+  local -a args=()
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --host)  host="${2:?--host requires a value}"; shift 2 ;;
+      --dest)  dest="${2:?--dest requires a value}"; shift 2 ;;
+      --dry-run) dry_run=1; shift ;;
+      -h|--help) usage; exit 0 ;;
+      --) shift; args+=("$@"); break ;;
+      *)  args+=("$1"); shift ;;
+    esac
+  done
+
+  [[ ${#args[@]} -ge 1 ]] || { usage; exit 1; }
+
+  # Last argument is the local file
+  local file="${args[-1]}"
+  [[ -f "$file" ]] || die "file not found: $file"
+
+  # Everything before the last argument is the command
+  local cmd="open"
+  if [[ ${#args[@]} -ge 2 ]]; then
+    cmd="${args[*]:0:${#args[@]}-1}"
+  fi
+
+  local basename
+  basename="$(basename "$file")"
+  local remote_path="${dest%/}/${basename}"
+
+  # Build the ssh command: replace {} or append
+  local ssh_cmd
+  if [[ "$cmd" == *'{}'* ]]; then
+    ssh_cmd="${cmd//\{\}/$remote_path}"
+  else
+    ssh_cmd="$cmd $remote_path"
+  fi
+
+  if [[ $dry_run -eq 1 ]]; then
+    echo "[dry-run] rsu push $file --to $host --dest $dest"
+    echo "[dry-run] ssh $host $ssh_cmd"
+    return 0
+  fi
+
+  # Transfer
+  rsu push "$file" --to "$host" --dest "$dest"
+
+  # Execute
+  ssh "$host" "$ssh_cmd"
+}
+
+main "$@"

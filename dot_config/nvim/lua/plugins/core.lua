@@ -1,6 +1,51 @@
+-- herdr ペイン内（$TMUX 無し）では herdr-navigate へフォールバックする。
+-- tmux 内では従来どおり vim-tmux-navigator を呼ぶ（挙動は変えない）。
+-- term=true の場合のみ、terminal mode から抜けるための stopinsert を先頭に挟む
+-- （既存 rhs の <C-\><C-n> に相当。normal mode の 5 本には無い）。
+local function nav(wincmd_dir, herdr_dir, tmux_cmd, term)
+  return function()
+    if term then
+      vim.cmd("stopinsert")
+    end
+    if vim.env.TMUX then
+      vim.cmd(tmux_cmd)
+      return
+    end
+    local w = vim.fn.winnr()
+    vim.cmd("wincmd " .. wincmd_dir)
+    if vim.fn.winnr() == w then
+      vim.fn.jobstart({ "herdr-navigate", "--force", herdr_dir })
+    end
+  end
+end
+
+-- <C-\> は縮退経路（tmux 無しなら <C-w>p）が他と形が違うため共通化しない。
+local function nav_prev(tmux_cmd, term)
+  return function()
+    if term then
+      vim.cmd("stopinsert")
+    end
+    if vim.env.TMUX then
+      vim.cmd(tmux_cmd)
+    else
+      vim.cmd("wincmd p")
+    end
+  end
+end
+
 return {
   {
     "christoomey/vim-tmux-navigator",
+    -- プラグイン自身の plugin/tmux_navigator.vim が既定でグローバルに
+    -- <C-h/j/k/l/\> を再定義し、下の keys 定義（$TMUX 分岐）を上書きしてしまう
+    -- （tmux 内では従来どおり TmuxNavigateLeft 等を呼ぶだけなので気付かなかった）。
+    -- 無効化して keys 側のマッピングを常に有効にする。
+    init = function()
+      vim.g.tmux_navigator_no_mappings = 1
+      -- 既定マッピングと同じブロックにある netrw workaround も一緒に無効化
+      -- されるため、tmux 内の挙動を変えないよう明示的に復元する。
+      vim.g.Netrw_UserMaps = { { "<C-l>", "<C-U>TmuxNavigateRight<cr>" } }
+    end,
     cmd = {
       "TmuxNavigateLeft",
       "TmuxNavigateDown",
@@ -10,18 +55,18 @@ return {
       "TmuxNavigatorProcessList",
     },
     keys = {
-      { "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
-      { "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
-      { "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
-      { "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
-      { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+      { "<c-h>", nav("h", "left", "TmuxNavigateLeft") },
+      { "<c-j>", nav("j", "down", "TmuxNavigateDown") },
+      { "<c-k>", nav("k", "up", "TmuxNavigateUp") },
+      { "<c-l>", nav("l", "right", "TmuxNavigateRight") },
+      { "<c-\\>", nav_prev("TmuxNavigatePrevious") },
 
       -- Terminal
-      { "<c-h>", [[<C-\><C-n><cmd>TmuxNavigateLeft<cr>]], mode = "t" },
-      { "<c-j>", [[<C-\><C-n><cmd>TmuxNavigateDown<cr>]], mode = "t" },
-      { "<c-k>", [[<C-\><C-n><cmd>TmuxNavigateUp<cr>]], mode = "t" },
-      { "<c-l>", [[<C-\><C-n><cmd>TmuxNavigateRight<cr>]], mode = "t" },
-      { "<c-\\>", [[<C-\><C-n><cmd>TmuxNavigatePrevious<cr>]], mode = "t" },
+      { "<c-h>", nav("h", "left", "TmuxNavigateLeft", true), mode = "t" },
+      { "<c-j>", nav("j", "down", "TmuxNavigateDown", true), mode = "t" },
+      { "<c-k>", nav("k", "up", "TmuxNavigateUp", true), mode = "t" },
+      { "<c-l>", nav("l", "right", "TmuxNavigateRight", true), mode = "t" },
+      { "<c-\\>", nav_prev("TmuxNavigatePrevious", true), mode = "t" },
     },
   },
   {
@@ -42,8 +87,8 @@ return {
     },
   },
   {
-    "sindrets/diffview.nvim",
-    cmd = { "DiffviewOpen", "DiffviewFileHistory", "DiffviewClose" },
+    "esmuellert/codediff.nvim",
+    cmd = "CodeDiff",
   },
   {
     "vim-jp/vimdoc-ja",

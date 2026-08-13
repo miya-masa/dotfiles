@@ -1,0 +1,7 @@
+interface:
+  display_name: "Execute Plan"
+  short_description: "TDDとtask reviewで計画をlocal verificationまで実行する"
+  default_prompt: "Use $execute-plan to implement this reviewed plan with TDD and stop after local verification."
+
+policy:
+  allow_implicit_invocation: false

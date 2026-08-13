@@ -19,6 +19,9 @@ vim.g.clipboard = {
 }
 
 vim.api.nvim_create_user_command("UpdateDisplay", function()
+  if vim.env.TMUX == nil then
+    return
+  end
   local display = vim.fn.system("tmux show-env DISPLAY")
   if vim.v.shell_error == 0 then
     vim.env.DISPLAY = display:gsub("^DISPLAY=", ""):gsub("\n", "")

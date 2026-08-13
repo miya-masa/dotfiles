@@ -1,0 +1,19 @@
+{
+  "type": "split",
+  "direction": "right",
+  "ratio": 0.5,
+  "first": { "type": "pane", "label": "nvim", "command": ["nvim"] },
+  "second": {
+    "type": "split",
+    "direction": "down",
+    "ratio": 0.3333,
+    "first": { "type": "pane", "command": ["claude"] },
+    "second": {
+      "type": "split",
+      "direction": "down",
+      "ratio": 0.5,
+      "first": { "type": "pane" },
+      "second": { "type": "pane" }
+    }
+  }
+}
