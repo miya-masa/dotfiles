@@ -1,6 +1,6 @@
 ---
 name: ecc-sync
-description: ECC取り込み済みファイルを表示する inventory スキル。ecc-source 系 metadata を集計する。
+description: ECC取り込み済みファイルとウォッチ対象を表示する inventory スキル。ecc-source 系 metadata を集計する。
 ---
 
 # ecc-sync (inventory only)
@@ -20,6 +20,7 @@ ECC 由来取り込みの一覧表示と整合性チェックを行う inventory
 set -euo pipefail
 
 CCLAUDE="$HOME/.claude"
+WATCHLIST="$CCLAUDE/THIRD_PARTY_LICENSES/ecc-watchlist.md"
 MANIFEST="$CCLAUDE/.ecc-manifest.json"
 
 # モード判別
@@ -78,6 +79,16 @@ if [ "$MODE" = "frontmatter" ]; then
   done
   echo ""
 fi
+
+# Watchlist
+echo "### Watchlist"
+echo ""
+if [ -f "$WATCHLIST" ]; then
+  cat "$WATCHLIST" | sed -n '/^|.*upstream-path/,$p'
+else
+  echo "(no watchlist found)"
+fi
+echo ""
 
 # Integrity warnings
 echo "### Integrity Warnings"

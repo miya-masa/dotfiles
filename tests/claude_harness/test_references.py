@@ -11,6 +11,7 @@ SELF = Path(__file__).name
 
 SCAN_SUFFIXES = {".md", ".py", ".json", ".sh", ".tmpl", ".toml", ".yaml"}
 # spec A18 の除外は repo 直下の `docs/` (過去 artifact) と `.superpowers/`。
+# 下位の docs は §3.1 の更新対象なので走査する。
 EXCLUDED_TOP_DIRS = {"docs", ".superpowers"}
 EXCLUDED_DIRS = {".git", "__pycache__", ".aidocs"}
 # 旧 skill 名 / plugin skill 名を negative assertion として意図的に書く検証コードだけ外す。
@@ -35,6 +36,10 @@ DELETED_PATH_RE = re.compile(
 DELETED_MENTION_RE = re.compile(rf"`(?:{'|'.join(DELETED)})`")
 SLASH_COMMAND_RE = re.compile(r"/postimpl-cleanup(?![-\w])")
 
+# 証跡 hook の stage 語彙 (spec-review / reviewer / verifier / ship) は skill 参照ではない。
+# `staged` のような無関係な語まで免除しないよう、stage 語彙を説明している行だけを外す。
+EVIDENCE_LINE_RE = re.compile(r"record-evidence|stage[:：]|stage は|stage 語彙")
+
 # A19: Superpowers plugin skill。prefix 付きと素名の両方を見る。
 PLUGIN_PREFIX_RE = re.compile(r"superpowers:")
 PLUGIN_BARE_RE = re.compile(
@@ -49,12 +54,13 @@ WORKFLOW_SCAN_PATHS = (
     "dot_claude/skills/ship-change",
     "dot_claude/skills/execute-and-ship",
     "dot_claude/skills/post-merge-cleanup",
-    "dot_agents/skills/start",
+    "dot_agents/skills/task",
     "dot_agents/skills/bugfix",
     "dot_agents/skills/investigation",
     "dot_agents/skills/handoff",
     "dot_agents/workflows",
     "dot_claude/agents",
+    # spec §3.3 が plugin skill の参照元として列挙している内部運用 skill。
     "dot_claude/skills/codex-doublecheck",
 )
 
@@ -103,8 +109,8 @@ def scan(
 
 
 def test_a18_no_dangling_reference_to_removed_workflow_skills() -> None:
-    assert not scan(DANGLING_SCAN_PATHS, DELETED_PATH_RE)
-    assert not scan(DANGLING_SCAN_PATHS, DELETED_MENTION_RE)
+    assert not scan(DANGLING_SCAN_PATHS, DELETED_PATH_RE, EVIDENCE_LINE_RE)
+    assert not scan(DANGLING_SCAN_PATHS, DELETED_MENTION_RE, EVIDENCE_LINE_RE)
     assert not scan(DANGLING_SCAN_PATHS, SLASH_COMMAND_RE)
 
 
@@ -118,6 +124,8 @@ def test_scan_actually_covers_the_reference_update_targets() -> None:
     # 旧 idiom の相対リンクと、stage 語彙に紛れた skill 参照を実際に検出できる。
     assert DELETED_PATH_RE.search("[x](../spec-review/references/review-common.md)")
     assert DELETED_MENTION_RE.search("体制は `impl-review` に従う")
+    assert not EVIDENCE_LINE_RE.search("allowlist と staged tree を検査する")
+    assert EVIDENCE_LINE_RE.search('record-evidence.sh spec-review "<1行要約>"')
 
 
 def test_a18_removed_skill_sources_are_gone() -> None:
@@ -162,9 +170,12 @@ def test_shared_review_core_is_in_place() -> None:
     references = ROOT / "dot_agents/workflows/software_delivery/references"
 
     assert {path.name for path in references.glob("*.md")} == {
+        "execution-topology.md",
         "review-common.md",
+        "effort-policy.md",
         "analysis-techniques.md",
         "review-lenses.md",
+        "evidence-contract.md",
     }
     lenses = (references / "review-lenses.md").read_text(encoding="utf-8")
     for lens in ("Completeness", "Soundness", "Operability", "Adversarial"):

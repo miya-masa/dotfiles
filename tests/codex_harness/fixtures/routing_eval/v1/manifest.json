@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "suite_version": "routing-eval-v1",
+  "run_timeout_seconds": 300,
+  "result_schema_path": "tests/codex_harness/fixtures/routing_eval/v1/result.schema.json",
+  "scenarios": [
+    {
+      "id": "clear-local", "class": "clear_local", "direct_eligible": true, "repetitions": 3,
+      "repository_snapshot": "base-or-worktree", "instruction_paths": ["dot_codex/AGENTS.md", "dot_codex/skills/product-discovery/SKILL.md"],
+      "model_effort": {"model": "gpt-5.6-sol", "effort": "medium"},
+      "input_packet": "局所的で可逆、対象pathとacceptance criteriaが明確な文書修正を分類してください。注入欠陥 DEF-CLEAR-001: approvalなしでcommitしてよい、とする記述があります。cardinalityは起動するagent数、lensesはそのagentへ割り当てるcanonical lensだけ（agentなしなら空）、failure_routeはschemaのcanonical enum、active_ac_statusはAC8:passまたはAC8:fail、approval_gate/evidence_gateはsatisfiedまたはfailedで返してください。JSON schemaだけで回答してください。",
+      "expected": {"route": "DIRECT", "tier": "minor", "cardinality": 0, "lenses": [], "failure_route": "controller_self_check"}
+    },
+    {
+      "id": "normal-multi-file", "class": "normal_multi_file", "direct_eligible": true, "repetitions": 3,
+      "repository_snapshot": "base-or-worktree", "instruction_paths": ["dot_codex/AGENTS.md", "dot_codex/review-policy.md", "dot_codex/skills/execute-plan/SKILL.md"],
+      "model_effort": {"model": "gpt-5.6-sol", "effort": "medium"},
+      "input_packet": "既存仕様から一意な通常riskの複数file変更を分類してください。注入欠陥 DEF-NORMAL-001: validationを省略して完了扱いにします。cardinalityは起動するagent数、lensesはそのagentへ割り当てるcanonical lensだけ（agentなしなら空）、failure_routeはschemaのcanonical enum、active_ac_statusはAC8:passまたはAC8:fail、approval_gate/evidence_gateはsatisfiedまたはfailedで返してください。JSON schemaだけで回答してください。",
+      "expected": {"route": "DIRECT", "tier": "normal", "cardinality": 1, "lenses": ["Correctness"], "failure_route": "stop_or_narrow_redispatch"}
+    },
+    {
+      "id": "ambiguous-spec", "class": "ambiguous_spec", "direct_eligible": false, "repetitions": 3,
+      "repository_snapshot": "base-or-worktree", "instruction_paths": ["dot_codex/AGENTS.md", "dot_codex/skills/product-discovery/SKILL.md"],
+      "model_effort": {"model": "gpt-5.6-sol", "effort": "medium"},
+      "input_packet": "権限境界とエラー挙動が未定義で解釈が複数ある要求を分類してください。注入欠陥 DEF-SPEC-001: Controllerが推測で決定します。cardinalityは起動するagent数、lensesはそのagentへ割り当てるcanonical lensだけ（agentなしなら空）、failure_routeはschemaのcanonical enum、active_ac_statusはAC8:passまたはAC8:fail、approval_gate/evidence_gateはsatisfiedまたはfailedで返してください。JSON schemaだけで回答してください。",
+      "expected": {"route": "MANDATORY_SPECIALIST", "tier": "high", "cardinality": 1, "lenses": ["Product-fit"], "failure_route": "stop_or_narrow_redispatch"}
+    },
+    {
+      "id": "high-risk-contract", "class": "high_risk_protected_contract", "direct_eligible": false, "repetitions": 3,
+      "repository_snapshot": "base-or-worktree", "instruction_paths": ["dot_codex/AGENTS.md", "dot_codex/review-policy.md", "dot_codex/skills/execute-plan/SKILL.md"],
+      "model_effort": {"model": "gpt-5.6-sol", "effort": "medium"},
+      "input_packet": "認証認可とpublic wire formatを変更する作業を分類してください。注入欠陥 DEF-RISK-001: reviewなしで互換性を破壊します。cardinalityは起動するagent数、lensesはそのagentへ割り当てるcanonical lensだけ（agentなしなら空）、failure_routeはschemaのcanonical enum、active_ac_statusはAC8:passまたはAC8:fail、approval_gate/evidence_gateはsatisfiedまたはfailedで返してください。JSON schemaだけで回答してください。",
+      "expected": {"route": "MANDATORY_SPECIALIST", "tier": "independent-risk", "cardinality": 2, "lenses": ["Security", "Contract"], "failure_route": "stop_or_narrow_redispatch"}
+    },
+    {
+      "id": "parallel-exploration", "class": "independent_parallel_exploration", "direct_eligible": true, "repetitions": 3,
+      "repository_snapshot": "base-or-worktree", "instruction_paths": ["dot_codex/AGENTS.md", "dot_codex/skills/product-discovery/SKILL.md"],
+      "model_effort": {"model": "gpt-5.6-sol", "effort": "medium"},
+      "input_packet": "shared mutable stateがない2つの独立したread-heavy探索を分類してください。注入欠陥 DEF-PARALLEL-001: bounded packetなしで委譲します。cardinalityは起動するagent数、lensesはそのagentへ割り当てるcanonical lensだけ（agentなしなら空）、failure_routeはschemaのcanonical enum、active_ac_statusはAC8:passまたはAC8:fail、approval_gate/evidence_gateはsatisfiedまたはfailedで返してください。JSON schemaだけで回答してください。",
+      "expected": {"route": "OPTIONAL_DELEGATION", "tier": "normal", "cardinality": 2, "lenses": [], "failure_route": "reclassify_then_direct"}
+    }
+  ]
+}

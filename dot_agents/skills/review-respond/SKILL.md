@@ -17,7 +17,18 @@ GitLab API、position計算、冪等性、YAMLのatomic updateには次を使う
 ~/.agents/skills/review-respond/scripts/gitlab_review_sync.py
 ```
 
-直接`glab mr note create`を使わない。GitLab 15.8ではfile-level commentが使えないため、inline不可時はoverview discussionまたはlocal-onlyだけを選択肢にする。
+直接`glab mr note create`を使わない。GitLab 15.8ではfile-level commentが使えないため、inline不可時はMR全体へのoverview discussionへ自動fallbackする。local-onlyはMR自体が無い、または同期不能な場合だけ。
+
+## 投稿フォーマット
+
+helperが本文を組み立てる。装飾・HTML・非表示markerを足さない。
+
+| 種別 | 本文 |
+|---|---|
+| 元comment | `[MUST] `/`[IMO] `/`[Q] ` + comment本文 |
+| AI回答・resolution | `[AIによる回答]` + 空行 + 本文 |
+
+本文はMarkdownとしてそのまま渡す（code fence・inline codeは維持される）。helperが無力化するのは行頭のquick actionと`@`mentionだけで、直後にzero-width spaceを挿入する。HTML entityは使わない（GitLabは描画後のtext nodeからmentionを拾うため`&#64;`は描画時に`@`へ戻り、code span内ではentityが見えてしまう）。credentialと絶対pathは投稿せずerrorにする。
 
 ## YAML の特定
 
@@ -66,11 +77,15 @@ reviews:
       source_branch: "feature"
       mr_iid: 123
       expected_head_sha: "..."
+      mode: inline
       discussion_id: "..."
       original_note_id: 456
-      replies: {}
+      replies:
+        answer: 457
       resolved: false
 ```
+
+`host`から`expected_head_sha`までは最初のMR選択時に固定する。`mode`・`discussion_id`・`original_note_id`・`replies`はhelperが投稿と同じlock内で書くので、手で`yaml-patch`しない。
 
 再実行時は保存済みの`host + target_project_id + mr_iid`を使う。MRを再発見して別MRへ差し替えない。固定先がclosed、merged、消失、またはbranch再利用で不整合になった場合は停止して確認する。
 
@@ -78,7 +93,8 @@ reviews:
 
 - `category`がなく`severity`だけがある旧entryは`imo`として扱う。
 - `status`がないentryは`pending`として扱う。
-- `id`がない旧entryは、処理前にhelperの`migrate-legacy --entry-index`でlock付きのstable IDを付与する。capture metadataがない旧entryはinline同期せず、現在位置を確認したうえでoverviewへ投稿するか、local-onlyにするかをユーザーへ確認する。
+- 旧書式（`**Local review [q]**` + `<pre>` + marker）で既に投稿済みのthreadは書き換えない。helperはpin済みnoteをそのまま再利用し、reply / resolveだけ新書式で続ける。旧AI replyのnote IDが`gitlab.replies`に無い場合、resolveは人間reply扱いで停止するので、その場合はGitLab上を確認して手動で閉じる。
+- `id`がない旧entryは、処理前にhelperの`migrate-legacy --entry-index`でlock付きのstable IDを付与する。capture metadataがない旧entryはinline同期できないため、現在位置を確認したうえで`post-original --mode overview --confirmed-legacy`で投稿する。
 - local-onlyを選んだentryは`gitlab.mode: skipped`と理由を記録する。
 
 ## 状態
@@ -114,6 +130,7 @@ retry時にworking treeと保存済みpatch digestが一致しなければ、com
    - reviewed_textが保存行に一致する。
    - relative fileがMR diffのnew_pathへ一意に対応する。
    - old_path/new_pathとnew-side line/rangeを解決できる。
+   - blob・reviewed_textの不一致は停止する。diff上にpositionを取れないentryだけをoverview fallback対象として記録し、preflight全体は止めない。
 6. 全entryが同一のexpected headでpreflight済みになってから、元commentを投稿する。
 
 GitLab側に未反映の保存済みdirty fileは正常なcaptureである。Commit / Push後にcapture blobとMR head blobが完全一致した場合だけ投稿する。
@@ -122,11 +139,14 @@ GitLab側に未反映の保存済みdirty fileは正常なcaptureである。Com
 
 1. helperの`post-original`を使い、全entryの元commentをコード変更前に投稿する。
 2. 各POST直前にexpected headを再照合する。途中でMR versionが変化した場合、投稿済みthreadは保持し、未投稿entryを自動的に別versionへ投稿せず停止する。
-3. helperの結果からdiscussion ID、note ID、position SHAを`yaml-patch`で保存する。
-4. inline不可時は自動fallbackしない。
-   - GitLab 15.8: overview discussion / local-onlyを確認する。
-   - overviewはhelperの`post-original --mode overview`を使い、同じmarker・sanitization・retry規則を適用する。
-5. helperはentry IDとphase/content digestの非表示markerを使う。retry時は全discussion pageを検索し、0件ならcreate、完全一致する1件ならreuse、複数またはidentity不一致なら停止する。
+3. helperが`discussion_id`・`original_note_id`・`mode`をYAMLへ書く（投稿と同じlock内）。追加の`yaml-patch`は不要で、結果のURLとIDを報告に使う。
+4. inline不可時（diff上にpositionを取れない、GitLab 15.8のfile-level comment不可）はMR全体へのoverview discussionへ自動fallbackする。
+   - helperの`post-original --mode overview`を使い、同じsanitization・retry規則を適用する。
+   - どのentryがinlineでなくMR全体コメントになったかを報告する（`gitlab.mode`はhelperが記録する）。
+   - AI回答・resolutionは同じdiscussionへreplyする（inlineと同じ経路）。
+   - capture metadataがない旧entryは`--confirmed-legacy`が必要なので、現在位置をユーザーへ提示して確認してから投稿する。
+   - local-onlyはMRが無い、または同期自体を拒否された場合だけ選ぶ。
+5. 冪等性はpinned ID（`original_note_id`、phaseごとの`replies`）と本文の完全一致で判定する。retry時は全discussion pageを検索し、pinned noteがあれば本文一致でreuse・不一致なら停止、pinnedが無ければ本文一致0件でcreate、1件でreuse、複数で停止する。他entryがpin済みのnoteは本文が同じでも再利用しない。
 
 元comment、answer、resolutionはquick action、mention、絶対path、credentialをそのままGitLabへ出さない。helperが安全にrenderできない本文は投稿せず報告する。
 
@@ -163,15 +183,17 @@ readyなコード変更は1回のreview runで一つのbatchにまとめる。q�
 6. 確認済みsource projectのremote/refへpushする。tracking設定だけに依存したpushをしない。
 7. MR headがpushしたcommitになったことを確認する。
 8. 固定済みhost、source/target project、source branch、MR IIDが変わっていないことを再確認し、各entryの`gitlab.expected_head_sha`だけを検証済みのpush commitへ`yaml-patch`で更新する。他のMR identityは変更しない。
-9. resolution、実行した検証、commit SHAを各threadへphase付きでreplyする。
-10. resolve直前にdiscussionをGETし、marker付きの自分のnote以外の非system replyがないことを確認する。人間replyがあれば`awaiting_decision`として停止する。
+9. resolution、実行した検証、commit SHAを各threadへ`--phase`付きでreplyする。helperがphaseごとにnote IDを`gitlab.replies`へ記録する。
+10. resolve直前にdiscussionをGETし、helperが記録したnote ID以外の非system replyがないことを確認する。人間replyがあれば`awaiting_decision`として停止する。本文の書式では判定しない（人間が同じアカウントから`[Q] ...`と返す場合があるため）。
 11. resolve後のGETでresolvedを確認してからentryを`resolved`にする。
 
 commitまたはpushを拒否された場合は`awaiting_publish`のまま保持し、threadをresolveしない。
 
 ## Partial failureとretry
 
-- original/replyのPOST成功後にYAML更新前で停止しても、phase markerを検索して既存noteを再利用する。
+- POST成功と同じlock内でpinを書くため、YAML未更新のまま停止する窓は無い。POST前に停止した場合は、同一本文のnoteを検索して再利用する。
+- pin済みnoteが人手で削除されるとhelperは停止する。GitLab上の状態を確認し、YAMLの`gitlab.discussion_id` / `original_note_id` / `replies`を消してから再実行する。
+- 同一本文のnoteを別アカウントが先に投稿していた場合も停止する。GitLab上でどちらを残すかを決めてから進める。
 - resolveはGETで現在状態を確認してから冪等なPUTを行い、再度GETする。
 - GitLab API、auth、network failureはローカル対応を破棄しない。同期を待つかlocal-onlyで完了するか確認する。
 - helper、Neovim capture、YAML update、archiveは`.review/.lock`を共通利用する。lockが残っている場合は、別writerがいないことを確認するまで削除しない。
@@ -204,7 +226,7 @@ commitまたはpushを拒否された場合は`awaiting_publish`のまま保持�
 - 対応: {何をしたか}
 - 見解・回答: {imoまたはq。該当しなければ省略}
 - ローカル状態: pending / awaiting_decision / awaiting_publish / resolved
-- GitLab: MR URL / discussion ID / synced, waiting, skipped
+- GitLab: MR URL / discussion ID / synced (inline | overview), waiting, skipped
 ```
 
 ## アーカイブ

@@ -11,9 +11,13 @@ from __future__ import annotations
 import argparse
 import copy
 from contextlib import contextmanager
+import errno
+import importlib.util
 import json
 import os
 from pathlib import Path
+import re
+import stat
 from typing import Any, Callable, Mapping
 import uuid
 
@@ -70,7 +74,12 @@ TRANSITIONS: dict[str, frozenset[str]] = {
     # EXECUTION_CHOICE is reachable directly because the Claude adapter drops the
     # preflight review subagent; Codex still routes through SHORT_TASK_PREFLIGHT.
     "SHORT_TASK_DRAFT": frozenset(
-        {"SHORT_TASK_PREFLIGHT", "EXECUTION_CHOICE", "DISCOVERY", "USER_DECISION_REQUIRED"}
+        {
+            "SHORT_TASK_PREFLIGHT",
+            "EXECUTION_CHOICE",
+            "DISCOVERY",
+            "USER_DECISION_REQUIRED",
+        }
     ),
     "SHORT_TASK_PREFLIGHT": frozenset(
         {"EXECUTION_CHOICE", "SHORT_TASK_DRAFT", "DISCOVERY", "USER_DECISION_REQUIRED"}
@@ -106,10 +115,25 @@ TRANSITIONS: dict[str, frozenset[str]] = {
 
 
 TOP_LEVEL_FIELDS = frozenset(
-    {"identity", "workspace", "state", "authorization", "artifacts", "execution", "shipping"}
+    {
+        "identity",
+        "workspace",
+        "state",
+        "authorization",
+        "artifacts",
+        "execution",
+        "shipping",
+    }
 )
 IDENTITY_FIELDS = frozenset(
-    {"schema_version", "workflow_id", "source_root", "artifact_root", "default_branch", "base_commit"}
+    {
+        "schema_version",
+        "workflow_id",
+        "source_root",
+        "artifact_root",
+        "default_branch",
+        "base_commit",
+    }
 )
 WORKSPACE_FIELDS = frozenset({"worktree_path", "branch"})
 STATE_FIELDS = frozenset({"phase", "stopped_from", "artifact_revision"})
@@ -196,6 +220,15 @@ def _validate_context_shape(context: Mapping[str, Any]) -> None:
         raise StateError("execution.gates must be an object")
     _nullable_string(execution["choice"], "execution.choice")
     _nullable_string(execution["review_snapshot_id"], "execution.review_snapshot_id")
+    if "human_review" in execution:
+        spec = importlib.util.spec_from_file_location(
+            "workflow_state_human_review", Path(__file__).with_name("human_review.py"))
+        human = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(human)
+        try:
+            human.validate_record_shape(execution["human_review"])
+        except human.HumanReviewError as exc:
+            raise StateError(str(exc)) from exc
 
     shipping = _mapping(context["shipping"], "shipping")
     _required(shipping, SHIPPING_FIELDS, "shipping")
@@ -223,13 +256,22 @@ def load_context(path: Path | str) -> dict[str, Any]:
     except OSError as exc:
         raise StateError(f"cannot read context {context_path}: {exc}") from exc
     try:
-        value = json.loads(raw, parse_constant=_reject_json_constant)
+        value = json.loads(raw, parse_constant=_reject_json_constant, object_pairs_hook=_unique_pairs)
     except (json.JSONDecodeError, ValueError) as exc:
         raise StateError(f"invalid JSON in {context_path}: {exc}") from exc
     if not isinstance(value, dict):
         raise StateError("context JSON must be an object")
     validate_context(value)
     return value
+
+
+def _unique_pairs(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
 
 
 def _reject_json_constant(value: str) -> Any:
@@ -331,13 +373,16 @@ def _write_atomic(path: Path, context: Mapping[str, Any]) -> None:
 
     parent = path.parent
     temporary = parent / f".{path.name}.{uuid.uuid4().hex}.tmp"
-    payload = json.dumps(
-        context,
-        ensure_ascii=False,
-        indent=2,
-        sort_keys=True,
-        allow_nan=False,
-    ) + "\n"
+    payload = (
+        json.dumps(
+            context,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+            allow_nan=False,
+        )
+        + "\n"
+    )
     fd: int | None = None
     try:
         fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
@@ -411,7 +456,9 @@ def mutate_context(
     context_path = Path(path)
     with _context_lock(context_path):
         current = load_context(context_path)
-        if isinstance(expected_revision, bool) or not isinstance(expected_revision, int):
+        if isinstance(expected_revision, bool) or not isinstance(
+            expected_revision, int
+        ):
             raise StateError("expected revision must be an integer")
         actual_revision = current["state"]["artifact_revision"]
         if expected_revision != actual_revision:
@@ -437,8 +484,229 @@ def mutate_context(
         # successful operation advances exactly one from the CAS value.
         result["state"]["artifact_revision"] = actual_revision + 1
         validate_context(result)
+        generated = _evaluate_gates(context_path, current, result, normative=operation is invalidate_normative_context)
+        if generated:
+            result["execution"]["gates"].update(generated["gates"])
+            if "review_snapshot_id" in generated:
+                result["execution"]["review_snapshot_id"] = generated["review_snapshot_id"]
         _write_atomic(context_path, result)
         return result
+
+
+def _evaluate_gates(path, current, candidate, *, normative=False):
+    spec = importlib.util.spec_from_file_location(
+        "workflow_state_evidence", Path(__file__).with_name("workflow_evidence.py"))
+    evidence = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(evidence)
+    try:
+        return evidence.evaluate_gates(path, current, candidate, normative=normative)
+    except evidence.EvidenceError as exc:
+        raise StateError(str(exc)) from exc
+
+
+# --- Artifact syntax-presence lint -----------------------------------------
+#
+# A state transition is the only place a phase gate is recorded, so this is
+# the one place that can fail closed if the artifact backing that gate does
+# not even have the expected shape.  Each check below only looks for the
+# minimal syntactic marker of a gate's content (an AC identifier, a
+# satisfaction-table row, a required heading); it is not a content review.
+
+AC_PATTERN = re.compile(r"AC[ \-_]?[0-9]+")
+STATUS_WORDS = ("SATISFIED", "UNSATISFIED", "UNVERIFIED")
+FAILURE_HEADING_WORDS = ("失敗", "Failure")
+UNVERIFIED_HEADING_WORDS = ("未検証", "未実施", "未確認")
+
+# Maps a (from, to) transition edge to the checks it must satisfy.  A phase
+# pair absent from this table has no artifact lint.
+LINT_EDGES: dict[tuple[str, str], frozenset[str]] = {
+    ("SPEC_REVIEWS", "USER_APPROVED_SPEC"): frozenset({"L1"}),
+    ("FINAL_REVIEW", "LOCAL_VERIFICATION"): frozenset({"L1", "L2"}),
+    ("LOCAL_VERIFICATION", "LOCAL_COMPLETE"): frozenset({"L1", "L3"}),
+    ("LOCAL_VERIFICATION", "COMMIT"): frozenset({"L1", "L3"}),
+    ("LOCAL_COMPLETE", "COMMIT"): frozenset({"L1", "L3"}),
+}
+
+
+class ArtifactUnreadable(Exception):
+    """An artifact file is missing, not a regular file, or not readable text.
+
+    Raised by :func:`_read_artifact` and caught per-file by
+    :func:`lint_artifacts`, so one unreadable artifact is reported as a lint
+    failure rather than as an unrelated ``state operation failed`` error from
+    :func:`mutate_context`.
+    """
+
+
+def _read_artifact(base: Path, rel: str) -> str:
+    """Read an artifact by descriptor so the check and the read see one inode.
+
+    ``O_NOFOLLOW`` plus a single ``open``/``fstat``/read sequence closes the
+    check/use race a separate ``is_symlink()`` / ``is_file()`` / ``read_text()``
+    sequence would leave open: the directory entry cannot be replaced between
+    the check and the read because there is no gap between them.
+    """
+
+    path = base / rel
+    fd: int | None = None
+    try:
+        # O_NONBLOCK keeps a FIFO at this path from blocking the open (and
+        # with it the context lock) until a writer appears; it is a no-op for
+        # the regular files this is meant to read, and the S_ISREG check below
+        # still rejects the FIFO as unreadable.
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        info = os.fstat(fd)
+        if not stat.S_ISREG(info.st_mode):
+            raise ArtifactUnreadable(f"{rel} が見つからない")
+        with os.fdopen(fd, "r", encoding="utf-8") as handle:
+            fd = None
+            return handle.read()
+    except OSError as exc:
+        if exc.errno == errno.ELOOP:
+            raise ArtifactUnreadable(
+                f"{rel} はシンボリックリンクのため読み込めない"
+            ) from exc
+        if exc.errno == errno.ENOENT:
+            raise ArtifactUnreadable(f"{rel} が見つからない") from exc
+        raise ArtifactUnreadable(f"{rel} を読み込めない: {exc}") from exc
+    except UnicodeDecodeError as exc:
+        raise ArtifactUnreadable(f"{rel} を読み込めない: {exc}") from exc
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+
+
+def _is_short_path(base: Path) -> bool:
+    # The short-task path is a workflow with a short-path marker whose
+    # spec.md never carries AC identifiers, distinguishing it from the full
+    # path (which has an AC-bearing spec.md).  Absence/unreadability of
+    # spec.md counts as "does not satisfy L1", same as an unsatisfied spec.
+    #
+    # The marker itself is checked with lstat (not the exists()/is_file()
+    # pair, which follows symlinks and accepts directories) so a symlink or a
+    # directory at that path cannot forge the exemption.  Any error reading
+    # the marker fails closed to "not short path", which puts L1 back in
+    # force rather than granting an exemption on an unreadable marker.
+    marker = base / "tasks" / "01-short-path.md"
+    try:
+        marker_is_regular_file = stat.S_ISREG(marker.lstat().st_mode)
+    except OSError:
+        marker_is_regular_file = False
+    if not marker_is_regular_file:
+        return False
+    try:
+        return _lint_spec(base) is not None
+    except ArtifactUnreadable:
+        return True
+
+
+def _lint_spec(base: Path) -> str | None:
+    text = _read_artifact(base, "spec.md")
+    for line in text.splitlines():
+        if AC_PATTERN.search(line):
+            return None
+    return "AC 識別子を含む行がない"
+
+
+def _lint_final_review(base: Path) -> str | None:
+    text = _read_artifact(base, "reviews/final-review.md")
+    for line in text.splitlines():
+        if AC_PATTERN.search(line) and any(word in line for word in STATUS_WORDS):
+            return None
+    return "AC 識別子と判定語を同一行に含む行がない"
+
+
+def _lint_verification(base: Path) -> tuple[str, str] | None:
+    """Return ``(reason, example)`` for the unmet side(s), or ``None`` if met.
+
+    The example points at whichever heading is actually missing, so the
+    error output tells the caller what to add rather than pointing at a
+    heading that is already present.
+    """
+
+    text = _read_artifact(base, "verification.md")
+    has_failure = False
+    has_unverified = False
+    for line in text.splitlines():
+        if not line.startswith("#"):
+            continue
+        if any(word in line for word in FAILURE_HEADING_WORDS):
+            has_failure = True
+        if any(word in line for word in UNVERIFIED_HEADING_WORDS):
+            has_unverified = True
+    if has_failure and has_unverified:
+        return None
+    if not has_failure and not has_unverified:
+        return (
+            "失敗履歴の見出しと未検証範囲の見出しがどちらもない",
+            "## 失敗履歴 と ## 未検証範囲",
+        )
+    if not has_failure:
+        return "失敗履歴の見出しがない", "## 失敗履歴"
+    return "未検証範囲の見出しがない", "## 未検証範囲"
+
+
+def lint_artifacts(base: Path, checks: frozenset[str]) -> None:
+    """Fail closed if any requested syntax-presence check is unmet.
+
+    Raises :class:`StateError` listing every unmet check, sorted file name
+    first and then check name, so a caller sees every gap in one failed
+    transition rather than fixing them one at a time.
+    """
+
+    failures: list[tuple[str, str, str, str]] = []
+
+    if "L1" in checks and not _is_short_path(base):
+        try:
+            reason = _lint_spec(base)
+        except ArtifactUnreadable as exc:
+            reason = str(exc)
+        if reason is not None:
+            failures.append(
+                (
+                    "spec.md",
+                    "L1",
+                    reason,
+                    "- **AC1**: ログイン失敗時にエラーメッセージを表示する",
+                )
+            )
+
+    if "L2" in checks:
+        try:
+            reason = _lint_final_review(base)
+        except ArtifactUnreadable as exc:
+            reason = str(exc)
+        if reason is not None:
+            failures.append(
+                (
+                    "reviews/final-review.md",
+                    "L2",
+                    reason,
+                    "| AC1 | tests/foo_test.go::TestBar | SATISFIED |",
+                )
+            )
+
+    if "L3" in checks:
+        try:
+            unmet = _lint_verification(base)
+        except ArtifactUnreadable as exc:
+            unmet = (str(exc), "## 失敗履歴 と ## 未検証範囲")
+        if unmet is not None:
+            reason, example = unmet
+            failures.append(("verification.md", "L3", reason, example))
+
+    if not failures:
+        return
+
+    failures.sort(key=lambda item: (item[0], item[1]))
+    lines = ["artifact lint failed"]
+    for rel, _check, reason, example in failures:
+        lines.append(f"  {rel}: {reason}")
+        lines.append(f"    期待例: {example}")
+    raise StateError("\n".join(lines))
 
 
 def _context_argument(parser: argparse.ArgumentParser) -> None:
@@ -457,7 +725,13 @@ def build_parser() -> argparse.ArgumentParser:
     validate = commands.add_parser("validate", help="validate context.json")
     _context_argument(validate)
 
-    transition = commands.add_parser("transition", help="apply one state-graph transition")
+    gates = commands.add_parser("check-gates", help="read-only cumulative evidence gate check")
+    _context_argument(gates)
+    gates.add_argument("--to", required=True)
+
+    transition = commands.add_parser(
+        "transition", help="apply one state-graph transition"
+    )
     _mutation_arguments(transition)
     transition.add_argument("--to", required=True)
     transition.add_argument("--patch-json")
@@ -492,12 +766,36 @@ def _run(args: argparse.Namespace) -> None:
     if args.command == "validate":
         load_context(args.context)
         return
+    if args.command == "check-gates":
+        with _context_lock(args.context):
+            current = load_context(args.context)
+            candidate = copy.deepcopy(current)
+            if current["state"]["phase"] == "USER_DECISION_REQUIRED" and args.to == current["state"]["stopped_from"]:
+                resume_context(candidate)
+            elif args.to != current["state"]["phase"]:
+                transition_context(candidate, args.to)
+            validate_context(candidate)
+            checks = LINT_EDGES.get((current["state"]["phase"], args.to))
+            if checks:
+                lint_artifacts(args.context.parent, checks)
+            _evaluate_gates(args.context, current, candidate)
+        return
     if args.command == "transition":
         patch = _patch_argument(args.patch_json)
+        base = args.context.parent
+
+        def _op(context: dict[str, Any]) -> dict[str, Any]:
+            current = context["state"]["phase"]
+            result = transition_context(context, args.to, patch)
+            checks = LINT_EDGES.get((current, args.to))
+            if checks:
+                lint_artifacts(base, checks)
+            return result
+
         mutate_context(
             args.context,
             expected_revision=args.expected_revision,
-            operation=lambda context: transition_context(context, args.to, patch),
+            operation=_op,
         )
         return
     if args.command == "invalidate-normative":

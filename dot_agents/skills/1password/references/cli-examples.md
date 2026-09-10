@@ -72,6 +72,10 @@ stdout を消費する右側 CLI にパイプで渡し、Claude context に値�
 # gh auth (token を環境に残さず login)
 OP_SERVICE_ACCOUNT_TOKEN="$(cat ~/.config/op/service-account-token)" \
   op read op://Private/github-pat/token | gh auth login --with-token
+
+# 同様に glab
+OP_SERVICE_ACCOUNT_TOKEN="$(cat ~/.config/op/service-account-token)" \
+  op read op://Private/gitlab-pat/token | glab auth login --hostname gitlab.example.com --stdin
 ```
 
 **注意**: パイプ全体を `command 2>&1 | tee log` などで logging すると secret が log に残る。安易に redirect しない。

@@ -22,35 +22,17 @@ local function git(root, args)
   return vim.trim(result.stdout or ""), nil
 end
 
----@param bufnr integer
----@return boolean
-local function is_codediff_original(bufnr)
-  if vim.g.loaded_codediff ~= 1 then
-    return false
-  end
-
-  local ok, lifecycle = pcall(require, "codediff.ui.lifecycle")
-  if not ok then
-    return false
-  end
-
-  local original = lifecycle.get_buffers(vim.api.nvim_get_current_tabpage())
-  return original == bufnr
-end
-
 --- Resolve the absolute file path and its Git worktree root
 ---@return table|nil target
 ---@return string|nil error
 local function get_target()
   local bufnr = vim.api.nvim_get_current_buf()
   local name = vim.api.nvim_buf_get_name(bufnr)
-  if
-    name == ""
-    or vim.bo[bufnr].buftype ~= ""
-    or name:match("^%a[%w+.-]*://")
-    or is_codediff_original(bufnr)
-  then
-    return nil, "Review comments can only be added to working-tree files"
+  -- diff ビューアの base 側バッファは URI scheme (diffview:// 等) で弾かれる。
+  -- Diffview の右側（作業ツリー側）は buftype が空の実ファイルバッファなので
+  -- そのまま通る。差分を見ながらのレビューは右側で行う。
+  if name == "" or vim.bo[bufnr].buftype ~= "" or name:match("^%a[%w+.-]*://") then
+    return nil, "Review comments can only be added to working-tree files (in Diffview, use the right-hand side)"
   end
 
   if vim.bo[bufnr].modified then
@@ -192,7 +174,38 @@ local function atomic_write(filepath, content)
   assert(ok, rename_err or "failed to replace review file")
 end
 
+--- Build a JSON object with the keys in the given order.
+--- yq の load() は JSON をそのまま読むので、ここで決めた順序が YAML の
+--- キー順になる。値は vim.json.encode に任せるので escape 漏れが無い。
+---@param entries table[] {key, value} の並び
+---@return string
+local function ordered_json(entries)
+  local parts = {}
+  for _, kv in ipairs(entries) do
+    table.insert(parts, ("%s:%s"):format(vim.json.encode(kv[1]), vim.json.encode(kv[2])))
+  end
+  return "{" .. table.concat(parts, ",") .. "}"
+end
+
+-- 既存 entry を保ったまま末尾へ 1 件足す。style の指定は 2 つとも必要:
+--   * map / seq だけ block style に戻す (load した節は flow style で入る)。
+--     scalar には触らない。触ると "123" のような値の引用符が外れて型が変わる。
+--   * key の引用符を外す (見た目だけ)。
+-- comment は読みやすさのため literal block を試みる。CR など block で表せない
+-- 文字が入っていれば yq が double-quoted へ落とすので、壊れることはない。
+local append_query = [[
+.reviews = ((.reviews // []) + [load(strenv(REVIEW_ENTRY))])
+| (.reviews[-1] | .. | select(tag == "!!map" or tag == "!!seq")) style=""
+| (.reviews[-1] | .. | key) style=""
+| .reviews[-1].comment style="literal"
+]]
+
 --- Save a review entry as YAML
+---
+--- 文字列連結で追記しない。review-respond の helper は PyYAML の safe_dump で
+--- 全体を書き戻すのでリスト項目が column 0 に来る。固定インデントで足すと
+--- そこで壊れる (`reviews: []` になった後、末尾に改行が無いファイル、
+--- CR 混じりの comment も同様)。yq に構造として読ませて書き戻す。
 ---@param range table
 ---@param comment string
 ---@param category "must"|"imo"|"q"
@@ -211,59 +224,70 @@ function M.save_yaml(range, comment, category)
     tostring(vim.uv.hrtime()),
     comment,
   }, "\0"))
-  local comment_lines = vim.split(comment, "\n")
-  local indented = {}
-  for _, line in ipairs(comment_lines) do
-    table.insert(indented, "      " .. line)
-  end
-  local comment_yaml = table.concat(indented, "\n") .. "\n"
 
-  local entry = string.format(
-    [[  - id: %s
-    file: %s
-    relative_file: %s
-    category: %s
-    status: pending
-    capture_head_sha: %s
-    capture_file_blob: %s
-    reviewed_text: %s
-    context_before: %s
-    context_after: %s
-    start_line: %d
-    end_line: %d
-    start_col: %d
-    end_col: %d
-    timestamp: "%s"
-    comment: |
-%s]],
-    vim.json.encode(entry_id),
-    vim.json.encode(range.file),
-    vim.json.encode(range.relative_file),
-    category,
-    vim.json.encode(range.capture_head_sha),
-    vim.json.encode(range.capture_file_blob),
-    vim.json.encode(range.reviewed_text),
-    vim.json.encode(range.context_before),
-    vim.json.encode(range.context_after),
-    range.start_line,
-    range.end_line,
-    range.start_col,
-    range.end_col,
-    timestamp,
-    comment_yaml
-  )
+  -- 貼り付けで混じる CR を落とす。escape されるので YAML は壊れないが、
+  -- そのまま agent へ渡っても意味が無い。
+  comment = (comment:gsub("\r\n?", "\n"))
+
+  -- 順序は review-respond の SKILL.md が示す並びに合わせる。
+  local entry_json = ordered_json({
+    { "id", entry_id },
+    { "file", range.file },
+    { "relative_file", range.relative_file },
+    { "category", category },
+    { "status", "pending" },
+    { "capture_head_sha", range.capture_head_sha },
+    { "capture_file_blob", range.capture_file_blob },
+    { "reviewed_text", range.reviewed_text },
+    { "context_before", range.context_before },
+    { "context_after", range.context_after },
+    { "start_line", range.start_line },
+    { "end_line", range.end_line },
+    { "start_col", range.start_col },
+    { "end_col", range.end_col },
+    { "timestamp", timestamp },
+    { "comment", comment },
+  })
 
   if not with_review_lock(dir, function()
-    local existing = ""
+    local entry_path = ("%s.entry.%d.%s.json"):format(filepath, vim.fn.getpid(), tostring(vim.uv.hrtime()))
+    local entry_file, entry_err = io.open(entry_path, "w")
+    assert(entry_file, entry_err or "failed to open temporary review entry")
+    entry_file:write(entry_json)
+    entry_file:close()
+
+    -- 空 / 不在なら空の document から始める。既存を読めないまま上書きしない。
+    local source = filepath
+    local seed_path = nil
     local current = io.open(filepath, "r")
+    local existing = current and current:read("*a") or ""
     if current then
-      existing = current:read("*a")
       current:close()
     end
-    if existing == "" then
-      existing = "reviews:\n"
+    if vim.trim(existing) == "" then
+      seed_path = entry_path .. ".seed.yaml"
+      local seed = io.open(seed_path, "w")
+      assert(seed, "failed to open temporary review seed")
+      seed:write("reviews: []\n")
+      seed:close()
+      source = seed_path
     end
-    atomic_write(filepath, existing .. entry)
+
+    local result = vim.system({ "yq", "-e", append_query, source }, {
+      text = true,
+      env = { REVIEW_ENTRY = entry_path },
+    }):wait()
+
+    os.remove(entry_path)
+    if seed_path then
+      os.remove(seed_path)
+    end
+
+    assert(
+      result.code == 0 and vim.trim(result.stdout or "") ~= "",
+      ("yq failed to update %s: %s"):format(filepath, vim.trim(result.stderr or "unknown error"))
+    )
+    atomic_write(filepath, result.stdout)
   end) then
     return
   end

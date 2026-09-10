@@ -15,14 +15,8 @@ REQUIRED_WRITABLE_ROOTS = [
     "/tmp/claude",
 ]
 REMOVED_WRITABLE_ROOT = str(Path.home() / "claude" / "skills")
-DISABLED_SKILLS = {
-    "start",
-    "bugfix",
-    "investigation",
-    "handoff",
-    "herdr-delegate",
-    "writing-gpt-prompts",
-}
+DISABLED_SKILLS = set()
+
 LEGACY_AGENT_NAMES = {
     "agent_luna_worker",
     "agent_explorer",
@@ -75,11 +69,12 @@ def disabled_skill_names(config: dict) -> set[str]:
 
 
 def assert_required_config(config: dict) -> None:
-    assert config["model"] == "gpt-5.6-terra"
-    assert config["model_reasoning_effort"] == "medium"
+    assert config["model"] == "gpt-6-astra"
+    assert config["model_reasoning_effort"] == "low"
     assert config["plan_mode_reasoning_effort"] == "medium"
     assert config["sandbox_mode"] == "workspace-write"
     assert config["approval_policy"] == "on-request"
+    assert config["model_context_window"] == 872_000
     assert config["model_auto_compact_token_limit"] == 260_000
     assert config["model_auto_compact_token_limit_scope"] == "total"
     assert config["sandbox_workspace_write"]["network_access"] is True
@@ -243,7 +238,7 @@ def test_invalid_cc_pane_markers_roll_back_without_changes(tmp_path: Path) -> No
 
 def test_preexisting_skill_config_is_preserved(tmp_path: Path) -> None:
     config = tmp_path / "config.toml"
-    existing_path = Path.home() / ".agents/skills/start/SKILL.md"
+    existing_path = Path.home() / ".agents/skills/task/SKILL.md"
     config.write_text(
         f'[[skills.config]]\npath = "{existing_path}"\nenabled = false\n',
         encoding="utf-8",
@@ -449,3 +444,38 @@ def test_missing_config_rolls_back_to_absent_on_failure(tmp_path: Path) -> None:
     assert not config.exists()
     assert not config.is_symlink()
     assert artifacts(config) == []
+
+
+def test_required_config_sets_safe_default_subagent_fallback(tmp_path: Path) -> None:
+    config = tmp_path / "config.toml"
+    config.write_text('[agents]\nmax_threads = 3\ndefault_subagent_model = "gpt-5.6-luna"\ndefault_subagent_reasoning_effort = "low"\n')
+    result = run_configure(config)
+    assert result.returncode == 0, result.stderr
+    agents = load_config(config)["agents"]
+    assert agents["default_subagent_model"] == "gpt-5.6-sol"
+    assert agents["default_subagent_reasoning_effort"] == "medium"
+    assert agents["max_threads"] == 3
+    configured = config.read_bytes()
+    assert run_configure(config).returncode == 0
+    assert config.read_bytes() == configured
+
+
+def test_managed_entry_skills_are_reenabled_on_upgrade(tmp_path: Path) -> None:
+    config = tmp_path / "config.toml"
+    names = ("task", "bugfix", "investigation", "handoff", "writing-gpt-prompts", "herdr-delegate")
+    config.write_text(
+        "# BEGIN CODEX MANAGED DELIVERY\n"
+        + "".join(
+            f'[[skills.config]]\npath = "{Path.home() / ".agents/skills" / name / "SKILL.md"}"\nenabled = false\n'
+            for name in names
+        )
+        + "# END CODEX MANAGED DELIVERY\n",
+        encoding="utf-8",
+    )
+    result = run_configure(config)
+    assert result.returncode == 0, result.stderr
+    assert disabled_skill_names(load_config(config)) == DISABLED_SKILLS
+    first_bytes = config.read_bytes()
+    result = run_configure(config)
+    assert result.returncode == 0, result.stderr
+    assert config.read_bytes() == first_bytes

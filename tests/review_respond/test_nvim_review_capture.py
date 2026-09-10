@@ -90,3 +90,89 @@ vim.cmd("qa!")
     )
 
     assert result.returncode == 0, result.stderr
+
+
+def save_comment(tmp_path: Path, file_path: Path, line: int, comment: str) -> None:
+    result = run_nvim(
+        tmp_path,
+        f"""
+local spec = dofile({str(REVIEW_LUA)!r})
+vim.cmd("edit " .. vim.fn.fnameescape({str(file_path)!r}))
+vim.api.nvim_win_set_cursor(0, {{ {line}, 0 }})
+local range, err = spec._review.get_range_normal()
+assert(range, err)
+spec._review.save_yaml(range, {comment!r}, "must")
+vim.cmd("qa!")
+""",
+    )
+    assert result.returncode == 0, result.stderr
+
+
+def test_append_survives_helper_rewrite(tmp_path: Path) -> None:
+    """review-respond の helper は PyYAML の safe_dump で書き戻すので、リスト
+    項目が column 0 に来る。固定インデントで連結追記するとここで壊れる。"""
+    repo, file_path = make_repo(tmp_path)
+    yaml_path = repo / ".review/review_comments.yaml"
+
+    save_comment(tmp_path, file_path, 2, "first")
+    document = yaml.safe_load(yaml_path.read_text())
+    document["reviews"][0]["status"] = "resolved"
+    yaml_path.write_text(
+        yaml.safe_dump(
+            document,
+            allow_unicode=True,
+            sort_keys=False,
+            default_flow_style=False,
+            width=10**9,
+        )
+    )
+    assert yaml_path.read_text().splitlines()[1].startswith("- ")
+
+    save_comment(tmp_path, file_path, 3, "second")
+
+    reviews = yaml.safe_load(yaml_path.read_text())["reviews"]
+    assert [entry["status"] for entry in reviews] == ["resolved", "pending"]
+    assert reviews[1]["comment"].strip() == "second"
+
+
+def test_append_to_emptied_and_unterminated_documents(tmp_path: Path) -> None:
+    repo, file_path = make_repo(tmp_path)
+    review_dir = repo / ".review"
+    review_dir.mkdir()
+    yaml_path = review_dir / "review_comments.yaml"
+
+    yaml_path.write_text("reviews: []\n")
+    save_comment(tmp_path, file_path, 2, "after archive")
+    assert len(yaml.safe_load(yaml_path.read_text())["reviews"]) == 1
+
+    yaml_path.write_text('reviews:\n  - id: "x"\n    category: must\n    status: pending')
+    save_comment(tmp_path, file_path, 2, "after hand edit")
+    assert len(yaml.safe_load(yaml_path.read_text())["reviews"]) == 2
+
+
+def test_carriage_returns_in_comment_do_not_break_the_document(tmp_path: Path) -> None:
+    repo, file_path = make_repo(tmp_path)
+    save_comment(tmp_path, file_path, 2, "line1\rline2\r\nline3")
+
+    entry = yaml.safe_load((repo / ".review/review_comments.yaml").read_text())["reviews"][0]
+    assert entry["comment"].strip().splitlines() == ["line1", "line2", "line3"]
+
+
+def test_scalar_types_are_preserved(tmp_path: Path) -> None:
+    """style を scalar まで広げると "123" の引用符が外れて int になる。"""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    file_path = repo / "sample.txt"
+    file_path.write_text("123\ntrue\nnull\n")
+    git(repo, "init")
+    git(repo, "config", "user.name", "Review Test")
+    git(repo, "config", "user.email", "review@example.com")
+    git(repo, "add", "sample.txt")
+    git(repo, "commit", "-m", "initial")
+
+    save_comment(tmp_path, file_path, 1, "numeric looking line")
+
+    entry = yaml.safe_load((repo / ".review/review_comments.yaml").read_text())["reviews"][0]
+    assert entry["reviewed_text"] == "123"
+    assert entry["context_after"] == ["true", "null"]
+    assert entry["start_line"] == 1

@@ -1,17 +1,23 @@
 ---
 name: herdr-delegate
-description: "herdr ペイン内で別の agent やコマンドを並走させるための共有契約。呼び出し元 skill（product-discovery / execute-plan / codex-doublecheck / ci-monitor 等）から `herdr-delegate` の agent / command:one-shot / command:resident いずれかのモードとして明示的に参照されたときだけ使う。ユーザーの自然文（「並列で走らせて」「別ペインで動かして」等）だけでは発火しない。HERDR_ENV=1 が前提。"
+description: "herdr ペイン内で別の agent、コマンド、または人間所有の別 task 用 Main を準備するための共有契約。呼び出し元 skill、常設指示、共有方針から `herdr-delegate` の agent / command:one-shot / command:resident / human-task いずれかのモードとして明示的に参照されたときだけ使う。ユーザーの自然文だけでは既存 mode は発火せず、human-task は topology の trigger に従う。HERDR_ENV=1 が前提。"
 ---
 
 # herdr-delegate
 
-herdr の別ペインで agent（クロスモデル委譲）またはコマンドを走らせるための契約。各呼び出し元 skill は herdr 手順と落とし穴回避をここに委ね、固有の停止条件・監視対象・ユーザー承認だけを自分の SKILL.md に残す。
+herdr の別ペインで agent（クロスモデル委譲）またはコマンドを走らせ、人間所有の別 task 用 Main を準備するための契約。各呼び出し元 skill、常設指示、共有方針は herdr 手順と落とし穴回避をここに委ね、固有の停止条件・監視対象・ユーザー承認だけを自分の SKILL.md に残す。
 
 前提: `test "${HERDR_ENV:-}" = 1`。不成立ならこの契約は成立せず、呼び出し元は自身の非 herdr 経路へ進む。
 
-ヘルパー `herdr-delegate`（`dot_local/bin/executable_herdr-delegate`、PATH 上）が prompt 組み立て・JSON パース・完了判定・孤児選別・隔離引数生成・隔離検証の 6 サブコマンドを提供する: `build-prompt` / `parse-pane` / `check-marker` / `select-orphans` / `build-launch-args` / `verify-profile`。散文では quoting 事故と隔離漏れを防げないため、これらは必ずヘルパー経由で行い、手で組み立てない。
+実行先の判断は [execution-topology.md](../../workflows/software_delivery/references/execution-topology.md) と呼び出し元が所有する。`task` から汎用の `command:one-shot` / `command:resident` を選んでもよい。`agent` は既存のレビュー専用契約であり、通常の実装workerや `human-task` へ拡張しない。`human-task` は下記の専用経路で扱う。
+
+候補判定は `herdr-delegate check-availability`。`HERDR_ENV` と PATH の executable だけを確認し、JSON の `eligible` / `reason` を返す（`outside_herdr` / `herdr_not_found` / `eligible`）。Herdr を実行せず socket にも接続しない。`eligible=true` は server readiness、起動許可、隔離成立の証拠ではなく、以降の gate は省略しない。
+
+ヘルパー `herdr-delegate`（`dot_local/bin/executable_herdr-delegate`、PATH 上）が `check-availability` / `run-command` / `build-prompt` / `parse-pane` / `check-marker` / `select-orphans` / `prepare-scratch` / `build-launch-args` / `verify-profile` を提供する。散文では quoting 事故と隔離漏れを防げないため、対応する処理はヘルパー経由で行い、手で組み立てない。
 
 ## 識別子と委譲記録
+
+以下の世代採番・`delegations.json`・孤児回収は既存 workflow の委譲に適用する。正式 workflow を持たない汎用 command は、現在の進捗記録に `mode / role / pane_id / cwd / state / 待ち理由 / 停止方法` を残し、そのために workflow artifact を作らない。孤児回収も行わず、今回作った pane だけを扱う。長期の退避が必要なら既存 `park` を使う。
 
 - **agent 名**: `hd-<workflow-id 末尾8hex>-<role>-<gen>`（32 文字制約 `[a-z][a-z0-9_-]{0,31}` を満たす。例 `hd-780ecd3f-review-2` = 20 文字）。世代 `gen` は同一 workflow の再実行で名前が衝突するのを避けるための連番。
 - **委譲記録**: `.aidocs/workflows/<id>/delegations.json`。世代の採番元。
@@ -33,15 +39,39 @@ herdr の別ペインで agent（クロスモデル委譲）またはコマン�
 
 off スイッチの判定は呼び出し元 skill の責務であり、この契約は関知しない（Claude 固有 path をここに持ち込まない）。
 
-## 3 モード
+## 4 モード
 
 | モード | 用途 | ライフサイクル |
 |---|---|---|
 | `agent` | 別モデルへの委譲（クロスモデルレビュー） | 1 回で完結。回収後に close |
-| `command:one-shot` | 完了シグナルのあるコマンド（CI 監視） | `wait-output` 後に close |
+| `command:one-shot` | 終了結果を保存するコマンド（テスト・CI 監視） | 終了コードとログを回収後に close。`wait-output` 単独では閉じない（詳細は command 手順） |
 | `command:resident` | 常駐（`--loop` 等） | ターンをまたいで生存。停止と close はユーザー承認後のみ、契約側から勝手に close しない |
+| `human-task` | 人間が所有する別 task 用の新 Main を準備 | 下記専用手順。prepare-only を既定とし、引き渡した新 WS / agent の close・回収はしない |
 
-## 全モード共通のルール
+## `human-task` 専用経路
+
+この経路は [execution-topology.md](../../workflows/software_delivery/references/execution-topology.md) の3 triggerまたは同じ意図（「別作業にして後で自分」「別WSで準備」「別作業にして進めて」）に限る。別作業という語だけで判定せず、人間へ引き渡す意図がある場合に限る。結果の回収・統合も現 Main に任せる指示なら通常委譲を優先する。ユーザーの永続運用指定があるため、毎回 Herdr 指示や workspace 作成を確認しない。公式 `herdr` skill の都度明示制約はこの指定で満たされ、公式 skill 自体は編集しない。
+
+下の `agent` / `command` 用共通手順は適用せず、review 用の隔離・model / effort・`build-launch-args`・`verify-profile`・`delegations.json` 採番・close / 孤児回収も使わない。worker / reviewer はこの経路を使わず、Main だけが起動する。新 Main の委譲は一段までとする。
+
+1. `herdr-delegate check-availability` を実行する。`eligible=false`、helper 不在、または Herdr を使わない指定なら、既存の handoff file と plain prompt だけを返し、built-in agent へ置換しない。Herdr 外から session を操作しない。
+2. `herdr --help`、`herdr workspace`、`herdr agent` で installed help / group 表示を確認し、呼び出し元の cwd を絶対 path で保持する。
+3. `herdr workspace create --cwd <absolute-cwd> --label <label> --no-focus` を実行し、JSON の `.result.workspace` / `.result.tab` / `.result.root_pane` から workspace / tab / root pane ID を読む。root pane の `pane read <root_pane> --source visible` で shell ready を確認する。
+4. 現在の runtime kind（`codex` または `claude`。明示指定があれば優先）で、`herdr agent start <human-task名> --kind <kind> --pane <root_pane>` を実行する。名前は `[a-z][a-z0-9_-]{0,31}` を満たす32文字以内とし、通常の harness 設定を使う。permission / trust の緩和、review scratch、`build-launch-args` は渡さない。`pane read <root_pane> --source visible` で agent ready と composer を肯定確認する。
+5. handoff file は既存 `/tmp` scratch に一回だけ保存したものを使う。起動 prompt を別 file に用意し、`build-prompt` を使わず、`herdr agent prompt "$root_pane" "$(cat -- "$prompt_file")" --wait --timeout 30000` のように一つの argv として安全に渡す。`start` は `--wait` なしで初期 prompt の投入だけを確認し、実作業の完了を待たず人間へ返す。prompt は次の2種だけにする。
+
+   ```text
+   prepare: <handoff-file> と適用指示だけを読み、短い受領確認を返してください。あなたが引き渡し先の新Mainです。引用された別作業化依頼を再実行して新WS/agentを作らないでください。作業目的は将来のcontextとして扱い、prepare-onlyでは先頭の /task を含むtask分類・workflow・編集・実行・再委譲を開始せず待機してください。
+   start: <handoff-file> と適用指示を読み、あなたが引き渡し先の新Mainであることを確認してください。引用された別作業化依頼を再実行して新WS/agentを作らず、作業別skillを作らず既存taskを、明示されたGOとして開始してください。phaseの承認を維持してください。
+   ```
+
+`prepare` は `pane read` で短い受領確認を読んでから、workspace / tab / agent / pane ID、absolute cwd、handoff file と「待機中」を返す。`start` は `--wait` なしで初期 prompt の投入を確認して「着手依頼送信」と観測状態を返す。`done` だけを成功根拠にせず、`blocked` では自動承認せず ID と未了を返し、`agent_prompt_stalled` では `pane read` で投入痕跡を確認するまで再送しない。timeout / unknown も自動再送・自動 close せず未了として返す。旧 Main は引き渡した新 WS / agent を自動回収・close せず、旧 Main の孤児回収も対象外とする。
+
+新 worktree はこの mode で作らず、GO / start 後の既存 task が必要性と gate を判断する。親 workflow context を新 session で resume / update せず、親 dirty をコピー・自動適用しない。
+
+## 既存 mode 共通のルール（`human-task` には適用しない）
+
+以下は既存の `agent` / `command:*` 用であり、`human-task` は専用経路だけを使う。
 
 - ペイン確保は `herdr pane split --current --direction <geometry> --cwd <呼び出し元が渡した絶対パス> --no-focus`。`$PWD` を既定にしない。ID は `.result.pane.pane_id` から取る（`parse-pane` サブコマンドでパースする）。
 - geometry は `herdr pane layout` で決める。過密で最小幅を割るなら分割せず fail-soft する（狭いペインは screen 検出を劣化させ `unknown` を誘発する）。
@@ -53,7 +83,7 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 
 ## 隔離方針（`agent` モード専用）
 
-`agent` モードの委譲先は、リポジトリではなくレビュー用 scratch ディレクトリ（`mktemp -d`）を cwd として起動する。
+`agent` モードの委譲先は、リポジトリではなくレビュー用 scratch ディレクトリを cwd として起動する。scratch は `herdr-delegate prepare-scratch` が確保する（自前の `mktemp -d` を使わない）。
 
 ```
 <scratch>/
@@ -61,6 +91,7 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 └── out/<name>.md  ← 回収先
 ```
 
+- **scratch root は固定・git 化・trusted 登録済みにする。** 既定は `${XDG_STATE_HOME:-~/.local/state}/herdr-delegate/scratch`（`HERDR_DELEGATE_SCRATCH_ROOT` で上書き可）。`prepare-scratch` が root を `git init` し、`$CODEX_HOME/config.toml`（既定 `~/.codex/config.toml`）へ `[projects."<root>"] trust_level = "trusted"` を 1 度だけ append し、その配下にユニークな scratch（`input/` と `out/` 付き）を作って絶対 path を返す。codex は cwd の git root に対して trust を解決するため、これで毎回の trust ダイアログが消える（P19）。追記は append-only で、既存表が `trusted` 以外なら書き換えず非ゼロ終了する（同名テーブルの重複は config を壊すため）。7 日より古い取り残し scratch は同時に掃除する。
 - 隔離は **permission profile による default-deny** で作る。**`--sandbox` フラグは渡さない**（渡すと profile 自体が無効化され、`workspace-write` に落ちて read が全 FS へ素通りする）。読み取り許可は `":minimal"` とツールチェイン root（`command -v codex` の解決先を `build-launch-args` が導出する）の 2 つに限り、`<scratch>` にだけ write を与える。deny glob（`"**"="deny"` 等）は**使わない**。`bwrap` は最大引数数 9000 を超えると `Exceeded maximum number of arguments` で全コマンドを起動不能にするため、default-deny + 許可列挙で組む。
 - 許可 root の値をハードコードしない。`build-launch-args --scratch D --profile-name N [--repo-root R]` が `command -v` の戻りから解決して組み立て、解決結果が repo や `.aidocs/` の祖先になっていないか（および `$HOME` 等の広域 root でないか）を祖先ガードで検査する。ガードに違反したら非ゼロ終了する。
 - **`agent start` の前に必ず `verify-profile --scratch D --profile-name N --repo-root R` を通し、0 を返した時だけ続行する（非ゼロなら agent を起動せず fail-soft）。** これは同一 profile・同一起動形の canary を `codex sandbox` でゼロクォータに 2 本打つ: **正**（`test -e <scratch>` → 見えるはずなので 0 を期待）と**負**（`test -e <repo 直下に実在するエントリ（名前昇順の先頭）>` → 不可視のはずなので非ゼロを期待。特定のファイル名に依存させないのは、その名前が無い repo で「不在」を「不可視」と誤読して fail-open するのを避けるため）。**両方が期待どおりの時だけ 0** を返し、判定は終了コードのみで行う（メッセージ文字列を見ない）。正を併せて打つのは、負だけでは「隔離成立」と「canary がそもそも起動できていない」を区別できないため — `--permission-profile` を持たない codex（v0.129 未満）はパースエラーで非ゼロ終了するので、負だけの判定では**隔離ゼロのまま fail-open** する。この 2 本立てが version gate と `bwrap` 起動失敗の検出を兼ねる。
@@ -69,11 +100,13 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 ## `agent` モードの手順
 
 1. `command -v codex` で事前確認し、絶対 path を解決して保持する（PATH に無いと `agent start` は 30 秒 timeout する）。無ければ即 fail-soft。**この確認は controller の cwd で行うため委譲先の cwd（scratch）での可用性は保証しない**。scratch を cwd にすると mise が別バージョンの node を選び `codex` が PATH から消えることがある。
-2. scratch を作り、入力を `<scratch>/input/` へコピーする。
+2. `herdr-delegate prepare-scratch` で scratch を確保し（trusted root 配下・`input/` と `out/` 込み）、入力を `<scratch>/input/` へコピーする。非ゼロ終了なら agent を起動せず fail-soft とする。
 3. `build-launch-args --scratch <scratch> --profile-name <name> --repo-root <repo> --env-out <f>` で、`agent start` の `--` 以降に渡す argv（1 行 1 引数）と、次の手順で使う `--env` の値を得る。`--env-out` が書き出すのは展開済みの完成値なので、`PATH=…` を手で組み立てない。
 4. `herdr pane split --cwd <scratch> --env "$(cat <f>)" --no-focus` でペインを確保する。**`--env` は必須**で、省くと手順 1 の false positive のまま `agent start` が 30 秒 timeout する。`pane read --source visible` で shell プロンプト到達を確認する（zsh + Zinit + mise で起動が遅い）。
 5. `verify-profile` を実行する。**0 を返した時だけ続行し、非ゼロなら agent を起動せず fail-soft**（隔離が効いていない、codex が古い、または canary 自体が起動できない）。
-6. `herdr agent start hd-<8hex>-<role>-<gen> --kind codex --pane <pane_id> -- <build-launch-args の出力>`（`-c "permissions.<name>={…}"` `-c 'default_permissions="<name>"'` `-c approval_policy="never"` `-c model_reasoning_effort="high"`）。`build-launch-args` の各出力行は single quote で包んで渡す（出力に `'` と改行が含まれないことを helper が保証している）。`approval_policy="never"` は default-deny 下で codex が権限昇格を要求して承認画面（＝ `blocked` 終端）に落ちるのを防ぐため。codex に `--effort` フラグは無い。**`--sandbox` は渡さない。**
+6. `herdr agent start hd-<8hex>-<role>-<gen> --kind codex --pane <pane_id> -- <build-launch-args の出力>`（`-c "permissions.<name>={…}"` `-c 'default_permissions="<name>"'` `-c approval_policy="never"` `-c model_reasoning_effort="high"` `-c 'model="gpt-5.6-sol"'`）。起動する codex の model は `gpt-5.6-sol`、reasoning effort は `high` に固定（`~/.codex/config.toml` の既定は変えない）。`build-launch-args` の各出力行は single quote で包んで渡す（出力に `'` と改行が含まれないことを helper が保証している）。`approval_policy="never"` は default-deny 下で codex が権限昇格を要求して承認画面（＝ `blocked` 終端）に落ちるのを防ぐため。codex に `--effort` フラグは無い。**`--sandbox` は渡さない。**
+   **argv の読み取りは `bash -c` で包む。** controller の shell は zsh で `mapfile` を持たないため、`mapfile -t ARGS < <(build-launch-args …)` は**空配列のまま非致命的に失敗し**、`agent start` は `argv: ["codex", ""]` で**成功してしまう**（＝ profile が渡らず隔離ゼロで起動する fail-open）。`verify-profile` は profile 定義が機能することしか見ないのでこれを検出しない。
+   **起動直後に `agent start` の戻り JSON の `.argv` を検査し、`default_permissions="<name>"` を含むことを確認してから手順 7 へ進む。** 含まなければ prompt を投入せず pane を close して起動し直す。
 7. **投入前ゲートは「状態 かつ 画面」の連言。** `agent get` が idle 系であることに加え、`pane read --source visible` で composer プロンプト（入力欄）を**肯定的に**確認できたときだけ投入する。確認できなければ画面内容・pane_id・到達手段を提示して停止する。`--wait` は承認画面で止まっていても `done` を返すことがあり、`blocked` / `unknown` の除外だけでは素通りするため。
 8. prompt は `build-prompt --instruction-file F --input-dir <scratch>/input --output-path <scratch>/out/<name>.md` で組み立て、一時ファイルへ書いた上で `herdr agent prompt <pane_id> "$(cat "$f")" --wait` の形でのみ渡す。単一引数の上限は `MAX_ARG_STRLEN`（131072、`getconf ARG_MAX` の値ではない）で、100KiB を超える argv は分割せず fail-soft とする。
 9. **完了判定の一次は `check-marker --path <scratch>/out/<name>.md` が 0 を返すこと**（ファイルが存在し、末尾に `<!-- DELEGATE-COMPLETE -->` を持つ）。herdr の状態は補助。マーカーが無い間は sleep-poll（例 5s × N）で待ち、上限で fail-soft とする。`agent wait` は `--until` 省略時に既に settled なら即返って busy-spin になるため一次判定には使わない。`--wait` / `agent wait` の戻りを単独の完了根拠にしない（`--wait` は turn を追跡せず、既に working 中なら別 turn の完了で満たされうる）。
@@ -82,7 +115,8 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 
 ## `command` モードの手順
 
-- **one-shot**: `pane run` → `pane wait-output`（`--match` のトークンを投入コマンド文字列に出さない。`pane wait-output` は投入コマンド行のエコーにもマッチするため、出力側にしか現れない語を使うかリテラルを分割する）→ `pane read` → close。
+- **one-shot**: 呼び出し元が既に終了コードとログを保存する runner を持つ場合は再利用する。ない場合は `mktemp -d` などで今回専用の空 directory を確保し、その絶対 path を使って `herdr-delegate run-command --output-dir <directory> -- <command> <args...>` を対象 pane の cwd で実行する。引数は通常の shell quoting を行い、prompt や未検査の文字列をコマンドとして評価しない。helper は argv を shell=False で実行し、結合した stdout/stderr を pane と `output.log` へ流す。`run.json` の `state=finished` と実際の `returncode` を回収し、ログを確認した後にだけ close する。非ゼロは失敗、`failed` / `running` / ファイル欠落は成功にしない。再実行は新しい directory を使い、既存 run を上書きしない。
+  `pane wait-output` は補助に留める。投入コマンド行のエコーや過去の出力にもマッチするため、完了や成功の一次証拠にしない。待機上限で結果がなければ未完了とし、投入済み command の状態を確認してから再試行する。`run-command` 自体は Herdr を呼ばないので、非 Herdr 経路でも同じ成果物を回収できる。これは実行結果の保存であり、workflow の正式な検証 receipt を代替しない。
 - **resident**: `pane run` で常駐起動しペインを残したままターンを終える。停止は呼び出し元 skill の契約（ユーザー承認 → `send-keys ctrl+c` → close）に従い、この契約側から勝手に close しない。
 - `command` モードの cwd は呼び出し元の作業ディレクトリ（worktree 等）でよい。scratch 隔離は `agent` モード固有。
 
@@ -92,9 +126,11 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 |---|---|---|
 | 正常完了 | 結果を返す | close |
 | `blocked` | 第 3 の終端状態。`send-keys` で自動応答せず、画面内容・pane_id・到達手段（herdr サイドバーの attention queue / `prefix+o`）を提示して停止 | **残す**（`delegations.json` に `held` として記録） |
-| `unknown` / その他の失敗 | fail-soft（warning を返しユーザーを止めない） | close |
+| `unknown` / その他の失敗 | 未完了として呼び出し元へ返す。任意経路は同等の非 Herdr 経路へ戻せる。必須 specialist / review / 隔離条件は省略せず、代替不能なら停止 | 自分の所有と実行状況を確認して扱う |
 
 `unknown` は「分類できない」だけで承認 UI の証拠ではなく、狭いペインでも出るためユーザーを止める側に倒さない。
+
+ただし、上記および本文の fail-soft は品質 gate の免除ではない。投入後の失敗は重複実行を避けるため現在の画面・成果物を確認する。`command:resident` は unknown / timeout でも勝手に停止・close せず、常駐の停止契約を維持する。
 
 ## 落とし穴と回避（実測・公式ドキュメント由来）
 
@@ -102,7 +138,7 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 |---|---|---|
 | P1 | `--wait` は承認画面で止まっていても `done` を返すことがある | 投入前ゲートを「状態 かつ 画面」の連言にする（手順 7） |
 | P2 | `--wait` は turn を追跡しない | 完了判定の一次は終端マーカー付きファイル（手順 9） |
-| P3 | `agent start` は trust / 承認画面が出ていても返る。対話 TUI 経由でも `--sandbox` を渡さない起動形なら trust 画面は出ない（実測） | canary（`verify-profile`）で隔離を先に確認し、投入前は `pane read --source visible` で composer を肯定的に確認 |
+| P3 | `agent start` は trust / 承認画面が出ていても `interactive_ready: true` で返る（`--sandbox` の有無に関係しない。codex-cli 0.149.1 実測） | canary（`verify-profile`）で隔離を先に確認し、投入前は `pane read --source visible` で composer を肯定的に確認 |
 | P4 | `agent prompt <TARGET> <TEXT>` は argv 直渡しのみ。単一引数の上限は `MAX_ARG_STRLEN = 131072` | 本文はファイル経由で渡し、100KiB 超は分割せず fail-soft（手順 8） |
 | P5 | `agent read` は非 idle 中 `agent_not_idle` を返す。`pane read` は状態非依存 | 非 idle の画面取得は常に `pane read --source visible` |
 | P6 | alternate screen から出た行は host scrollback に入らず、`--lines` を増やしても `recent-unwrapped` で回収できない | 初回 prompt からファイル出力を指示する（後述「prompt 作法」で herdr 公式 skill:185 を上書き） |
@@ -117,10 +153,13 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 | P15 | scratch（`/tmp` 配下）を cwd にすると mise が別の node を選び、`codex` が PATH から消える | `pane split --env` に `build-launch-args --env-out` の値を渡す（手順 3〜4） |
 | P16 | `--sandbox` フラグを渡すと permission profile が無効化される | `agent start` に `--sandbox` を渡さない（手順 6） |
 | P17 | permission profile の deny glob（`"**"="deny"`）は `bwrap: Exceeded maximum number of arguments 9000` で全コマンドを起動不能にする | default-deny + 読み取り許可の列挙で組む（`build-launch-args`） |
+| P18 | zsh に `mapfile` は無い。argv 配列が空のまま `agent start` が `argv: ["codex", ""]` で**成功**し、隔離ゼロで起動する（`verify-profile` は profile 定義しか見ないので検出できない）。実測で発生 | argv の読み取りを `bash -c` で包み、`agent start` の戻り `.argv` に `default_permissions` が含まれることを確認してから prompt 投入（手順 6） |
+| P19 | codex は cwd（git 管理下なら git root）が `$CODEX_HOME/config.toml` の `projects` で `trust_level="trusted"` になっていない限り directory trust ダイアログを出す。cwd を毎回新規の `mktemp -d` にすると毎回聞かれ、ユーザーが承認するたび `/tmp/...` の trust 表が config に溜まる。`-c projects."<scratch>".trust_level="trusted"` の CLI override では抑止できず、scratch を `git init` しただけでも抑止できない（いずれも codex-cli 0.149.1 実測） | `prepare-scratch` が固定 scratch root を `git init` して 1 度だけ trusted 登録し、scratch をその配下に作る（実測で trust ダイアログ消失）。それでも trust 画面が出たら `blocked` の契約どおり `send-keys` で自動応答せず fail-soft とし、呼び出し元は Codex 無しで gate を成立させる |
 
 ## prompt 作法
 
-- 委譲先が GPT 系なら `writing-gpt-prompts`、Claude 系なら `writing-claude-prompts` に従う。
+- 委譲先が GPT 系なら `writing-gpt-prompts`、Claude 系なら `writing-claude-prompts` に従う。ただしこれらは**構成の指針であって言語の指針ではない**。
+- **instruction-file 本文は日本語で書く。** 委譲先の出力も日本語で受け取る（技術名 / コマンド名 / API 名 / エラー文は原文のまま）。`build-prompt` が末尾に日本語出力の指定を付けるが、本文が英語だと委譲先はそれに引きずられるため、本文の言語も呼び出し元の責務とする。回収した md をそのままユーザーへ見せる前提で、翻訳の手戻りを作らない。
 - **初回 prompt からファイル出力を指示する。** herdr 公式 skill（`dot_agents/skills/herdr/SKILL.md:185`）は "do not request file output in the initial prompt" としているが、本契約はこれを意図的に上書きする。根拠は 2 点: (a) alternate screen から出た行は host scrollback に入らず `--lines` を増やしても回収できない（P6）ため、初回から回避しないと出力を丸ごと失いうる、(b) 完了判定を状態非依存の終端マーカー付きファイルに載せるため（herdr の状態は補助）。呼び出し元 skill はこの上書きを再掲しない。
 
 ## timeout の 2 段構え

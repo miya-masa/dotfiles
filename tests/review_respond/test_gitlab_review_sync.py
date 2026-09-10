@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+import yaml
 
 import gitlab_review_sync as sync
 
@@ -53,6 +54,21 @@ def make_entry(repo: Path, runner: sync.Runner) -> dict[str, Any]:
             "expected_head_sha": head,
         },
     }
+
+
+def write_yaml(repo: Path, *entries: dict[str, Any]) -> Path:
+    path = repo / ".review" / "review_comments.yaml"
+    path.write_text(
+        yaml.safe_dump({"reviews": list(entries)}, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
+    return path
+
+
+def reload_entry(yaml_path: Path, entry_id: str) -> dict[str, Any]:
+    return sync.find_entry(
+        sync.load_review_document(yaml_path, sync.Runner()), entry_id
+    )
 
 
 def version(head: str) -> dict[str, Any]:
@@ -289,13 +305,53 @@ def test_render_original_neutralizes_mentions_and_quick_actions() -> None:
         "comment": "/close\nPlease ask @all",
     }
 
-    body, marker = sync.render_original(entry)
+    body = sync.render_original(entry)
 
+    assert body.startswith("[Q] ")
+    # GitLab は描画後の text node から mention を拾い、quick action は raw body
+    # から拾う。entity では前者を防げないので zero-width space で一致を壊す。
     assert "/close" not in body
     assert "@all" not in body
-    assert "&#47;close" in body
-    assert "&#64;all" in body
-    assert marker in body
+    assert "/\u200bclose" in body
+    assert "@\u200ball" in body
+    assert "&#" not in body
+
+
+def test_render_original_keeps_markdown_and_adds_no_decoration() -> None:
+    entry = {
+        "id": "abc",
+        "category": "q",
+        "comment": "`%` は api/handler で使いますか？",
+    }
+
+    body = sync.render_original(entry)
+
+    assert body == "[Q] `%` は api/handler で使いますか？"
+    assert "<pre>" not in body
+    assert "review-respond:" not in body
+
+
+def test_render_reply_uses_the_plain_answer_header() -> None:
+    body = sync.render_reply("answer", "はい。`%` は literal として扱います。")
+
+    assert body == "[AIによる回答]\n\nはい。`%` は literal として扱います。"
+    assert "<pre>" not in body
+    assert "review-respond:" not in body
+
+
+def test_neutralization_keeps_code_spans_and_fences_readable() -> None:
+    body = sync.render_reply(
+        "answer",
+        "`@dataclass` を使います。\n\n```\n/close\n```",
+    )
+
+    # entity なら code span / fence 内で literal 表示されてしまう。
+    assert "&#" not in body
+    assert body.replace("\u200b", "").endswith(
+        "`@dataclass` を使います。\n\n```\n/close\n```"
+    )
+    assert "@\u200bdataclass" in body
+    assert "/\u200bclose" in body
 
 
 @pytest.mark.parametrize(
@@ -322,7 +378,7 @@ def test_render_original_rejects_sensitive_text(comment: str) -> None:
 
 def test_render_reply_rejects_absolute_path() -> None:
     with pytest.raises(sync.SyncError, match="absolute path"):
-        sync.render_reply("abc", "resolution", "Tests: /workspace/run/output.log")
+        sync.render_reply("resolution", "Tests: /workspace/run/output.log")
 
 
 def test_render_original_rejects_invalid_category() -> None:
@@ -332,9 +388,9 @@ def test_render_original_rejects_invalid_category() -> None:
         )
 
 
-def test_render_reply_rejects_marker_injection() -> None:
-    with pytest.raises(sync.SyncError, match="marker identity"):
-        sync.render_reply("abc", "resolution:bad -->", "Fixed.")
+def test_render_reply_rejects_invalid_phase() -> None:
+    with pytest.raises(sync.SyncError, match="phase identity"):
+        sync.render_reply("resolution:bad -->", "Fixed.")
 
 
 def test_validate_snapshot_requires_worktree_and_head_to_match_capture(
@@ -491,7 +547,7 @@ def test_post_original_rejects_changed_content_after_post(tmp_path: Path) -> Non
     runner = sync.Runner()
     client = FakeClient(head)
     entry = make_entry(repo, runner)
-    sync.post_original(
+    posted = sync.post_original(
         repo_root=repo,
         entry=entry,
         client=client,
@@ -502,6 +558,8 @@ def test_post_original_rejects_changed_content_after_post(tmp_path: Path) -> Non
         confirmed_legacy=False,
         runner=runner,
     )
+    entry["gitlab"]["discussion_id"] = posted["discussion_id"]
+    entry["gitlab"]["original_note_id"] = posted["note_id"]
     entry["comment"] = "A different comment must not create another discussion."
 
     with pytest.raises(sync.SyncError, match="different content"):
@@ -520,14 +578,14 @@ def test_post_original_rejects_changed_content_after_post(tmp_path: Path) -> Non
     assert len(client.discussions) == 1
 
 
-def test_post_original_rejects_copied_marker_from_another_author(
+def test_post_original_rejects_identical_body_from_another_author(
     tmp_path: Path,
 ) -> None:
     repo, head = make_repo(tmp_path)
     runner = sync.Runner()
     client = FakeClient(head)
     entry = make_entry(repo, runner)
-    body, _ = sync.render_original(entry)
+    body = sync.render_original(entry)
     client.discussions.append(
         {
             "id": "copied",
@@ -545,7 +603,7 @@ def test_post_original_rejects_copied_marker_from_another_author(
         }
     )
 
-    with pytest.raises(sync.SyncError, match="different note"):
+    with pytest.raises(sync.SyncError, match="different author"):
         sync.post_original(
             repo_root=repo,
             entry=entry,
@@ -590,6 +648,7 @@ def test_reply_retry_and_unexpected_human_reply_block_resolve(
         entry=entry,
         phase="resolution",
         text="Fixed and tested.",
+        runner=runner,
     )
     second = sync.post_reply(
         repo_root=repo,
@@ -601,6 +660,7 @@ def test_reply_retry_and_unexpected_human_reply_block_resolve(
         entry=entry,
         phase="resolution",
         text="Fixed and tested.",
+        runner=runner,
     )
     assert first["reused"] is False
     assert second["reused"] is True
@@ -659,6 +719,7 @@ def test_reply_accepts_position_inherited_from_inline_discussion(
         entry=entry,
         phase="resolution",
         text="Fixed and tested.",
+        runner=runner,
     )
     second = sync.post_reply(
         repo_root=repo,
@@ -670,6 +731,7 @@ def test_reply_accepts_position_inherited_from_inline_discussion(
         entry=entry,
         phase="resolution",
         text="Fixed and tested.",
+        runner=runner,
     )
 
     assert first["position"] == original["position"]
@@ -713,6 +775,7 @@ def test_reply_accepts_verified_advanced_mr_head(tmp_path: Path) -> None:
         entry=entry,
         phase="resolution",
         text="Published and tested.",
+        runner=runner,
     )
 
     assert result["reused"] is False
@@ -748,6 +811,7 @@ def test_reply_rejects_discussion_not_pinned_to_entry(tmp_path: Path) -> None:
             entry=entry,
             phase="resolution",
             text="Fixed.",
+            runner=runner,
         )
 
 
@@ -782,6 +846,326 @@ def test_overview_mode_is_idempotent(tmp_path: Path) -> None:
 
     assert first["position"] is None
     assert second["reused"] is True
+
+
+def test_overview_discussion_accepts_the_ai_reply(tmp_path: Path) -> None:
+    repo, head = make_repo(tmp_path)
+    runner = sync.Runner()
+    client = FakeClient(head)
+    entry = make_entry(repo, runner)
+    original = sync.post_original(
+        repo_root=repo,
+        entry=entry,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        expected_head_sha=head,
+        mode="overview",
+        confirmed_legacy=False,
+        runner=runner,
+    )
+    entry["gitlab"]["discussion_id"] = original["discussion_id"]
+    entry["gitlab"]["original_note_id"] = original["note_id"]
+
+    reply = sync.post_reply(
+        repo_root=repo,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        discussion_id=original["discussion_id"],
+        expected_head_sha=head,
+        entry=entry,
+        phase="answer",
+        text="はい、その理解で合っています。",
+        runner=runner,
+    )
+
+    assert reply["discussion_id"] == original["discussion_id"]
+    assert reply["reused"] is False
+    notes = client.discussions[0]["notes"]
+    assert len(notes) == 2
+    assert notes[1]["body"].startswith("[AIによる回答]")
+
+
+def test_post_original_persists_the_pin_and_blocks_edited_content(
+    tmp_path: Path,
+) -> None:
+    repo, head = make_repo(tmp_path)
+    runner = sync.Runner()
+    client = FakeClient(head)
+    entry = make_entry(repo, runner)
+    yaml_path = write_yaml(repo, entry)
+
+    posted = sync.post_original(
+        repo_root=repo,
+        entry=entry,
+        yaml_path=yaml_path,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        expected_head_sha=head,
+        mode="inline",
+        confirmed_legacy=False,
+        runner=runner,
+    )
+
+    # POST と YAML 更新の間に窓を作らない（別コマンドの yaml-patch を待たない）。
+    stored = reload_entry(yaml_path, "entry-1")["gitlab"]
+    assert stored["discussion_id"] == posted["discussion_id"]
+    assert stored["original_note_id"] == posted["note_id"]
+    assert stored["mode"] == "inline"
+
+    edited = reload_entry(yaml_path, "entry-1")
+    edited["comment"] = "A different comment must not create another discussion."
+    write_yaml(repo, edited)
+    with pytest.raises(sync.SyncError, match="different content"):
+        sync.post_original(
+            repo_root=repo,
+            entry=edited,
+            yaml_path=yaml_path,
+            client=client,
+            target_project_id=20,
+            mr_iid=3,
+            expected_head_sha=head,
+            mode="inline",
+            confirmed_legacy=False,
+            runner=runner,
+        )
+    assert len(client.discussions) == 1
+
+
+def test_post_original_keeps_entries_with_identical_comments_apart(
+    tmp_path: Path,
+) -> None:
+    repo, head = make_repo(tmp_path)
+    runner = sync.Runner()
+    client = FakeClient(head)
+    first = make_entry(repo, runner)
+    second = {**make_entry(repo, runner), "id": "entry-2"}
+    yaml_path = write_yaml(repo, first, second)
+
+    posted_first = sync.post_original(
+        repo_root=repo,
+        entry=first,
+        yaml_path=yaml_path,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        expected_head_sha=head,
+        mode="overview",
+        confirmed_legacy=False,
+        runner=runner,
+    )
+    posted_second = sync.post_original(
+        repo_root=repo,
+        entry=second,
+        yaml_path=yaml_path,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        expected_head_sha=head,
+        mode="overview",
+        confirmed_legacy=False,
+        runner=runner,
+    )
+
+    assert posted_second["reused"] is False
+    assert posted_second["discussion_id"] != posted_first["discussion_id"]
+    assert len(client.discussions) == 2
+
+
+def test_resolve_accepts_recorded_replies_and_rejects_a_same_author_human_reply(
+    tmp_path: Path,
+) -> None:
+    repo, head = make_repo(tmp_path)
+    runner = sync.Runner()
+    client = FakeClient(head)
+    entry = make_entry(repo, runner)
+    yaml_path = write_yaml(repo, entry)
+    original = sync.post_original(
+        repo_root=repo,
+        entry=entry,
+        yaml_path=yaml_path,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        expected_head_sha=head,
+        mode="inline",
+        confirmed_legacy=False,
+        runner=runner,
+    )
+    sync.post_reply(
+        repo_root=repo,
+        yaml_path=yaml_path,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        discussion_id=original["discussion_id"],
+        expected_head_sha=head,
+        entry=reload_entry(yaml_path, "entry-1"),
+        phase="answer",
+        text="回答です。",
+        runner=runner,
+    )
+
+    # 人間が同じアカウントから skill と同じ書式で返した reply を見逃さない。
+    client.discussions[0]["notes"].append(
+        {
+            "id": 900,
+            "body": "[Q] 本当にこの対応で良いですか？",
+            "author": client.user,
+            "position": None,
+            "system": False,
+            "resolvable": False,
+            "resolved": False,
+        }
+    )
+    with pytest.raises(sync.SyncError, match="unexpected human reply"):
+        sync.resolve_discussion(
+            repo_root=repo,
+            client=client,
+            target_project_id=20,
+            mr_iid=3,
+            discussion_id=original["discussion_id"],
+            expected_head_sha=head,
+            entry=reload_entry(yaml_path, "entry-1"),
+            yaml_path=yaml_path,
+            runner=runner,
+        )
+
+    client.discussions[0]["notes"] = [
+        note for note in client.discussions[0]["notes"] if note["id"] != 900
+    ]
+    resolved = sync.resolve_discussion(
+        repo_root=repo,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        discussion_id=original["discussion_id"],
+        expected_head_sha=head,
+        entry=reload_entry(yaml_path, "entry-1"),
+        yaml_path=yaml_path,
+        runner=runner,
+    )
+    assert resolved["resolved"] is True
+
+
+def test_reply_keeps_phases_apart_when_the_text_is_identical(tmp_path: Path) -> None:
+    repo, head = make_repo(tmp_path)
+    runner = sync.Runner()
+    client = FakeClient(head)
+    entry = make_entry(repo, runner)
+    yaml_path = write_yaml(repo, entry)
+    original = sync.post_original(
+        repo_root=repo,
+        entry=entry,
+        yaml_path=yaml_path,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        expected_head_sha=head,
+        mode="inline",
+        confirmed_legacy=False,
+        runner=runner,
+    )
+
+    def reply(phase: str) -> dict[str, Any]:
+        return sync.post_reply(
+            repo_root=repo,
+            yaml_path=yaml_path,
+            client=client,
+            target_project_id=20,
+            mr_iid=3,
+            discussion_id=original["discussion_id"],
+            expected_head_sha=head,
+            entry=reload_entry(yaml_path, "entry-1"),
+            phase=phase,
+            text="同じ本文。",
+            runner=runner,
+        )
+
+    answer = reply("answer")
+    resolution = reply("resolution")
+    retried = reply("resolution")
+
+    assert answer["note_id"] != resolution["note_id"]
+    assert resolution["reused"] is False
+    assert retried["reused"] is True
+    assert retried["note_id"] == resolution["note_id"]
+    replies = reload_entry(yaml_path, "entry-1")["gitlab"]["replies"]
+    assert replies == {"answer": answer["note_id"], "resolution": resolution["note_id"]}
+
+
+def test_legacy_marker_thread_still_accepts_reply_and_resolve(tmp_path: Path) -> None:
+    repo, head = make_repo(tmp_path)
+    runner = sync.Runner()
+    client = FakeClient(head)
+    entry = make_entry(repo, runner)
+    legacy_body = (
+        "**Local review [must]**\n\n<pre>Please fix this.</pre>\n\n"
+        "<!-- review-respond:entry-1:original:0123456789abcdef0123 -->"
+    )
+    client.discussions.append(
+        {
+            "id": "legacy-discussion",
+            "individual_note": False,
+            "notes": [
+                {
+                    "id": 42,
+                    "body": legacy_body,
+                    "author": client.user,
+                    "position": None,
+                    "system": False,
+                    "resolvable": True,
+                    "resolved": False,
+                }
+            ],
+        }
+    )
+    entry["gitlab"]["discussion_id"] = "legacy-discussion"
+    entry["gitlab"]["original_note_id"] = 42
+    yaml_path = write_yaml(repo, entry)
+
+    reused = sync.post_original(
+        repo_root=repo,
+        entry=entry,
+        yaml_path=yaml_path,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        expected_head_sha=head,
+        mode="overview",
+        confirmed_legacy=False,
+        runner=runner,
+    )
+    assert reused["reused"] is True
+    assert len(client.discussions) == 1
+
+    sync.post_reply(
+        repo_root=repo,
+        yaml_path=yaml_path,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        discussion_id="legacy-discussion",
+        expected_head_sha=head,
+        entry=reload_entry(yaml_path, "entry-1"),
+        phase="answer",
+        text="新書式で返信します。",
+        runner=runner,
+    )
+    resolved = sync.resolve_discussion(
+        repo_root=repo,
+        client=client,
+        target_project_id=20,
+        mr_iid=3,
+        discussion_id="legacy-discussion",
+        expected_head_sha=head,
+        entry=reload_entry(yaml_path, "entry-1"),
+        yaml_path=yaml_path,
+        runner=runner,
+    )
+    assert resolved["resolved"] is True
 
 
 def test_yaml_patch_is_atomic_and_preserves_other_entries(tmp_path: Path) -> None:

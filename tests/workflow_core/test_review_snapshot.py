@@ -358,3 +358,31 @@ def test_public_functions_are_importable(git_repo: Path) -> None:
     assert module.snapshot(
         git_repo, base_commit(git_repo), ["tracked.txt"], "worktree"
     ).review_snapshot_id.startswith("sha256:")
+
+
+def test_snapshot_from_commit_keeps_fixed_base_modes_deletions_and_allowlist(git_repo):
+    spec = importlib.util.spec_from_file_location('commit_snapshot_test', SCRIPT)
+    helper = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helper)
+    base = base_commit(git_repo)
+    paths = ['tracked.txt', 'mode.sh', 'new.txt', 'absent.txt']
+    (git_repo / 'tracked.txt').unlink()
+    (git_repo / 'mode.sh').chmod(0o755)
+    (git_repo / 'new.txt').write_text('new\n')
+    reviewed = helper.snapshot(git_repo, base, paths)
+    assert run_git(git_repo, 'add', '-A').returncode == 0
+    assert run_git(git_repo, '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'change').returncode == 0
+    commit = base_commit(git_repo)
+    committed = helper.snapshot_from_commit(git_repo, base, paths, commit)
+    assert committed.manifest == reviewed.manifest
+    assert committed.review_snapshot_id == reviewed.review_snapshot_id
+    assert committed.manifest['base_commit'] == base != commit
+    assert {p['path']: p['state'] for p in committed.manifest['paths']} == {
+        'absent.txt': 'absent', 'mode.sh': 'present', 'new.txt': 'present', 'tracked.txt': 'deleted'}
+    (git_repo / 'external.txt').write_text('outside change\n')
+    assert run_git(git_repo, 'add', 'external.txt').returncode == 0
+    # WIP/index do not affect an already committed tree.
+    assert helper.snapshot_from_commit(git_repo, base, paths, commit).review_snapshot_id == reviewed.review_snapshot_id
+    assert run_git(git_repo, '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'outside').returncode == 0
+    with pytest.raises(helper.SnapshotError, match='outside allowlist'):
+        helper.snapshot_from_commit(git_repo, base, paths, base_commit(git_repo))

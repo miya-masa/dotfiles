@@ -19,6 +19,8 @@ function has() {
 # hook 本体 (~/.claude/hooks/herdr-agent-state.sh、~/.codex/herdr-agent-state.sh)
 # と ~/.codex/hooks.json の Herdr エントリは installer が所有する。生成 hook
 # 自体は編集せず、この script が導入と chezmoi 所有の fallback 追記を行う。
+# ~/.claude/settings.json への SessionStart hook 追記は chezmoi 管理下
+# (dot_claude/private_settings.json.tmpl) にも取り込み済み。
 #
 # hook は HERDR_ENV / HERDR_SOCKET_PATH / HERDR_PANE_ID が揃わないと即 exit 0
 # するため、tmux 側の cc-pane とは干渉しない。

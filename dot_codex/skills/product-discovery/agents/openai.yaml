@@ -1,7 +1,7 @@
 interface:
-  display_name: "Product Discovery"
-  short_description: "曖昧な機能アイデアを対話とfresh reviewで仕様化する"
-  default_prompt: "Use $product-discovery to refine this idea into an approved, reviewed specification."
+  display_name: "プロダクトディスカバリ"
+  short_description: "曖昧な機能アイデアを対話と新しいreviewで仕様化する"
+  default_prompt: "このアイデアを承認済みのレビュー済み仕様に整えるには $product-discovery を使用してください。"
 
 policy:
   allow_implicit_invocation: false

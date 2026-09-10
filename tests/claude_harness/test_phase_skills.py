@@ -37,6 +37,16 @@ def frontmatter(text: str) -> dict[str, str]:
     return fields
 
 
+def test_nonbehavioral_validation_contract_matches_short_path_and_execution() -> None:
+    for reference in (
+        read_reference("product-discovery", "spec-and-plan.md"),
+        read_reference("execute-plan", "task-execution.md"),
+    ):
+        assert "承認済みの TDD 例外" not in reference
+        assert "非挙動" in reference
+        assert "代替 validation" in reference
+
+
 def test_a1_phase_skills_exist_with_triggers_and_exclusions() -> None:
     assert {path.name for path in SKILLS.iterdir() if path.is_dir()} >= set(PHASES)
 
@@ -133,7 +143,7 @@ def test_a8_task_execution_requires_red_reason_then_minimal_green() -> None:
         assert "RED 理由" in text
         assert "最小の GREEN" in text
     assert "RED → 期待した RED 理由の確認 → 最小の GREEN" in reference
-    assert "実行時に TDD 例外を発明しない" in reference
+    assert "挙動変更を非挙動と扱わない" in reference
 
 
 def test_a9_plan_tasks_declare_nine_fields() -> None:
@@ -171,8 +181,8 @@ def test_a10_short_path_requires_artifact_and_choice_without_preflight() -> None
     assert "ファイル数" in reference and "ファイル数" in body
     assert "acceptance criteria" in reference
     assert "validation command" in reference
-    assert "実行方法のユーザー選択を省略しない" in reference
-    assert "実行方法のユーザー選択を省略しない" in body
+    assert "実行選択の記録を省略しない" in reference
+    assert "実行選択の記録を省略しない" in body
 
 
 def test_a11_snapshot_equality_gate_brackets_staging_and_commit() -> None:
@@ -260,3 +270,74 @@ def test_shipping_authorization_records_a_concrete_command() -> None:
     assert "shipping_authorized" in doc
     assert "--patch-json" in doc
     assert "execute-and-ship" in doc
+
+
+def test_artifact_removal_reference_requires_explicit_authorization() -> None:
+    doc = read_reference("execute-plan", "state-and-artifacts.md")
+
+    assert "remove --project-root ROOT --workflow-id ID --expected-revision N" in doc
+    assert "  --authorize ARTIFACT_REMOVE" in doc
+    assert "--authorize ARTIFACT_REMOVE [--phase ARTIFACT_REMOVE]" in doc
+    assert "明示的な `--authorize ARTIFACT_REMOVE` が必須" in doc
+    assert "[--authorize ARTIFACT_REMOVE]" not in doc
+
+
+def test_ac13_final_review_verdict_uses_english_status_words() -> None:
+    """spec AC13: SKILL.md の final review verdict 語彙が英語の判定語に統一される。"""
+    body = read_skill("execute-plan")
+
+    for word in ("SATISFIED", "UNSATISFIED", "UNVERIFIED"):
+        assert word in body
+    for word in ("充足", "不充足", "判定不能"):
+        assert word not in body
+
+
+def test_ac16_final_review_is_the_canonical_lint_target() -> None:
+    """spec AC16 (Claude 分): reviews/final-review.md が lint 対象の正本と明記される。"""
+    body = read_skill("execute-plan")
+
+    assert "reviews/final-review.md" in body
+    assert "正本" in body
+    assert "tasks/01-short-path.md" in body
+
+
+def test_ac14_artifact_lint_rejection_is_documented() -> None:
+    """spec AC14 (Claude 分): lint の発火点と transition の非ゼロ終了原因が記載される。"""
+    for skill, name in (
+        ("execute-plan", "state-and-artifacts.md"),
+        ("execute-plan", "task-execution.md"),
+    ):
+        doc = read_reference(skill, name)
+        assert "artifact lint failed" in doc
+
+    plan_doc = read_reference("product-discovery", "spec-and-plan.md")
+    assert "artifact lint failed" in plan_doc
+    assert "AC1" in plan_doc
+
+
+def test_ac15_verification_canonical_headings_and_short_path_ac_source() -> None:
+    """spec AC15 (Claude 分): verification.md の正準見出しと short path の AC 出所を記載する。"""
+    task_execution = read_reference("execute-plan", "task-execution.md")
+
+    for word in ("失敗", "Failure"):
+        assert word in task_execution
+    for word in ("未検証", "未実施", "未確認"):
+        assert word in task_execution
+
+    plan_doc = read_reference("product-discovery", "spec-and-plan.md")
+    assert "01-short-path.md" in plan_doc
+    assert "AC1" in plan_doc.split("## short path", 1)[1]
+
+    body = read_skill("execute-plan")
+    assert "plan の acceptance criteria で代替する" not in body
+
+
+def test_routing_returns_plan_gaps_to_planning_before_model_escalation() -> None:
+    roles = read_reference("product-discovery", "roles.md")
+    assert "model overrideだけではfrontmatterのeffortを変えられない" in roles
+    assert "実効設定" in roles
+    for text in (roles, read_skill("execute-plan"), read_reference("execute-plan", "task-execution.md")):
+        for phrase in ("計画不足", "deliberator", "実装固有の推論", "implementer-high"):
+            assert phrase in text
+    assert "task_kind=specification" in read_skill("product-discovery")
+    assert "task_kind=planning" in read_skill("implementation-planning")

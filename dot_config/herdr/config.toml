@@ -19,6 +19,13 @@ split_horizontal = "prefix+minus"
 previous_tab = "prefix+ctrl+p"
 next_tab = "prefix+ctrl+n"
 
+# tmux に対応物が無い（session 移動は tp/tm の fzf 経由で済ませていた）。
+# workspace はサイドバーに縦に並ぶので上下を vim の k/j に対応させ、
+# ペイン移動 prefix+h/j/k/l に shift を足すと 1 段上のスコープ、と読ませる。
+# workspace 系が shift グループ（shift+n 新規 / shift+w rename / shift+d close）に揃う。
+previous_workspace = "prefix+shift+k"
+next_workspace = "prefix+shift+j"
+
 # tmux 既定に合わせる
 rename_tab = "prefix+comma"
 close_tab = "prefix+ampersand"
@@ -83,8 +90,10 @@ agent_panel_sort = "priority"
 rows = [["state_icon", "workspace"], ["branch", "git_status"]]
 
 [advanced]
-# tmux の history-limit 50000 に相当する上限（単位はバイトで概念が異なる）
-scrollback_limit_bytes = 10000000
+# scrollback の保持上限（herdr は行数ではなくバイト数で持つ）。
+# agent 出力は色 escape 込みで 1 行あたり 500B 程度になるため、
+# 約 100,000 行を保持できる想定で 50MB とする（herdr 既定は 10MB）。
+scrollback_limit_bytes = 50000000
 
 # `herdr integration install` が追記したもの。agent の通知を OS 通知ではなく
 # herdr 内の toast として出す。

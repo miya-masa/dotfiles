@@ -22,13 +22,13 @@ python ~/.agents/workflows/software_delivery/scripts/workflow_artifact.py \
   init --project-root ROOT --workflow-id ID [--default-branch B] [--base-commit C]
 python ~/.agents/workflows/software_delivery/scripts/workflow_artifact.py \
   remove --project-root ROOT --workflow-id ID --expected-revision N \
-  [--phase ARTIFACT_REMOVE] [--context PATH]
+  --authorize ARTIFACT_REMOVE [--phase ARTIFACT_REMOVE] [--context PATH]
 ```
 
 - `new-id` は slug を小文字 ASCII とハイフンへ正規化して 38 文字に切り詰め、UTC 秒と 8 桁の hex を付ける（最大 63 文字）。
 - `init` は既存 / 衝突する workflow ディレクトリを拒否し、traversal・絶対・不正・symlink の path も拒否する。canonical な project root、artifact root、Git の default branch、full base commit を schema-v1 `context.json` に記録する。初期状態は phase `DISCOVERY`、revision `0`、worktree なし、shipping 認可なし、task 履歴は空、`spec_review` は pending。
 - `init` は artifact を作る前に `.aidocs/` について `git check-ignore` を実行する。project が未 ignore なら、repository-local な `.git/info/exclude` へ `/.aidocs/` を **1 度だけ**追記する。既存のバイトは保全し、再実行は冪等で、**tracked な `.gitignore` は決して書き換えない**。Git metadata が symlink または利用不可なら、別の場所へ迂回せず拒否する。→ artifact は Git 追跡対象にならない。**init に失敗したら workflow を始めない。**
-- `remove` は fail-closed。canonical な project root、symlink でない単一の直下 workflow path、`context.json` の identity 一致を検証し、schema 妥当で phase が `ARTIFACT_REMOVE`、かつ `--expected-revision` が正確に一致することを要求する。不一致なら artifact に触れない。`.aidocs/` 自体や他の workflow、symlink 先は決して削除しない。
+- `remove` は fail-closed。canonical な project root、symlink でない単一の直下 workflow path、`context.json` の identity 一致を検証し、schema 妥当で phase が `ARTIFACT_REMOVE`、かつ `--expected-revision` が正確に一致することを要求する。さらに現在の人間レビュー承認と保持証跡の一致を削除直前にも再検査し、明示的な `--authorize ARTIFACT_REMOVE` が必須で、欠落・不一致を含む不一致なら artifact に触れない。`.aidocs/` 自体や他の workflow、symlink 先は決して削除しない。
   ただし**通常の workflow は artifact を削除しない**。merge 後も spec / plan / review / verification / progress を参照するため、`post-merge-cleanup` は worktree だけを消して `WT_REMOVE` で終端する。`remove` はユーザーが個別に「この workflow の記録を消す」と依頼した時だけ使う。
 
 ## state CLI
@@ -44,7 +44,23 @@ workflow_state.py stop   --context context.json --expected-revision N --reason "
 workflow_state.py resume --context context.json --expected-revision N
 ```
 
-成功する変更はすべて compare-and-swap。渡した revision が `state.artifact_revision` と一致する必要があり、結果の revision はちょうど 1 つ増える。不正な JSON、フィールド欠落、無効な遷移、不変 identity の変更、stale な revision は非ゼロ終了し、**元のバイトを一切変更しない**。
+成功する変更はすべて compare-and-swap。渡した revision が `state.artifact_revision` と一致する必要があり、結果の revision はちょうど 1 つ増える。不正な JSON、フィールド欠落、無効な遷移、不変 identity の変更、stale な revision、**artifact lint failed**（下記の artifact syntax presence lint 不合格）は非ゼロ終了し、**元のバイトを一切変更しない**。
+
+### artifact syntax presence lint
+
+`transition` は特定の辺で、gate を裏付ける artifact に最低限の構文的痕跡があるかを機械検査する（内容の当否は見ない）。無ければ stderr に `error: artifact lint failed` から始まるブロックを出し、**不足を全件**（1 件につき不足行 1 行 + `期待例:` 1 行）列挙して rc=1 で終わり、`context.json` は変わらない。path は `--context` が指す `context.json` の**親ディレクトリからの固定相対 path**（`artifacts.*_path` も `identity.artifact_root` も `--patch-json` も参照しない）。
+
+| 遷移 | 検査 |
+|---|---|
+| `SPEC_REVIEWS → USER_APPROVED_SPEC` | L1 |
+| `FINAL_REVIEW → LOCAL_VERIFICATION` | L1 + L2 |
+| `LOCAL_VERIFICATION → LOCAL_COMPLETE` | L1 + L3 |
+| `LOCAL_VERIFICATION → COMMIT` | L1 + L3 |
+| `LOCAL_COMPLETE → COMMIT` | L1 + L3 |
+
+- L1: `spec.md` に AC 識別子（`AC[ \-_]?[0-9]+`）を含む行が 1 行以上。short path（`tasks/01-short-path.md` が **regular file として**存在し `spec.md` が L1 を満たさない）では全辺で免除される。symlink やディレクトリの marker では免除しない。
+- L2: `reviews/final-review.md` に AC 識別子と `SATISFIED` / `UNSATISFIED` / `UNVERIFIED` を同一行に含む行が 1 行以上。
+- L3: `verification.md` に、`失敗` または `Failure` を含む見出し（行頭が `#` の行）と、`未検証` / `未実施` / `未確認` のいずれかを含む見出しが各 1 つ以上（詳細は [task-execution.md](task-execution.md)）。
 
 `invalidate-normative` は `SPEC_REVIEWS` へ戻し、`plan_path` を削除し、有効な `execution.tasks` を消し、plan と下流 gate の値・実行方法の選択・snapshot を消し、shipping 認可を取り消し、shipping status を初期化する。有効な task ID を後継 plan へ持ち越さない。監査履歴は append-only の `progress.md` か別の履歴フィールドに置き、invalidation はそれらを変更しない。
 
@@ -86,7 +102,7 @@ short path は `DISCOVERY → SHORT_TASK_DRAFT → EXECUTION_CHOICE`。Claude �
 
 - 差し戻し: `SPEC_DRAFT` / `SPEC_REVIEWS` / `PLAN` → `DISCOVERY`、`USER_APPROVED_SPEC` → `SPEC_REVIEWS`、`PLAN_REVIEW` → `PLAN`、`SHORT_TASK_DRAFT` → `DISCOVERY`、`FINAL_REVIEW` / `LOCAL_VERIFICATION` / `CI` → `TASKS`。
 - `DEBUGGING` へは `TASKS` / `FINAL_REVIEW` / `LOCAL_VERIFICATION` / `CI` から入り、`TASKS` へ戻る。
-- `LOCAL_VERIFICATION → COMMIT` の直行辺も helper 上は存在するが使わない。`execute-plan` は `LOCAL_COMPLETE` で止まり、shipping は必ず `LOCAL_COMPLETE → COMMIT` から入る。
+- `LOCAL_VERIFICATION → COMMIT` の直行辺は、全 local 必須 check 成功、現在提示へのユーザー承認、明示された CI 委譲、shipping 認可、index identity 一致が揃う場合だけ使える。通常の `execute-plan` は `LOCAL_COMPLETE` で止まり、条件を満たさない shipping は `LOCAL_COMPLETE → COMMIT` から入る。
 - `USER_DECISION_REQUIRED` へは非終端の全 phase から入れる。外部 blocker は `stop` を使い、直前の phase が `state.stopped_from` に記録され、`resume` がそれを復元する。`stopped_from` を持たない user-decision 状態は resume できない（該当する normative gate か controller gate で解消する）。
 - `ARTIFACT_REMOVE` と `USER_DECISION_REQUIRED` は出口を持たない。`STOPPED` phase は存在しない。
 
@@ -137,3 +153,9 @@ allowlist 外の dirty / staged path は identity から除外されるが、**s
 ## cleanup 結果の確認
 
 worktree 削除の確認に helper は使わない。Worktrunk の JSON はスキーマが version 間で変わるため、`git worktree list` と `git branch --list` で Git 側を直接確認する（`post-merge-cleanup` の契約を参照）。保存した `wt-remove.json` は evidence として artifact 配下に置くだけで、判定の根拠にはしない。
+
+## 人間レビューの停止と再開
+
+`execution.human_review` は共有 `~/.agents/workflows/software_delivery/references/evidence-contract.md` に従う optional な typed record。旧v1 contextは読取/停止/修復できるが、完了・shipping・cleanupには従来の現在提示への明示承認が必要。v2 LOWは人間待ちなし、MEDIUM/HIGHはriskに応じた明示承認とする。`human_review.py --context PATH` で欠落・部分回答・stale・撤回を再検査し、`execution.gates` の手書き passed で代替しない。
+
+present は `USER_DECISION_REQUIRED` に停止する。respond 成功後も停止を保つため、最新 artifact revision で既存 resume を実行する。承認済みでも snapshot・判断・検証前提・証跡が変われば再判定/再提示し、単なる resume や予定済み CI 成功では承認を反復しない。完了後の revoke は同じ CAS 内で停止する。cleanup では保持 record と live record を照合し、再承認後は新 export を検査して保持 bundle を更新してから resume する。`LOCAL_VERIFICATION` の入口と `TASKS` / `DEBUGGING` / `SPEC_REVIEWS` への回復に、完了承認を要求しない。

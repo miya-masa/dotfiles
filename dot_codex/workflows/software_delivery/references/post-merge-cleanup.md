@@ -1,74 +1,74 @@
-# Post-merge cleanup handoff
+# マージ後クリーンアップの引き継ぎ
 
-Post-merge cleanup runs only after the user explicitly requests it and the
-forge confirms that the workflow's merge request is merged.  Before removing
-anything, record the exact branch, canonical worktree path, and artifact
-directory from schema-v1 `context.json`.
+マージ後のクリーンアップは、ユーザーが明示的に要求し、かつforgeがworkflowの
+merge requestをmergedと確認した後だけ実行します。何かを削除する前に、schema-v1
+`context.json`から正確なbranch、正規worktree path、成果物directoryを記録します。
 
-Only the worktree — and the local branch Worktrunk deletes with it — is
-removed.  The artifact under `.aidocs/workflows/<workflow-id>/` holds the spec,
-plan, review, and verification record and is still referenced after the merge,
-so it is kept.
+削除するのはworktreeだけです（Worktrunkがそれと一緒に削除するlocal branchを含む）。
+`.aidocs/workflows/<workflow-id>/`配下のartifactにはspec、plan、review、検証記録が
+保持され、merge後も参照されるため、そのまま残します。
 
-## Salvaging worktree-only records
+`identity.artifact_root`が削除予定のworktree内にある場合はstop conditionです。
+worktreeを削除するとworkflow自身の記録を壊すため、何も削除せず、成果物の場所と
+その状態になった経緯を人間の判断用に報告します。worktree内からworkflowを開始
+するとこの状態になります。
 
-Files that exist only inside the worktree disappear with it.  Copy them into
-the parent repository's `.aidocs/workflows/<workflow-id>/` *before* removal:
-the worktree-private git dir's `harness-evidence.jsonl` (resolved with `git -C
-<worktree> rev-parse --path-format=absolute --git-dir`, appended to the
-artifact's `evidence.jsonl` without duplicating existing lines), and any
-verification logs or outputs that never landed in a commit.  Stop and report
-if something cannot be salvaged.
+## worktreeだけにある記録の救出
 
-## Worktrunk removal
+worktree内にしか存在しないファイルはworktreeとともに消えます。削除する*前に*、
+親リポジトリの`.aidocs/workflows/<workflow-id>/`へコピーしてください。対象は、
+worktree専用git dirの`harness-evidence.jsonl`（`git -C <worktree> rev-parse
+--path-format=absolute --git-dir`で解決し、既存行を重複させずartifactの
+`evidence.jsonl`へ追記）と、commitに入っていない検証ログや出力です。
+救出できないものがあれば停止して報告します。
 
-List the intended resources first, then run this exact command from the
-repository's primary worktree.  Save stdout without changing the command or
-adding flags:
+## Worktrunkによる削除
+
+削除前に固定artifactの `evidence/cleanup/` へ `workflow_artifact.py evidence-export --context PATH --output <固定ART>/evidence/cleanup` を実行し、`workflow_state.py check-gates --context PATH --to WT_REMOVE` で証拠を検査する。共有 `~/.agents/workflows/software_delivery/references/evidence-contract.md` に従い、`human_review.py --context PATH` の現在risk gateと保持 record の一致も検査する。既存bundleがstaleなら、旧bundleを保持したまま新directoryへexportして検査後に置き換える。成功後にだけ、以下の既存削除手順とGit確認、`WT_REMOVE` 遷移を行う。
+
+まず対象リソースを列挙し、リポジトリのprimary worktreeから次のコマンドをそのまま
+実行します。コマンドを変更したりflagを追加したりせず、stdoutを保存します。
 
 ```text
 wt remove --foreground --format=json <branch> > wt-remove.json
 ```
 
-The command must not use `--force`, `-D` (or `--force-delete`), `--no-hooks`,
-or `--yes` (or `-y`).  A dirty worktree, an unmerged or moved branch, or an
-unapproved hook is a stop condition.  Do not fall back to `git worktree
-remove`, branch deletion, `rm`, or another destructive cleanup command.
+このcommandでは`--force`、`-D`（または`--force-delete`）、`--no-hooks`、
+`--yes`（または`-y`）を使ってはいけません。dirtyなworktree、unmergedまたは
+移動したbranch、未承認のhookはstop conditionです。`git worktree remove`、
+branch削除、`rm`、その他の破壊的なcleanup commandへフォールバックしません。
 
-If the local default branch has not yet absorbed the merge, Worktrunk reports
-the branch as unmerged, removes the worktree, and keeps the branch.  Advance
-the parent repository's default branch with `git fetch` and run the same
-command again.  Never reach for `-D`.  A branch that genuinely is not in the
-default branch's history is a stop condition.
+local default branchがまだmergeを取り込んでいない場合、Worktrunkはbranchを
+unmergedと報告し、worktreeを削除してbranchを残します。親リポジトリのdefault
+branchを`git fetch`で進め、同じcommandをもう一度実行します。決して`-D`に頼りません。
+default branchの履歴に本当に含まれないbranchはstop conditionです。
 
-## Result gate
+## 結果ゲート
 
-Confirm the removal against Git, not against the saved JSON:
+保存したJSONではなく、Gitに対して削除を確認します。
 
 ```text
 git worktree list                 # the canonical worktree path is gone
 git branch --list <branch>        # the output is empty
 ```
 
-Worktrunk's JSON schema changes between versions — v0.71.0 returns
-`{"branch","branch_checked_out_at","branch_deleted","kind","path"}` and splits
-worktree removal and branch deletion into separate records from separate runs —
-so no helper validates it and its shape is never the deletion verdict.  Save
-`wt-remove.json` into the artifact as evidence only.
+WorktrunkのJSON schemaはversion間で変わります。v0.71.0は
+`{"branch","branch_checked_out_at","branch_deleted","kind","path"}`を返し、
+worktree削除とbranch削除を別runの別recordに分けます。そのためhelperはこれを検証
+せず、shapeを削除のverdictに使いません。`wt-remove.json`は証拠としてのみartifact
+へ保存します。
 
-Terminal success requires both checks.  Anything else is nonterminal: a
-retained, unmerged, or checked-out branch, a deferred or not_attempted removal,
-invalid JSON, or a mismatch with `context.json` keeps the worktree and artifact
-on hold for investigation or a later retry, and does not delete anything.  Do
-not escalate to a forced removal.
+終端成功には両方のcheckが必要です。それ以外はnonterminalです。保持されたbranch、
+unmergedまたはchecked-outのbranch、deferredまたは`not_attempted`の削除、無効なJSON、
+`context.json`との不一致があれば、調査または後日のretryのためworktreeとartifactを
+保留し、何も削除しません。forced removalへエスカレーションしないでください。
 
-## Terminal state
+## 終端状態
 
-Only after both Git checks pass may the controller use `workflow_state.py` to
-transition the context to `WT_REMOVE` with the expected artifact revision, and
-set `workspace.worktree_path` to null.  `WT_REMOVE` is this phase's terminal
-state: do not advance to `ARTIFACT_REMOVE` and do not invoke
-`workflow_artifact.py remove`.  That edge remains in the state machine only for
-a separate, explicit user request to delete a workflow's records.  Remote
-branch deletion is outside this handoff and is not performed unless separately
-authorized by the forge workflow.
+両方のGit checkが通った後だけ、controllerは`workflow_state.py`を使い、期待する
+artifact revisionでcontextを`WT_REMOVE`へ遷移させ、`workspace.worktree_path`を
+nullに設定できます。`WT_REMOVE`はこのphaseの終端状態です。`ARTIFACT_REMOVE`へ
+進めたり、`workflow_artifact.py remove`を呼び出したりしません。このedgeはworkflow
+記録を削除する別の明示的なユーザー要求のためだけにstate machineへ残っています。
+remote branchの削除はこの引き継ぎの範囲外であり、forge workflowが別途認可しない
+限り実行しません。

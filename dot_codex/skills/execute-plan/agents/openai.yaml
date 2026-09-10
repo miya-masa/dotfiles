@@ -1,7 +1,7 @@
 interface:
-  display_name: "Execute Plan"
-  short_description: "TDDとtask reviewで計画をlocal verificationまで実行する"
-  default_prompt: "Use $execute-plan to implement this reviewed plan with TDD and stop after local verification."
+  display_name: "計画実行"
+  short_description: "計画を実装しリスクに応じたレビューとローカル検証で完了する"
+  default_prompt: "レビュー済み計画を実装し、ローカル検証後に停止するには $execute-plan を使用してください。"
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

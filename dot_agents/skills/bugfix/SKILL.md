@@ -1,57 +1,32 @@
 ---
 name: bugfix
-description: "不具合修正のワークフロー（調査→再現→修正→検証）を controller がオーケストレーションするための指揮書。バグ・不具合・障害の修正で使う。explorer で原因特定、implementer で再現テスト→修正、verifier で検証。「バグを直して」「不具合修正」「この障害を調査して直す」などで参照。"
+description: 既存の不具合を再現・局所化し、最小修正と必要十分な検証まで進める。「バグを直して」「障害を調査して直す」で使う。単純な修正は controller が直接完了し、原因未確定・証拠矛盾・設計判断が残る場合だけ診断を広げる。
 ---
 
-# Bugfix ワークフロー
+# Bugfix
 
-controller はオーケストレーションと判断に集中し、調査・修正・fresh review・検証を subagent に委譲する。role 名は論理名である。Claude Code では `explorer` / `implementer` / `reviewer` / `verifier` を起動し、Codex では `explorer`（Luna・read-only）/ `worker`（Terra・workspace-write）/ `reviewer` を使う。
+通常は controller が `symptom → reproduction/evidence → cause → minimal fix → targeted validation` を完了する。作業量・委譲・effort は共通 [effort-policy.md](../../workflows/software_delivery/references/effort-policy.md) に従う。
 
-## フェーズと担当
+## 直接完了する条件
 
-| フェーズ | 担当 | 使う skill | 成果 |
-|---|---|---|---|
-| 1. 調査 | explorer | 本 skill の調査規律 | root cause 仮説と根拠 |
-| 2. 再現 | explorer / verifier | project test tools | 最小再現と failing evidence |
-| 2.5 worktree | controller | `execute-plan` の worktree gate | 隔離 worktree |
-| 3. 修正 | implementer | `execute-plan` の RED → GREEN 契約 + 言語 skill | 最小差分と green test |
-| 4. fresh review | reviewer | `review-lenses.md` + 言語 / 専門 review skill | Critical / Important の指摘 |
-| 5. 検証 | verifier | `execute-plan` の local verification 契約 | 実入口に近い evidence |
-| 終端 | controller | 出荷するなら `ship-change`、merge 後は `post-merge-cleanup` | 固定形式の完了報告 |
+期待動作が既存 code/test/docs から明確で、原因を evidence が説明し、修正が局所的・可逆で protected contract や複雑な状態へ波及せず、委譲コストが作業を上回る小変更なら直接修正する。explorer / implementer / verifier、計画、workflow artifact、worktree 作成を前処理にしない。既存のユーザー変更を分離できない場合は先に変更場所を確保する。
 
-## 調査
+不具合を示す failing test または再現 evidence を確認し、最小修正後に同じ入口を検証する。追加 test は回帰を検出できる場合に作る。再現不能でも原因を断定せず、不足証拠と次の判別手段を示す。調査だけの依頼ならコードを変更しない。
 
-1. 症状、期待動作、再現条件、直近変更を整理する。
-2. explorer に関連コード、呼び出し元、状態遷移、ログとテストを追わせる。
-3. 対立仮説を作り、観測または実験で棄却する。症状ではなく root cause を特定する。
-4. 次のいずれかなら、別コンテキストの fresh explorer または専門 reviewer に read-only 診断を委譲する。
-   - コード上の予測と観測が矛盾する。
-   - プロトコル、コーデック、ライブラリ内部などの専門知識が決め手になる。
-   - 実機実験でしか対立仮説を判別できない。
-   - 2 回の探索または同等の時間を使っても root cause が絞れない。
-5. 追加診断には症状、仮説と棄却理由、関連パス、期待動作を渡す。返答は元の explorer / verifier が裏取りする。
+## 診断を広げる条件
 
-調査のみの依頼はここで終了してよい。再現できず、検証可能な仮説も得られない場合は当て推量で変更せず、得られた evidence と不足情報を報告する。
+再現できない、複数 subsystem に跨る、回帰の起点が原因判定に必要だが不明、architecture 判断が必要、targeted test が失敗、または証拠が矛盾する場合は、未解決の問いだけを調べる。環境・入力・推論の失敗を区別し、同じ探索を繰り返さない。
 
-### 診断 brief
+競合仮説が残る、証拠が理解を否定する、異なる修正が 2 回失敗した場合は fresh 診断を使う。Codex は `debugging`、Claude は `deliberator`（`task_kind=debugging`、model / effort は runtime の roles.md）へ渡す。protected contract・データ損失・不可逆処理の判断には該当専門家とユーザー合意を得る。専門診断に不足や矛盾があれば問いを絞って戻し、推測で修正しない。
 
-修正へ渡す前と調査のみの依頼を締める時は、Symptom（Expected / Actual）/ Reproduction / Root cause / Evidence（`file:line`・ログ）/ Impact scope / Regression test 条件 / Fix constraints / Unknowns にまとめる。原因未確定でも確度と不足証拠を書いてこの形で出す。
+委譲時は Expected / Actual、Reproduction、first divergence、Root cause と確度、Evidence（path:line / log）、棄却した仮説、Impact scope、Regression test 条件、Fix constraints、Unknowns を短く渡す。controller は結論を左右する一次証拠だけを裏取りする。新しい仕様判断が必要な時だけ `product-discovery` へ移り、診断を取り直さない。
 
-**診断レンズ**（controller が1パス、下記に該当すれば fresh reviewer へ委譲）: root cause が再現と evidence を過不足なく説明するか（相関を因果と取り違えていないか）/ 対立仮説を証拠で棄却できているか / Impact scope の限定が適切か / 証拠の穴を防御的な guard で埋めていないか。定義は `~/.agents/workflows/software_delivery/references/review-lenses.md` にある。
+## Review・検証・完了
 
-protected contract・データ損失・不可逆処理が絡む、または仮説が競合したまま残る場合は fresh reviewer に反証役として委譲する（`~/.agents/workflows/software_delivery/references/review-common.md` の共通制約に従う）。
+review はリスクで決める。Codex は `~/.codex/review-policy.md`、Claude は共有 [review-common.md](../../workflows/software_delivery/references/review-common.md) を正本とし、軽微な修正は self-check、必要な場合だけ fresh reviewer を使う。必須の独立 review を self-review で代替しない。
 
-## 修正
+controller が targeted validation と必要な統合検証を行い、[review-common.md](../../workflows/software_delivery/references/review-common.md) のrisk分類を適用する。v2 LOWは人間待ちなし、MEDIUMはsummary、HIGHはboundaryの明示承認を要求し、v1 legacyは従来承認を維持する。[evidence-contract.md](../../workflows/software_delivery/references/evidence-contract.md#人間レビューの記録と操作) のhelperで現在の検査を行った後、変更・原因・検証（失敗履歴を含む）・残る未確認範囲を報告する。実行済み evidence を verifier に取り直させない。 `HERDR_ENV=1` の時は報告の直前に `nvim-review-open --base <比較起点>` を 1 回実行し、同じ workspace の nvim に `base..作業ツリー` の diffview を開いてフォーカスを移す。**待ち方は risk 区分のまま**変えず、失敗したら 1 行報告して続ける。
 
-- worktree の要否は `execute-plan` の worktree gate に従う。
-- failing reproduction test を先に確認し、最小修正で green にする。
-- protected contract（CLAUDE.md 4原則1）へ波及するなら止まり、変更前にユーザー判断を得る。
-- ガード条件追加で済む場合は既存ロジックを大きく変えない。
+出荷を依頼された場合、`ship-change` は `context.json` / `LOCAL_COMPLETE` / `review_snapshot_id` を要求する。既存 evidence を再利用して `product-discovery` の short path（条件外なら通常経路）で artifact を初期化し、`execute-plan` の gate を通す。承認や完了 state を捏造せず、artifact なしに commit / push / MR を行わない。shipping・merge・cleanup の権限は修正依頼から推論しない。
 
-## Review と検証
-
-- 実装文脈を持たない fresh reviewer が仕様適合、回帰、失敗時挙動、修正の単純さを確認する（レンズは `~/.agents/workflows/software_delivery/references/review-lenses.md` の実装後レンズ、起動 model は runtime 側の体制表に従う。self-review は代替にならない）。
-- reviewer に severity の足切りを課さず、`~/.agents/workflows/software_delivery/references/review-common.md` の Finding gate と採用判定の二段構えで絞る。
-- verifier が再現手順、focused test、必要な統合テストを実行し、修正前に失敗した入口が修正後に成功する evidence を示す。同じ evidence を取り直す重複検証は積まない。
-- controller は diff と実行結果を裏取りし、変更内容 / 検証（失敗履歴含む）/ 残リスク / 人間が判断すべき点を報告する。
-- **出荷まで進める場合**: `ship-change` の entry gate は workflow artifact（`context.json` / `LOCAL_COMPLETE` / `review_snapshot_id`）を要求するが、bugfix はそれを作らない。出荷する見込みが立った時点で `product-discovery` の short path に載せ（`tasks/01-short-path.md` + artifact init）、`execute-plan` の gate を通してから `ship-change` へ渡す。artifact を作らずに commit / push / MR を行わない。
+原因・修正条件が確定した通常規模の実装は下位 implementer / worker へ渡す。計画不足は上位の仕様・計画へ戻し、実装固有の推論が難しい時だけ共通 effort policy の上位実装経路を使う。

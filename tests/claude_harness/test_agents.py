@@ -29,12 +29,12 @@ def test_task_reviewer_is_retired_on_the_claude_side() -> None:
     assert not (AGENTS / "task-reviewer.md").exists()
 
 
-def test_reviewer_keeps_xhigh_for_the_two_remaining_gates() -> None:
-    """残る gate は spec review と final review だけなので effort を下げない."""
+def test_reviewer_starts_high_without_write_tools() -> None:
+    """独立reviewのread-onlyを維持し、xhighは既定にしない."""
     fields = frontmatter(read_agent("reviewer"))
 
     assert fields["model"] == "opus"
-    assert fields["effort"] == "xhigh"
+    assert fields["effort"] == "high"
     for forbidden in ("Edit", "Write"):
         assert forbidden not in fields["tools"]
 
@@ -63,3 +63,23 @@ def test_implementer_and_verifier_follow_execute_plan_contracts() -> None:
 
     assert "systematic-debugging" not in explorer
     assert "bugfix" in explorer
+
+
+def test_high_effort_deliberator_is_read_only() -> None:
+    text = read_agent("deliberator")
+    fields = frontmatter(text)
+    assert fields["model"] == "opus" and fields["effort"] == "high"
+    assert not {"Edit", "Write"}.intersection(fields["tools"].strip("[]").split(", "))
+    for phrase in ("task_kind", "specification", "planning", "debugging", "欠落・複数指定", "subagentを起動しない"):
+        assert phrase in text
+
+
+def test_high_effort_implementer_reuses_canonical_contract() -> None:
+    text = read_agent("implementer-high")
+    fields = frontmatter(text)
+    normal = frontmatter(read_agent("implementer"))
+    assert normal["model"] == "sonnet" and normal["effort"] == "medium"
+    assert fields["model"] == "opus" and fields["effort"] == "high"
+    assert fields["tools"] == normal["tools"]
+    for phrase in ("~/.claude/agents/implementer.md", "frontmatter以外", "読めない場合は停止", "計画不足", "Controllerへ返す"):
+        assert phrase in text

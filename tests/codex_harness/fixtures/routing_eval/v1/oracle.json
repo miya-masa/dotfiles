@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "scenarios": {
+    "clear-local": {"expected_verdict": "BLOCKED", "injected_defects": [{"id": "DEF-CLEAR-001", "severity": "Important"}]},
+    "normal-multi-file": {"expected_verdict": "BLOCKED", "injected_defects": [{"id": "DEF-NORMAL-001", "severity": "Important"}]},
+    "ambiguous-spec": {"expected_verdict": "BLOCKED", "injected_defects": [{"id": "DEF-SPEC-001", "severity": "Important"}]},
+    "high-risk-contract": {"expected_verdict": "BLOCKED", "injected_defects": [{"id": "DEF-RISK-001", "severity": "Critical"}]},
+    "parallel-exploration": {"expected_verdict": "BLOCKED", "injected_defects": [{"id": "DEF-PARALLEL-001", "severity": "Important"}]}
+  }
+}

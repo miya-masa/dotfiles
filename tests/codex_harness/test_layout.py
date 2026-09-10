@@ -42,7 +42,9 @@ def test_codex_uses_dedicated_instructions_and_phase_skills() -> None:
         assert set(interface) == {"display_name", "short_description", "default_prompt"}
         assert 25 <= len(interface["short_description"]) <= 64
         assert f"${name}" in interface["default_prompt"]
-        if name != "systematic-debugging":
+        if name == "execute-plan":
+            assert "policy:\n  allow_implicit_invocation: true" in metadata_text
+        elif name != "systematic-debugging":
             assert "policy:\n  allow_implicit_invocation: false" in metadata_text
     assert not (ROOT / "dot_codex/symlink_AGENTS.md").exists()
 
@@ -53,6 +55,23 @@ def test_codex_instructions_avoid_zsh_readonly_status_variable() -> None:
     assert "zsh" in agents
     assert "status" in agents
     assert "task_status" in agents
+
+
+def test_codex_instructions_default_to_japanese_for_responses_and_aidocs() -> None:
+    agents = (ROOT / "dot_codex/AGENTS.md").read_text(encoding="utf-8")
+
+    assert "ユーザーが英語を明示的に希望しない限り" in agents
+    assert "ユーザー向けの通常応答" in agents
+    assert ".aidocs/" in agents
+    assert "自然言語" in agents
+    assert "技術識別子" in agents
+    assert "コマンド" in agents
+    assert "API名" in agents
+    assert "エラー文" in agents
+    assert "機械可読なキー" in agents
+    assert "委譲packet" in agents
+    assert "subagent" in agents
+    assert "artifact" in agents
 
 
 def test_codex_routes_routine_work_to_luna_and_judgment_to_sol() -> None:
@@ -115,7 +134,7 @@ def test_codex_skills_have_distinct_handoff_boundaries() -> None:
     assert "コードやplanを変更しない" in discovery
     assert "implementation-planning" in discovery
     assert "software-delivery" not in discovery
-    assert "root cause" in debugging
+    assert "根本原因" in debugging
     assert "コードを変更しない" in debugging
     assert "implementation-planning" in debugging
     assert "software-delivery" not in debugging
@@ -123,7 +142,7 @@ def test_codex_skills_have_distinct_handoff_boundaries() -> None:
     assert "execute-plan" in planning
     assert "execute-and-ship" in planning
     assert "ship-change" in execution
-    assert "未確定のproduct判断や実装そのものには使わない" in planning
+    assert "未確定のプロダクト判断や実装そのものには使わない" in planning
 
 
 def test_codex_workflows_share_artifact_review_policy() -> None:
@@ -178,22 +197,22 @@ def test_native_agents_pin_models_to_their_roles() -> None:
 
     explorer = agents["explorer"]
     assert explorer["name"] == "explorer"
-    assert explorer["model"] == "gpt-5.6-luna"
-    assert explorer["model_reasoning_effort"] == "max"
+    assert "model" not in explorer
+    assert "model_reasoning_effort" not in explorer
     assert explorer["sandbox_mode"] == "read-only"
     assert len(explorer["developer_instructions"].splitlines()) <= 15
 
     worker = agents["worker"]
     assert worker["name"] == "worker"
-    assert worker["model"] == "gpt-5.6-luna"
-    assert worker["model_reasoning_effort"] == "max"
+    assert "model" not in worker
+    assert "model_reasoning_effort" not in worker
     assert worker["sandbox_mode"] == "workspace-write"
     assert len(worker["developer_instructions"].splitlines()) <= 15
 
     for role in ("debugging", "planning", "specification", "reviewer"):
         agent = agents[role]
-        assert agent["model"] == "gpt-5.6-sol"
-        assert agent["model_reasoning_effort"] == "high"
+        assert "model" not in agent
+        assert "model_reasoning_effort" not in agent
         assert agent["sandbox_mode"] == "read-only"
         assert len(agent["developer_instructions"].splitlines()) <= 35
 
@@ -218,7 +237,7 @@ def test_native_agents_pin_models_to_their_roles() -> None:
         "severity",
         "confidence",
         "file/symbol/line",
-        "具体的失敗scenario",
+        "具体的な失敗scenario",
         "impact",
         "現在のtestで防げない理由",
         "修正方針",
@@ -258,7 +277,10 @@ def test_workflow_helpers_live_in_the_shared_core() -> None:
     assert {path.name for path in shared.glob("*.py")} == {
         "workflow_state.py",
         "workflow_artifact.py",
+        "workflow_evidence.py",
         "review_snapshot.py",
+        "human_review.py",
+        "workflow_merge.py",
     }
 
     cleanup_reference = (

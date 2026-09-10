@@ -1,0 +1,31 @@
+{
+  "schema_version": 2,
+  "manifest_sha256": "d2aa6f1f0760983b8730942150e76e7e020be8f7a058a4ea2e0e3b9ffc0b3c3a",
+  "oracle_sha256": "07eb24eb488b7f1c51bfd1ff7d04fd6b4c1dd03a277b4d08a6c4dc22651a7043",
+  "codex_version": "codex-cli 0.153.4",
+  "baseline": {
+    "base_commit": "c9d577ce86c747e77efc1a7f01ba09e778e00a1d",
+    "controller_pin": {"model": "gpt-5.6-sol", "effort": "medium"},
+    "agent_pins": {
+      "debugging": {"path": "dot_codex/agents/debugging.toml", "model": "gpt-5.6-sol", "effort": "high"},
+      "explorer": {"path": "dot_codex/agents/explorer.toml", "model": "gpt-5.6-luna", "effort": "max"},
+      "planning": {"path": "dot_codex/agents/planning.toml", "model": "gpt-5.6-sol", "effort": "high"},
+      "reviewer": {"path": "dot_codex/agents/reviewer.toml", "model": "gpt-5.6-sol", "effort": "high"},
+      "specification": {"path": "dot_codex/agents/specification.toml", "model": "gpt-5.6-sol", "effort": "high"},
+      "task-reviewer": {"path": "dot_codex/agents/task-reviewer.toml", "model": "gpt-5.6-luna", "effort": "max"},
+      "worker": {"path": "dot_codex/agents/worker.toml", "model": "gpt-5.6-luna", "effort": "max"}
+    }
+  },
+  "candidate": {
+    "controller_pin": {"model": "gpt-6-astra", "effort": "low"},
+    "agent_pins": {
+      "debugging": {"path": "dot_codex/agents/debugging.toml", "model": "gpt-5.6-sol", "effort": "high"},
+      "explorer": {"path": "dot_codex/agents/explorer.toml", "model": "gpt-5.6-luna", "effort": "low"},
+      "planning": {"path": "dot_codex/agents/planning.toml", "model": "gpt-5.6-sol", "effort": "high"},
+      "reviewer": {"path": "dot_codex/agents/reviewer.toml", "model": "gpt-5.6-sol", "effort": "high"},
+      "specification": {"path": "dot_codex/agents/specification.toml", "model": "gpt-5.6-sol", "effort": "high"},
+      "task-reviewer": {"path": "dot_codex/agents/task-reviewer.toml", "model": "gpt-5.6-luna", "effort": "low"},
+      "worker": {"path": "dot_codex/agents/worker.toml", "model": "gpt-5.6-luna", "effort": "low"}
+    }
+  }
+}

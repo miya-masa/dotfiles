@@ -1,7 +1,7 @@
 interface:
-  display_name: "Ship Change"
-  short_description: "検証済み変更をcommit・push・MR・CIまで安全に進める"
-  default_prompt: "Use $ship-change to commit, push, open an MR, and resolve in-scope CI failures."
+  display_name: "変更の出荷"
+  short_description: "検証済み変更をコミット・プッシュ・MR・CIまで安全に進める"
+  default_prompt: "変更をコミット、プッシュし、MRを開き、対象範囲内のCI失敗を解消するには $ship-change を使用してください。"
 
 policy:
   allow_implicit_invocation: false

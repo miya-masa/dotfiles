@@ -23,9 +23,9 @@ gui:
     inactiveViewSelectedLineBgColor:
       - "#1e1e2e"
 git:
-  pagers:
+  diffRenderers:
     - colorArg: always
-      pager: delta --dark --paging=never --line-numbers
+      command: delta --dark --paging=never --line-numbers
   autoFetch: true
   autoRefresh: true
   skipHookPrefix: WIP

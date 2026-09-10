@@ -1,0 +1,334 @@
+#!/usr/bin/env python3
+"""herdr workspace の nvim に「base..作業ツリー」の diffview を開かせる。
+
+使い方: nvim-review-open [--base REV] [--repo PATH] [--workspace ID] [--no-focus]
+
+Agent (Claude Code / Codex) が実装を終えて人間にレビューを求めるときに呼ぶ。
+同じ workspace のペインで nvim が動いていれば、その nvim の RPC socket
+(~/.local/state/nvim/servers/<workspace>.sock、nvim 側は config/options.lua で
+listen する) に接続して `:DiffviewOpen <base>` を実行する。diffview は常に
+`tab split` で新しいタブページを作るので、開いているバッファやウィンドウは
+壊さない。nvim が居なければペインを分割して nvim を起動する。
+
+最後に nvim のペインへフォーカスを移す (--no-focus で抑止)。
+
+人間が insert mode の間は開かない。RPC の ex コマンドはモードを変えないので、
+diffview の右側 (作業ツリーの実ファイル) にフォーカスが移った状態で打鍵が
+そのままファイルへ入ってしまう。
+
+untracked file は commit と作業ツリーの比較では diffview に出ない (git adapter
+の show_untracked は STAGE vs LOCAL のときだけ true)。既定では index を触らず
+一覧を stderr に出すだけにし、--intent-to-add が付いたときだけ `git add -N` で
+diff に載せる。
+
+失敗しても Agent の gate を止めないよう、エラーは stderr に 1 行出して
+exit 1 で返すだけにする。呼び出し側は成否に関わらず提示を続けてよい。
+"""
+
+import argparse
+import json
+import os
+import subprocess
+import sys
+
+STATE_DIR = os.path.join(
+    os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state"),
+    "nvim",
+    "servers",
+)
+
+
+def warn(message):
+    sys.stderr.write("nvim-review-open: %s\n" % message)
+
+
+def git(repo, *args):
+    result = subprocess.run(
+        ["git", "-C", repo] + list(args), capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        return None
+    return result.stdout.strip()
+
+
+def resolve_repo(path):
+    top = git(path, "rev-parse", "--show-toplevel")
+    if not top:
+        warn("not a git repository: %s" % path)
+        sys.exit(1)
+    return top
+
+
+def resolve_base(repo, explicit):
+    """比較起点を決める。既定は default branch との merge-base。
+
+    Agent は固定した base を持っているので --base で渡すのが正。ここでの
+    推定は手で叩いたときのための fallback。"""
+    if explicit:
+        resolved = git(repo, "rev-parse", "--verify", "--quiet", explicit + "^{commit}")
+        if not resolved:
+            warn("unknown base revision: %s" % explicit)
+            sys.exit(1)
+        return resolved
+
+    head = git(repo, "symbolic-ref", "--quiet", "refs/remotes/origin/HEAD")
+    candidates = []
+    if head:
+        candidates.append(head.replace("refs/remotes/", "", 1))
+    candidates += ["origin/main", "origin/master", "main", "master"]
+
+    for candidate in candidates:
+        merge_base = git(repo, "merge-base", candidate, "HEAD")
+        if merge_base:
+            return merge_base
+
+    warn("failed to resolve a base revision; falling back to HEAD")
+    return "HEAD"
+
+
+def untracked_files(repo):
+    out = git(repo, "-c", "core.quotePath=false", "ls-files", "--others", "--exclude-standard")
+    return [line for line in (out or "").splitlines() if line]
+
+
+def announce_untracked(repo, paths, intent_to_add):
+    """untracked は commit vs 作業ツリーの diffview に出ない。
+
+    既定では index を触らず一覧を知らせるだけにする。--intent-to-add を付けた
+    ときだけ `git add -N` して diff に載せる (index に intent-to-add が付く。
+    `git reset` で戻せるが、途中まで stage している人間の作業には割り込む)。"""
+    if not paths:
+        return
+    if intent_to_add:
+        if git(repo, "add", "-N", "--", *paths) is None:
+            warn("failed to intent-to-add %d untracked file(s)" % len(paths))
+        return
+    warn(
+        "%d untracked file(s) will not appear in the diff: %s"
+        % (len(paths), ", ".join(paths[:10]) + (" ..." if len(paths) > 10 else ""))
+    )
+
+
+def herdr_api(method, params):
+    """socket API を叩く。herdr-api は成功時に result 本体だけを stdout に出し、
+    エラーは exit 1 + stderr 1 行で返す。"""
+    result = subprocess.run(
+        ["herdr-api", method, json.dumps(params)], capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        warn("herdr %s failed: %s" % (method, result.stderr.strip()))
+        return None
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError:
+        warn("herdr %s returned unparsable output" % method)
+        return None
+
+
+def herdr_cli(args):
+    """herdr CLI 本体を叩く。エラー時は exit 1 + stderr へ
+    `{"error":{"code":...,"message":...}}` を 1 行出すので、message だけ取り出す。"""
+    result = subprocess.run(["herdr"] + args, capture_output=True, text=True)
+
+    if result.returncode != 0:
+        stderr = result.stderr.strip()
+        try:
+            error = json.loads(stderr).get("error")
+        except (json.JSONDecodeError, AttributeError):
+            error = None
+        if isinstance(error, dict) and error.get("message"):
+            return None, error["message"]
+        return None, stderr or "herdr command failed"
+
+    try:
+        return json.loads(result.stdout).get("result") or {}, None
+    except (json.JSONDecodeError, AttributeError):
+        return {}, None
+
+
+def nvim_socket(workspace):
+    return os.path.join(STATE_DIR, "%s.sock" % workspace)
+
+
+def nvim_registry(workspace):
+    path = os.path.join(STATE_DIR, "%s.json" % workspace)
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def vim_string(value):
+    """Vim script の double-quoted 文字列リテラルへ変換する。
+
+    パスに空白や `"` が含まれると `execute("...")` の文字列が閉じてしまい、
+    ex コマンドの引数分割でも壊れる。式は argv で渡すのでシェルは経由しない。"""
+    return '"%s"' % value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def remote_expr(sock, expr):
+    """生きている nvim に式を評価させる。"""
+    result = subprocess.run(
+        ["nvim", "--server", sock, "--remote-expr", expr],
+        capture_output=True,
+        text=True,
+        timeout=10,
+    )
+    if result.returncode != 0:
+        warn("remote-expr failed: %s" % (result.stderr.strip() or expr))
+        return False, ""
+    return True, result.stdout
+
+
+def nvim_alive(sock):
+    if not os.path.exists(sock):
+        return False
+    try:
+        return remote_expr(sock, "1")[0]
+    except (subprocess.TimeoutExpired, OSError):
+        return False
+
+
+def open_in_running_nvim(sock, repo, base):
+    # insert / visual / operator-pending 中に開かない。ex コマンドはモードを
+    # 変えないので、diffview が右側 (作業ツリーの実ファイル) にフォーカスを
+    # 移した後の打鍵がそのままファイルへ入る。
+    ok, mode = remote_expr(sock, "mode(1)")
+    if not ok:
+        return False
+    if not mode.startswith("n"):
+        warn("nvim is in %r mode; not opening the diff (press <leader>ao when ready)" % mode)
+        return False
+
+    # 外部で書き換えられたバッファを読み直す。W12 の確認で止まることがあるので
+    # 失敗しても diff を開く方を優先する。
+    remote_expr(sock, 'execute("checktime")')
+
+    # DiffviewOpen は `tab split` するので既存のタブ・ウィンドウは残る。
+    expr = 'execute("DiffviewOpen " . %s . " -C" . fnameescape(%s))' % (
+        vim_string(base),
+        vim_string(repo),
+    )
+    return remote_expr(sock, expr)[0]
+
+
+def spawn_nvim_pane(workspace, repo, base, focus):
+    """nvim が居ないので隣にペインを作って起動する。
+
+    起点は自分のペイン。pane.current は「サーバが今フォーカスしているペイン」を
+    返すので、人間が別 workspace を見ていると分割先がそちらへ飛ぶ。"""
+    # pane id は "<workspace>:<pane>" 形式。--workspace で別 workspace を指した
+    # ときに自分のペインを起点にすると、そちらへ分割してしまう。
+    target = os.environ.get("HERDR_PANE_ID")
+    if target and target.split(":")[0] != workspace:
+        target = None
+    if not target:
+        current = herdr_api("pane.current", {}) or {}
+        pane = current.get("pane") or {}
+        if pane.get("workspace_id") == workspace:
+            target = pane.get("pane_id")
+
+    params = {"direction": "right", "cwd": repo, "focus": focus}
+    if target:
+        params["target_pane_id"] = target
+    else:
+        params["workspace_id"] = workspace
+
+    created = herdr_api("pane.split", params)
+    if not created:
+        return None
+
+    pane = created.get("pane") or created
+    pane_id = pane.get("pane_id")
+    if not pane_id:
+        warn("pane.split returned no pane_id")
+        return None
+
+    command = 'nvim -c "DiffviewOpen %s"' % base
+    _, err = herdr_cli(["pane", "run", pane_id, command])
+    if err:
+        warn("failed to start nvim in the new pane: %s" % err)
+        return None
+    return pane_id
+
+
+def focused_workspace():
+    """herdr が今フォーカスしている workspace。判らなければ None。"""
+    data = herdr_api("workspace.list", {}) or {}
+    for workspace in data.get("workspaces") or []:
+        if workspace.get("focused"):
+            return workspace.get("workspace_id")
+    return None
+
+
+def may_take_focus(workspace):
+    """人間が別 workspace を見ているならフォーカスを奪わない。
+
+    pane.focus が workspace 切り替えを伴うかは未確認なので、伴う前提で避ける。
+    判定できなかったときは従来どおり移す (同じ workspace に居るのが通常)。"""
+    current = focused_workspace()
+    if current is None or current == workspace:
+        return True
+    warn(
+        "leaving focus alone: you are in workspace %s, the diff opened in %s"
+        % (current, workspace)
+    )
+    return False
+
+
+def focus_pane(pane_id):
+    if not pane_id:
+        return
+    herdr_api("pane.focus", {"pane_id": pane_id})
+
+
+def main():
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument("--base", help="比較起点。省略時は default branch との merge-base")
+    parser.add_argument("--repo", default=os.getcwd(), help="対象リポジトリ (既定: cwd)")
+    parser.add_argument("--workspace", default=os.environ.get("HERDR_WORKSPACE_ID"))
+    parser.add_argument("--no-focus", action="store_true")
+    parser.add_argument(
+        "--intent-to-add",
+        action="store_true",
+        help="untracked file を `git add -N` して diff に載せる (index を触る)",
+    )
+    args = parser.parse_args()
+
+    repo = resolve_repo(args.repo)
+    base = resolve_base(repo, args.base)
+    announce_untracked(repo, untracked_files(repo), args.intent_to_add)
+
+    workspace = args.workspace
+    if not workspace:
+        warn("HERDR_WORKSPACE_ID is not set; nothing to open")
+        return 1
+
+    take_focus = not args.no_focus and may_take_focus(workspace)
+
+    sock = nvim_socket(workspace)
+    if nvim_alive(sock):
+        if not open_in_running_nvim(sock, repo, base):
+            return 1
+        if take_focus:
+            focus_pane(nvim_registry(workspace).get("pane_id"))
+        print("opened diffview against %s in the running nvim" % base[:12])
+        return 0
+
+    pane_id = spawn_nvim_pane(workspace, repo, base, take_focus)
+    if not pane_id:
+        return 1
+    if take_focus:
+        focus_pane(pane_id)
+    print("started nvim with diffview against %s in a new pane" % base[:12])
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        # 提示の直前に呼ばれるので、traceback を出して gate を汚さない。
+        warn("aborted: %s" % exc)
+        sys.exit(1)

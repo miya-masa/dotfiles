@@ -8,6 +8,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 
@@ -68,6 +69,223 @@ class BuildPromptTests(unittest.TestCase):
             # No shell expansion happened: literal $(...) survives, and no
             # stray "rf" file listing / command output leaked into stdout.
             self.assertIn("$(rm -rf /)", result.stdout)
+
+    def test_requires_japanese_output(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            instruction = tmp_path / "instruction.md"
+            instruction.write_text("spec をレビューしてください", encoding="utf-8")
+
+            result = run_helper(
+                "build-prompt",
+                "--instruction-file",
+                str(instruction),
+                "--input-dir",
+                str(tmp_path / "input"),
+                "--output-path",
+                str(tmp_path / "out" / "review.md"),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("出力は日本語で書いてください", result.stdout)
+
+
+# ---------------------------------------------------------------------------
+# prepare-scratch
+# ---------------------------------------------------------------------------
+
+
+def prepare_scratch_env(home: Path, codex_home: Path) -> dict[str, str]:
+    env = {**os.environ, "HOME": str(home), "CODEX_HOME": str(codex_home)}
+    env.pop("XDG_STATE_HOME", None)
+    env.pop("HERDR_DELEGATE_SCRATCH_ROOT", None)
+    return env
+
+
+class PrepareScratchTests(unittest.TestCase):
+    def test_creates_git_root_trust_entry_and_scratch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            home = tmp_path / "home"
+            home.mkdir()
+            codex_home = tmp_path / "codex"
+            root = tmp_path / "scratch-root"
+
+            result = run_helper(
+                "prepare-scratch",
+                "--root",
+                str(root),
+                env=prepare_scratch_env(home, codex_home),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            scratch = Path(result.stdout.strip())
+            self.assertEqual(scratch.parent, root)
+            self.assertTrue((scratch / "input").is_dir())
+            self.assertTrue((scratch / "out").is_dir())
+            # codex resolves trust against the git root of its cwd, so the
+            # root -- not each scratch -- has to be the repository.
+            self.assertTrue((root / ".git").exists())
+            config = (codex_home / "config.toml").read_text(encoding="utf-8")
+            self.assertIn(f'[projects."{root}"]', config)
+            self.assertIn('trust_level = "trusted"', config)
+
+    def test_second_run_reuses_trust_entry_and_makes_a_new_scratch(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            home = tmp_path / "home"
+            home.mkdir()
+            codex_home = tmp_path / "codex"
+            root = tmp_path / "scratch-root"
+            env = prepare_scratch_env(home, codex_home)
+
+            first = run_helper("prepare-scratch", "--root", str(root), env=env)
+            second = run_helper("prepare-scratch", "--root", str(root), env=env)
+
+            self.assertEqual(first.returncode, 0, first.stderr)
+            self.assertEqual(second.returncode, 0, second.stderr)
+            self.assertNotEqual(first.stdout.strip(), second.stdout.strip())
+            config = (codex_home / "config.toml").read_text(encoding="utf-8")
+            self.assertEqual(config.count(f'[projects."{root}"]'), 1)
+
+    def test_preserves_unrelated_config_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            home = tmp_path / "home"
+            home.mkdir()
+            codex_home = tmp_path / "codex"
+            codex_home.mkdir()
+            config_path = codex_home / "config.toml"
+            # No trailing newline: appending must not join onto this line.
+            config_path.write_text('model = "gpt-5.6-terra"', encoding="utf-8")
+            root = tmp_path / "scratch-root"
+
+            result = run_helper(
+                "prepare-scratch",
+                "--root",
+                str(root),
+                env=prepare_scratch_env(home, codex_home),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = config_path.read_text(encoding="utf-8")
+            self.assertIn('model = "gpt-5.6-terra"\n', config)
+            self.assertIn(f'[projects."{root}"]\ntrust_level = "trusted"\n', config)
+
+    def test_existing_untrusted_entry_is_reported_not_duplicated(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            home = tmp_path / "home"
+            home.mkdir()
+            codex_home = tmp_path / "codex"
+            codex_home.mkdir()
+            root = tmp_path / "scratch-root"
+            config_path = codex_home / "config.toml"
+            config_path.write_text(
+                f'[projects."{root}"]\ntrust_level = "untrusted"\n', encoding="utf-8"
+            )
+
+            result = run_helper(
+                "prepare-scratch",
+                "--root",
+                str(root),
+                env=prepare_scratch_env(home, codex_home),
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            config = config_path.read_text(encoding="utf-8")
+            self.assertEqual(config.count(f'[projects."{root}"]'), 1)
+            self.assertNotIn('trust_level = "trusted"', config)
+
+    def test_relative_root_is_registered_as_absolute(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp).resolve()
+            home = tmp_path / "home"
+            home.mkdir()
+            codex_home = tmp_path / "codex"
+
+            # A relative key would never match the absolute cwd codex
+            # compares against, so the dialog would silently come back.
+            result = run_helper(
+                "prepare-scratch",
+                "--root",
+                "scratch-root",
+                env=prepare_scratch_env(home, codex_home),
+                cwd=tmp_path,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = (codex_home / "config.toml").read_text(encoding="utf-8")
+            self.assertIn(f'[projects."{tmp_path / "scratch-root"}"]', config)
+
+    def test_unexpected_projects_form_is_reported_not_duplicated(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp).resolve()
+            home = tmp_path / "home"
+            home.mkdir()
+            codex_home = tmp_path / "codex"
+            codex_home.mkdir()
+            root = tmp_path / "scratch-root"
+            config_path = codex_home / "config.toml"
+            config_path.write_text(
+                f"[projects.'{root}']\ntrust_level = \"trusted\"\n", encoding="utf-8"
+            )
+
+            result = run_helper(
+                "prepare-scratch",
+                "--root",
+                str(root),
+                env=prepare_scratch_env(home, codex_home),
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            config = config_path.read_text(encoding="utf-8")
+            self.assertNotIn(f'[projects."{root}"]', config)
+
+    def test_default_root_follows_xdg_state_home(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            home = tmp_path / "home"
+            home.mkdir()
+            codex_home = tmp_path / "codex"
+            state_home = tmp_path / "state"
+            env = prepare_scratch_env(home, codex_home)
+            env["XDG_STATE_HOME"] = str(state_home)
+
+            result = run_helper("prepare-scratch", env=env)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            scratch = Path(result.stdout.strip())
+            self.assertEqual(scratch.parent, state_home / "herdr-delegate" / "scratch")
+
+    def test_prunes_only_stale_own_leftovers(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            home = tmp_path / "home"
+            home.mkdir()
+            codex_home = tmp_path / "codex"
+            root = tmp_path / "scratch-root"
+            root.mkdir()
+            stale = root / "hd-stale"
+            fresh = root / "hd-fresh"
+            foreign = root / "someone-elses"
+            for path in (stale, fresh, foreign):
+                path.mkdir()
+            old = time.time() - 30 * 86400
+            os.utime(stale, (old, old))
+            os.utime(foreign, (old, old))
+
+            result = run_helper(
+                "prepare-scratch",
+                "--root",
+                str(root),
+                env=prepare_scratch_env(home, codex_home),
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse(stale.exists())
+            self.assertTrue(fresh.exists())
+            self.assertTrue(foreign.exists())
 
 
 # ---------------------------------------------------------------------------
@@ -140,6 +358,177 @@ class CheckMarkerTests(unittest.TestCase):
                 "check-marker", "--path", str(path), "--marker", self.MARKER
             )
             self.assertEqual(result.returncode, 0, result.stderr)
+
+
+# ---------------------------------------------------------------------------
+# check-availability
+# ---------------------------------------------------------------------------
+
+
+class CheckAvailabilityTests(unittest.TestCase):
+    def test_outside_herdr(self) -> None:
+        env = os.environ.copy()
+        env.pop("HERDR_ENV", None)
+
+        result = run_helper("check-availability", env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {"eligible": False, "reason": "outside_herdr"},
+        )
+        self.assertEqual(result.stderr, "")
+
+    def test_herdr_not_found(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            env = os.environ.copy()
+            env["HERDR_ENV"] = "1"
+            env["PATH"] = tmp
+
+            result = run_helper("check-availability", env=env)
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {"eligible": False, "reason": "herdr_not_found"},
+        )
+        self.assertEqual(result.stderr, "")
+
+    def test_eligible_does_not_invoke_herdr(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            marker = tmp_path / "called"
+            fake_herdr = tmp_path / "herdr"
+            make_executable(
+                fake_herdr,
+                f"#!/bin/sh\nprintf called > {shlex.quote(str(marker))}\n",
+            )
+            env = os.environ.copy()
+            env["HERDR_ENV"] = "1"
+            env["PATH"] = str(tmp_path)
+
+            result = run_helper("check-availability", env=env)
+
+            self.assertFalse(marker.exists())
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {"eligible": True, "reason": "eligible"},
+        )
+        self.assertEqual(result.stderr, "")
+
+
+# ---------------------------------------------------------------------------
+# run-command
+# ---------------------------------------------------------------------------
+
+
+class RunCommandTests(unittest.TestCase):
+    def test_preserves_literal_argv_and_records_success(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            output_dir = tmp_path / "run"
+            output_dir.mkdir()
+            expected = ["arg with spaces", "$(literal)", "`backtick`", "quote'\"able"]
+            command = [
+                sys.executable,
+                "-c",
+                "import json, sys; "
+                "print(json.dumps(sys.argv[1:])); "
+                "print('stderr', file=sys.stderr)",
+                *expected,
+            ]
+
+            result = run_helper(
+                "run-command",
+                "--output-dir",
+                str(output_dir),
+                "--",
+                *command,
+            )
+
+            run_record = json.loads((output_dir / "run.json").read_text())
+            output = (output_dir / "output.log").read_text(encoding="utf-8")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            run_record, {"state": "finished", "argv": command, "returncode": 0}
+        )
+        self.assertEqual(result.stdout, output)
+        self.assertIn(json.dumps(expected), output)
+        self.assertIn("stderr\n", output)
+        self.assertIn(str(output_dir / "run.json"), result.stderr)
+
+    def test_normalizes_nonzero_exit_and_keeps_returncode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output_dir = Path(tmp) / "run"
+            output_dir.mkdir()
+            command = [sys.executable, "-c", "import sys; sys.exit(7)"]
+
+            result = run_helper(
+                "run-command",
+                "--output-dir",
+                str(output_dir),
+                "--",
+                *command,
+            )
+
+            run_record = json.loads((output_dir / "run.json").read_text())
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(run_record["state"], "finished")
+        self.assertEqual(run_record["argv"], command)
+        self.assertEqual(run_record["returncode"], 7)
+
+    def test_records_launch_failure_without_running_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            output_dir = tmp_path / "run"
+            output_dir.mkdir()
+            missing = tmp_path / "missing-command"
+
+            result = run_helper(
+                "run-command",
+                "--output-dir",
+                str(output_dir),
+                "--",
+                str(missing),
+            )
+
+            run_record = json.loads((output_dir / "run.json").read_text())
+
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(run_record["state"], "failed")
+        self.assertIn(str(missing), run_record["error"])
+        self.assertIn("cannot start command", result.stderr)
+
+    def test_rejects_existing_output_without_running_command(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            output_dir = tmp_path / "run"
+            output_dir.mkdir()
+            (output_dir / "run.json").write_text("existing\n", encoding="utf-8")
+            marker = tmp_path / "called"
+            command = [
+                sys.executable,
+                "-c",
+                "from pathlib import Path; Path(__import__('sys').argv[1]).touch()",
+                str(marker),
+            ]
+
+            result = run_helper(
+                "run-command",
+                "--output-dir",
+                str(output_dir),
+                "--",
+                *command,
+            )
+
+            self.assertFalse(marker.exists())
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("must be empty", result.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -364,6 +753,7 @@ class BuildLaunchArgsTests(unittest.TestCase):
             self.assertIn('default_permissions="hdreview"', output)
             self.assertIn('approval_policy="never"', output)
             self.assertIn('model_reasoning_effort="high"', output)
+            self.assertIn('model="gpt-5.6-sol"', output)
             self.assertIn('":minimal"="read"', output)
             self.assertIn(f'"{toolchain_root}"="read"', output)
             self.assertIn(f'"{scratch}"={{"."="write"}}', output)

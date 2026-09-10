@@ -70,25 +70,26 @@ return {
     },
   },
   {
-    "johmsalas/text-case.nvim",
-    config = function()
-      require("textcase").setup({})
-    end,
-    keys = {
-      { "ga.", "<cmd>TextCaseOpenTelescope<CR>", mode = "n", desc = "Text Case" },
-      { "ga.", "<cmd>TextCaseOpenTelescope<CR>", mode = "v", desc = "Text Case" },
-    },
+    -- side-by-side diff。旧 codediff.nvim からの移行 (2026-08-21)。
+    -- codediff は組み込みの scrollbind を捨てて自前のスクロール同期を持つため
+    -- Neovim の差分描画最適化 (grid_scroll) が効かず、SSH 越しにスクロールが
+    -- 体感で破綻していた (実測: 標準 diff 246 B/scroll に対し 3236 B/scroll)。
+    -- diffview は組み込みの diff mode を使うのでこの問題が起きない
+    -- (小 hunk で 164 B/scroll)。
+    -- 本家 sindrets/diffview.nvim は 2024-06 で更新が止まっているため、
+    -- 活発にメンテされている fork の diffview+ を使う (コマンド名は本家と同じ)。
+    "dlyongemallo/diffview-plus.nvim",
+    version = "*",
     cmd = {
-      "Subs",
-      "TextCaseOpenTelescope",
-      "TextCaseOpenTelescopeQuickChange",
-      "TextCaseOpenTelescopeLSPChange",
-      "TextCaseStartReplacingCommand",
+      "DiffviewOpen",
+      "DiffviewToggle",
+      "DiffviewClose",
+      "DiffviewFileHistory",
+      "DiffviewDiffFiles",
+      "DiffviewToggleFiles",
+      "DiffviewFocusFiles",
+      "DiffviewLog",
     },
-  },
-  {
-    "esmuellert/codediff.nvim",
-    cmd = "CodeDiff",
   },
   {
     "vim-jp/vimdoc-ja",
@@ -127,12 +128,6 @@ return {
   {
     "RaafatTurki/hex.nvim",
     cmd = { "HexDump", "HexAssemble", "HexToggle" },
-    opts = {},
-  },
-  {
-    "Wansmer/treesj",
-    keys = { "<space>m", "<space>j", "<space>s" },
-    dependencies = { "nvim-treesitter/nvim-treesitter" },
     opts = {},
   },
 }

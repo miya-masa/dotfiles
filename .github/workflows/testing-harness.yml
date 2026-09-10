@@ -1,0 +1,25 @@
+name: Testing harness
+
+on:
+  pull_request:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - run: python3 -m pip install pytest
+      - run: python3 -m pytest tests/workflow_core tests/codex_harness tests/claude_harness --junitxml=.aidocs/harness-results/junit.xml
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: harness-results
+          path: .aidocs/harness-results/
+          include-hidden-files: true

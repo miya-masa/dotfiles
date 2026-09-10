@@ -38,16 +38,16 @@ JSON を検証し、選ばれた worktree を実在する canonical な絶対 pa
 
 ## 直列 implementer
 
-plan の順序どおり、**1 度に 1 task**。未完了 task ごとに fresh な `implementer` を 1 体起動し、task の goal、acceptance criteria、正確な owned paths、依存と evidence の path、validation command、制約、stop conditions、固定した絶対 workdir、現在の artifact revision を含む packet を渡す。implementer は owned paths の中に留まり、無関係なユーザーの変更を保全し、**commit / push / 外部書き込み / subagent 起動をしない**。
+plan の順序どおり、**1 度に 1 task**。通常は fresh な `implementer` へ実装を渡し、委譲コストが作業を上回る明確な小変更だけ controller が直接実装する。計画不足は `deliberator`、計画が十分でも実装固有の推論が難しい場合は `implementer-high` を選ぶ。委譲では、task の goal、acceptance criteria、正確な owned paths、依存と evidence の path、validation command、制約、stop conditions、固定した絶対 workdir、現在の artifact revision を含む packet を渡す。implementer は owned paths の中に留まり、無関係なユーザーの変更を保全し、**commit / push / 外部書き込み / subagent 起動をしない**。
 
 観測可能な挙動変更には次の順序を要求し、各結果を記録する。
 
 ```text
 RED → 期待した RED 理由の確認 → 最小の GREEN → GREEN 確認
-    → 限定的な refactor → GREEN 再確認
+    → 必要な refactor を行った場合のみ再検証
 ```
 
-RED test は実装前に**記録された理由で**失敗しなければならない。限定的な refactor は owned な変更の中で重複除去と命名改善だけを行い、挙動や将来向けの抽象化を追加しない。docs、生成物、純粋な設定など非挙動の task は、承認済み plan が対象・RED が不可能な理由・代替の validation command・reviewer の承認を明記している場合に限り RED を省略できる（**承認済みの TDD 例外**）。実行時に TDD 例外を発明しない。
+RED test は実装前に**記録された理由で**失敗しなければならない。限定的な refactor は owned な変更の中で重複除去と命名改善だけを行い、挙動や将来向けの抽象化を追加しない。docs、生成物、純粋な設定など非挙動の task は、plan に対象・非挙動である理由・代替 validation command を記録して検証する。追加 reviewer 承認や形式的な RED は要求しない。挙動変更を非挙動と扱わない。
 
 テストを skip / delete して通さない。テストの実行 command はプロジェクト側（CLAUDE.md / AGENTS.md / README / Makefile / CI config）の正規 command を使い、未確認の ad-hoc command を持ち込まない。
 
@@ -55,19 +55,25 @@ RED test は実装前に**記録された理由で**失敗しなければなら�
 
 **task ごとの review subagent は起動しない。** implementer は TDD の自己ループで検証済みで、差分全体の敵対的検証は final review が 1 回だけ担うので、同じ差分を task 単位で二重に見ない。
 
+**完了通知を完了の証拠にしない。** 「Background task completed」が届いても implementer がまだ書いていることがある。真の完了は (a) 対象コミット / ファイルが実 FS に着地したこと、または (b) subagent transcript（`<session>/subagents/agent-*.jsonl`）の mtime が 90 秒静止したこと、で判定する。`TaskOutput` は teammate 型 implementer には効かない（`No task found`）ので、最終報告は transcript 末尾の assistant text から読む。
+
+**git 状態の確認は `dangerouslyDisableSandbox: true` で行う。** sandbox 越しの `git log` が、実在しない hash と期待どおりのメッセージを持つ「幻のコミット」を返したことがある（実測で 2 回）。sandbox 内の `Monitor` で git を監視しない。Go の build / test / generate も GOCACHE が read-only で sandbox 内では落ちるので、その注意は packet に最初から書いて往復を減らす。
+
 implementer が完了を報告し focused validation が通ったら、controller が次を自分で確認して次の task へ進む。
 
 - acceptance criteria が満たされているか（一次証拠は validation の実行結果と owned paths の差分）
 - owned paths の外を触っていないか、無関係なユーザーの変更を保全しているか
-- 観測可能な挙動変更で `RED → GREEN` が記録されているか（または承認済みの TDD 例外か）
+- 観測可能な挙動変更で `RED → GREEN` が記録されているか（または非挙動変更の理由と代替検証があるか）
 
 不足や逸脱が見つかったら、正確なシナリオ・impact・一次証拠・最小の修正を添えて implementer へ差し戻し、focused validation を通してから次の task へ進む。
 
-**同一 issue の失敗回数を数える。同じ issue で 2 回修正に失敗したら implementer のループを止め**、read-only の `explorer` に診断を委譲して root cause と修復条件を確定させる（それでも割れないなら `codex:codex-rescue`）。その後、その修復条件だけを載せた packet で fresh `implementer` を起動する。未解決の重大な逸脱、scope 拡大、protected contract の判断、信頼できない validation は workflow を停止する。
+**同一 issue の失敗回数を数える。同じ issue で 2 回修正に失敗したら implementer のループを止め**、roles.md の複雑な read-only 診断へ委譲して root cause と修復条件を確定させる（それでも割れないなら `codex:codex-rescue`）。その後、その修復条件だけを載せた packet で fresh `implementer` を起動する。未解決の重大な逸脱、scope 拡大、protected contract の判断、信頼できない validation は workflow を停止する。
 
 ## final review、snapshot、local verification
 
-全 task の実装と focused validation が終わったら、fresh `reviewer` を fable xhigh で起動する（protected contract、security、migration、並行 / 分散、複数 service、evidence 不足、または fix loop を要した逸脱があった場合は opus xhigh のレンズ並列に上げる）。固定した merge-base からの allowlist 済み差分全体を対象に、該当するレンズだけを使わせる。**これが差分全体を見る唯一の review gate なので、effort を下げたり省略したりしない。** verdict は `APPROVED` / `CHANGES_REQUIRED` / `USER_DECISION_REQUIRED`。
+Controller は共有 `~/.agents/workflows/software_delivery/references/evidence-contract.md` の phase 手順2–3を実施する。final review 前に `load_contract` で registry を検証し、review 後に file hash・contract hash・snapshot と AC 判定を `evidence.json.review` へ束縛する。`check-gates --to LOCAL_VERIFICATION` を通し、不足 check を `evidence-run` で収集する。共有 `~/.agents/workflows/software_delivery/references/review-common.md` と `human_review.py` の検査に従い、v2 LOWは人間待ちなし、MEDIUMはsummary、HIGHはboundaryの明示承認を要求し、v1 legacyは従来承認を維持する。shipping 認可済み composite の引き継ぎは同 reference の D1 に従う。
+
+全 task の実装と focused validation が終わったら、共有 `review-common.md` のリスク基準を適用する。軽微なら controller の self-check、それ以外は必要な fresh `reviewer`（model / effort は roles.md）を起動する。固定した merge-base からの allowlist 済み差分全体を対象に、該当するレンズだけを使わせる。reviewer 0 の場合も同じ AC 表・verdict・snapshot を controller が記録し、review gate 自体は省略しない。 verdict は `APPROVED` / `CHANGES_REQUIRED` / `USER_DECISION_REQUIRED`。
 
 不変の `review_snapshot_id` を snapshot helper で計算する。
 
@@ -80,9 +86,11 @@ python ~/.agents/workflows/software_delivery/scripts/review_snapshot.py \
 
 final review と local verification を同じ snapshot に束縛する。内容・mode・削除・allowlist・base・external-dirty preflight のいずれかが変われば ID が変わり、**両方の gate が無効化されて再実行が必要**になる。別の snapshot の報告を使い回さない。
 
-`APPROVED` の後、固定した絶対 workdir で記録済みの validation command をすべて実行し、可能なら実際の入口（CLI / API / 画面 / メッセージ / デバイス）も 1 つ通す。mock だけで終えない。実行した正確な command、成功、失敗履歴、未検証の範囲を `verification.md` に記録する。実入口 evidence は一度取れば足り、「念のため」の再実行を積まない。失敗は所属する task / review / verification の gate へ戻し、gate の省略を正当化しない。
+`APPROVED` の後、同じ snapshot・入力・環境で取得済みの evidence を確認し、不足する validation command だけを固定した絶対 workdir で実行する。可能なら未確認の実際の入口（CLI / API / 画面 / メッセージ / デバイス）も 1 つ通す。mock だけで終えない。実行した正確な command、成功、失敗履歴、未検証の範囲を `verification.md` に記録する。実入口 evidence は一度取れば足り、「念のため」の再実行を積まない。失敗は所属する task / review / verification の gate へ戻し、gate の省略を正当化しない。
 
-成功したら snapshot を記録して `LOCAL_COMPLETE` へ遷移する。**`execute-plan` の選択は local completion だけを意味する。commit しない。stage・push・MR の作成や変更・merge・release・tag・その他の外部書き込みもしない。** 結果を報告し、次の任意 phase として `ship-change` だけを示す。`execute-and-ship` はこの完了した handoff を、別途記録された shipping 認可がある場合にのみ使える。
+`verification.md` は正準見出し（行頭が `#` の行）2 種を持つ — 失敗履歴側の見出しに `失敗` または `Failure`、未検証範囲側の見出しに `未検証` / `未実施` / `未確認` のいずれかを含める。どちらか欠けると `LOCAL_VERIFICATION → LOCAL_COMPLETE`（および `→ COMMIT`）が `artifact lint failed` で rc=1 になり `context.json` は変わらない（検査の詳細は [state-and-artifacts.md](state-and-artifacts.md)）。
+
+検証成功後、現在提示への明示承認と helper 検査成功を確認して snapshot を記録し、`LOCAL_COMPLETE` へ遷移する。**`execute-plan` の選択は local completion だけを意味する。commit しない。stage・push・MR の作成や変更・merge・release・tag・その他の外部書き込みもしない。** 結果を報告し、次の任意 phase として `ship-change` だけを示す。shipping 認可記録済みの `execute-and-ship` は、この handoff または共有 evidence contract の D1 による `LOCAL_VERIFICATION` handoff を使える。
 
 ## stop と recovery
 

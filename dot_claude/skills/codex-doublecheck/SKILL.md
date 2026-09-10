@@ -238,6 +238,7 @@ raw_output: <貼り付けられた Codex 出力全文>
 - background job の poll (`/codex:status`)
 - 結果回収 (`/codex:result`)
 - キャンセル (`/codex:cancel`)
+- job ごとの永続ファイル記録
 - `/compact` 抑止 (走行中 job との連携)
 - シリアル化 gate (Tier 2 adversarial と Step F.5 の並行衝突回避)
 - 3 周ループ判定 (1 周のみに変更)

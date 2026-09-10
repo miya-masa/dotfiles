@@ -356,7 +356,9 @@ def remove_artifact(
     validate_workflow_id(workflow_id)
     if phase is not None and phase != "ARTIFACT_REMOVE":
         raise ArtifactError("remove requires phase ARTIFACT_REMOVE")
-    if authorize is not None and authorize != "ARTIFACT_REMOVE":
+    if authorize is None:
+        raise ArtifactError("remove requires authorization ARTIFACT_REMOVE")
+    if authorize != "ARTIFACT_REMOVE":
         raise ArtifactError("remove authorization must be ARTIFACT_REMOVE")
     if isinstance(expected_revision, bool) or not isinstance(expected_revision, int) or expected_revision < 0:
         raise ArtifactError("expected revision must be a non-negative integer")
@@ -390,7 +392,14 @@ def remove_artifact(
             f"expected {expected_revision}, current {state_values['artifact_revision']}"
         )
     try:
-        shutil.rmtree(artifact)
+        with state._context_lock(context):
+            current = state.load_context(context)
+            if current != loaded:
+                raise ArtifactError("workflow context changed before removal")
+            state._evaluate_gates(context, current, current)
+            shutil.rmtree(artifact)
+    except state.StateError as exc:
+        raise ArtifactError(f"artifact removal gate failed: {exc}") from exc
     except OSError as exc:
         raise ArtifactError(f"cannot remove workflow artifact: {exc}") from exc
 
@@ -432,6 +441,16 @@ def build_parser() -> argparse.ArgumentParser:
     remove.add_argument("--expected-revision", "--revision", required=True, type=int)
     remove.add_argument("--phase")
     remove.add_argument("--authorize")
+
+    evidence_run = commands.add_parser("evidence-run", help="run one fixed evidence check")
+    evidence_run.add_argument("--context", required=True, type=Path)
+    evidence_run.add_argument("--check", required=True, dest="check_id")
+    evidence_ci = commands.add_parser("evidence-ci", help="collect fixed GitLab CI evidence")
+    evidence_ci.add_argument("--context", required=True, type=Path)
+    evidence_ci.add_argument("--pipeline-id", required=True, type=int)
+    evidence_export = commands.add_parser("evidence-export", help="export local evidence copies")
+    evidence_export.add_argument("--context", required=True, type=Path)
+    evidence_export.add_argument("--output", required=True, type=Path)
     return parser
 
 
@@ -470,6 +489,22 @@ def _run(args: argparse.Namespace) -> None:
             authorize=args.authorize,
             context_path=args.context_path,
         )
+        return
+    if args.command in ("evidence-run", "evidence-ci", "evidence-export"):
+        evidence_path = Path(__file__).with_name("workflow_evidence.py")
+        spec = importlib.util.spec_from_file_location("codex_workflow_evidence", evidence_path)
+        if spec is None or spec.loader is None:
+            raise ArtifactError("workflow evidence collector is unavailable")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        if args.command == "evidence-export":
+            print(json.dumps(module.export_evidence(args.context, args.output), sort_keys=True))
+            return
+        receipts = module.collect_ci(args.context, args.pipeline_id) if args.command == "evidence-ci" else [module.run_check(args.context, args.check_id)]
+        receipt = receipts if args.command == "evidence-ci" else receipts[0]
+        print(json.dumps(receipt, ensure_ascii=False, sort_keys=True))
+        if any(result["status"] != "passed" for item in receipts for result in item["results"]):
+            raise ArtifactError("evidence check did not pass; see receipt")
         return
     raise ArtifactError(f"unknown command: {args.command}")
 

@@ -8,6 +8,8 @@
 
 削除の前に、schema-v1 `context.json` から正確な branch、canonical な worktree path、artifact root、所有関係、対象 workflow を読み取り、**削除対象の resource を先に列挙**する。entry と resume で state と evidence を検証する。MR が merge 済みであることは forge 側（`gh`）で確認し、報告や推測で代替しない。
 
+`identity.artifact_root` が削除対象の worktree path の配下にあるなら、それは stop condition。worktree を消すと workflow の記録そのものが消える。何も削除せず、artifact の場所と経緯を報告して人間の判断を待つ。worktree の中で workflow を開始するとこの状態になる。
+
 ## worktree 内の記録の退避
 
 worktree の中にしか無いファイルは worktree ごと消える。削除の**前に**親リポジトリの `.aidocs/workflows/<workflow-id>/` へ写す。
@@ -20,6 +22,8 @@ worktree の中にしか無いファイルは worktree ごと消える。削除�
 worktree 専用 git dir は `git -C <worktree> rev-parse --path-format=absolute --git-dir` で解決する（`--git-common-dir` は親リポジトリを指すので退避元の判定には使わない）。退避が済んだことを確認してから削除へ進む。退避できないもの（読めない・場所が特定できない）があれば停止して報告する。
 
 ## Worktrunk による削除
+
+削除前に固定artifactの `evidence/cleanup/` へ `workflow_artifact.py evidence-export --context PATH --output <固定ART>/evidence/cleanup` を実行し、`workflow_state.py check-gates --context PATH --to WT_REMOVE` で検査する。共有 `~/.agents/workflows/software_delivery/references/evidence-contract.md` に従い、`human_review.py --context PATH` の現在承認と保持 record の一致も検査する。既存bundleがstaleなら、旧bundleを保持したまま新directoryへexportして検査後に置き換える。成功後にだけ、以下の既存削除手順、Git確認、`WT_REMOVE` 遷移を行う。
 
 repository の primary worktree から、次を**そのまま**実行して stdout を保存する。
 

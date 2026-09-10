@@ -18,11 +18,12 @@ dispatch の前に `context.json` へ `shipping_authorized: true` を記録す�
 ## 進め方
 
 1. まず `execute-plan` を、その直列 TDD・final review・snapshot・local verification の gate 付きで実行する（契約は `~/.claude/skills/execute-plan/references/task-execution.md`）。**実行中は commit しない。**
-2. `LOCAL_COMPLETE` が一致したら、**shipping の可否を改めて質問せず** `ship-change` へ handoff する。`ship-change` は evidence を再検証し、sanitize gate と snapshot equality gate を通してから MR ready まで進む（契約は `~/.claude/skills/ship-change/references/shipping.md`）。
+2. `LOCAL_COMPLETE`、または共有 evidence contract の D1 条件を満たす `LOCAL_VERIFICATION` が一致したら、共有 `~/.agents/workflows/software_delivery/references/review-common.md` のrisk分類（v2 LOWは人間待ちなし、MEDIUMはsummary、HIGHはboundary、v1 legacyは従来承認）と `human_review.py --context PATH` の検査に従って `ship-change` へ handoff する。`ship-change` は evidence を再検証し、sanitize gate と snapshot equality gate を通してから MR ready まで進む（契約は `~/.claude/skills/ship-change/references/shipping.md`）。
 3. 各 phase の resume は最初の未完了 gate から行い、完了済みの外部 write を重複させない。
-4. `LOCAL_COMPLETE` → shipping の内部境界では session 引き継ぎ（`handoff` skill）を提案しない。
+4. local verification → shipping の内部境界では session 引き継ぎ（`handoff` skill）を提案しない。
 5. MR ready を報告する時は session 引き継ぎ（`handoff` skill、既定 new-session）の要否を評価する。基準は `~/.claude/skills/product-discovery/references/session-handoff.md`。
 
 ## この phase が行わないこと
 
 discovery と planning を含まない（未確定の要求は `product-discovery` へ、plan 作成は `implementation-planning` へ戻す）。**merge、post-merge cleanup、release、tag、production 変更、credential / 権限の変更、scope 拡大は認可しない。** 認可の欠落、snapshot の変化、protected contract の判断、外部 CI / runner の失敗、evidence の不一致では停止する。
+証拠の registry、receipt、CI 委譲の詳細は共有の `~/.agents/workflows/software_delivery/references/evidence-contract.md` を正本とする。

@@ -13,7 +13,9 @@ workflow が所有する worktree を削除して workflow を終端させる ph
 
 ## 事前確認
 
-`context.json` から正確な branch、canonical な worktree path、artifact root、所有関係、対象 workflow を読み取り、**削除対象を先に列挙**する。entry と resume で state と evidence を検証する。merge 済みかは forge 側（`gh`）で確認し、報告や推測で代替しない。所有関係の不一致は停止してすべてを保持する。
+`context.json` から正確な branch、canonical な worktree path、artifact root、所有関係、対象 workflow を読み取り、**削除対象を先に列挙**する。entry と resume で state と evidence を検証する。merge 済みかは forge 側（`gh`）で確認し、報告や推測で代替しない。所有関係の不一致は停止してすべてを保持する。`artifact_root` が削除対象の worktree 配下にある場合も停止する（worktree ごと記録が消えるため）。
+
+**削除が失敗する既知の原因を先に潰す。** ① worktree を CWD にしているプロセス（`/proc/*/cwd` の readlink で特定できる）。自分が起動した残存プロセスは kill してよいが、**ユーザーが開いている editor / shell / LSP は kill しない**。閉じてもらってから再開する。② container を root で回す integration test は bind mount 先に root 所有のファイルを残し、`--force` でも削除が途中で止まる。test の停止 command（`make down` 等）を先に済ませておけば残らない。所有者は `find <worktree> ! -uid $(id -u)` で確認する。permission や所有者に起因する失敗を、コード側の問題や workflow の不整合と誤診しない。
 
 ## worktree 内の記録を先に退避する
 
@@ -25,6 +27,8 @@ worktree の中にしか無いファイルは worktree ごと消える。削除�
 古い記録が worktree 側に残っている場合にだけ退避が要る。退避できたことを確認してから削除へ進む。
 
 ## Worktrunk による削除
+
+削除前に固定artifactの `evidence/cleanup/` へ evidence-export を行い、`check-gates --to WT_REMOVE` を通す。stale bundle は別名へ退避して再exportし、成功後に既存の削除・Git確認・遷移へ進む。
 
 repository の primary worktree から、次を**そのまま**実行して stdout を保存する。
 
@@ -45,7 +49,7 @@ git worktree list                 # 対象 path が消えていること
 git branch --list <branch>        # 出力が空であること
 ```
 
-どちらかが残っていれば非終端。原因を報告して停止し、強制削除へ切り替えない。
+どちらかが残っていれば非終端。原因を報告して停止し、強制削除へ切り替えない。**`git worktree prune` も走らせない。** 削除が失敗した直後の prune は git 側の登録だけを消してディレクトリ実体を残し、以後 `worktree remove` も `worktree repair` も効かなくなる（復旧手段が `rm -rf` だけになり、それも deny される）。busy を解消してから同じ command を成功させる。
 
 ## 終端
 

@@ -207,8 +207,22 @@ def test_remove_requires_terminal_phase_exact_revision_and_root(git_repo: Path) 
     before = context_path(git_repo).read_bytes()
 
     for args in (
-        ("--expected-revision", "0", "--phase", "LOCAL_COMPLETE"),
-        ("--expected-revision", "1", "--phase", "ARTIFACT_REMOVE"),
+        (
+            "--expected-revision",
+            "0",
+            "--phase",
+            "LOCAL_COMPLETE",
+            "--authorize",
+            "ARTIFACT_REMOVE",
+        ),
+        (
+            "--expected-revision",
+            "1",
+            "--phase",
+            "ARTIFACT_REMOVE",
+            "--authorize",
+            "ARTIFACT_REMOVE",
+        ),
     ):
         result = run_cli(git_repo, "remove", "--workflow-id", "demo-workflow", *args)
         assert result.returncode != 0
@@ -235,6 +249,8 @@ def test_remove_requires_terminal_phase_exact_revision_and_root(git_repo: Path) 
             "0",
             "--phase",
             "ARTIFACT_REMOVE",
+            "--authorize",
+            "ARTIFACT_REMOVE",
         ],
         text=True,
         capture_output=True,
@@ -253,22 +269,26 @@ def test_remove_requires_explicit_artifact_remove_authorization(git_repo: Path) 
         json.dumps(context, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
-    result = run_cli(
-        git_repo,
-        "remove",
-        "--workflow-id",
-        "demo-workflow",
-        "--expected-revision",
-        "0",
-        "--authorize",
-        "WRONG_GATE",
-    )
+    before = context_path(git_repo).read_bytes()
+    for authorization in (None, "WRONG_GATE"):
+        args = [
+            "--workflow-id",
+            "demo-workflow",
+            "--expected-revision",
+            "0",
+            "--phase",
+            "ARTIFACT_REMOVE",
+        ]
+        if authorization is not None:
+            args.extend(("--authorize", authorization))
+        result = run_cli(git_repo, "remove", *args)
 
-    assert result.returncode != 0
-    assert artifact_root(git_repo).exists()
+        assert result.returncode != 0
+        assert artifact_root(git_repo).exists()
+        assert context_path(git_repo).read_bytes() == before
 
 
-def test_remove_deletes_exactly_one_owned_workflow_directory(git_repo: Path) -> None:
+def test_remove_rejects_handwritten_terminal_state_without_retained_evidence(git_repo: Path) -> None:
     assert init_artifact(git_repo, "demo-workflow").returncode == 0
     assert init_artifact(git_repo, "keep-workflow").returncode == 0
     context_path(git_repo, "demo-workflow").write_text(
@@ -305,8 +325,9 @@ def test_remove_deletes_exactly_one_owned_workflow_directory(git_repo: Path) -> 
         "ARTIFACT_REMOVE",
     )
 
-    assert result.returncode == 0, result.stderr
-    assert not artifact_root(git_repo, "demo-workflow").exists()
+    assert result.returncode != 0
+    assert "artifact removal gate failed" in result.stderr
+    assert artifact_root(git_repo, "demo-workflow").exists()
     assert keep.exists()
     assert (keep / "user-note.txt").read_text(encoding="utf-8") == "preserve\n"
 

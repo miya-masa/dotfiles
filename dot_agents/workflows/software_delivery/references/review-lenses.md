@@ -10,17 +10,21 @@ spec / plan / 診断 brief / コード差分をレビューする時に使うレ
 
 | レンズ | 観点 | 起動条件 |
 |---|---|---|
-| Completeness | 決定表、状態遷移、境界、エラー、互換性、AC。未定義動作を探す | 基本 |
+| Completeness | 決定表、状態遷移、境界、エラー、互換性、AC。未定義動作を探す。`## 外部サーフェス` 節の網羅性と本文との一致 | 基本 |
 | Soundness | 不変条件、依存、時間軸。論理破綻と race を探す | 基本 |
 | Operability | 互換性、移行、rollback、観測性、test の検証可能性 | 基本 |
-| Simplicity | scope creep、不要な要件・抽象化。要求されていないものが入っていないか | 基本 |
+| Simplicity | scope creep、不要な要件・抽象化。要求されていないものが入っていないか。加えて**解法そのものの代替**（同じ outcome をより小さい変更で得られないか）と、**不要なエッジケース・状態・分岐の削除または延期** | 基本 |
 | Adversarial / Risk | 敵対的検証の専任。spec の中心的主張・前提・採用判断を「間違っている前提」で反証し、反例を一次情報に接地して示す。信頼境界に触れる spec では攻撃者視点でバイパスと悪用も探す | protected contract、security、migration、並行・分散状態、または根拠の薄い中心的主張がある時 |
+
+`## 外部サーフェス` 節の観点は spec 相当 artifact（`spec.md` / `tasks/01-short-path.md`）に限る。plan と診断 brief には課さない。
 
 plan に適用する時は、対象を「spec の各要件に対応する task があるか / decision-complete か / 分割と順序 / 検証手段 / 中断耐性」に読み替える（plan 固有の観点は `spec-and-plan.md` 側の plan 契約にある）。
 
 依頼例:
 
-> 対象 spec `<path>` を Completeness レンズだけで fresh review してください。`analysis-techniques.md` の決定表、状態遷移、境界を使い、未定義動作を探してください。共通制約に従い、各 Gap に v1 必要性（`v1 必須 / v1.x で可 / 将来拡張で十分`）を付けてください。
+> 対象 spec `<path>` を Completeness レンズだけで fresh review してください。`analysis-techniques.md` の決定表、状態遷移、境界を使い、未定義動作を探してください。`## 外部サーフェス` 節の網羅性と本文との一致も見てください。共通制約に従って報告してください。
+
+> 対象 spec `<path>` を Simplicity レンズだけで fresh review してください。scope creep と不要な抽象化に加え、この spec が解こうとしている outcome をより小さい変更で得られないか（既存の集約点・既存 API・既存機構・既存データ経路の流用）と、不要なエッジケース・状態・分岐を削除または後続リリースへ延期できないかを見てください。spec 本文から「新規の API / エンドポイント / テーブル / migration / 設定項目 / 常駐機構（worker、poller、cron、daemon）を増やす」または「既存機構に分岐・状態・retry・タイムアウトを積み増す」と読み取れる時は、**代替案を最低 1 案 Finding に含めてください**。代替案には既存機構の一次根拠（`file:line`）と、その代替で維持される outcome / protected contract を必ず添えます（これが無い代替案は報告しない）。spec 本文から判定できない時はこの義務を課しません。成立する代替が無い場合は Finding ではなく、報告末尾の `反証を試みたが壊せなかった点` に「代替なし」を根拠付きで書いてください。共通制約に従って報告してください。
 
 > 対象 spec `<path>` を Adversarial レンズだけで fresh review してください。この spec は間違っているという前提で、中心的主張・前提・採用判断への反証を試み、反例を spec 本文と一次情報に接地して示してください。信頼境界に触れる場合は `analysis-techniques.md` の攻撃者視点でバイパスと悪用も探してください。共通制約に従って報告してください。
 

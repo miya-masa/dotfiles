@@ -1,8 +1,8 @@
-# Immutable review snapshot
+# 不変レビュー・スナップショット
 
-`review_snapshot.py` binds review, local verification, and later staging to one
-allowlisted intended tree. It reads Git metadata and the selected worktree or
-index; it never writes the index.
+`review_snapshot.py` はreview、ローカル検証、後続のstageを一つのallowlist対象の
+意図したtreeへ束ねます。Gitメタデータと選択したworktreeまたはindexを読み取り、
+indexへ書き込みません。
 
 ```text
 python review_snapshot.py \
@@ -13,14 +13,13 @@ python review_snapshot.py \
   --output MANIFEST
 ```
 
-The allowlist is version `1` and contains normalized repository-relative file
-paths. Duplicate paths, `..` escapes, absolute paths, trailing separators,
-symlinked parents, and `.git` metadata paths are rejected. A full resolved Git
-commit ID is required; an abbreviated commit is rejected.
+allowlistはversion `1`で、正規化したリポジトリ相対のfile pathを含みます。重複path、
+`..` escape、絶対path、末尾separator、シンボリックリンクのparent、`.git`メタデータ
+pathは拒否します。完全に解決されたGit commit IDが必要で、省略形commitは拒否します。
 
-## Manifest and identity
+## マニフェストとidentity
 
-The output manifest is written atomically and has this exact shape:
+出力manifestはatomicに書き込まれ、次のexact shapeになります。
 
 ```json
 {
@@ -36,20 +35,19 @@ The output manifest is written atomically and has this exact shape:
 }
 ```
 
-Entries are sorted by normalized path. `present` records the selected final
-tree's mode and raw bytes (symlinks hash their link target); `deleted` retains
-the removed base entry's mode and content hash where it has a blob; `absent`
-means neither the base tree nor the selected tree contains the path.
+entryは正規化path順に並びます。`present`は選択した最終treeのmodeとraw byteを記録
+します（シンボリックリンクはlink targetをhashします）。`deleted`は削除されたbase
+entryにblobがあれば、そのmodeとcontent hashを保持します。`absent`はbase treeにも
+選択treeにもpathがないことを示します。
 
-The snapshot ID is `sha256:<hex>` over the UTF-8 bytes of the manifest encoded
-as canonical JSON (`sort_keys=True`, compact separators, no trailing newline).
-The source selector is not part of the manifest, so an equivalent worktree and
-index tree produce the same ID. Changing the base commit, allowlisted content,
-mode, or deletion changes the ID.
+snapshot IDは、canonical JSON（`sort_keys=True`、compact separator、末尾改行なし）で
+encodeしたmanifestのUTF-8 byteに対する`sha256:<hex>`です。source selectorは
+manifestの一部ではないため、同値のworktreeとindex treeは同じIDを生成します。base
+commit、allowlist対象content、mode、または削除を変えるとIDも変わります。
 
-## Preflight and equality gate
+## preflightと一致ゲート
 
-Standard output is one JSON object containing the ID and preflight result:
+標準出力はIDとpreflight結果を含む一つのJSON objectです。
 
 ```json
 {
@@ -62,14 +60,12 @@ Standard output is one JSON object containing the ID and preflight result:
 }
 ```
 
-Dirty or staged paths outside the allowlist are reported separately and are
-excluded from the identity. They still block shipping. In `index` mode, any
-external staged path is a hard error (and no manifest is replaced); external
-unstaged paths remain observable as a blocking preflight. The requested
-manifest is replaced only after all validation and hashing succeeds, using a
-same-directory temporary file and `os.replace`.
+allowlist外のdirtyまたはstaged pathは別に報告し、identityから除外しますが、出荷は
+引き続きblockします。`index` modeでは外部staged pathが一つでもあればhard error
+（manifestは置き換えない）です。外部unstaged pathはblocking preflightとして観測
+可能なままです。要求されたmanifestは、すべての検証とhashingが成功した後だけ、
+同じdirectoryの一時fileと`os.replace`を使って置き換えます。
 
-Immediately before staging and immediately before committing, recompute the
-snapshot with the same full base commit and allowlist. Proceed only when the
-new ID exactly equals the ID recorded by final review and local verification;
-otherwise invalidate those gates and rerun them for the changed snapshot.
+stage直前とcommit直前に、同じ完全なbase commitとallowlistでsnapshotを再計算します。
+新しいIDがfinal reviewとローカル検証に記録されたIDと完全一致する場合だけ進み、
+それ以外では両方のgateを無効化して、変更後snapshotで再実行します。

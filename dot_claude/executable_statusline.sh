@@ -111,13 +111,4 @@ for i in "${!PARTS[@]}"; do
     OUTPUT="$OUTPUT · ${PARTS[$i]}"
   fi
 done
-# --- session-insights: 未処理 proposal バッジ ---
-SI_PROPOSALS_DIR="$HOME/.claude/data/session-insights/proposals"
-SI_BADGE=""
-if [[ -d "$SI_PROPOSALS_DIR" ]]; then
-  si_count=$(find "$SI_PROPOSALS_DIR" -maxdepth 1 -name '*.md' -type f 2>/dev/null | wc -l | tr -d ' ')
-  if [[ "$si_count" -gt 0 ]]; then
-    SI_BADGE=" 📋${si_count}"
-  fi
-fi
-echo "${OUTPUT}${SI_BADGE}"
+echo "${OUTPUT}"

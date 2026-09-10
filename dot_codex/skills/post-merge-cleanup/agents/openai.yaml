@@ -1,7 +1,7 @@
 interface:
-  display_name: "Post-Merge Cleanup"
-  short_description: "merge済みworkflowのworktreeとartifactを安全に片付ける"
-  default_prompt: "Use $post-merge-cleanup to verify the merge and safely remove this workflow's owned resources."
+  display_name: "マージ後のクリーンアップ"
+  short_description: "マージ済みworkflowのworktreeとartifactを安全に片付ける"
+  default_prompt: "このworkflowの所有リソースのマージを確認し、安全に削除するには $post-merge-cleanup を使用してください。"
 
 policy:
   allow_implicit_invocation: false

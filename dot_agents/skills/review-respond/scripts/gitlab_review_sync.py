@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import contextlib
 import hashlib
-import html
 import json
 import os
 import re
@@ -44,6 +43,15 @@ _CREDENTIAL_RE = re.compile(
     r"(?:access|api|private)[_-]?token\s*[:=])",
     re.IGNORECASE,
 )
+_CATEGORY_LABELS = {"must": "MUST", "imo": "IMO", "q": "Q"}
+_REPLY_HEADER = "[AIによる回答]"
+_ZWSP = "\u200b"
+# 旧書式（marker 付き）で既に同期済みの thread を読み取るためだけに使う。
+# 新規投稿には使わない。
+_LEGACY_MARKER = "<!-- review-respond:"
+_MENTION_RE = re.compile(r"(?<![A-Za-z0-9_])@(?=[A-Za-z0-9_])")
+_LEADING_SLASH_RE = re.compile(r"(?m)^([ \t]*)/(?=[A-Za-z])")
+_PHASE_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
 
 
 def _redact(text: str) -> str:
@@ -263,6 +271,20 @@ def review_lock(review_dir: Path) -> Iterator[None]:
             pass
 
 
+def _apply_entry_patch(
+    yaml_path: Path,
+    entry_id: str,
+    patch: dict[str, Any],
+    runner: Runner,
+) -> dict[str, Any]:
+    """`.review/.lock` を既に保持している呼び出し元だけが使う lock なしの patch。"""
+    document = load_review_document(yaml_path, runner)
+    entry = find_entry(document, entry_id)
+    _deep_merge(entry, patch)
+    _write_review_document(yaml_path, document, runner)
+    return entry
+
+
 def yaml_patch(
     yaml_path: Path,
     entry_id: str,
@@ -272,11 +294,32 @@ def yaml_patch(
     if not isinstance(patch, dict):
         raise SyncError("YAML patch must be a JSON object")
     with review_lock(yaml_path.parent):
-        document = load_review_document(yaml_path, runner)
-        entry = find_entry(document, entry_id)
-        _deep_merge(entry, patch)
-        _write_review_document(yaml_path, document, runner)
-    return find_entry(document, entry_id)
+        return _apply_entry_patch(yaml_path, entry_id, patch, runner)
+
+
+def _entry_note_ids(entry: dict[str, Any], *, include_replies: bool = True) -> set[Any]:
+    pinned = entry.get("gitlab")
+    if not isinstance(pinned, dict):
+        return set()
+    note_ids = set()
+    if pinned.get("original_note_id") is not None:
+        note_ids.add(pinned["original_note_id"])
+    replies = pinned.get("replies")
+    if include_replies and isinstance(replies, dict):
+        note_ids.update(value for value in replies.values() if value is not None)
+    return note_ids
+
+
+def _other_entry_note_ids(document: dict[str, Any] | None, entry_id: Any) -> set[Any]:
+    """他 entry が既に pin 済みの note ID。本文一致だけでの取り違えを防ぐ。"""
+    if document is None:
+        return set()
+    note_ids: set[Any] = set()
+    for item in document.get("reviews", []):
+        if item.get("id") == entry_id:
+            continue
+        note_ids |= _entry_note_ids(item)
+    return note_ids
 
 
 def migrate_legacy_entry(
@@ -655,48 +698,40 @@ def validate_pinned_identity(
 
 
 def _safe_fragment(text: str) -> str:
+    """Markdown はそのまま通し、quick action と mention だけ無力化する。
+
+    HTML entity は使えない。GitLab は markdown を描画した後のtext nodeから
+    mentionを拾うため、`&#64;` は描画時に `@` へ戻って mention として成立し、
+    code span 内では entity が literal 表示される。zero-width space は
+    quick action抽出（raw body）とmention抽出（描画後）の両方で一致を壊し、
+    表示は元のまま保たれる。
+    """
     if _CREDENTIAL_RE.search(text):
         raise SyncError("Outbound review text appears to contain a credential")
     path_probe = _SAFE_NO_ARGUMENT_QUICK_ACTION_RE.sub("", text)
     if _LOCAL_PATH_RE.search(path_probe):
         raise SyncError("Outbound review text contains a local absolute path")
-    escaped = html.escape(text, quote=False)
-    return escaped.replace("@", "&#64;").replace("/", "&#47;")
+    neutralized = _LEADING_SLASH_RE.sub(lambda m: f"{m.group(1)}/{_ZWSP}", text)
+    return _MENTION_RE.sub(f"@{_ZWSP}", neutralized)
 
 
-def operation_marker(entry_id: str, phase: str, text: str) -> str:
-    marker_component = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}")
-    if not marker_component.fullmatch(entry_id) or not marker_component.fullmatch(
-        phase
-    ):
-        raise SyncError("Review marker identity is invalid")
-    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()[:20]
-    return f"<!-- review-respond:{entry_id}:{phase}:{digest} -->"
-
-
-def render_original(entry: dict[str, Any]) -> tuple[str, str]:
+def render_original(entry: dict[str, Any]) -> str:
     category = entry.get("category") or ("imo" if "severity" in entry else "imo")
-    if category not in {"must", "imo", "q"}:
+    if category not in _CATEGORY_LABELS:
         raise SyncError("Review category must be must, imo, or q")
     comment = str(entry.get("comment", "")).rstrip()
     if not comment:
         raise SyncError("Review comment is empty")
-    marker = operation_marker(entry["id"], "original", comment)
-    body = (
-        f"**Local review [{category}]**\n\n"
-        f"<pre>{_safe_fragment(comment)}</pre>\n\n"
-        f"{marker}"
-    )
-    return body, marker
+    return f"[{_CATEGORY_LABELS[category]}] {_safe_fragment(comment)}"
 
 
-def render_reply(entry_id: str, phase: str, text: str) -> tuple[str, str]:
+def render_reply(phase: str, text: str) -> str:
+    if not _PHASE_RE.fullmatch(phase):
+        raise SyncError("Review phase identity is invalid")
     text = text.rstrip()
     if not text:
         raise SyncError("Reply text is empty")
-    marker = operation_marker(entry_id, phase, text)
-    body = f"**AI review response**\n\n<pre>{_safe_fragment(text)}</pre>\n\n{marker}"
-    return body, marker
+    return f"{_REPLY_HEADER}\n\n{_safe_fragment(text)}"
 
 
 def _discussions(
@@ -714,41 +749,39 @@ def _current_user(client: GlabClient) -> dict[str, Any]:
     return client.api("user")
 
 
-def _find_marker(
+def _find_body(
     discussions: list[dict[str, Any]],
-    marker: str,
-) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    matches: list[tuple[dict[str, Any], dict[str, Any]]] = []
-    for discussion in discussions:
-        for note in discussion.get("notes", []):
-            if marker in (note.get("body") or ""):
-                matches.append((discussion, note))
-    return matches
-
-
-def _find_marker_prefix(
-    discussions: list[dict[str, Any]],
-    marker_prefix: str,
-) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    matches: list[tuple[dict[str, Any], dict[str, Any]]] = []
-    for discussion in discussions:
-        for note in discussion.get("notes", []):
-            if marker_prefix in (note.get("body") or ""):
-                matches.append((discussion, note))
-    return matches
-
-
-def _reject_conflicting_phase(
-    discussions: list[dict[str, Any]],
+    body: str,
     *,
-    entry_id: str,
-    phase: str,
-    exact_marker: str,
-) -> None:
-    prefix = f"<!-- review-respond:{entry_id}:{phase}:"
-    matches = _find_marker_prefix(discussions, prefix)
-    if any(exact_marker not in (note.get("body") or "") for _, note in matches):
-        raise SyncError(f"GitLab already contains different content for phase {phase}")
+    exclude_note_ids: set[Any] | None = None,
+) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """本文の完全一致で既存noteを探す。他用途にpin済みのnoteは除外する。"""
+    excluded = exclude_note_ids or set()
+    matches: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    for discussion in discussions:
+        for note in discussion.get("notes", []):
+            if note.get("id") in excluded:
+                continue
+            if (note.get("body") or "") == body:
+                matches.append((discussion, note))
+    return matches
+
+
+def _is_legacy_original(note_body: str, entry_id: Any) -> bool:
+    return f"{_LEGACY_MARKER}{entry_id}:original:" in note_body
+
+
+def _find_pinned_note(
+    discussions: list[dict[str, Any]],
+    note_id: Any,
+) -> tuple[dict[str, Any], dict[str, Any]] | None:
+    if note_id is None:
+        return None
+    for discussion in discussions:
+        for note in discussion.get("notes", []):
+            if note.get("id") == note_id:
+                return discussion, note
+    raise SyncError("Pinned note is missing from the merge request")
 
 
 def _validate_owned_note(
@@ -761,7 +794,7 @@ def _validate_owned_note(
     allow_missing_position: bool = False,
 ) -> None:
     if note.get("body") != body or note.get("author", {}).get("id") != user_id:
-        raise SyncError("Existing idempotency marker belongs to a different note")
+        raise SyncError("Existing note has a different author or different content")
     if position is None:
         if note.get("position") is not None:
             raise SyncError("Existing overview note unexpectedly has a diff position")
@@ -772,7 +805,7 @@ def _validate_owned_note(
     elif not _contains_mapping(actual_position, position):
         raise SyncError("Existing note position differs from the captured position")
     if discussion.get("individual_note"):
-        raise SyncError("Existing marker is not in a resolvable discussion")
+        raise SyncError("Existing note is not in a resolvable discussion")
 
 
 def _contains_mapping(actual: Any, expected: Any) -> bool:
@@ -792,7 +825,6 @@ def _validate_pinned_discussion(
     discussion_id: str,
     discussion: dict[str, Any],
     body: str,
-    marker: str,
     user_id: int,
 ) -> dict[str, Any]:
     pinned = entry.get("gitlab")
@@ -800,14 +832,20 @@ def _validate_pinned_discussion(
         raise SyncError(
             "Discussion does not match the review entry's pinned discussion"
         )
-    matches = _find_marker([discussion], marker)
-    if len(matches) != 1:
+    notes = [
+        note
+        for note in discussion.get("notes", [])
+        if note.get("id") == pinned.get("original_note_id")
+    ]
+    if len(notes) != 1:
         raise SyncError("Pinned discussion does not contain the original review note")
-    matched_discussion, note = matches[0]
-    if pinned.get("original_note_id") != note.get("id"):
-        raise SyncError("Discussion does not contain the pinned original note")
+    note = notes[0]
+    pinned_body = note.get("body") or ""
+    if _is_legacy_original(pinned_body, entry.get("id")):
+        # 旧書式で投稿済みの thread は書き換えず、reply / resolve だけ継続する。
+        body = pinned_body
     _validate_owned_note(
-        matched_discussion,
+        discussion,
         note,
         body=body,
         user_id=user_id,
@@ -816,10 +854,55 @@ def _validate_pinned_discussion(
     return note
 
 
+def _persist_original_pin(
+    yaml_path: Path | None,
+    entry: dict[str, Any],
+    discussion: dict[str, Any],
+    note: dict[str, Any],
+    *,
+    mode: str,
+    runner: Runner,
+) -> None:
+    """POST 直後に同じ lock 内で pin を書き、YAML未更新の窓を作らない。"""
+    if yaml_path is None:
+        return
+    _apply_entry_patch(
+        yaml_path,
+        entry["id"],
+        {
+            "gitlab": {
+                "discussion_id": discussion["id"],
+                "original_note_id": note["id"],
+                "mode": mode,
+            }
+        },
+        runner,
+    )
+
+
+def _persist_reply_pin(
+    yaml_path: Path | None,
+    entry: dict[str, Any],
+    phase: str,
+    note: dict[str, Any],
+    *,
+    runner: Runner,
+) -> None:
+    if yaml_path is None:
+        return
+    _apply_entry_patch(
+        yaml_path,
+        entry["id"],
+        {"gitlab": {"replies": {phase: note["id"]}}},
+        runner,
+    )
+
+
 def post_original(
     *,
     repo_root: Path,
     entry: dict[str, Any],
+    yaml_path: Path | None = None,
     client: GlabClient,
     target_project_id: int,
     mr_iid: int,
@@ -828,7 +911,7 @@ def post_original(
     confirmed_legacy: bool,
     runner: Runner,
 ) -> dict[str, Any]:
-    body, marker = render_original(entry)
+    body = render_original(entry)
     with review_lock(repo_root / ".review"):
         mr, _ = _mr_context(client, target_project_id, mr_iid)
         validate_pinned_identity(
@@ -858,15 +941,38 @@ def post_original(
 
         user = _current_user(client)
         discussions = _discussions(client, target_project_id, mr_iid)
-        _reject_conflicting_phase(
-            discussions,
-            entry_id=entry["id"],
-            phase="original",
-            exact_marker=marker,
+        document = (
+            load_review_document(yaml_path, runner) if yaml_path is not None else None
         )
-        matches = _find_marker(discussions, marker)
+        if document is not None:
+            entry = find_entry(document, entry["id"])
+        pinned = entry.get("gitlab") if isinstance(entry.get("gitlab"), dict) else {}
+        reserved = _other_entry_note_ids(document, entry.get("id"))
+        pinned_match = _find_pinned_note(discussions, pinned.get("original_note_id"))
+        if pinned_match is not None:
+            discussion, note = pinned_match
+            if (
+                pinned.get("discussion_id") is not None
+                and discussion.get("id") != pinned.get("discussion_id")
+            ):
+                raise SyncError("Pinned original note is in a different discussion")
+            pinned_body = note.get("body") or ""
+            legacy = _is_legacy_original(pinned_body, entry.get("id"))
+            if not legacy and pinned_body != body:
+                raise SyncError(
+                    "GitLab already contains different content for this review entry"
+                )
+            _validate_owned_note(
+                discussion,
+                note,
+                body=pinned_body if legacy else body,
+                user_id=user["id"],
+                position=position,
+            )
+            return _operation_result(discussion, note, reused=True)
+        matches = _find_body(discussions, body, exclude_note_ids=reserved)
         if len(matches) > 1:
-            raise SyncError("Multiple GitLab notes contain the same idempotency marker")
+            raise SyncError("Multiple GitLab notes contain the same review comment")
         if matches:
             discussion, note = matches[0]
             _validate_owned_note(
@@ -875,6 +981,9 @@ def post_original(
                 body=body,
                 user_id=user["id"],
                 position=position,
+            )
+            _persist_original_pin(
+                yaml_path, entry, discussion, note, mode=mode, runner=runner
             )
             return _operation_result(discussion, note, reused=True)
 
@@ -889,7 +998,7 @@ def post_original(
         fetched = client.api(
             f"projects/{target_project_id}/merge_requests/{mr_iid}/discussions/{created['id']}"
         )
-        matches = _find_marker([fetched], marker)
+        matches = _find_body([fetched], body, exclude_note_ids=reserved)
         if len(matches) != 1:
             raise SyncError("Created discussion could not be verified")
         discussion, note = matches[0]
@@ -900,12 +1009,16 @@ def post_original(
             user_id=user["id"],
             position=position,
         )
+        _persist_original_pin(
+            yaml_path, entry, discussion, note, mode=mode, runner=runner
+        )
         return _operation_result(discussion, note, reused=False)
 
 
 def post_reply(
     *,
     repo_root: Path,
+    yaml_path: Path | None = None,
     client: GlabClient,
     target_project_id: int,
     mr_iid: int,
@@ -914,10 +1027,10 @@ def post_reply(
     entry: dict[str, Any],
     phase: str,
     text: str,
+    runner: Runner,
 ) -> dict[str, Any]:
-    entry_id = entry["id"]
-    body, marker = render_reply(entry_id, phase, text)
-    original_body, original_marker = render_original(entry)
+    body = render_reply(phase, text)
+    original_body = render_original(entry)
     with review_lock(repo_root / ".review"):
         mr, _ = _mr_context(client, target_project_id, mr_iid)
         validate_pinned_identity(
@@ -931,6 +1044,11 @@ def post_reply(
         if mr["sha"] != expected_head_sha:
             raise SyncError("Merge request HEAD changed before replying")
         user = _current_user(client)
+        document = (
+            load_review_document(yaml_path, runner) if yaml_path is not None else None
+        )
+        if document is not None:
+            entry = find_entry(document, entry["id"])
         discussion = client.api(
             f"projects/{target_project_id}/merge_requests/{mr_iid}/discussions/{discussion_id}"
         )
@@ -939,18 +1057,38 @@ def post_reply(
             discussion_id=discussion_id,
             discussion=discussion,
             body=original_body,
-            marker=original_marker,
             user_id=user["id"],
         )
-        _reject_conflicting_phase(
+        pinned = entry.get("gitlab") if isinstance(entry.get("gitlab"), dict) else {}
+        replies = pinned.get("replies") if isinstance(pinned.get("replies"), dict) else {}
+        reserved = _other_entry_note_ids(document, entry.get("id")) | {
+            note_id
+            for recorded_phase, note_id in replies.items()
+            if recorded_phase != phase and note_id is not None
+        }
+        recorded_match = _find_pinned_note([discussion], replies.get(phase))
+        if recorded_match is not None:
+            _, note = recorded_match
+            if (note.get("body") or "") != body:
+                raise SyncError(
+                    f"GitLab already contains different content for phase {phase}"
+                )
+            _validate_owned_note(
+                discussion,
+                note,
+                body=body,
+                user_id=user["id"],
+                position=original_note.get("position"),
+                allow_missing_position=True,
+            )
+            return _operation_result(discussion, note, reused=True)
+        matches = _find_body(
             [discussion],
-            entry_id=entry_id,
-            phase=phase,
-            exact_marker=marker,
+            body,
+            exclude_note_ids=reserved | {original_note.get("id")},
         )
-        matches = _find_marker([discussion], marker)
         if len(matches) > 1:
-            raise SyncError("Multiple replies contain the same idempotency marker")
+            raise SyncError("Multiple replies contain the same body")
         if matches:
             _, note = matches[0]
             _validate_owned_note(
@@ -961,6 +1099,7 @@ def post_reply(
                 position=original_note.get("position"),
                 allow_missing_position=True,
             )
+            _persist_reply_pin(yaml_path, entry, phase, note, runner=runner)
             return _operation_result(discussion, note, reused=True)
 
         note = client.api(
@@ -971,7 +1110,11 @@ def post_reply(
         fetched = client.api(
             f"projects/{target_project_id}/merge_requests/{mr_iid}/discussions/{discussion_id}"
         )
-        matches = _find_marker([fetched], marker)
+        matches = _find_body(
+            [fetched],
+            body,
+            exclude_note_ids=reserved | {original_note.get("id")},
+        )
         if len(matches) != 1:
             raise SyncError("Created reply could not be verified")
         _, verified_note = matches[0]
@@ -983,6 +1126,7 @@ def post_reply(
             position=original_note.get("position"),
             allow_missing_position=True,
         )
+        _persist_reply_pin(yaml_path, entry, phase, verified_note, runner=runner)
         return _operation_result(fetched, verified_note, reused=False)
 
 
@@ -995,9 +1139,10 @@ def resolve_discussion(
     discussion_id: str,
     expected_head_sha: str,
     entry: dict[str, Any],
+    yaml_path: Path | None = None,
+    runner: Runner | None = None,
 ) -> dict[str, Any]:
-    entry_id = entry["id"]
-    original_body, original_marker = render_original(entry)
+    original_body = render_original(entry)
     with review_lock(repo_root / ".review"):
         mr, _ = _mr_context(client, target_project_id, mr_iid)
         validate_pinned_identity(
@@ -1011,6 +1156,8 @@ def resolve_discussion(
         if mr["sha"] != expected_head_sha:
             raise SyncError("Merge request HEAD changed before resolving")
         user = _current_user(client)
+        if yaml_path is not None and runner is not None:
+            entry = find_entry(load_review_document(yaml_path, runner), entry["id"])
         discussion = client.api(
             f"projects/{target_project_id}/merge_requests/{mr_iid}/discussions/{discussion_id}"
         )
@@ -1019,15 +1166,17 @@ def resolve_discussion(
             discussion_id=discussion_id,
             discussion=discussion,
             body=original_body,
-            marker=original_marker,
             user_id=user["id"],
         )
-        marker_prefix = f"<!-- review-respond:{entry_id}:"
+        # 本文の書式では判定しない。人間が同じアカウントで `[Q] ...` と返した
+        # 場合に見逃すため、helper が pin した note ID だけを自分の note とみなす。
+        known_note_ids = _entry_note_ids(entry)
         for note in discussion.get("notes", []):
             if note.get("system"):
                 continue
-            if note.get("author", {}).get("id") != user["id"] or marker_prefix not in (
-                note.get("body") or ""
+            if (
+                note.get("author", {}).get("id") != user["id"]
+                or note.get("id") not in known_note_ids
             ):
                 raise SyncError(
                     "Discussion has an unexpected human reply; manual decision is required"
@@ -1189,6 +1338,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 result = post_original(
                     repo_root=repo_root,
                     entry=_entry_from_args(args, runner),
+                    yaml_path=Path(args.yaml).resolve(),
                     client=client,
                     target_project_id=args.target_project_id,
                     mr_iid=args.mr_iid,
@@ -1202,6 +1352,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 entry = _entry_from_args(args, runner)
                 result = post_reply(
                     repo_root=repo_root,
+                    yaml_path=Path(args.yaml).resolve(),
                     client=client,
                     target_project_id=args.target_project_id,
                     mr_iid=args.mr_iid,
@@ -1210,6 +1361,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                     entry=entry,
                     phase=args.phase,
                     text=text,
+                    runner=runner,
                 )
             elif args.command == "resolve":
                 entry = _entry_from_args(args, runner)
@@ -1221,6 +1373,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                     discussion_id=args.discussion_id,
                     expected_head_sha=args.expected_head_sha,
                     entry=entry,
+                    yaml_path=Path(args.yaml).resolve(),
+                    runner=runner,
                 )
             else:
                 raise AssertionError(f"Unhandled command: {args.command}")

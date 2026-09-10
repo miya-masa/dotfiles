@@ -28,9 +28,11 @@ verify = true
 pager = "delta --paging=never"
 
 # Copy gitignored files (node_modules, build artifacts, etc.) to new worktrees
-# Exclude heavy caches that should be rebuilt
+# Exclude heavy caches that should be rebuilt, and .aidocs/ whose workflow
+# artifact is the single state authority in the parent repository: a copy goes
+# stale as the workflow advances and splits the state.
 [step.copy-ignored]
-exclude = [".cache/", ".turbo/", ".omc/"]
+exclude = [".cache/", ".turbo/", ".omc/", ".aidocs/"]
 
 # Global hooks stay in post-start. Copy must finish before an ignored .envrc can be allowed.
 [[post-start]]

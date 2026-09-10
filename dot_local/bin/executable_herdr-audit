@@ -1,0 +1,264 @@
+#!/usr/bin/env python3
+# 使い方: herdr-audit [--age N] [--json]
+# herdr の全 workspace を棚卸しして 1 行 1 workspace の TSV を出す。hclean の入力。
+#
+# status は「閉じてよいか」の自己判定:
+#   ok    生成 AI も走行プロセスも無く、未コミット/未 push も無く、--age 日以上経過
+#   park  park レコードがある（閉じる前提で状態を退避済み）
+#   WARN  AI は居ないが、未コミット・未 push・新しい等の引っかかりがある
+#   busy  生成 AI が居る、または shell 以外のプロセスが前面で走っている
+#
+# 出力: status \t ws_id \t age \t panes \t flags \t label \t cwd
+import argparse
+import json
+import os
+import socket
+import subprocess
+import sys
+import time
+
+SHELLS = {"zsh", "bash", "sh", "fish", "dash"}
+PARKED_DIR = os.path.expanduser("~/.claude/data/parked")
+
+
+class Client:
+    """1 接続を張り直しながら NDJSON リクエストを順に流す最小クライアント。
+
+    pane.process_info を pane ごとに CLI で呼ぶと 54 workspace で数百回の
+    プロセス起動になるため、socket を直接使う。"""
+
+    def __init__(self):
+        self.socket_path = os.environ.get("HERDR_SOCKET_PATH") or os.path.expanduser(
+            "~/.config/herdr/herdr.sock"
+        )
+        self.seq = 0
+
+    def call(self, method, params=None):
+        self.seq += 1
+        request = {
+            "id": "herdr-audit-%d-%d" % (os.getpid(), self.seq),
+            "method": method,
+            "params": params or {},
+        }
+        sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        sock.settimeout(5.0)
+        try:
+            sock.connect(self.socket_path)
+            sock.sendall((json.dumps(request) + "\n").encode("utf-8"))
+            buf = b""
+            while b"\n" not in buf:
+                chunk = sock.recv(65536)
+                if not chunk:
+                    break
+                buf += chunk
+        finally:
+            sock.close()
+        if not buf:
+            raise RuntimeError("no response from herdr server at %s" % self.socket_path)
+        response = json.loads(buf.split(b"\n", 1)[0].decode("utf-8"))
+        error = response.get("error")
+        if error:
+            message = error.get("message", str(error)) if isinstance(error, dict) else str(error)
+            raise RuntimeError(message)
+        return response.get("result") or {}
+
+
+def git(cwd, *args):
+    try:
+        out = subprocess.run(
+            ["git", "-C", cwd] + list(args),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if out.returncode != 0:
+        return None
+    return out.stdout.strip()
+
+
+def git_flags(cwd):
+    """未コミット・未 push を数える。git repo でなければ空。"""
+    if not cwd or not os.path.isdir(cwd):
+        return []
+    if git(cwd, "rev-parse", "--is-inside-work-tree") != "true":
+        return []
+    flags = []
+    status = git(cwd, "status", "--porcelain")
+    if status:
+        flags.append("dirty:%d" % len(status.splitlines()))
+    branch = git(cwd, "rev-parse", "--abbrev-ref", "HEAD")
+    if branch and branch != "HEAD":
+        upstream = git(cwd, "rev-parse", "--abbrev-ref", "@{upstream}")
+        if upstream:
+            ahead = git(cwd, "rev-list", "--count", "@{upstream}..HEAD")
+            if ahead and ahead != "0":
+                flags.append("unpushed:%s" % ahead)
+        elif git(cwd, "rev-parse", "--verify", "HEAD"):
+            # upstream 未設定のブランチ。push 前の作業を抱えている可能性がある。
+            flags.append("no-upstream")
+    return flags
+
+
+def pane_age_days(shell_pid, now):
+    """pane の shell プロセスの生成時刻を workspace の齢として使う。
+
+    pty の mtime は herdr 側の書き込みで更新され続け、最終操作時刻の代わりに
+    ならない（全 workspace が 0 時間になる）。実測で使えたのはこちらだけ。"""
+    try:
+        started = os.stat("/proc/%d" % shell_pid).st_mtime
+    except OSError:
+        return None
+    return int((now - started) // 86400)
+
+
+def parked_labels():
+    """park 済み workspace の label 集合。park skill が書くレコードを読む。"""
+    labels = set()
+    try:
+        names = os.listdir(PARKED_DIR)
+    except OSError:
+        return labels
+    for name in names:
+        if not name.endswith(".json"):
+            continue
+        try:
+            with open(os.path.join(PARKED_DIR, name), encoding="utf-8") as fh:
+                record = json.load(fh)
+        except (OSError, ValueError):
+            continue
+        label = record.get("label")
+        if label:
+            labels.add(label)
+    return labels
+
+
+def main():
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument("--age", type=int, default=3, help="ok と見なす最小の経過日数")
+    parser.add_argument("--json", action="store_true", help="TSV でなく JSON で出す")
+    args = parser.parse_args()
+
+    client = Client()
+    try:
+        workspaces = client.call("workspace.list").get("workspaces", [])
+        panes = client.call("pane.list").get("panes", [])
+        agents = client.call("agent.list").get("agents", [])
+    except (OSError, RuntimeError, ValueError) as e:
+        sys.stderr.write("herdr-audit: %s\n" % e)
+        return 1
+
+    now = time.time()
+    parked = parked_labels()
+    agents_by_ws = {}
+    for agent in agents:
+        agents_by_ws.setdefault(agent.get("workspace_id"), []).append(agent)
+    panes_by_ws = {}
+    for pane in panes:
+        panes_by_ws.setdefault(pane.get("workspace_id"), []).append(pane)
+
+    rows = []
+    for ws in workspaces:
+        ws_id = ws.get("workspace_id")
+        ws_agents = agents_by_ws.get(ws_id, [])
+        running = 0
+        age = None
+        for pane in panes_by_ws.get(ws_id, []):
+            try:
+                info = client.call("pane.process_info", {"pane_id": pane["pane_id"]})
+            except (OSError, RuntimeError, ValueError):
+                continue
+            info = info.get("process_info", {})
+            for proc in info.get("foreground_processes", []):
+                if proc.get("name") not in SHELLS:
+                    running += 1
+                    break
+            shell_pid = info.get("shell_pid")
+            if shell_pid:
+                days = pane_age_days(shell_pid, now)
+                # workspace の齢は「最も新しい pane」で測る。古い pane が
+                # 1 つ残っているだけの workspace を古いと誤判定しないため。
+                if days is not None and (age is None or days < age):
+                    age = days
+
+        worktree = ws.get("worktree") or {}
+        cwd = worktree.get("checkout_path")
+        if not cwd:
+            ws_panes = panes_by_ws.get(ws_id, [])
+            cwd = ws_panes[0].get("cwd", "") if ws_panes else ""
+        flags = git_flags(cwd)
+        if ws_agents:
+            flags.insert(0, "agent:%d" % len(ws_agents))
+        if running:
+            flags.insert(0, "run:%d" % running)
+        if ws.get("focused"):
+            flags.insert(0, "focused")
+
+        label = ws.get("label", "")
+        is_parked = label in parked
+        if is_parked:
+            flags.append("parked")
+
+        if ws.get("focused"):
+            status = "busy"
+        elif is_parked:
+            status = "park"
+        elif ws_agents or running:
+            status = "busy"
+        elif any(f.startswith(("dirty:", "unpushed:")) or f == "no-upstream" for f in flags):
+            status = "WARN"
+        elif age is None or age < args.age:
+            if age is not None:
+                flags.append("young")
+            status = "WARN"
+        else:
+            status = "ok"
+
+        rows.append(
+            {
+                "status": status,
+                "workspace_id": ws_id,
+                "age_days": age,
+                "panes": ws.get("pane_count", 0),
+                "agents": len(ws_agents),
+                "flags": flags,
+                "label": label,
+                "cwd": cwd,
+            }
+        )
+
+    if args.json:
+        json.dump(rows, sys.stdout, ensure_ascii=False, indent=2)
+        sys.stdout.write("\n")
+        return 0
+
+    order = {"ok": 0, "park": 1, "WARN": 2, "busy": 3}
+    rows.sort(key=lambda r: (order.get(r["status"], 9), -(r["age_days"] or 0)))
+    for row in rows:
+        age = "-" if row["age_days"] is None else "%dd" % row["age_days"]
+        sys.stdout.write(
+            "\t".join(
+                [
+                    row["status"],
+                    row["workspace_id"],
+                    age,
+                    "%dp" % row["panes"],
+                    ",".join(row["flags"]) or "-",
+                    row["label"],
+                    row["cwd"],
+                ]
+            )
+            + "\n"
+        )
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(130)
+    except Exception as e:  # トレースバックを出さず 1 行で失敗を伝える
+        sys.stderr.write("herdr-audit: unexpected error: %s\n" % e)
+        sys.exit(1)

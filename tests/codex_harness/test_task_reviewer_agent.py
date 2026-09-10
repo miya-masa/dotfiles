@@ -11,13 +11,13 @@ def load_agent() -> dict:
         return tomllib.load(agent_file)
 
 
-def test_task_reviewer_is_a_luna_max_read_only_reviewer() -> None:
+def test_task_reviewer_is_a_luna_low_read_only_reviewer() -> None:
     agent = load_agent()
 
     assert agent["name"] == "task-reviewer"
     assert "bounded" in agent["description"]
-    assert agent["model"] == "gpt-5.6-luna"
-    assert agent["model_reasoning_effort"] == "max"
+    assert "model" not in agent
+    assert "model_reasoning_effort" not in agent
     assert agent["sandbox_mode"] == "read-only"
 
 
@@ -29,7 +29,7 @@ def test_task_reviewer_contract_keeps_verdicts_and_packet_bounded() -> None:
     assert "bounded packet" in instructions
     assert "Spec compliance" in instructions
     assert "Simplicity" in instructions
-    assert "separate" in instructions
+    assert "分け" in instructions
     for field in (
         "goal",
         "acceptance criteria",
@@ -46,21 +46,21 @@ def test_task_reviewer_accepts_short_path_preflight_without_prior_review() -> No
     instructions = load_agent()["developer_instructions"]
 
     assert "short-path task draft" in instructions
-    assert "without requiring prior preflight review" in instructions
+    assert "事前のpreflight reviewを要求せず" in instructions
 
 
 def test_task_reviewer_requires_gate_evidence_after_short_path_implementation() -> None:
     instructions = load_agent()["developer_instructions"]
 
-    assert "post-implementation short-path review" in instructions
-    assert "approved short-path task" in instructions
-    assert "recorded preflight gate evidence" in instructions
+    assert "実装後のshort-path review" in instructions
+    assert "承認済みshort-path task" in instructions
+    assert "記録済みpreflight gate evidence" in instructions
 
 
 def test_task_reviewer_cannot_modify_or_extend_the_review() -> None:
     instructions = load_agent()["developer_instructions"]
 
-    assert "Do not edit files" in instructions
-    assert "Do not run tests" in instructions
-    assert "Do not spawn subagents" in instructions
-    assert "read-only" in instructions
+    assert "ファイルを編集せず" in instructions
+    assert "テスト、ビルド、lint、fetch" in instructions
+    assert "subagentを起動しない" in instructions
+    assert "読み取り専用" in instructions

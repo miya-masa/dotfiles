@@ -446,6 +446,41 @@ def snapshot(
     return SnapshotResult(manifest, identity, preflight)
 
 
+def snapshot_from_commit(repo, base_commit, allowlist, commit) -> SnapshotResult:
+    """Read a committed tree against the fixed base, without consulting WIP/index."""
+    root = repository_root(repo)
+    base_id = _resolve_base_commit(root, base_commit)
+    commit_id = _resolve_base_commit(root, commit)
+    paths = normalize_allowlist(allowlist if isinstance(allowlist, (dict, str)) else
+                                {"version": 1, "paths": list(allowlist)})
+    changed = _git_bytes(root, "diff-tree", "--no-commit-id", "--name-only",
+                         "--no-renames", "-r", "-z", base_id, commit_id, "--")
+    external = {p for p in changed.split(b"\0") if p} - {_path_bytes(p) for p in paths}
+    if external:
+        raise SnapshotError("commit contains changes outside allowlist: " +
+                            ", ".join(sorted(os.fsdecode(p) for p in external)))
+    base = _base_entries(root, base_id, paths)
+    selected = _base_entries(root, commit_id, paths)
+    manifest_paths = []
+    for path in paths:
+        old, entry = base.get(path), selected.get(path)
+        for value in (old, entry):
+            if value is not None:
+                _validate_base_entry(value)
+        if entry is not None:
+            state, mode, content = "present", entry.mode, _base_content_hash(root, entry)
+        elif old is not None:
+            state, mode, content = "deleted", old.mode, _base_content_hash(root, old)
+        else:
+            state, mode, content = "absent", None, None
+        manifest_paths.append(dict(content_sha256=content, mode=mode, path=path, state=state))
+    manifest = dict(base_commit=base_id, paths=manifest_paths)
+    canonical = json.dumps(manifest, ensure_ascii=False, separators=(",", ":"),
+                           sort_keys=True, allow_nan=False).encode("utf-8")
+    return SnapshotResult(manifest, "sha256:" + hashlib.sha256(canonical).hexdigest(),
+                          dict(external_dirty_paths=[], external_staged_paths=[], shipping_blocked=False))
+
+
 def _atomic_write(path: Path, payload: bytes) -> None:
     parent = path.parent
     try:

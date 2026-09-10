@@ -243,12 +243,13 @@ import sys
 
 path = pathlib.Path(sys.argv[1])
 names = (
-    "start",
+    "task",
     "bugfix",
     "investigation",
     "handoff",
     "writing-gpt-prompts",
     "herdr-delegate",
+    "nvim-review",
 )
 text = path.read_text(encoding="utf-8").rstrip() + "\n\n"
 text += "# BEGIN CODEX MANAGED DELIVERY\n"
@@ -256,7 +257,7 @@ for name in names:
     skill_path = pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md"
     text += "\n[[skills.config]]\n"
     text += f"path = {json.dumps(str(skill_path))}\n"
-    text += "enabled = false\n"
+    text += "enabled = true\n"
 text += "# END CODEX MANAGED DELIVERY\n"
 path.write_text(text, encoding="utf-8")
 PY
@@ -296,14 +297,18 @@ before = normalized_before(sys.argv[1])
 after = load(sys.argv[2])
 expected = copy.deepcopy(before)
 expected.update({
-    "model": "gpt-5.6-terra",
-    "model_reasoning_effort": "medium",
+    "model": "gpt-6-astra",
+    "model_reasoning_effort": "low",
     "plan_mode_reasoning_effort": "medium",
     "sandbox_mode": "workspace-write",
     "approval_policy": "on-request",
+    "model_context_window": 872000,
     "model_auto_compact_token_limit": 260000,
     "model_auto_compact_token_limit_scope": "total",
 })
+
+agents = expected.setdefault("agents", {})
+agents.update({"default_subagent_model": "gpt-5.6-sol", "default_subagent_reasoning_effort": "medium"})
 
 sandbox = expected.setdefault("sandbox_workspace_write", {})
 if not isinstance(sandbox, dict):
@@ -345,6 +350,9 @@ if agents is not None:
         "agent_verifier", "agent_investigator", "agent_decision_reviewer",
     ):
         agents.pop(name, None)
+    for name in ("default_subagent_model", "default_subagent_reasoning_effort"):
+        if name not in agents:
+            raise TypeError(f"agents.{name} is required")
 
 skills = expected.setdefault("skills", {})
 configs = skills.get("config", [])
@@ -362,14 +370,14 @@ if "# BEGIN CODEX MANAGED DELIVERY" in before_text:
     # (ユーザーが自分で無効化した skill) を巻き込まないよう、後ろから消す。
     for managed_path in re.findall(r'^path = "(.+)"$', managed_block, re.MULTILINE):
         for index in range(len(configs) - 1, -1, -1):
-            if configs[index] == {"path": managed_path, "enabled": False}:
+            if configs[index] in ({"path": managed_path, "enabled": False}, {"path": managed_path, "enabled": True}):
                 del configs[index]
                 break
 configs.extend(
-    {"path": str(pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md"), "enabled": False}
+    {"path": str(pathlib.Path.home() / ".agents" / "skills" / name / "SKILL.md"), "enabled": True}
     for name in (
-        "start", "bugfix", "investigation", "handoff", "writing-gpt-prompts",
-        "herdr-delegate",
+        "task", "bugfix", "investigation", "handoff", "writing-gpt-prompts",
+        "herdr-delegate", "nvim-review",
     )
 )
 skills["config"] = configs
@@ -423,13 +431,16 @@ configure_codex() {
   if ! remove_legacy_and_managed_config "${working_file}" ||
      ! normalize_cc_pane_notify "${working_file}" ||
      ! writable_roots_value=$(merged_writable_roots_value "${working_file}") ||
-     ! upsert_top_level "${working_file}" model '"gpt-5.6-terra"' ||
-     ! upsert_top_level "${working_file}" model_reasoning_effort '"medium"' ||
+     ! upsert_top_level "${working_file}" model '"gpt-6-astra"' ||
+     ! upsert_top_level "${working_file}" model_reasoning_effort '"low"' ||
      ! upsert_top_level "${working_file}" plan_mode_reasoning_effort '"medium"' ||
      ! upsert_top_level "${working_file}" sandbox_mode '"workspace-write"' ||
      ! upsert_top_level "${working_file}" approval_policy '"on-request"' ||
+     ! upsert_top_level "${working_file}" model_context_window 872000 ||
      ! upsert_top_level "${working_file}" model_auto_compact_token_limit 260000 ||
      ! upsert_top_level "${working_file}" model_auto_compact_token_limit_scope '"total"' ||
+     ! upsert_table_key "${working_file}" agents default_subagent_model '"gpt-5.6-sol"' ||
+     ! upsert_table_key "${working_file}" agents default_subagent_reasoning_effort '"medium"' ||
      ! upsert_table_key "${working_file}" sandbox_workspace_write network_access true ||
      ! upsert_table_array_key "${working_file}" sandbox_workspace_write writable_roots "${writable_roots_value}" ||
      ! append_managed_config "${working_file}" ||

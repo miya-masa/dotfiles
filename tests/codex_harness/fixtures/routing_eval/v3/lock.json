@@ -1,0 +1,98 @@
+{
+  "schema_version": 2,
+  "manifest_sha256": "78057dc556ef31eca3302e261b327db950c9a21416acad0ecfd6753648843d93",
+  "oracle_sha256": "07eb24eb488b7f1c51bfd1ff7d04fd6b4c1dd03a277b4d08a6c4dc22651a7043",
+  "codex_version": "codex-cli 0.153.4",
+  "baseline": {
+    "base_commit": "f99b0defd25157ac4d4979ae6dfee8ff3af87b9f",
+    "controller_pin": {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    },
+    "agent_pins": {
+      "debugging": {
+        "path": "dot_codex/agents/debugging.toml",
+        "model": "gpt-5.6-sol",
+        "effort": "high"
+      },
+      "explorer": {
+        "path": "dot_codex/agents/explorer.toml",
+        "model": "gpt-5.6-luna",
+        "effort": "low"
+      },
+      "planning": {
+        "path": "dot_codex/agents/planning.toml",
+        "model": "gpt-5.6-sol",
+        "effort": "high"
+      },
+      "reviewer": {
+        "path": "dot_codex/agents/reviewer.toml",
+        "model": "gpt-5.6-sol",
+        "effort": "high"
+      },
+      "specification": {
+        "path": "dot_codex/agents/specification.toml",
+        "model": "gpt-5.6-sol",
+        "effort": "high"
+      },
+      "task-reviewer": {
+        "path": "dot_codex/agents/task-reviewer.toml",
+        "model": "gpt-5.6-luna",
+        "effort": "low"
+      },
+      "worker": {
+        "path": "dot_codex/agents/worker.toml",
+        "model": "gpt-5.6-luna",
+        "effort": "low"
+      }
+    }
+  },
+  "candidate": {
+    "controller_pin": {
+      "model": "gpt-6-astra",
+      "effort": "low"
+    },
+    "subagent_defaults": {
+      "model": "gpt-6-astra",
+      "effort": "high"
+    },
+    "agent_pins": {
+      "debugging": {
+        "path": "dot_codex/agents/debugging.toml",
+        "model": null,
+        "effort": null
+      },
+      "explorer": {
+        "path": "dot_codex/agents/explorer.toml",
+        "model": null,
+        "effort": null
+      },
+      "planning": {
+        "path": "dot_codex/agents/planning.toml",
+        "model": null,
+        "effort": null
+      },
+      "reviewer": {
+        "path": "dot_codex/agents/reviewer.toml",
+        "model": null,
+        "effort": null
+      },
+      "specification": {
+        "path": "dot_codex/agents/specification.toml",
+        "model": null,
+        "effort": null
+      },
+      "task-reviewer": {
+        "path": "dot_codex/agents/task-reviewer.toml",
+        "model": null,
+        "effort": null
+      },
+      "worker": {
+        "path": "dot_codex/agents/worker.toml",
+        "model": null,
+        "effort": null
+      }
+    }
+  },
+  "suite_version": "routing-eval-v3"
+}

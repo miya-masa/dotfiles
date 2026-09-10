@@ -5,7 +5,7 @@ description: local に完成した変更を 1 つの commit・push・MR・in-sco
 
 # Ship Change
 
-`LOCAL_COMPLETE` の変更を **MR ready まで**出荷する phase。明示的な `ship-change` 選択、または shipping 認可を記録した `execute-and-ship` の handoff でのみ使う。入力は final review 通過 + local verification 済みであること。**通常の実装は shipping を認可しない。**
+`LOCAL_COMPLETE`、または共有 evidence contract の D1 条件を満たす `LOCAL_VERIFICATION` の変更を **MR ready まで**出荷する phase。明示的な `ship-change` 選択、または shipping 認可を記録した `execute-and-ship` の handoff でのみ使う。入力は final review 通過 + local verification 済みであること。**通常の実装は shipping を認可しない。**
 
 契約の詳細は [references/shipping.md](references/shipping.md)、state と helper CLI は `~/.claude/skills/execute-plan/references/state-and-artifacts.md` にある。
 
@@ -25,10 +25,12 @@ secret・credential・内部 path・非公開 host・顧客情報・`.aidocs/` �
 
 ## commit / push / MR / CI
 
+Controller は共有 `~/.agents/workflows/software_delivery/references/review-common.md` のrisk gateを `human_review.py --context PATH` で再検査する。v2 LOWは人間待ちなし、MEDIUM/HIGHは現在提示の明示承認、v1 legacyは従来承認とする。commit 前に `check-gates --to COMMIT`、CI 収集に `evidence-ci`、完了前に `check-gates --to MR_READY` を実行する。コマンドと D1 の判定は共有の `~/.agents/workflows/software_delivery/references/evidence-contract.md` に従う。
+
 equality gate を通ってから論理的に 1 つの commit を作り（`conventional-commit` に従い、ユーザー承認済み message と同一内容で）、記録済み branch を push し、固定 Worktrunk default branch を target に MR を開く。CI は全 required job を監視し、失敗時は同じ review / verification / snapshot gate を通した **in-scope な修正だけ**を行って再 push する。外部 blocker（CI / runner 障害等）は推測せずユーザー判断へ上げる。
 
 MR ready を報告する時、session 引き継ぎ（`handoff` skill、既定 new-session）の要否を評価する。基準は `~/.claude/skills/product-discovery/references/session-handoff.md`。
 
 ## この phase が行わないこと
 
-**merge しない。** release、tag、production 変更、credential / 権限の変更、local merge による override、scope 拡大もしない。未認可の shipping、evidence 不一致、外部 dirty state、protected contract の判断では停止する。**ready な MR がこの phase の終端**で、後から実際に merge されたときにだけ `post-merge-cleanup` を明示的に案内する。
+**merge しない。** release、tag、production 変更、credential / 権限の変更、local merge による override、scope 拡大もしない。mergeは後続の明示依頼時だけ `workflow_merge.py --context PATH --mr IID --sha FULL_SHA --authorize MERGE` を使う。**ready な MR がこの phase の終端**で、後から実際に merge されたときにだけ `post-merge-cleanup` を明示的に案内する。

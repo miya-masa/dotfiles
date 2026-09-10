@@ -1,6 +1,6 @@
 # shipping の契約
 
-`ship-change` の運用契約。入力は `LOCAL_COMPLETE` の workflow（final review 通過 + local verification 済み）で、終端は **MR ready**。merge / release / tag は行わない。
+`ship-change` の運用契約。入力は `LOCAL_COMPLETE`、または共有 `~/.agents/workflows/software_delivery/references/evidence-contract.md` の D1 条件を満たす `LOCAL_VERIFICATION` の workflow で、終端は **MR ready**。merge / release / tag は行わない。
 
 - state と helper CLI: `~/.claude/skills/execute-plan/references/state-and-artifacts.md`
 - 実行側の契約: `~/.claude/skills/execute-plan/references/task-execution.md`
@@ -36,7 +36,7 @@ review 時・verification 時・staged の identity が**厳密に等しい**こ
 
 ## commit / push / MR
 
-equality gate を通ってから、**論理的に 1 つの commit** を作る。
+Controller は共有 `~/.agents/workflows/software_delivery/references/review-common.md` のrisk gate（v2 LOWは自動、MEDIUM/HIGHとv1 legacyは現在承認）を `human_review.py --context PATH` で再検査する。操作は共有 `~/.agents/workflows/software_delivery/references/evidence-contract.md` に従い、shipping 認可や sanitize OK からコード承認を推論しない。equality gate 後、Controller が共有 evidence contract の `check-gates --to COMMIT` を通し、既存 state/CAS 手順で進めてから、**論理的に 1 つの commit** を作る。
 
 - `conventional-commit` とリポジトリ規約に従う。英語・命令形・lowercase・末尾ピリオドなし、emoji / AI attribution / `Co-authored-by` なし、必要なら `BREAKING CHANGE:` footer。
 - commit 対象と `git diff --cached`（および `--check`）を確認し、既存の未コミット変更を混ぜない。
@@ -54,7 +54,7 @@ push はユーザーの明示許可後。記録済みの branch を push し、�
 - 2 回の修正または同等の調査でも原因が絞れない場合は、別コンテキストの fresh `explorer` / `reviewer` に read-only 診断を委譲する（失敗ログ、試した修正、結果、関連 path を渡す）。仮説は検証してから採用する。
 - 外部 service 障害、runner / cache / secret manager、再現困難な複数 system、acceptance 自体の矛盾、protected contract の変更が必要な場合は推測せずユーザー判断を得る。
 
-CI 全 pass の evidence を確認してから終端を報告する。CI 未完了や未確認を「完了」と報告しない。
+Controller が共有 evidence contract の `evidence-ci` で CI 全 pass の receipt を収集し、`check-gates --to MR_READY` を確認してから終端を報告する。CI 未完了や未確認を「完了」と報告しない。予定済み CI 成功は承認を反復しないが、失敗/放棄後の成功は旧承認を復活させず再判定/再提示する。
 
 ## この phase が行わないこと
 

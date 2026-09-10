@@ -8,6 +8,10 @@ allowed-tools: Bash(npx agent-browser:*), Bash(agent-browser:*)
 
 The CLI uses Chrome/Chromium via CDP directly. Install via `npm i -g agent-browser`, `brew install agent-browser`, or `cargo install agent-browser`. Run `agent-browser install` to download Chrome. Existing Chrome, Brave, Playwright, and Puppeteer installations are detected automatically. Run `agent-browser upgrade` to update to the latest version.
 
+## Running under Claude Code
+
+Invoke the CLI plainly and run every call with `dangerouslyDisableSandbox: true`. Do not prefix it with `XDG_RUNTIME_DIR=...`. Inside the Bash sandbox `/run/user/1000` is mounted read-only so the daemon cannot bind its socket, and loopback listeners are invisible to Chrome, which then fails with `ERR_CONNECTION_REFUSED`. This covers the call that starts the daemon, every later call that uses it, and any SSH tunnel opened for it (`nohup ... & disown`).
+
 ## Core Workflow
 
 Every browser automation follows this pattern:

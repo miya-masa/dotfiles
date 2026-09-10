@@ -19,19 +19,19 @@ def skill(name: str) -> Path:
 def test_phase_metadata_is_explicit_and_exact() -> None:
     expected = {
         "ship-change": (
-            'display_name: "Ship Change"',
-            'short_description: "検証済み変更をcommit・push・MR・CIまで安全に進める"',
-            'default_prompt: "Use $ship-change to commit, push, open an MR, and resolve in-scope CI failures."',
+            'display_name: "変更の出荷"',
+            'short_description: "検証済み変更をコミット・プッシュ・MR・CIまで安全に進める"',
+            'default_prompt: "変更をコミット、プッシュし、MRを開き、対象範囲内のCI失敗を解消するには $ship-change を使用してください。"',
         ),
         "post-merge-cleanup": (
-            'display_name: "Post-Merge Cleanup"',
-            'short_description: "merge済みworkflowのworktreeとartifactを安全に片付ける"',
-            'default_prompt: "Use $post-merge-cleanup to verify the merge and safely remove this workflow\'s owned resources."',
+            'display_name: "マージ後のクリーンアップ"',
+            'short_description: "マージ済みworkflowのworktreeとartifactを安全に片付ける"',
+            'default_prompt: "このworkflowの所有リソースのマージを確認し、安全に削除するには $post-merge-cleanup を使用してください。"',
         ),
         "execute-and-ship": (
-            'display_name: "Execute and Ship"',
-            'short_description: "計画を実装しcommit・push・MR・CIまで連続して進める"',
-            'default_prompt: "Use $execute-and-ship to execute this reviewed plan and continue through MR-ready CI."',
+            'display_name: "実行して出荷"',
+            'short_description: "計画を実装しコミット・プッシュ・MR・CIまで連続して進める"',
+            'default_prompt: "レビュー済み計画を実行し、MR対応可能なCIまで継続するには $execute-and-ship を使用してください。"',
         ),
     }
     for name, values in expected.items():
@@ -46,47 +46,47 @@ def test_skill_bodies_are_concise_and_explicit_only() -> None:
         body = read(skill(name) / "SKILL.md")
         assert len(body.splitlines()) <= 65
         assert "TODO" not in body
-        assert "explicit" in body.lower()
+        assert "明示" in body
 
 
 def test_ship_change_requires_authorization_and_snapshot_gates() -> None:
     body = read(skill("ship-change") / "SKILL.md")
     for phrase in (
-        "shipping authorization",
+        "出荷認可",
         "LOCAL_COMPLETE",
-        "execute-and-ship handoff",
-        "entry or resume",
+        "execute-and-ship` の引き継ぎ",
+        "開始時または再開時",
         "snapshot",
-        "commit",
+        "コミット",
         "remote",
         "MR",
         "CI",
         "allowlist",
         "external dirty",
-        "reviewed",
-        "verified",
+        "レビュー済み",
+        "検証済み",
         "staged",
         "controller",
-        "logical",
-        "fixed default branch",
-        "repository status",
-        "intended",
+        "論理",
+        "固定されたdefault branch",
+        "リポジトリの状態",
+        "意図した",
         "base/head",
-        "secrets",
-        "local paths",
-        "internal",
-        "workflow artifacts",
-        "fails closed",
-        "suspected contamination",
-        "before commit",
-        "in-scope",
-        "escalation",
-        "never merge",
+        "secret",
+        "ローカルpath",
+        "内部",
+        "workflow artifact",
+        "fail closed",
+        "汚染の疑い",
+        "コミット前",
+        "対象範囲内",
+        "エスカレーション",
+        "マージ（`no merge`）",
         "no merge",
-        "credential",
-        "production",
-        "release",
-        "tag",
+        "認証情報",
+        "本番",
+        "リリース",
+        "タグ付け",
     ):
         assert phrase in body, phrase
 
@@ -94,23 +94,23 @@ def test_ship_change_requires_authorization_and_snapshot_gates() -> None:
 def test_ship_change_resume_and_stop_contract_is_unambiguous() -> None:
     body = read(skill("ship-change") / "SKILL.md")
     for phrase in (
-        "recompute",
-        "immediately before staging",
+        "再計算",
+        "ステージの直前",
         "preflight",
-        "against the index",
-        "immediately before commit",
-        "no intervening change",
-        "exactly equal",
-        "mismatch",
-        "invalidate",
-        "duplicate push",
-        "duplicate MR",
-        "external blocker",
-        "scope expansion",
+        "indexに対して",
+        "コミット直前",
+        "介在する変更なし",
+        "完全一致",
+        "不一致",
+        "無効にして停止",
+        "プッシュやMR作成を重複させない",
+        "MR作成を重複させない",
+        "外部ブロッカー",
+        "スコープ拡大",
         "protected contract",
-        "permission",
+        "権限",
         "runner",
-        "stop",
+        "停止",
     ):
         assert phrase in body, phrase
 
@@ -121,9 +121,9 @@ def test_cleanup_requires_merge_ownership_exact_command_and_git_confirmation() -
         ROOT / "dot_codex/workflows/software_delivery/references/post-merge-cleanup.md"
     )
     for phrase in (
-        "explicit",
+        "明示的",
         "merged",
-        "ownership",
+        "所有権",
         "branch",
         "worktree",
         "artifact",
@@ -140,7 +140,7 @@ def test_cleanup_requires_merge_ownership_exact_command_and_git_confirmation() -
         "WT_REMOVE",
         "ARTIFACT_REMOVE",
         "terminal",
-        "no next skill",
+        "次のskillがない",
     ):
         assert phrase in body or phrase in reference, phrase
 
@@ -151,17 +151,17 @@ def test_cleanup_requires_merge_ownership_exact_command_and_git_confirmation() -
 def test_cleanup_fails_closed_and_keeps_the_artifact() -> None:
     body = read(skill("post-merge-cleanup") / "SKILL.md")
     for phrase in (
-        "retained",
+        "保持",
         "not_attempted",
         "deferred",
-        "invalid JSON",
-        "mismatch",
-        "keep",
-        "hold",
-        "does not delete",
-        "remote branch deletion is outside this handoff; do not delete it",
-        "Do not advance to `ARTIFACT_REMOVE`",
-        "`WT_REMOVE` is this phase's terminal state",
+        "無効なJSON",
+        "不一致",
+        "保持",
+        "保留",
+        "削除しない",
+        "remote branchの削除はこの引き継ぎの範囲外なので削除しない",
+        "ARTIFACT_REMOVE` へ進めたり",
+        "`WT_REMOVE` がこのphaseのterminal state",
     ):
         assert phrase in body, phrase
 
@@ -169,22 +169,22 @@ def test_cleanup_fails_closed_and_keeps_the_artifact() -> None:
 def test_execute_and_ship_only_composes_execution_and_shipping() -> None:
     body = read(skill("execute-and-ship") / "SKILL.md")
     for phrase in (
-        "shipping authorization",
+        "出荷認可",
         "execute-plan",
         "ship-change",
-        "local verification",
-        "MR-ready CI",
-        "commit",
-        "push",
+        "ローカル検証",
+        "MR対応可能なCI",
+        "コミット",
+        "プッシュ",
         "MR",
-        "in-scope",
-        "does not include",
+        "対象範囲内",
+        "含めず",
         "discovery",
         "planning",
-        "merge",
-        "cleanup",
-        "release",
-        "tag",
+        "マージ",
+        "クリーンアップ",
+        "リリース",
+        "タグ",
     ):
         assert phrase in body, phrase
 

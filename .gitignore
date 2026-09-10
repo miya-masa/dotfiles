@@ -89,6 +89,8 @@ Brewfile_linux.lock.json
 /.omc/state
 /.worktrees
 /.aidocs/
+/docs/superpowers
+/docs/superpowers/codex-jobs/
 /.codex
 /nvim.log
 

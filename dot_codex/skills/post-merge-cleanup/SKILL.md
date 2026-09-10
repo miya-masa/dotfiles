@@ -1,43 +1,28 @@
 ---
 name: post-merge-cleanup
-description: After explicit authorization and a confirmed merged MR, safely remove the workflow-owned Worktrunk worktree while keeping the artifact.
+description: 明示的な認可とMRのマージ確認後に、artifactを保持したままworkflow所有のWorktrunk worktreeを安全に削除する。
 ---
 
-# Post-Merge Cleanup
+# マージ後のクリーンアップ
 
-Run only after an explicit user request. Confirm the forge MR is merged and
-`context.json` proves exact branch, canonical worktree, artifact root, ownership,
-and the expected workflow. List those resources before any removal; validate
-state and evidence on entry or resume.
+明示的なユーザー依頼後のみ実行する。forge上のMRがマージ済みであること、
+`context.json` が正確なブランチ、正規worktree、artifact root、所有権、想定workflowを証明することを確認する。削除前に対象リソースを列挙し、開始時または再開時に状態と証拠を検証する。
 
-Remove only the worktree (and the local branch Worktrunk deletes with it). The
-artifact under `.aidocs/workflows/<workflow-id>/` is the sole record of what was
-decided and verified, so it is kept. Salvage anything that exists only inside the
-worktree into the artifact before removal.
+worktreeだけを削除する（Worktrunkが併せて削除するローカルブランチを含む）。
+`.aidocs/workflows/<workflow-id>/` 配下のartifactが決定・検証内容の唯一の記録なので保持する。worktree内にしか存在しないものは、削除前にartifactへ退避する。
 
-From the repository's primary worktree, run exactly:
+リポジトリのprimary worktreeから、次のコマンドを正確に実行する。
 
 ```text
 wt remove --foreground --format=json <branch>
 ```
 
-Save its JSON without `--force`, `-D`, `--no-hooks`, `--yes`, or fallback removal
-commands. A dirty/unmerged/moved branch, hook trust request, or ownership
-mismatch stops and retains everything.
+そのJSONを保存するが、`--force`、`-D`、`--no-hooks`、`--yes`、または代替の削除コマンドは使わない。`dirty`/`unmerged`/`moved branch`、`hook trust request`、所有権不一致があれば停止し、すべてを保持する。
 
-Confirm the removal against Git, not against that JSON: `git worktree list` must
-no longer show the canonical path and `git branch --list <branch>` must be empty.
-Worktrunk's schema changes between versions, so a saved result is evidence only
-and never the deletion verdict. Anything else — a retained or unmerged branch, a
-deferred or not_attempted removal, invalid JSON, or a mismatch — is nonterminal,
-keeps everything on hold, and does not delete anything. Only a confirmed removal
-transitions to `WT_REMOVE` via `workflow_state.py` with the expected revision.
-Do not advance to `ARTIFACT_REMOVE` or invoke Task 3's `workflow_artifact.py
-remove`; `WT_REMOVE` is this phase's terminal state.
+削除確認はそのJSONではなくGitで行う。`git worktree list` に正規pathが表示されなくなり、`git branch --list <branch>` が空でなければならない。Worktrunkのschemaはversion間で変わるため、保存結果は証拠にすぎず削除判定には使わない。その他（保持または未マージのブランチ、`deferred` または `not_attempted` の削除、無効なJSON、不一致）は `nonterminal` としてすべてを保留し、何も削除しない。確認済みの削除だけを、期待するrevisionで `workflow_state.py` 経由の `WT_REMOVE` へ遷移させる。
+`ARTIFACT_REMOVE` へ進めたり、Task 3の `workflow_artifact.py remove` を呼び出したりしない。`WT_REMOVE` がこのphaseのterminal stateである。
 
-remote branch deletion is outside this handoff; do not delete it. On successful
-worktree removal, report a terminal state and no next skill; never run cleanup
-before merge or infer deletion from a report alone. Read
+remote branchの削除はこの引き継ぎの範囲外なので削除しない。worktree削除に成功したらterminal stateと次のskillがないことを報告する。マージ前にcleanupを実行したり、報告だけから削除を推測したりしない。実行前に
 [post-merge-cleanup.md](../../workflows/software_delivery/references/post-merge-cleanup.md),
 [state-recovery.md](../../workflows/software_delivery/references/state-recovery.md),
-and `~/.codex/review-policy.md`.
+および `~/.codex/review-policy.md` を読む。

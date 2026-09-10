@@ -33,8 +33,9 @@ chezmoi edit      # Edit source files
 - **Terminal**: Tmux (prefix: `Ctrl+s`), WezTerm, Alacritty
 - **herdr**: tmux 代替の terminal multiplexer。第 1 段階の移行として追加済み（tmux は段階移行のため引き続き残置）。詳細は下記「herdr（tmux からの段階移行）」参照
 - **Languages**: mise (Go, Node, Python, etc.)
-- **Tools**: fzf, ripgrep, lazygit, lazydocker, ghq, delta
+- **Tools**: fzf, ripgrep, lazygit, lazydocker, ghq, delta, `kpg`（Kubernetes クラスタ内の PostgreSQL へ pgcli で 1 コマンド接続）
 - **AI agents**: Claude Code's global instructions live in `dot_claude/CLAUDE.md`; Claude Code and opencode share skills from `.agents/`; Claude Code and Codex run the same six-phase software delivery workflow (`product-discovery`, `implementation-planning`, `execute-plan`, `ship-change`, `post-merge-cleanup`, and `execute-and-ship`) on top of a shared workflow core in `.agents/workflows/software_delivery/` (state/artifact/snapshot helpers and review lenses); Codex additionally keeps `systematic-debugging`, native subagents, and selected shared skills
+- **常用モデル**: Codex controller は `gpt-6-astra` / `low`、Claude は `opus[1m]` / `low`。Controller は要件・状態・統合を保持し、通常は上位モデルで仕様・計画 → 下位モデルで実装 → fresh な上位モデルで review。Codex は role の model 固定を外して spawn ごとに model/effort を選択し、Claude は native profile を選ぶ。通常値と昇格条件は [共通方針](dot_agents/workflows/software_delivery/references/effort-policy.md) が正本。明確な小変更には直接完了経路を残す。実taskの品質・速度・料金は今後比較する。
 
 ### herdr（tmux からの段階移行）
 
@@ -47,14 +48,16 @@ tmux に代わる terminal multiplexer として herdr を第 1 段階で追加�
 - **`hp`**: fzf でディレクトリと layout（`dev` / `mac` / `tile`）を選んで herdr セッションを起動するランチャー（`tp` の herdr 版）。herdr サーバ起動中に使う
 - **skill 再生成**: herdr を上げたら `herdr --skill > dot_agents/skills/herdr/SKILL.md` を実行して差分を取る（出力は加工しない）
 - **サイドバーの attention queue**: `agent_panel_sort = "priority"` を設定しているため、サイドバーの agent 一覧が space 順ではなく「今見るべき順」に並ぶ。herdr は各ペインの agent を `working` / `blocked`（承認・質問待ち）/ `done`（未確認のまま完了）/ `idle`（確認済み）に分類する。`prefix+o` で通知の発生元ペインへジャンプできる
-- **agent integration**: `.chezmoiscripts/run_onchange_after_17-install-herdr-integrations.sh` が `herdr integration install claude` / `codex` を冪等に流す。integration は agent の session id を herdr に渡してセッション identity / restore を補助する（ペインの `working` / `blocked` / `done` / `idle` は screen manifest で判定され、integration が transcript を読み続けるわけではない）。hook 本体（`~/.claude/hooks/herdr-agent-state.sh`、`~/.codex/herdr-agent-state.sh`、`~/.codex/hooks.json`）は herdr installer が所有し再インストールで上書きされるため chezmoi では管理しない。hook は `HERDR_ENV` / `HERDR_SOCKET_PATH` / `HERDR_PANE_ID` が揃わないと即 exit するので tmux 側の cc-pane とは干渉しない
+- **agent integration**: `.chezmoiscripts/run_onchange_after_17-install-herdr-integrations.sh` が `herdr integration install claude` / `codex` を冪等に流す。integration は agent の session id を herdr に渡してセッション identity / restore を補助する（ペインの `working` / `blocked` / `done` / `idle` は screen manifest で判定され、integration が transcript を読み続けるわけではない）。hook 本体（`~/.claude/hooks/herdr-agent-state.sh`、`~/.codex/herdr-agent-state.sh`、`~/.codex/hooks.json`）は herdr installer が所有し再インストールで上書きされるため chezmoi では管理しない。`~/.claude/settings.json` への SessionStart 追記と Codex の fallback command 追記だけ chezmoi 管理下にある。hook は `HERDR_ENV` / `HERDR_SOCKET_PATH` / `HERDR_PANE_ID` が揃わないと即 exit するので tmux 側の cc-pane とは干渉しない
   - 反映は **新しい agent セッションから**。通常は SessionStart、Codex fallback は最初の UserPromptSubmit で紐付ける。紐付いたかは `herdr agent get <pane>` の `agent_session` で確認する（`herdr-server.log` にはこの報告が一切残らないので、ログは判定に使えない）
   - **codex は integration 導入後の初回起動で "Hooks need review" の承認画面を出す。** trust しないと hook は走らない（`~/.codex/config.toml` の `[hooks.state."~/.codex/hooks.json:session_start:0:0"]` が `enabled = true` かで確認できる）
   - **Codex 0.147 の SessionStart に transcript_path が無い場合の fallback**: `~/.local/bin/herdr-codex-session-bridge` を UserPromptSubmit に登録し、rollout が materialize した後の非空 `transcript_path` を SessionStart 形に変換して Herdr の生成 hook へ渡す。これで session identity と Herdr server 再起動後の native resume を補助できるが、ライフサイクル状態の判定は引き続き screen manifest のまま（identity が欠けると native resume に影響する）。integration 導入後の初回起動では Codex の "Hooks need review" を **trust** し、hook 設定を読み込ませるため **新しい Codex セッション**を起動する。trust しない場合や bridge がまだ実行されない場合も `agent start` / `agent prompt` / `agent read`（= `codex-doublecheck` の herdr 経路）による画面ベースの検出は動く
   - herdr を上げたら `herdr integration status --outdated-only` を確認し、古ければ入れ直す（codex 側は上記が直っているか併せて確認する）
+- **Neovim 連携（agent bridge）**: workspace 内の nvim は `~/.local/state/nvim/servers/<HERDR_WORKSPACE_ID>.sock` で RPC を listen し、隣の pane 番号を同名の `.json` に残す。Agent 側は `nvim-review-open` でその socket に繋ぎ、`base..作業ツリー` の diffview を**新しいタブ**に開いてから `pane.focus` でその pane へフォーカスを移す（nvim が居なければ pane を split して起動する）。Claude / Codex 双方の `execute-plan` と共有の `bugfix` が人間へ結果を出す直前に呼び、workflow の外で「diff を見せて」と言われた時の入口は薄い共有 skill `nvim-review`（`dot_agents/skills/nvim-review/`、Codex の managed allowlist にも登録）。**待ち方は risk 区分のまま**で変わらない。insert / visual mode の間は開かない（ex コマンドはモードを変えないので、打鍵が diffview 右側の実ファイルへ入るため）。untracked file は diffview が commit vs 作業ツリーでは列挙しないので既定では一覧を報告するだけにし、`--intent-to-add` を付けたときだけ `git add -N` で載せる。逆方向は nvim の `<leader>a`（`lua/config/agent_bridge.lua`）で、選択範囲 `@file#Lx-y` / 現在ファイル / 変更ファイル一覧を `herdr pane send-text` で agent pane に**貼るだけ**（Enter を送らないので続きの指示を書き足せる）。`.review` 対応依頼だけは完結した依頼なので `herdr agent prompt` で送信まで確定する。レビュー指摘そのものは従来どおり `<leader>r`（`.review/review_comments.yaml`）で、diffview の**右側**が実ファイルバッファなのでそこから直接書ける
 - **worktrunk 連携**: `dot_config/worktrunk/config.toml` の `[[post-start]]` に、herdr の中で作った worktree を workspace として開く hook がある（`HERDR_ENV` が無ければ no-op）。`herdr worktree open` は**親リポジトリ workspace から始める必要がある**ため `--cwd` には `--git-common-dir` から導出した親 root を渡す（worktree のパスを渡すと `linked_worktree_source` で失敗する）。既に開いていれば `already_open` が返るだけで workspace は増えない。ただし**初回は親リポジトリの workspace も併せて作られる**ので、worktree 1 個につき workspace が 2 個生えることがある
-- **skill 側の herdr 経路**: `codex-doublecheck`（隣のペインで codex を起動して結果まで回収）、`ci-monitor`（CI ポーリングをペインに逃がす）、`product-discovery` / `execute-plan`（spec review gate と final review での Codex クロスモデル並走）が `HERDR_ENV=1` のときだけ herdr 経路に分岐する。herdr の外では従来経路のまま
+- **skill 側の herdr 経路**: `codex-doublecheck`（隣のペインで codex を起動して結果まで回収）、`ci-monitor`（CI ポーリングをペインに逃がす）、`product-discovery` / `execute-plan`（明示依頼時の spec review gate / final review での Codex クロスモデル並走）が `HERDR_ENV=1` のときだけ herdr 経路に分岐する。herdr の外では従来経路のまま
 - **共有契約 `herdr-delegate`**: 上記 skill の herdr 手順（ペイン確保・投入・完了判定・隔離・片付け）は `dot_agents/skills/herdr-delegate/SKILL.md` に一本化されており、`agent`（クロスモデル委譲）/ `command:one-shot`（CI 監視等）/ `command:resident`（常駐プロセス）の 3 モードを持つ。各呼び出し元 skill は固有の停止条件・監視対象だけを自分の SKILL.md に残す。並走の off スイッチは `~/.claude/data/harness/cross-model-off`（`command` モードの ci-monitor は対象外）。委譲先の Codex が更に agent を起動しないよう、`herdr-delegate` 自体は Codex の skill 一覧から無効化されている（`.chezmoiscripts/run_onchange_after_35-configure-codex.sh.tmpl`）
+  - **`agent` モードの scratch は固定 root（既定 `${XDG_STATE_HOME:-~/.local/state}/herdr-delegate/scratch`）配下に作る。** `herdr-delegate prepare-scratch` が root を `git init` して `~/.codex/config.toml` へ `[projects."<root>"] trust_level = "trusted"` を 1 度だけ登録するため、codex の directory trust ダイアログが毎回出なくなる（codex は cwd の git root で trust を解決する。`-c projects."<path>".trust_level="trusted"` の CLI override でも `mktemp -d` を `git init` するだけでも抑止できない: codex-cli 0.149.1 実測）。委譲先への指示文と回収する md は日本語で統一する（`build-prompt` が日本語出力の指定を prompt 末尾に付ける）
 
 #### 主要キー対応（tmux → herdr）
 
@@ -75,6 +78,8 @@ tmux に代わる terminal multiplexer として herdr を第 1 段階で追加�
 | vim-tmux-navigator `C-h/j/k/l` | `Ctrl+h/j/k/l`（nvim / fzf の中は pass-through、それ以外はペイン移動） |
 
 herdr 既定のうち退避したもの: settings = `prefix+Shift+s`、scrollback 編集 = `prefix+Shift+e`。既定のままのもの: goto = `prefix+g`、サイドバー開閉 = `prefix+b`、ペイン移動 = `prefix+h/j/k/l`。
+
+tmux に対応物が無く herdr 側で足したもの: workspace の前/次 = `prefix+Shift+k` / `prefix+Shift+j`（herdr 既定では未割当）。workspace はサイドバーに縦に並ぶので上下を vim の `k`/`j` に対応させ、ペイン移動 `prefix+h/j/k/l` に Shift を足すと 1 段上のスコープ、と読ませている。tmux の `bind -r H/J/K/L` リサイズは herdr ではリサイズモードに集約済みなので衝突しない。
 
 #### CLI の落とし穴（実測・herdr 0.8.0）
 
@@ -98,6 +103,7 @@ herdr 既定のうち退避したもの: settings = `prefix+Shift+s`、scrollbac
 - `synchronize-panes` の**持続モード**は無い（`prefix+e` は 1 回送信のみ）
 - `prefix+space` の**レイアウト巡回**は無い（herdr の `layout.apply` が対象 tab のプロセスを全部作り直すため。第 2 段で `pane move` 方式を検討）
 - thumbs（`prefix+f` の画面上文字列コピー）は無い
+- OSC 52 の **read**（`ESC ] 52 ; c ; ?`）には応答しない。write は上位端末へ中継し terminfo の `Ms` も申告するが、query は無視される（実測: 3 秒待って 0 バイト。tmux は自分の paste buffer から `ESC ] 52 ; ; ESC \` を即返していた）。nvim の `vim.g.clipboard` に `vim.ui.clipboard.osc52.paste` を置くと put のたびに 10 秒タイムアウトするので、copy だけ OSC 52 に載せる
 - status への cpu / battery / 時刻の表示は無い（サイドバーは branch と git status のみ）
 - copy-mode の `V`（行選択）/ `C-v`（矩形選択）は無い
 - `<C-\>` の pane またぎは無い（herdr 内では nvim ウィンドウ内の直前移動に縮退）
