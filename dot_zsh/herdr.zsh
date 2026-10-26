@@ -1,3 +1,87 @@
+# Herdr 内の Codex TUI は、CLI の暗黙的な共有 daemon を再利用せず embedded backend
+# を使うよう、root の argv を最小限 scan して local override を先頭に追加する。
+# 管理 subcommand、明示的な remote/help/version、未知の root option は素通しする。
+# 現在の Codex CLI 0.154.0 の root parser を対象にしており、未知の subcommand と prompt
+# は区別できないため、既知の管理 subcommand だけを素通し判定する。
+if [[ "${HERDR_ENV:-}" == 1 ]]; then
+  _herdr_codex_tui_args() {
+    local token
+    local i=1
+    local image_files
+    local -a scan_args
+    scan_args=("$@")
+
+    # resume の後でも、`--` より前の明示指定を優先する。
+    while (( i <= $# )); do
+      token="${scan_args[i]}"
+      [[ "$token" == "--" ]] && break
+      case "$token" in
+        --remote|--remote=*|-h|--help|-V|--version) return 1 ;;
+      esac
+      (( i++ ))
+    done
+
+    i=1
+    while (( i <= $# )); do
+      token="${scan_args[i]}"
+      [[ "$token" == "--" ]] && return 0
+      case "$token" in
+        -c|--config|--enable|--disable|--remote-auth-token-env|-m|--model|--local-provider|-p|--profile|-s|--sandbox|-C|--cd|--add-dir|-a|--ask-for-approval)
+          (( i++ ))
+          (( i > $# )) && return 1
+          (( i++ ))
+          ;;
+        --config=*|--enable=*|--disable=*|--remote-auth-token-env=*|--model=*|--local-provider=*|--profile=*|--sandbox=*|--cd=*|--add-dir=*|--ask-for-approval=*)
+          (( i++ ))
+          ;;
+        -c?*|-m?*|-p?*|-s?*|-C?*|-a?*)
+          (( i++ ))
+          ;;
+        -i|--image)
+          (( i++ ))
+          image_files=0
+          while (( i <= $# )); do
+            token="${scan_args[i]}"
+            [[ "$token" == "--" || "$token" == -* ]] && break
+            image_files=1
+            (( i++ ))
+          done
+          (( image_files )) || return 1
+          ;;
+        --image=*|-i?*)
+          (( i++ ))
+          ;;
+        --strict-config|--oss|--approve-for-me|--dangerously-bypass-approvals-and-sandbox|--dangerously-bypass-hook-trust|--worktree|--search|--no-alt-screen)
+          (( i++ ))
+          ;;
+        agents|exec|e|review|login|logout|mcp|plugin|app-server|exec-server|remote-control|completion|update|doctor|sandbox|debug|apply|a|queue|archive|delete|migrate-rollouts|unarchive|cloud|features|help)
+          return 1
+          ;;
+        -*)
+          return 1
+          ;;
+        *)
+          return 0
+          ;;
+      esac
+    done
+    return 0
+  }
+
+  codex() {
+    if [[ "${HERDR_ENV:-}" != 1 ]]; then
+      command codex "$@"
+      return $?
+    fi
+    if _herdr_codex_tui_args "$@"; then
+      command codex -c 'shell_environment_policy.set.HERDR_ENV="1"' "$@"
+      return $?
+    fi
+    command codex "$@"
+    return $?
+  }
+fi
+
 # hp - fzf-powered herdr workspace launcher
 #
 # Usage: hp
@@ -133,7 +217,7 @@ hclean() {
   selected=$(print -r -- "$rows" \
     | column -t -s $'\t' \
     | fzf --multi --query='^ok' \
-          --header='TAB=選択 / ok=閉じてよい park=退避済み WARN=要確認 busy=稼働中 (クエリを消せば全件)' \
+          --header='TAB=選択 / ok=閉じてよい WARN=要確認 busy=稼働中 (クエリを消せば全件)' \
           --preview='echo {}; echo; git -C {-1} status -sb 2>/dev/null | head -20' \
           --preview-window=down,40%)
   [[ -z "$selected" ]] && return 0
@@ -164,116 +248,4 @@ hclean() {
       echo "failed  $id"
     fi
   done
-}
-
-# hunpark - park した herdr workspace を再開する
-#
-# Usage: hunpark
-#   ~/.claude/data/parked/*.json を fzf で選び、workspace を作り直して各 pane で
-#   `claude --resume` / `codex resume` を起動する。park レコードは park skill が
-#   書く（待ち条件・外部影響・pane ごとの session id）。
-hunpark() {
-  herdr status server --json 2>/dev/null | jq -e '.running' >/dev/null 2>&1 \
-    || { echo "herdr server is not running"; return 1 }
-
-  local dir="$HOME/.claude/data/parked"
-  local -a records
-  records=( $dir/*.json(N) )
-  if (( ${#records} == 0 )); then
-    echo "park された workspace はありません ($dir)"
-    return 0
-  fi
-
-  local selected
-  selected=$(for f in "${records[@]}"; do
-      jq -r --arg f "$f" '[(.parked_at // "-"), (.label // "-"), (.wait_for // "-"), $f] | @tsv' "$f"
-    done | sort -r | column -t -s $'\t' \
-    | fzf --expect=ctrl-x \
-          --header='Enter=再開 / Ctrl-X=このレコードを捨てる (preview = park メモ)' \
-          --preview='f={-1}; cat "${f%.json}.md" 2>/dev/null || cat "$f"' \
-          --preview-window=down,60%)
-  [[ -z "$selected" ]] && return 0
-
-  # --expect があるので 1 行目は押されたキー（Enter なら空行）、2 行目が選択行。
-  local key row
-  key=${selected%%$'\n'*}
-  row=${selected#*$'\n'}
-  [[ -z "$row" ]] && return 0
-
-  local record label cwd
-  record=$(awk '{print $NF}' <<< "$row")
-
-  # 戻らないと決めた park はここで捨てる（放っておくと workspace と同じように溜まる）。
-  if [[ "$key" == "ctrl-x" ]]; then
-    local drop
-    read "drop?$(jq -r '.label // "?"' "$record") の park レコードを削除します。よろしいですか [y/N]: " || return 0
-    [[ "$drop" != [yY] ]] && { echo "中止しました"; return 0 }
-    rm -f "$record" "${record%.json}.md"
-    echo "deleted: ${record:t}"
-    return 0
-  fi
-  label=$(jq -r '.label // "parked"' "$record")
-  cwd=$(jq -r '.cwd // empty' "$record")
-  if [[ -z "$cwd" || ! -d "$cwd" ]]; then
-    echo "park レコードの cwd がありません: ${cwd:-(未記録)}"
-    return 1
-  fi
-
-  # レコードの session が別 pane で生きているなら二重に開かない。park は「閉じてから
-  # 戻る」もので、元の workspace を残したまま復元すると同じ会話が 2 箇所で開く。
-  local agents live=0 sid
-  agents=$(herdr agent list)
-  for sid in ${(f)"$(jq -r '.panes[]?.session_id // empty' "$record")"}; do
-    if jq -e --arg s "$sid" '[.result.agents[] | select(.agent_session.value == $s)] | length > 0' \
-         <<< "$agents" >/dev/null; then
-      echo "  まだ動いています: $sid"
-      live=1
-    fi
-  done
-  if (( live )); then
-    echo "上の session が別 pane で生きています。先にその workspace を閉じてから hunpark してください。"
-    return 1
-  fi
-
-  local resp root_pane
-  resp=$(herdr workspace create --cwd "$cwd" --label "$label" --focus) || return 1
-  root_pane=$(jq -r '.result.root_pane.pane_id // empty' <<< "$resp")
-  if [[ -z "$root_pane" ]]; then
-    echo "failed to create herdr workspace"
-    return 1
-  fi
-
-  # レコードの pane を順に復元する。1 つ目は root pane、2 つ目以降は直前の pane の
-  # 右へ split する（root を基準にすると 3 つ目以降が逆順に挿し込まれるため）。
-  local n=0 target prev agent session pane_cwd cmd
-  while IFS=$'\t' read -r agent session pane_cwd; do
-    [[ -z "$agent" ]] && continue
-    if (( n == 0 )); then
-      target="$root_pane"
-    else
-      target=$(herdr pane split --pane "$prev" --direction right \
-                 --cwd "${pane_cwd:-$cwd}" --no-focus | jq -r '.result.pane.pane_id // empty')
-      [[ -z "$target" ]] && break
-    fi
-    prev="$target"
-    case "$agent" in
-      claude) [[ -n "$session" ]] && cmd="claude --resume $session" || cmd="claude" ;;
-      codex)  [[ -n "$session" ]] && cmd="codex resume $session"   || cmd="codex" ;;
-      *)      cmd="" ;;
-    esac
-    [[ -n "$cmd" ]] && herdr pane run "$target" ${=cmd} >/dev/null
-    (( n++ ))
-  done < <(jq -r '.panes[]? | [(.agent // ""), (.session_id // ""), (.cwd // "")] | @tsv' "$record")
-
-  # 再開したので park を解除する（hclean の判定から外すため）
-  mkdir -p "$dir/resumed"
-  mv "$record" "$dir/resumed/" 2>/dev/null
-  [[ -f "${record%.json}.md" ]] && mv "${record%.json}.md" "$dir/resumed/" 2>/dev/null
-
-  # resumed は「何を待っていたか」の履歴として残すが、放っておくと park も
-  # workspace と同じように溜まるので 30 日で剪定する。
-  find "$dir/resumed" -maxdepth 1 -type f -mtime +30 -delete 2>/dev/null
-
-  echo "resumed: $label ($cwd)"
-  echo "park メモ: $dir/resumed/${${record:t}%.json}.md"
 }

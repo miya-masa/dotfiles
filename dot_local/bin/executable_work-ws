@@ -1,0 +1,498 @@
+#!/usr/bin/env python3
+"""main セッションごとの作業用 herdr workspace を用意・記録・片付ける。
+
+使い方: work-ws ensure [--owner PANE] [--cwd PATH]
+        work-ws show   [--owner PANE | --workspace ID]
+        work-ws list
+        work-ws toggle [--pane PANE]
+        work-ws keep   (--owner PANE | --workspace ID)
+        work-ws close  (--owner PANE | --workspace ID) [--force]
+
+作業 WS は main (人間の窓口の agent ペイン) 1 つにつき最大 1 つ。上に nvim
+(大)、下に手作業用の shell を置く。母艦の workspace にペインを足さずに、
+diff やファイルを広く見たり手でコマンドを打ったりする場所として使う。
+
+- ensure: 記録があって WS が生きていれば使い回し、無ければ作る。nvim や
+  shell が欠けていれば作業 WS の中で補う。結果を JSON で stdout に出す。
+  人間のフォーカスは動かさない (別の作業中のことが多い。移動は toggle で人間が行う)。
+- show / list: 記録を JSON で出す。list は WS が消えた記録を黙って消す。
+- toggle: 作業 WS に居ればそれを作った main のペインへ、main のペインに居れば
+  その作業 WS へ移る (作業 WS で最後に居たペインに戻る)。herdr のキー
+  (prefix+w) から呼ぶ。作業 WS が無ければ何もしない (作らない)。
+- keep: sebas の「使っていますか？」確認を以後出さない印を付ける。
+- close: WS を閉じて記録を消す。shell で何か実行中なら exit 3 で止まる
+  (--force で閉じる)。
+
+記録は ~/.local/state/work-ws/<owner pane id の : を _ にしたもの>.json。owner のペインが変わっても
+(claude --resume。sebas resume を含む) 同じ agent session なら同じ WS に付け替える。
+
+失敗しても呼び出し元の gate を止めないよう、エラーは stderr に 1 行出して
+exit 1 で返す。
+"""
+
+import argparse
+import contextlib
+import datetime
+import fcntl
+import json
+import os
+import subprocess
+import sys
+import time
+
+STATE_HOME = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
+RECORD_DIR = os.path.join(STATE_HOME, "work-ws")
+NVIM_SERVERS = os.path.join(STATE_HOME, "nvim", "servers")
+SHELLS = {"zsh", "bash", "sh", "fish", "dash"}
+SHELL_RATIO = 0.75  # 分割元 (nvim) が残す割合。shell は下 25%
+EXIT_BUSY = 3
+
+
+class WorkWsError(Exception):
+    pass
+
+
+def warn(message):
+    sys.stderr.write("work-ws: %s\n" % message)
+
+
+def herdr_api(method, params):
+    result = subprocess.run(
+        ["herdr-api", method, json.dumps(params)], capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        return None
+    try:
+        return json.loads(result.stdout)
+    except json.JSONDecodeError:
+        return None
+
+
+def herdr_cli(*args):
+    result = subprocess.run(["herdr"] + list(args), capture_output=True, text=True)
+    if result.returncode != 0:
+        stderr = result.stderr.strip()
+        try:
+            stderr = json.loads(stderr)["error"]["message"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            pass
+        raise WorkWsError("herdr %s failed: %s" % (" ".join(args[:2]), stderr))
+    try:
+        return json.loads(result.stdout).get("result") or {}
+    except (json.JSONDecodeError, AttributeError):
+        return {}
+
+
+# ---- 記録 ---------------------------------------------------------------------
+
+def record_path(owner):
+    return os.path.join(RECORD_DIR, "%s.json" % owner.replace(":", "_").replace("/", "_"))
+
+
+def load_records():
+    records = []
+    try:
+        names = sorted(os.listdir(RECORD_DIR))
+    except FileNotFoundError:
+        return records
+    for name in names:
+        if not name.endswith(".json"):
+            continue
+        try:
+            with open(os.path.join(RECORD_DIR, name)) as f:
+                records.append(json.load(f))
+        except (OSError, json.JSONDecodeError):
+            continue
+    return records
+
+
+def save_record(record):
+    os.makedirs(RECORD_DIR, exist_ok=True)
+    path = record_path(record["owner_pane_id"])
+    tmp = path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(record, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
+
+
+def drop_record(record):
+    with contextlib.suppress(FileNotFoundError):
+        os.remove(record_path(record["owner_pane_id"]))
+
+
+@contextlib.contextmanager
+def locked():
+    """ensure の「探す → 作る → 記録する」を 1 単位にする。skill と
+    nvim-review-open が同時に呼んでも WS を二重に作らないため。"""
+    os.makedirs(RECORD_DIR, exist_ok=True)
+    with open(os.path.join(RECORD_DIR, ".lock"), "w") as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(f, fcntl.LOCK_UN)
+
+
+def find_record(owner=None, session=None, workspace=None):
+    records = load_records()
+    for key, value in (("owner_pane_id", owner), ("workspace_id", workspace), ("owner_session", session)):
+        if not value:
+            continue
+        for record in records:
+            if record.get(key) == value:
+                return record
+    return None
+
+
+# ---- herdr の状態 ---------------------------------------------------------------
+
+def live_workspaces():
+    data = herdr_api("workspace.list", {})
+    if data is None:
+        raise WorkWsError("herdr workspace.list failed")
+    return {w["workspace_id"]: w for w in data.get("workspaces") or []}
+
+
+def live_panes(workspace_id):
+    try:
+        data = herdr_cli("pane", "list", "--workspace", workspace_id)
+    except WorkWsError:
+        return {}
+    return {p["pane_id"]: p for p in data.get("panes") or []}
+
+
+def owner_info(owner):
+    try:
+        pane = herdr_cli("pane", "get", owner).get("pane") or {}
+    except WorkWsError:
+        raise WorkWsError("owner pane not found: %s" % owner)
+    return pane
+
+
+def ws_label(owner_pane, cwd):
+    label = owner_pane.get("label") or ""
+    if label.startswith("main/"):
+        label = label[len("main/"):]
+    return "work/%s" % (label or os.path.basename(os.path.abspath(cwd)))
+
+
+def nvim_socket(workspace_id):
+    return os.path.join(NVIM_SERVERS, "%s.sock" % workspace_id)
+
+
+def nvim_alive(sock):
+    if not os.path.exists(sock):
+        return False
+    try:
+        result = subprocess.run(
+            ["nvim", "--server", sock, "--remote-expr", "1"],
+            capture_output=True, text=True, timeout=5,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return False
+    return result.returncode == 0
+
+
+def nvim_command(owner):
+    # <leader>a (agent_bridge.lua) の送り先を渡す。WS の env はペインの shell に
+    # しか効かないので、nvim 自身にも付けて起動する。
+    return "NVIM_AGENT_PANE=%s nvim" % owner
+
+
+def wait_for_socket(sock, timeout=10.0):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if nvim_alive(sock):
+            return True
+        time.sleep(0.2)
+    return False
+
+
+def pane_busy(pane_id):
+    """shell の前面で shell 以外が動いていれば、そのプロセス名を返す
+    (herdr-audit の run: 判定と同じ)。"""
+    data = herdr_api("pane.process_info", {"pane_id": pane_id}) or {}
+    for proc in (data.get("process_info") or {}).get("foreground_processes") or []:
+        if proc.get("name") not in SHELLS:
+            return proc.get("name") or "?"
+    return None
+
+
+# ---- 作る ---------------------------------------------------------------------
+
+def split_pane(target, direction, cwd, owner, ratio=None):
+    args = ["pane", "split", target, "--direction", direction, "--cwd", cwd,
+            "--env", "NVIM_AGENT_PANE=%s" % owner, "--no-focus"]
+    if ratio is not None:
+        args += ["--ratio", str(ratio)]
+    split = herdr_cli(*args)
+    return (split.get("pane") or split).get("pane_id")
+
+
+def create_workspace(owner, owner_pane, cwd, keep):
+    """WS を作り、ペインを揃える前に記録する。途中で失敗しても、次の ensure が
+    同じ WS を拾って足りないペインを補う (記録の無い WS を残さない)。"""
+    created = herdr_cli(
+        "workspace", "create", "--cwd", cwd, "--label", ws_label(owner_pane, cwd),
+        "--env", "NVIM_AGENT_PANE=%s" % owner, "--no-focus",
+    )
+    record = {
+        "workspace_id": created["workspace"]["workspace_id"],
+        "label": created["workspace"]["label"],
+        "owner_pane_id": owner,
+        "owner_session": (owner_pane.get("agent_session") or {}).get("value"),
+        "owner_workspace_id": owner_pane.get("workspace_id"),
+        "cwd": cwd,
+        "nvim_pane_id": created["root_pane"]["pane_id"],
+        "shell_pane_id": None,
+        "created_at": datetime.datetime.now().astimezone().isoformat(timespec="seconds"),
+        "keep": keep,
+    }
+    save_record(record)
+    return record
+
+
+def complete_layout(record):
+    """上に nvim (大)、下に shell を揃える。母艦には何も足さない。
+
+    - nvim の socket が生きていれば、その pane を nvim として記録し直す
+    - nvim が居なければ、空いている shell (記録の nvim pane か shell pane) で起動する
+    - shell が無ければ nvim pane を下に割って作る"""
+    panes = live_panes(record["workspace_id"])
+    if not panes:
+        raise WorkWsError("no panes in %s" % record["workspace_id"])
+    owner, cwd = record["owner_pane_id"], record["cwd"]
+    for key in ("nvim_pane_id", "shell_pane_id"):
+        if record.get(key) not in panes:
+            record[key] = None
+
+    sock = nvim_socket(record["workspace_id"])
+    if nvim_alive(sock):
+        registry = os.path.join(NVIM_SERVERS, "%s.json" % record["workspace_id"])
+        with contextlib.suppress(OSError, json.JSONDecodeError, KeyError):
+            with open(registry) as f:
+                pane_id = json.load(f)["pane_id"]
+            if pane_id in panes:
+                record["nvim_pane_id"] = pane_id
+    elif record.get("nvim_pane_id") and pane_busy(record["nvim_pane_id"]) == "nvim":
+        pass  # 起動中 (並行した ensure が打った直後)。socket は呼び出し側で待つ
+    else:
+        idle = [p for p in (record.get("nvim_pane_id"), record.get("shell_pane_id")) if p and not pane_busy(p)]
+        if idle:
+            target = idle[0]
+            if target == record.get("shell_pane_id"):
+                record["shell_pane_id"] = None  # shell を nvim に回し、shell は下に作り直す
+        else:
+            base = record.get("shell_pane_id") or record.get("nvim_pane_id") or next(iter(panes))
+            target = split_pane(base, "right", cwd, owner)
+        herdr_cli("pane", "run", target, nvim_command(owner))
+        record["nvim_pane_id"] = target
+
+    if not record.get("shell_pane_id"):
+        record["shell_pane_id"] = split_pane(record["nvim_pane_id"], "down", cwd, owner, SHELL_RATIO)
+
+
+def alive(record, workspaces):
+    """記録の WS が生きているか。id は herdr の再起動で振り直されうるので label も照合する。"""
+    ws = workspaces.get(record.get("workspace_id"))
+    return bool(ws) and ws.get("label") == record.get("label")
+
+
+def ensure(owner, cwd):
+    owner_pane = owner_info(owner)
+    session = (owner_pane.get("agent_session") or {}).get("value")
+    with locked():
+        record = find_record(owner=owner) or (session and find_record(session=session))
+        workspaces = live_workspaces()
+        created = False
+        if record and alive(record, workspaces):
+            if record["owner_pane_id"] != owner:
+                # resume（sebas resume を含む）でペインが変わった。同じ session の WS を引き継ぐ。
+                drop_record(record)
+            record.update(owner_pane_id=owner, owner_workspace_id=owner_pane.get("workspace_id"))
+            if session:
+                record["owner_session"] = session
+        else:
+            keep = bool(record and record.get("keep"))
+            if record:
+                drop_record(record)
+            record = create_workspace(owner, owner_pane, cwd, keep)
+            created = True
+        try:
+            complete_layout(record)
+        finally:
+            save_record(record)
+    record["created"] = created
+    record["nvim_socket"] = nvim_socket(record["workspace_id"])
+    if not wait_for_socket(record["nvim_socket"]):
+        warn("nvim in %s did not start listening" % record["workspace_id"])
+    return record
+
+
+# ---- サブコマンド -----------------------------------------------------------------
+
+def default_owner():
+    return os.environ.get("HERDR_PANE_ID")
+
+
+def select_record(args):
+    record = find_record(owner=args.owner, workspace=args.workspace)
+    if not record:
+        raise WorkWsError("no work workspace recorded for %s" % (args.owner or args.workspace))
+    return record
+
+
+def cmd_ensure(args):
+    owner = args.owner or default_owner()
+    if not owner:
+        raise WorkWsError("HERDR_PANE_ID is not set; pass --owner")
+    record = ensure(owner, os.path.abspath(args.cwd))
+    print(json.dumps(record, ensure_ascii=False))
+    return 0
+
+
+def cmd_show(args):
+    if not args.workspace:
+        args.owner = args.owner or default_owner()
+    print(json.dumps(select_record(args), ensure_ascii=False))
+    return 0
+
+
+def cmd_list(_args):
+    with locked():
+        workspaces = live_workspaces()
+        live = []
+        for record in load_records():
+            if alive(record, workspaces):
+                live.append(record)
+            else:
+                # 人間が閉じた WS の記録は黙って消す
+                drop_record(record)
+    print(json.dumps(live, ensure_ascii=False))
+    return 0
+
+
+def session_of(pane_id):
+    try:
+        return ((herdr_cli("pane", "get", pane_id).get("pane") or {}).get("agent_session") or {}).get("value")
+    except WorkWsError:
+        return None
+
+
+def pane_of_session(session):
+    """resume（sebas resume を含む）で main が別ペインに移っていても、同じ session のペインを返す。"""
+    if not session:
+        return None
+    try:
+        agents = herdr_cli("agent", "list").get("agents") or []
+    except WorkWsError:
+        return None
+    for agent in agents:
+        if (agent.get("agent_session") or {}).get("value") == session:
+            return agent.get("pane_id")
+    return None
+
+
+def cmd_toggle(args):
+    pane = args.pane or os.environ.get("HERDR_ACTIVE_PANE_ID") or default_owner()
+    if not pane:
+        raise WorkWsError("no pane to toggle from; pass --pane")
+    workspace_id = pane.split(":")[0]
+    workspaces = live_workspaces()
+
+    # 作業 WS から main へ。herdr は WS 内で最後に居たペインを覚えないので、戻る先として残す
+    with locked():
+        record = find_record(workspace=workspace_id)
+        if record and alive(record, workspaces):
+            record["last_pane_id"] = pane
+            save_record(record)
+        else:
+            record = None
+    if record:
+        for target in (record["owner_pane_id"], pane_of_session(record.get("owner_session"))):
+            if target and herdr_api("pane.focus", {"pane_id": target}):
+                return 0
+        raise WorkWsError("main pane %s is gone" % record["owner_pane_id"])
+
+    # main から作業 WS へ。main のペインが変わっていれば session で引く
+    record = find_record(owner=pane) or find_record(session=session_of(pane))
+    if record and alive(record, workspaces):
+        panes = live_panes(record["workspace_id"])
+        for target in (record.get("last_pane_id"), record.get("nvim_pane_id")):
+            if target in panes:
+                herdr_api("pane.focus", {"pane_id": target})
+                return 0
+        herdr_cli("workspace", "focus", record["workspace_id"])
+        return 0
+    raise WorkWsError("%s is neither a work workspace nor a main with one" % pane)
+
+
+def cmd_keep(args):
+    with locked():
+        record = select_record(args)
+        record["keep"] = True
+        save_record(record)
+    print("kept: %s (%s)" % (record["label"], record["workspace_id"]))
+    return 0
+
+
+def cmd_close(args):
+    with locked():
+        record = select_record(args)
+        if not alive(record, live_workspaces()):
+            drop_record(record)
+            print("already closed: %s" % record["label"])
+            return 0
+        if not args.force:
+            busy = []
+            for pane_id in live_panes(record["workspace_id"]):
+                if pane_id == record.get("nvim_pane_id"):
+                    continue
+                name = pane_busy(pane_id)
+                if name:
+                    busy.append("%s (%s)" % (pane_id, name))
+            if busy:
+                warn("still running in %s: %s; rerun with --force to close" % (record["label"], ", ".join(busy)))
+                return EXIT_BUSY
+        herdr_cli("workspace", "close", record["workspace_id"])
+        drop_record(record)
+    print("closed: %s (%s)" % (record["label"], record["workspace_id"]))
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="work-ws")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("ensure", help="作業 WS を用意する (あれば使い回す)")
+    p.add_argument("--owner", help="main の pane id (既定: $HERDR_PANE_ID)")
+    p.add_argument("--cwd", default=os.getcwd(), help="新しく作る時の cwd (既定: cwd)")
+    p.set_defaults(func=cmd_ensure)
+
+    for name, func in (("show", cmd_show), ("keep", cmd_keep), ("close", cmd_close)):
+        p = sub.add_parser(name)
+        group = p.add_mutually_exclusive_group()
+        group.add_argument("--owner")
+        group.add_argument("--workspace")
+        if name == "close":
+            p.add_argument("--force", action="store_true")
+        p.set_defaults(func=func)
+
+    sub.add_parser("list", help="生きている作業 WS の記録").set_defaults(func=cmd_list)
+
+    p = sub.add_parser("toggle", help="作業 WS と main を行き来する")
+    p.add_argument("--pane", help="起点のペイン (既定: $HERDR_ACTIVE_PANE_ID)")
+    p.set_defaults(func=cmd_toggle)
+
+    args = parser.parse_args()
+    if args.command in ("keep", "close") and not (args.owner or args.workspace):
+        args.owner = default_owner()
+    try:
+        return args.func(args)
+    except (WorkWsError, KeyError, subprocess.TimeoutExpired, OSError) as exc:
+        warn(str(exc))
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

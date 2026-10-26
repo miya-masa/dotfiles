@@ -51,6 +51,20 @@ description = "send one command to every pane in the tab"
 width = "80%"
 height = "20%"
 
+# main と、その作業用 WS（work-ws が作る work/<slug>）を行き来する
+[[keys.command]]
+key = "prefix+w"
+type = "shell"
+command = "$HOME/.local/bin/work-ws toggle"
+description = "toggle between a main and its work workspace"
+
+# どの pane からでもセバスの pane へ戻る（sebas back）
+[[keys.command]]
+key = "prefix+a"
+type = "shell"
+command = "[ -x \"$HOME/.local/bin/sebas\" ] && \"$HOME/.local/bin/sebas\" back"
+description = "focus the sebas pane"
+
 # vim-tmux-navigator 相当。nvim / fzf 前面時は pass-through する
 [[keys.command]]
 key = "ctrl+h"
@@ -83,7 +97,7 @@ pane_borders = true
 show_agent_labels_on_pane_borders = true
 # サイドバーの agent 一覧を space 順ではなく attention queue 順にする
 # （blocked = 承認・質問待ち、done = 未確認のまま完了、を上に持ってくる）。
-# tmux には対応物が無く、cc-pane の状態表示を herdr 側で置き換えるもの。
+# tmux には対応物が無い。
 agent_panel_sort = "priority"
 
 [ui.sidebar.spaces]

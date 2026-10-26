@@ -157,7 +157,7 @@ class PrepareScratchTests(unittest.TestCase):
             codex_home.mkdir()
             config_path = codex_home / "config.toml"
             # No trailing newline: appending must not join onto this line.
-            config_path.write_text('model = "gpt-5.6-terra"', encoding="utf-8")
+            config_path.write_text('model = "gpt-6-sol"', encoding="utf-8")
             root = tmp_path / "scratch-root"
 
             result = run_helper(
@@ -169,7 +169,7 @@ class PrepareScratchTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stderr)
             config = config_path.read_text(encoding="utf-8")
-            self.assertIn('model = "gpt-5.6-terra"\n', config)
+            self.assertIn('model = "gpt-6-sol"\n', config)
             self.assertIn(f'[projects."{root}"]\ntrust_level = "trusted"\n', config)
 
     def test_existing_untrusted_entry_is_reported_not_duplicated(self) -> None:
@@ -753,7 +753,7 @@ class BuildLaunchArgsTests(unittest.TestCase):
             self.assertIn('default_permissions="hdreview"', output)
             self.assertIn('approval_policy="never"', output)
             self.assertIn('model_reasoning_effort="high"', output)
-            self.assertIn('model="gpt-5.6-sol"', output)
+            self.assertIn('model="gpt-6-sol"', output)
             self.assertIn('":minimal"="read"', output)
             self.assertIn(f'"{toolchain_root}"="read"', output)
             self.assertIn(f'"{scratch}"={{"."="write"}}', output)

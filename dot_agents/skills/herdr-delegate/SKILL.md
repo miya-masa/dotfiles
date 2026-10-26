@@ -1,15 +1,15 @@
 ---
 name: herdr-delegate
-description: "herdr ペイン内で別の agent、コマンド、または人間所有の別 task 用 Main を準備するための共有契約。呼び出し元 skill、常設指示、共有方針から `herdr-delegate` の agent / command:one-shot / command:resident / human-task いずれかのモードとして明示的に参照されたときだけ使う。ユーザーの自然文だけでは既存 mode は発火せず、human-task は topology の trigger に従う。HERDR_ENV=1 が前提。"
+description: "herdr ペイン内で別の agent、コマンド、人間所有の別 task 用 Main、または元 Main が回収する別 WS の agent を準備するための共有契約。呼び出し元 skill、常設指示、共有方針から `herdr-delegate` の agent / command:one-shot / command:resident / human-task / dispatch いずれかのモードとして明示的に参照されたときだけ使う。ユーザーの自然文だけでは既存 mode は発火せず、human-task と dispatch は topology の trigger に従う。人間へ引き渡す依頼（「別作業にして後で自分」「別WSで準備」「別作業にして進めて」）は human-task、元の Main が回収する依頼（「別WSでディスパッチ」「別WSに投げて」）は dispatch でこの skill を使う。HERDR_ENV=1 が前提。"
 ---
 
 # herdr-delegate
 
-herdr の別ペインで agent（クロスモデル委譲）またはコマンドを走らせ、人間所有の別 task 用 Main を準備するための契約。各呼び出し元 skill、常設指示、共有方針は herdr 手順と落とし穴回避をここに委ね、固有の停止条件・監視対象・ユーザー承認だけを自分の SKILL.md に残す。
+herdr の別ペインで agent（クロスモデル委譲）またはコマンドを走らせ、人間所有の別 task 用 Main や、元 Main が回収する別 WS の agent を準備するための契約。各呼び出し元 skill、常設指示、共有方針は herdr 手順と落とし穴回避をここに委ね、固有の停止条件・監視対象・ユーザー承認だけを自分の SKILL.md に残す。
 
 前提: `test "${HERDR_ENV:-}" = 1`。不成立ならこの契約は成立せず、呼び出し元は自身の非 herdr 経路へ進む。
 
-実行先の判断は [execution-topology.md](../../workflows/software_delivery/references/execution-topology.md) と呼び出し元が所有する。`task` から汎用の `command:one-shot` / `command:resident` を選んでもよい。`agent` は既存のレビュー専用契約であり、通常の実装workerや `human-task` へ拡張しない。`human-task` は下記の専用経路で扱う。
+実行先の判断は [execution-topology.md](../../workflows/software_delivery/references/execution-topology.md) と呼び出し元が所有する。`task` から汎用の `command:one-shot` / `command:resident` を選んでもよい。`agent` は既存のレビュー専用契約であり、通常の実装workerや `human-task` / `dispatch` へ拡張しない。`human-task` と `dispatch` は下記の専用経路で扱う。
 
 候補判定は `herdr-delegate check-availability`。`HERDR_ENV` と PATH の executable だけを確認し、JSON の `eligible` / `reason` を返す（`outside_herdr` / `herdr_not_found` / `eligible`）。Herdr を実行せず socket にも接続しない。`eligible=true` は server readiness、起動許可、隔離成立の証拠ではなく、以降の gate は省略しない。
 
@@ -17,7 +17,7 @@ herdr の別ペインで agent（クロスモデル委譲）またはコマン�
 
 ## 識別子と委譲記録
 
-以下の世代採番・`delegations.json`・孤児回収は既存 workflow の委譲に適用する。正式 workflow を持たない汎用 command は、現在の進捗記録に `mode / role / pane_id / cwd / state / 待ち理由 / 停止方法` を残し、そのために workflow artifact を作らない。孤児回収も行わず、今回作った pane だけを扱う。長期の退避が必要なら既存 `park` を使う。
+以下の世代採番・`delegations.json`・孤児回収は既存 workflow の委譲に適用する。正式 workflow を持たない汎用 command は、現在の進捗記録に `mode / role / pane_id / cwd / state / 待ち理由 / 停止方法` を残し、そのために workflow artifact を作らない。孤児回収も行わず、今回作った pane だけを扱う。
 
 - **agent 名**: `hd-<workflow-id 末尾8hex>-<role>-<gen>`（32 文字制約 `[a-z][a-z0-9_-]{0,31}` を満たす。例 `hd-780ecd3f-review-2` = 20 文字）。世代 `gen` は同一 workflow の再実行で名前が衝突するのを避けるための連番。
 - **委譲記録**: `.aidocs/workflows/<id>/delegations.json`。世代の採番元。
@@ -39,7 +39,7 @@ herdr の別ペインで agent（クロスモデル委譲）またはコマン�
 
 off スイッチの判定は呼び出し元 skill の責務であり、この契約は関知しない（Claude 固有 path をここに持ち込まない）。
 
-## 4 モード
+## 5 モード
 
 | モード | 用途 | ライフサイクル |
 |---|---|---|
@@ -47,10 +47,11 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 | `command:one-shot` | 終了結果を保存するコマンド（テスト・CI 監視） | 終了コードとログを回収後に close。`wait-output` 単独では閉じない（詳細は command 手順） |
 | `command:resident` | 常駐（`--loop` 等） | ターンをまたいで生存。停止と close はユーザー承認後のみ、契約側から勝手に close しない |
 | `human-task` | 人間が所有する別 task 用の新 Main を準備 | 下記専用手順。prepare-only を既定とし、引き渡した新 WS / agent の close・回収はしない |
+| `dispatch` | 元 Main が対話窓口のまま別 WS の agent に作業させ回収する | 下記専用手順。報告ファイルで往復し、close は元 Main が判断する |
 
 ## `human-task` 専用経路
 
-この経路は [execution-topology.md](../../workflows/software_delivery/references/execution-topology.md) の3 triggerまたは同じ意図（「別作業にして後で自分」「別WSで準備」「別作業にして進めて」）に限る。別作業という語だけで判定せず、人間へ引き渡す意図がある場合に限る。結果の回収・統合も現 Main に任せる指示なら通常委譲を優先する。ユーザーの永続運用指定があるため、毎回 Herdr 指示や workspace 作成を確認しない。公式 `herdr` skill の都度明示制約はこの指定で満たされ、公式 skill 自体は編集しない。
+この経路は [execution-topology.md](../../workflows/software_delivery/references/execution-topology.md) の3 triggerまたは同じ意図（「別作業にして後で自分」「別WSで準備」「別作業にして進めて」）に限る。別作業という語だけで判定せず、人間へ引き渡す意図がある場合に限る。結果の回収・統合も現 Main に任せる指示なら通常委譲を優先し、別 WS へ出すことが明示されていれば `dispatch` とする。ユーザーの永続運用指定があるため、毎回 Herdr 指示や workspace 作成を確認しない。公式 `herdr` skill の都度明示制約はこの指定で満たされ、公式 skill 自体は編集しない。
 
 下の `agent` / `command` 用共通手順は適用せず、review 用の隔離・model / effort・`build-launch-args`・`verify-profile`・`delegations.json` 採番・close / 孤児回収も使わない。worker / reviewer はこの経路を使わず、Main だけが起動する。新 Main の委譲は一段までとする。
 
@@ -69,9 +70,32 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 
 新 worktree はこの mode で作らず、GO / start 後の既存 task が必要性と gate を判断する。親 workflow context を新 session で resume / update せず、親 dirty をコピー・自動適用しない。
 
-## 既存 mode 共通のルール（`human-task` には適用しない）
+## `dispatch` 専用経路
 
-以下は既存の `agent` / `command:*` 用であり、`human-task` は専用経路だけを使う。
+選ぶ条件・承認の中継・close の判断は [execution-topology.md](../../workflows/software_delivery/references/execution-topology.md) の `dispatch` 節が正本で、ここは Herdr 操作と報告の形式だけを持つ。`agent` 用の隔離・model / effort 固定・`build-launch-args`・`verify-profile`・`delegations.json` 採番・孤児回収は使わない。進捗記録には `mode / name / workspace / pane_id / cwd / 連絡用 directory / 最新 report 番号 / state` を残す。
+
+1. `herdr-delegate check-availability` を実行する。`eligible=false`、helper 不在、または Herdr を使わない指定なら `dispatch` は成立しないと返し、built-in agent へ置換しない。
+2. 親子が見て分かる名前にする。`herdr workspace get "$HERDR_WORKSPACE_ID"` で親の workspace ID と label を読み、agent 名を `dp-<親 workspace ID の小文字>-<slug>`（`[a-z][a-z0-9_-]{0,31}`。例 `dp-w8c-smoke`）、workspace label を `<親 label>/dp:<slug>`（例 `chezmoi/dp:smoke`）とする。ただし元がデスクから起動されたメイン（`herdr agent get "$HERDR_PANE_ID"` の `name` が `main-<メイン slug>`）なら、agent 名を `dp-<メイン slug>-<slug>`（32 文字以内。超える時は `<slug>` を縮める）、workspace label を `main/<メイン slug>/dp:<slug>` とする。連絡用 directory は agent 名で `/tmp/claude/dispatch/<name>/` を作る。Claude と Codex の既定の書き込み許可に入る場所として固定する。既に存在すれば別名にする。
+3. 同 directory に `brief.md` を Write tool かクォート済みヒアドキュメントで書く。含めるもの: 親の workspace / pane ID、目的と元依頼原文の範囲、absolute cwd / branch、使う入口（既存 task / phase skill）、non-goal と権限（push / merge / 外部操作などの承認が要る操作は元経由で人間の承認原文を受け取るまで行わない）、人間へ直接質問しないこと、Herdr の `dispatch` / `human-task` をしないこと（phase skill が既存契約で使う `agent` / `command` mode は可）、worktree を作ったらその path と hook が開いた WS ID を次の報告に書くこと、`takeover:` を受けたらこの brief の報告・中継の制約を解除して人間と直接対話すること、下記の報告形式。
+4. `herdr workspace create --cwd <absolute-cwd> --label <workspace label> --no-focus` を実行し、`.result.workspace.workspace_id` / `.result.root_pane.pane_id` から ID を読む。`pane read <root_pane> --source visible` で shell ready を確認する。同時に `git -C <absolute-cwd> status --porcelain` の結果を連絡用 directory の `baseline-status.txt` に保存する。
+5. 起動の前に、kind が claude なら session id（uuid）を決め、元の now.md の「ワーカー」節（now.md が無い task では research.md の末尾に同じ節）に `<agent 名> / session <id> / WS label / cwd / 動作中` の 1 行を書く。書いてから `herdr agent start <name> --kind <kind> --pane <root_pane> -- --session-id <id>` を実行する（claude 以外は `--` 以降を付けない）。kind は明示指定を優先し、無ければ現在の runtime kind。通常の harness 設定のまま、permission / trust の緩和を渡さない。`pane read --source visible` で composer を肯定確認し、trust 画面なら `blocked` として workspace / pane ID を人間へ示す。
+6. 初期 prompt を一時ファイルに書き、`herdr agent prompt "$pane" "$(cat -- "$prompt_file")"` で `--wait` なしに投入する。本文は `dispatch: <dir>/brief.md を読み、あなたが元 Main から作業を受けた dispatch 先であることを確認して着手してください。最初の報告は <dir>/report-1.md に書いてください。` とする。`agent_prompt_stalled` では `pane read` で投入痕跡を確認するまで再送しない。
+7. 待機は元の対話を塞がない runtime の background 待機で行う（Claude は Bash `run_in_background` の until ループ）。background 待機が無い runtime では、待機中は元の対話が塞がると人間へ伝える。`herdr-delegate check-marker --path <dir>/report-<n>.md` が 0、`herdr agent get <pane> | jq -r .result.agent.agent_status` が `blocked`、マーカーが無いまま `done` / `idle` が 3 回続く（例 15 秒間隔）、または上限時間（既定 60 分）のいずれかで抜ける。`done` / `idle` だけでは完了扱いにしない。マーカー以外で抜けたら `pane read --source visible` の要点と workspace / pane ID を人間へ示す。`blocked` には自動応答しない。
+8. 報告を読み、1 行目の `kind` で分岐する。`question` / `approval` は人間へ提示し、回答を `reply-<n>.md` に書く。人間の承認・判断は「人間の発言（原文）」節に原文のまま置き、元の補足と区別する。`approval` の reply には報告の `presentation_id` を書く。先の `agent_status` が idle 系で composer を肯定確認できた時だけ `reply: <dir>/reply-<n>.md を読んで続行し、次の報告は <dir>/report-<n+1>.md に書いてください。` を投入し、7 へ戻る。`done` は成果物を diff・テスト結果などの一次証拠で確かめてから統合する。
+9. close は `herdr-audit --age 0 --json` の該当 workspace で判定する。`dirty:*` があれば `git status --porcelain` を `baseline-status.txt` と比べ、先が増やした変更がある時は閉じずに報告する。`run:` が agent pane の数を超える時も閉じずに報告する。`unpushed:*` / `no-upstream` は branch と worktree path を報告に残して閉じてよい。先が報告した worktree の WS も、元が `workspace rename` で `<親 label>/dp:<slug>-wt` に付け直し、その worktree の `git status` で同じ判定をしてから閉じる。`herdr workspace close <workspace_id>` を実行し、連絡用 directory は残す。閉じたらワーカー節の該当行を `閉じた` にする。連絡用 directory が消えていて `baseline-status.txt` と比べられない時は、先の cwd と先が報告した worktree で `git status --porcelain` を見て、未 commit の変更があれば閉じずに報告する。
+10. 元が再開された時（デスクからの再開、マシンの再起動の後）は、ワーカー節の `動作中` の行ごとに次を行う（session id のある claude の行だけ。それ以外は画面と workspace ID を人間へ示す）。`herdr agent get <agent 名>` で生きていればそのまま 7 から続ける。居なければ、同じ label・cwd で 4 の workspace を作り、`herdr agent start <agent 名> --kind claude --pane <root_pane> -- --resume <session id>` で同じ会話を起動し直す。連絡用 directory が無ければ作り直し、`再開: 元が再開しました。次の報告は <dir>/report-<n>.md に書いてください。` を投入して 7 へ戻る（`<n>` は元が最後に読んだ番号 + 1）。ワーカー節に無いワーカーは起動しない。
+11. 人間が先を引き取ると言ったら、先の composer を確認して `takeover: 所有は人間へ移りました。brief の報告・中継の制約を解除し、以後は人間と直接対話してください。` を投入し、以後は回収・close しない。
+
+報告形式（`brief.md` に書く）:
+
+- 区切り（完了・質問・承認が必要・blocker）ごとに指定された `report-<n>.md` を書き、ターンを終える。
+- 1 行目は `kind: done` / `kind: question` / `kind: approval` / `kind: blocked` のいずれか。本文は結論、変更場所（absolute path / branch）、実行した検証と結果、未了。質問は選択肢 2〜3 個と推奨を添える。`approval` には `human_review.py` の最新 `presentation_id` と提示内容（変更挙動・証跡・残余リスク）を書く。
+- 中継された承認を記録する時は `user_citation` を `{role: "user", reference: "<親 workspace/pane ID>:<reply-n.md の絶対 path>", quote: <「人間の発言（原文）」の文言>}` とする。reply の `presentation_id` が最新の提示と違えば記録せず、再提示して `approval` を報告し直す。
+- 書き終えてから最終行に `<!-- DELEGATE-COMPLETE -->` を置く。
+
+## 既存 mode 共通のルール（`human-task` / `dispatch` には適用しない）
+
+以下は既存の `agent` / `command:*` 用であり、`human-task` / `dispatch` は専用経路だけを使う。
 
 - ペイン確保は `herdr pane split --current --direction <geometry> --cwd <呼び出し元が渡した絶対パス> --no-focus`。`$PWD` を既定にしない。ID は `.result.pane.pane_id` から取る（`parse-pane` サブコマンドでパースする）。
 - geometry は `herdr pane layout` で決める。過密で最小幅を割るなら分割せず fail-soft する（狭いペインは screen 検出を劣化させ `unknown` を誘発する）。
@@ -104,14 +128,14 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 3. `build-launch-args --scratch <scratch> --profile-name <name> --repo-root <repo> --env-out <f>` で、`agent start` の `--` 以降に渡す argv（1 行 1 引数）と、次の手順で使う `--env` の値を得る。`--env-out` が書き出すのは展開済みの完成値なので、`PATH=…` を手で組み立てない。
 4. `herdr pane split --cwd <scratch> --env "$(cat <f>)" --no-focus` でペインを確保する。**`--env` は必須**で、省くと手順 1 の false positive のまま `agent start` が 30 秒 timeout する。`pane read --source visible` で shell プロンプト到達を確認する（zsh + Zinit + mise で起動が遅い）。
 5. `verify-profile` を実行する。**0 を返した時だけ続行し、非ゼロなら agent を起動せず fail-soft**（隔離が効いていない、codex が古い、または canary 自体が起動できない）。
-6. `herdr agent start hd-<8hex>-<role>-<gen> --kind codex --pane <pane_id> -- <build-launch-args の出力>`（`-c "permissions.<name>={…}"` `-c 'default_permissions="<name>"'` `-c approval_policy="never"` `-c model_reasoning_effort="high"` `-c 'model="gpt-5.6-sol"'`）。起動する codex の model は `gpt-5.6-sol`、reasoning effort は `high` に固定（`~/.codex/config.toml` の既定は変えない）。`build-launch-args` の各出力行は single quote で包んで渡す（出力に `'` と改行が含まれないことを helper が保証している）。`approval_policy="never"` は default-deny 下で codex が権限昇格を要求して承認画面（＝ `blocked` 終端）に落ちるのを防ぐため。codex に `--effort` フラグは無い。**`--sandbox` は渡さない。**
+6. `herdr agent start hd-<8hex>-<role>-<gen> --kind codex --pane <pane_id> -- <build-launch-args の出力>`（`-c "permissions.<name>={…}"` `-c 'default_permissions="<name>"'` `-c approval_policy="never"` `-c model_reasoning_effort="high"` `-c 'model="gpt-6-sol"'`）。起動する codex の model は `gpt-6-sol`、reasoning effort は `high` に固定（`~/.codex/config.toml` の既定は変えない）。`build-launch-args` の各出力行は single quote で包んで渡す（出力に `'` と改行が含まれないことを helper が保証している）。`approval_policy="never"` は default-deny 下で codex が権限昇格を要求して承認画面（＝ `blocked` 終端）に落ちるのを防ぐため。codex に `--effort` フラグは無い。**`--sandbox` は渡さない。**
    **argv の読み取りは `bash -c` で包む。** controller の shell は zsh で `mapfile` を持たないため、`mapfile -t ARGS < <(build-launch-args …)` は**空配列のまま非致命的に失敗し**、`agent start` は `argv: ["codex", ""]` で**成功してしまう**（＝ profile が渡らず隔離ゼロで起動する fail-open）。`verify-profile` は profile 定義が機能することしか見ないのでこれを検出しない。
    **起動直後に `agent start` の戻り JSON の `.argv` を検査し、`default_permissions="<name>"` を含むことを確認してから手順 7 へ進む。** 含まなければ prompt を投入せず pane を close して起動し直す。
 7. **投入前ゲートは「状態 かつ 画面」の連言。** `agent get` が idle 系であることに加え、`pane read --source visible` で composer プロンプト（入力欄）を**肯定的に**確認できたときだけ投入する。確認できなければ画面内容・pane_id・到達手段を提示して停止する。`--wait` は承認画面で止まっていても `done` を返すことがあり、`blocked` / `unknown` の除外だけでは素通りするため。
 8. prompt は `build-prompt --instruction-file F --input-dir <scratch>/input --output-path <scratch>/out/<name>.md` で組み立て、一時ファイルへ書いた上で `herdr agent prompt <pane_id> "$(cat "$f")" --wait` の形でのみ渡す。単一引数の上限は `MAX_ARG_STRLEN`（131072、`getconf ARG_MAX` の値ではない）で、100KiB を超える argv は分割せず fail-soft とする。
 9. **完了判定の一次は `check-marker --path <scratch>/out/<name>.md` が 0 を返すこと**（ファイルが存在し、末尾に `<!-- DELEGATE-COMPLETE -->` を持つ）。herdr の状態は補助。マーカーが無い間は sleep-poll（例 5s × N）で待ち、上限で fail-soft とする。`agent wait` は `--until` 省略時に既に settled なら即返って busy-spin になるため一次判定には使わない。`--wait` / `agent wait` の戻りを単独の完了根拠にしない（`--wait` は turn を追跡せず、既に working 中なら別 turn の完了で満たされうる）。
 10. `agent prompt` が `agent_prompt_stalled` を返した場合、**close / retry の前に `pane read --source visible` で投入痕跡を確認する**。`agent_prompt_stalled` は「投入後 5 秒以内に lifecycle 変化が観測できなかった」であり、本文は投入済みであることが多い。投入済みなら close / retry せず待機を続ける（二重投入とクォータ浪費を防ぐ）。
-11. 回収した md の原本を `reviews/` に保存し、**kind / model / effort（`codex` / `gpt-5.6-sol` 等 / `high`）を evidence に残す**。scratch は回収後に削除する。
+11. 回収した md の原本を `reviews/` に保存し、**kind / model / effort（`codex` / `gpt-6-sol` 等 / `high`）を evidence に残す**。scratch は回収後に削除する。
 
 ## `command` モードの手順
 
@@ -164,4 +188,4 @@ off スイッチの判定は呼び出し元 skill の責務であり、この契
 
 ## timeout の 2 段構え
 
-Task tool はターンをブロックするため、Opus のレンズ並列が返るまで controller は Codex の状態を見に行けない。**Codex 側 `--wait` の timeout は Opus 側の想定より短く取り**、Task 復帰直後に `agent get` / `check-marker` で取り直す。これにより、ブロックされている間に Codex 側が完了・停止していても、復帰後の 1 手で検知できる。
+Task tool はターンをブロックするため、reviewer のレンズ並列が返るまで controller は Codex の状態を見に行けない。**Codex 側 `--wait` の timeout は reviewer 側の想定より短く取り**、Task 復帰直後に `agent get` / `check-marker` で取り直す。これにより、ブロックされている間に Codex 側が完了・停止していても、復帰後の 1 手で検知できる。

@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: このセッションの作業を引き継ぐ時に使う。状況を判定して2モードに分岐する — compact(同一セッションを /compact で圧縮して続ける) / new-session(セッションが壊れた・新しいセッションで続ける)。どちらも引き継ぎ内容を tmp ファイル(構造化 md)に書き出し、それを読んで再開させる短い起動文を出す。「コンパクト前準備」「コンパクトしたい」「圧縮して続けたい」「/compact の前に」「セッションが壊れた」「次のセッションに引き継ぐ」「クラッシュした」「session handoff」「新しいセッションで続けたい」などで発火。worktree 切替直後の /compact 前や、implementation-planning → 実行 phase（execute-plan / execute-and-ship）移行直前にも使う。
+description: 明示的な compact 前準備や、壊れた session から新 session への引継ぎに使う。通常の phase 継続・自動 compact には使わない。
 ---
 
 # Handoff
@@ -18,6 +18,8 @@ description: このセッションの作業を引き継ぐ時に使う。状況�
 
 `/compact` 自体は CLI スラッシュコマンドのためモデルからは実行できない。ユーザー操作が必須。
 
+通常の phase 移行と auto compact は透過的に続け、この Skill を開始条件にしない。明示的な手動引継ぎでは既存 state の所在と未完了 gate を保存する。
+
 ## モード判定(skill 冒頭で必ず行う)
 
 起動時にまずモードを判定する。
@@ -25,7 +27,7 @@ description: このセッションの作業を引き継ぐ時に使う。状況�
 | signal | → モード |
 |---|---|
 | 「compact」「圧縮して続けたい」「/compact の前に」「コンパクト前準備」「context 逼迫だが続けたい」、worktree 切替直後の /compact | **compact** |
-| 「セッションが壊れた」「クラッシュ」「次のセッションに引き継ぐ」「新しいセッションで」「session handoff」「壊れたので引き継ぎ」、implementation-planning → 実行 phase（execute-plan / execute-and-ship）移行直前 | **new-session** |
+| 「セッションが壊れた」「クラッシュ」「次のセッションに引き継ぐ」「新しいセッションで」「session handoff」「壊れたので引き継ぎ」 | **new-session** |
 | どちらとも取れる(signal が弱い／拮抗) | **1問だけ** AskUserQuestion で確認 |
 
 - 判定が**明白**なら「○○モードと判断しました」と1行宣言して**即実行**。質問しない。
@@ -100,7 +102,7 @@ description: このセッションの作業を引き継ぐ時に使う。状況�
 （このファイルは tmp。永続化したいなら docs/ 等へ移すこと）
 ```
 
-**`## 再開手順` が構造化の肝。** 再開するエージェントは context ゼロから始まる。①最初にやる具体アクション ②起動すべき skill を**番号付き**で明示すること。これで Read 直後に手が動く。引数で次の作業予定が渡されていれば、その内容をここの先頭に落とす。
+`## 再開手順` には、最初にやる具体アクションと起動すべき skill を番号付きで書く。再開するエージェントは context ゼロから始まるので、Read 直後に手が動く形にする。引数で次の作業予定が渡されていれば、その内容をここの先頭に落とす。
 
 パスは**すべて絶対パス**で書く(再開先は別プロセス・CWD が違う場合がある)。
 
@@ -162,9 +164,11 @@ description: このセッションの作業を引き継ぐ時に使う。状況�
 
 ユーザーの応答は待たない。補足が来たらファイルに追記する。
 
-## software delivery workflow 特例
+## task skill / 既存 workflow の特例
 
-compact / new-session いずれで session 引き継ぎ（`handoff` skill）を使う場合も、機械可読な state authority は `.aidocs/workflows/<workflow-id>/context.json` なので、handoff md には**その所在と現在地だけ**を書く(内容を写さない。写しは stale になり、context.json と矛盾したら stop condition になる)。handoff md(compact の場合は focus にも)に以下を**必ず**含める:
+task skill の重量 task では、handoff md に task dir（`.aidocs/tasks/<slug>/`）の絶対パスと `now.md` の状態・次の一手だけを書く（内容を写さない。`now.md` が正）。`## 再開手順` は「`now.md` の次の一手から再開し、未チェックのタスクを飛ばさない」とする。
+
+既存の `context.json` を持つ workflow を引き継ぐ場合は、機械可読な state authority は `.aidocs/workflows/<workflow-id>/context.json` なので、handoff md には**その所在と現在地だけ**を書く(内容を写さない。写しは stale になり、context.json と矛盾したら stop condition になる)。handoff md(compact の場合は focus にも)に以下を**必ず**含める:
 
 - workflow artifact root の絶対パス(`.aidocs/workflows/<workflow-id>/`)
 - 現在の phase と `artifact_revision`
@@ -172,19 +176,7 @@ compact / new-session いずれで session 引き継ぎ（`handoff` skill）を�
 - 直前に通した gate と、次に来る未完了 gate
 - ユーザーが明示承認した事項(spec 承認 / 実行方法の選択 / shipping 認可)
 
-`## 再開手順` には、(1) `workflow_state.py validate` で `context.json` を検証し記録された artifact と Git evidence を確認する、(2) 最初の未完了 gate から再開する、(3) 完了済み task を再 dispatch せず記録済みの外部 write(push / MR)を重複させない、の 3 点と、再開する phase skill 名(`product-discovery` / `implementation-planning` / `execute-plan` / `ship-change` / `post-merge-cleanup`)を書く。
-
-## Common Mistakes
-
-- **モード判定を飛ばす** → 冒頭で必ず判定する。明白なら宣言して即実行、曖昧時のみ1問。
-- **引数なしで聞き返す** → 基本は聞き返さない。会話履歴から自動抽出して書き切る。
-- **「現状の要約」をファイルに延々と書く** → ファイルに残すのは**保持すべき固有情報**(path / 状態 / 確定判断 / 再開手順)。議論の経緯や既存コードの説明は書かない。
-- **起動文に引き継ぎ本文を埋める** → 本文は md にある。起動文は「ファイルを読んで再開手順に従って」の1行。再開先の context を食わない。
-- **`## 再開手順` を曖昧にする** → 最初のアクションと起動 skill を番号付きで具体的に。ここが弱いと再開先が迷う。
-- **path を相対で書く** → 再開先は別プロセス・CWD が違うことがある。すべて絶対パス。
-- **モデルが /compact を実行しようとする** → CLI スラッシュコマンドのためモデルからは実行不可。ユーザー操作必須。
-- **compact の focus に引き継ぎファイルパスを入れ忘れる** → 要約後にパスを見失い再開不能になる。focus に必ず含める。
-- **tmp 揮発を過信する** → `/tmp` はマシン再起動で消える。プロセスが死んだ程度なら残るが、長期保存したいなら md 末尾の注記どおり docs/ 等へ移すよう案内する。
+`## 再開手順` には、(1) `workflow_state.py validate` で `context.json` を検証し記録された artifact と Git evidence を確認する、(2) 最初の未完了 gate から再開する、(3) 完了済み task を再 dispatch せず記録済みの外部 write(push / MR)を重複させない、の 3 点と、再開する phase skill 名(`define-spec` / `implementation-planning` / `ship-change` / `post-merge-cleanup`)を書く。
 
 ## Skip 条件
 

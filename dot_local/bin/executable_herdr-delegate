@@ -665,7 +665,7 @@ def cmd_build_launch_args(args: argparse.Namespace) -> int:
         "-c",
         'model_reasoning_effort="high"',
         "-c",
-        'model="gpt-5.6-sol"',
+        'model="gpt-6-sol"',
     )
     # Each output line is later wrapped in single quotes by the caller (see
     # SKILL.md); a `'` or embedded newline in a line would corrupt that
