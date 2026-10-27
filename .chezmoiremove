@@ -39,3 +39,21 @@
 .claude/commands/postimpl-cleanup.md
 .codex/workflows/software_delivery/scripts
 .agents/workflows/software_delivery/scripts/cleanup_result.py
+
+# Retired Neovim plugin specs; lazy.nvim still loads them if they stay on the live side.
+.config/nvim/lua/plugins/alpha.lua
+.config/nvim/lua/plugins/avante.lua
+.config/nvim/lua/plugins/claudecode.lua
+.config/nvim/lua/plugins/codecompanion.lua
+.config/nvim/lua/plugins/edgy.lua
+.config/nvim/lua/plugins/gitlab.lua
+.config/nvim/lua/plugins/image.lua
+.config/nvim/lua/plugins/mcp.lua
+.config/nvim/lua/plugins/none-ls.lua
+.config/nvim/lua/plugins/opencode.lua
+.config/nvim/lua/plugins/other-nvim.lua
+.config/nvim/lua/plugins/overseer.lua
+.config/nvim/lua/plugins/refactoring.lua
+.config/nvim/lua/plugins/sidekick.lua
+.config/nvim/lua/plugins/telekasten.lua
+.config/nvim/lua/plugins/which-keys.lua
